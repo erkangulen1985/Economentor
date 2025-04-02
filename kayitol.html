@@ -164,6 +164,7 @@
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
 
+      // Şifre kontrolü
       if (password !== confirmPassword) {
         errorBox.innerText = "Şifreler uyuşmuyor!";
         errorBox.style.display = "block";
@@ -176,15 +177,16 @@
         const user = userCredential.user;
 
         // Firestore'a kullanıcı bilgilerini kaydet
-        const registrationDate = Timestamp.fromDate(new Date());
+        const registrationDate = Timestamp.fromDate(new Date()); // Şu anki zaman
         await setDoc(doc(db, "users", user.uid), {
-          fullName,
-          dob,  // "dob" (Doğum Tarihi) string formatında kaydedilecek.
-          username,
-          email,
-          registrationDate
+          fullName, // Ad Soyad
+          dob,      // Doğum Tarihi
+          username, // Kullanıcı Adı
+          email,    // E-posta
+          registrationDate, // Kayıt tarihi
         });
 
+        // Başarı mesajını göster
         successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
         successBox.style.display = "block";
 
