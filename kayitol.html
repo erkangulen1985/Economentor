@@ -13,7 +13,10 @@
       color: #fff;
       font-family: Arial, sans-serif;
       height: 100vh;
-      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
     .background {
@@ -24,7 +27,7 @@
       bottom: 0;
       pointer-events: none;
       z-index: -1;
-      background-image: url('image2.png');
+      background-image: url('image2.png'); /* Arka plan resmini buraya ekleyin */
       background-position: center;
       background-size: cover;
     }
@@ -33,11 +36,9 @@
       background: rgba(0, 0, 0, 0.7);
       padding: 30px;
       border-radius: 12px;
-      width: 90%;
+      width: 100%;
       max-width: 400px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
-      text-align: center;
-      margin-top: 100px; /* Dikeyde ortalama için */
     }
 
     h2 {
@@ -101,6 +102,7 @@
   </style>
 </head>
 <body>
+
   <!-- Arka Plan -->
   <div class="background"></div>
 
