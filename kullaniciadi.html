@@ -98,7 +98,10 @@
         <h2>Kullanıcı Adımı Unuttum</h2>
         <form id="usernameRecoveryForm">
             <div id="errorMsg"></div>
+            
             <input type="email" id="email" placeholder="E-Posta Adresi" required>
+            <input type="password" id="password" placeholder="Şifre" required>
+            
             <button type="submit">Kullanıcı Adımı Gönder</button>
         </form>
         <a href="index.html" class="link">Geri Dön</a>
@@ -127,6 +130,7 @@
             errorBox.innerText = "";
 
             const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
             try {
                 // Firestore'da e-posta ile kullanıcıyı bul
