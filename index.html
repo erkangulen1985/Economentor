@@ -119,7 +119,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -151,14 +151,21 @@
             if (!querySnapshot.empty) {
                 const userData = querySnapshot.docs[0].data(); // İlk belgeyi al
                 const email = userData.email; // Kullanıcının e-posta adresini al
+                const role = userData.role || "user"; // Kullanıcı rolü (admin veya user)
 
                 // E-posta ve şifre ile giriş yap
                 signInWithEmailAndPassword(auth, email, password)
                     .then((userCredential) => {
                         const user = userCredential.user;
                         console.log("Giriş başarılı: ", user);
-                        alert("Giriş başarılı!");
-                        window.location.href = "home.html"; // Başarılı giriş sonrası yönlendirme
+
+                        // Admin kontrolü
+                        if (role === "admin") {
+                            window.location.href = "adminpanel.html"; // Admin paneline yönlendir
+                        } else {
+                            window.location.href = "duyuru.html"; // Diğer kullanıcılar duyuru sayfasına yönlendirilir
+                        }
+
                     })
                     .catch((error) => {
                         console.error("Hata: ", error.message);
@@ -170,43 +177,6 @@
             }
         });
 
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const usernameInput = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        let matchedEmail = null;
-        let userRole = null;
-
-        querySnapshot.forEach((doc) => {
-          const user = doc.data();
-          if (user.username === usernameInput) {
-            matchedEmail = user.email;
-            userRole = user.role || "user";
-          }
-        });
-
-        if (!matchedEmail) {
-          alert(translations[currentLang].error);
-          return;
-        }
-
-        await signInWithEmailAndPassword(auth, matchedEmail, password);
-        alert(translations[currentLang].success);
-
-        if (userRole === "admin") {
-          window.location.href = "adminpanel.html";
-        } else {
-          window.location.href = "duyuru.html";
-        }
-      } catch (err) {
-        console.error(err);
-        alert(translations[currentLang].error);
-      }
-    });
-        
     </script>
 
 </body>
