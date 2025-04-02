@@ -53,22 +53,6 @@
             background-color: #121212;
         }
 
-        .button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .button:hover {
-            background-color: #45a049;
-        }
-
         .title {
             font-size: 30px;
             margin-bottom: 20px;
@@ -82,11 +66,6 @@
 
         .section {
             margin: 20px 0;
-        }
-
-        .section h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
         }
 
         .logout-button {
@@ -116,51 +95,78 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="content-container">
-            <h2 class="title">Hoşgeldiniz, Yönetici!</h2>
-            <p>Yönetici: <strong id="adminUsername">Yükleniyor...</strong></p> <!-- Yönetici ismini burada göstereceğiz -->
+            <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yükleniyor...</span>!</h2>
 
+            <!-- İçerik kutuları ve yönetim alanları -->
             <div class="section">
                 <h3>Kullanıcı ve İstatistik Yönetimi</h3>
-                <p>Buradan kullanıcıların istatistiklerini görüntüleyebilir ve yönetebilirsiniz.</p>
                 <button class="button" onclick="window.location.href='kul-is.html'">Yönetici Paneline Git</button>
             </div>
 
             <div class="section">
                 <h3>Paylaşımlar</h3>
-                <p>Paylaşımlar yönetimi kısmı buradan yapılabilir.</p>
                 <button class="button" onclick="window.location.href='paylasimlar.html'">Paylaşımları Görüntüle</button>
             </div>
 
             <div class="section">
                 <h3>Tüm Kullanıcılara Mesaj</h3>
-                <p>Buradan tüm kullanıcılara mesaj gönderebilirsiniz.</p>
                 <button class="button" onclick="window.location.href='mesaj-admin.html'">Mesaj Gönder</button>
             </div>
 
             <div class="section">
                 <h3>Duyuru Düzenle</h3>
-                <p>Site üzerindeki duyuruları buradan düzenleyebilirsiniz.</p>
                 <button class="button" onclick="window.location.href='duyuru-admin.html'">Duyuru Düzenle</button>
             </div>
 
             <div class="section">
                 <h3>Hakkında Düzenle</h3>
-                <p>Site hakkında bilgileri buradan düzenleyebilirsiniz.</p>
                 <button class="button" onclick="window.location.href='hakkında-admin.html'">Hakkında Düzenle</button>
             </div>
 
             <div class="section">
                 <h3>Dilek ve Şikayetler</h3>
-                <p>Buradan kullanıcıların dilek ve şikayetlerine bakabilirsiniz.</p>
                 <button class="button" onclick="window.location.href='dil-şik.html'">Dilek & Şikayetler</button>
             </div>
 
         </div>
     </div>
 
-    <script>
-        // Yönetici adı burada dinamik olarak yüklenecek
-        document.getElementById('adminUsername').textContent = localStorage.getItem('adminUsername') || 'Yönetici'; // Eğer admin adı varsa göster, yoksa varsayılan olarak "Yönetici" yazacak
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+            authDomain: "economentor-8ddc4.firebaseapp.com",
+            projectId: "economentor-8ddc4",
+            storageBucket: "economentor-8ddc4.firebasestorage.app",
+            messagingSenderId: "835370350520",
+            appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+            measurementId: "G-FS3FMPYVPD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Yönetici adı Firebase'den alınacak
+        async function getAdminUsername() {
+            const user = auth.currentUser; // Giriş yapan kullanıcı
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid); // Giriş yapan kullanıcının verileri
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('adminUsername').textContent = userData.username || "Yönetici"; // Kullanıcı adı (eğer varsa) ya da varsayılan "Yönetici"
+                }
+            } else {
+                document.getElementById('adminUsername').textContent = "Yönetici"; // Eğer kullanıcı giriş yapmamışsa, varsayılan yazıyı göster
+            }
+        }
+
+        // Sayfa yüklendiğinde yönetici adı çekilsin
+        window.onload = getAdminUsername;
     </script>
 
 </body>
