@@ -34,35 +34,38 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px;
+            padding: 30px;
             background-color: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
-            width: 300px;
+            width: 350px;
             text-align: center;
         }
 
         h1 {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 28px; /* Increased size of title */
         }
 
         input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 15px; /* Increased input size */
+            margin: 15px 0; /* Increased margin */
             border-radius: 5px;
             border: none;
             background-color: #fff;
             color: #333;
+            font-size: 16px; /* Increased font size in inputs */
         }
 
         button {
             width: 100%;
-            padding: 10px;
+            padding: 15px; /* Increased button size */
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 18px; /* Increased button font size */
         }
 
         button:hover {
@@ -72,12 +75,18 @@
         .link {
             color: #fff;
             text-decoration: none;
-            margin-top: 10px;
+            margin-top: 20px;
             display: block;
+            font-size: 16px; /* Increased font size */
         }
 
         .link:hover {
             text-decoration: underline;
+        }
+
+        /* Additional spacing for links */
+        #forgotPassword, #forgotUsername, #signup {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -141,7 +150,7 @@
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            }
+            // You can add Firebase login logic here
         });
     </script>
 </body>
