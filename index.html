@@ -23,7 +23,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Diğer öğelerin arkasında kalmasını sağlar */
+            z-index: -2; /* Arka plan sembollerin tamamen arkasında kalacak şekilde ayarlandı */
         }
 
         /* Finans Sembolleri */
@@ -33,6 +33,7 @@
             color: rgba(255, 255, 255, 0.8);
             opacity: 0.9;
             animation: fall 10s linear infinite, rotateSymbol 15s infinite linear, randomMovement 5s linear infinite;
+            z-index: -1; /* Semboller arka planın önünde olacak şekilde ayarlandı */
         }
 
         /* Sembollerin Düşme Animasyonu */
