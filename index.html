@@ -12,34 +12,39 @@
             height: 100%;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            background: #0A1A2E; /* Dark Blue Background */
         }
 
         /* Background */
         .background {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: #0A1A2E; /* Dark Navy Blue */
-            overflow: hidden;
+            background: url('image1.png') center center no-repeat;
+            background-size: contain;
+            z-index: -1; /* Ensure the background image is behind other elements */
         }
 
         /* Financial Symbols */
         .symbol {
             position: absolute;
-            font-size: 50px; /* Larger font size for bigger symbols */
+            font-size: 30px; /* Smaller symbol size */
             color: rgba(255, 255, 255, 0.8);
-            animation: moveSymbol 15s linear infinite, rotateSymbol 20s infinite linear;
+            opacity: 0.9;
+            animation: fall 10s linear infinite, rotateSymbol 15s infinite linear;
         }
 
-        /* Animation for moving symbols */
-        @keyframes moveSymbol {
+        /* Animation for falling symbols */
+        @keyframes fall {
             0% {
-                top: -50px;
-                left: -50px;
+                top: -50px; /* Start from the top of the screen */
+                left: 0;
             }
             100% {
-                top: 100%;
-                left: 100%;
+                top: 100%; /* Move to the bottom */
+                left: calc(100% * var(--random-x)); /* Horizontal movement based on random X position */
             }
         }
 
@@ -53,59 +58,67 @@
             }
         }
 
-        /* Responsive Settings */
-        @media (max-width: 768px) {
-            .symbol {
-                font-size: 30px; /* Smaller symbols for mobile */
-            }
+        /* Logo Position */
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            width: 100px; /* Set a size for the logo */
         }
     </style>
 </head>
 <body>
 
-<div class="background">
-    <!-- Financial Symbols (add more if needed) -->
-    <div class="symbol" style="top: 10%; left: 20%;">$</div>
-    <div class="symbol" style="top: 25%; left: 15%;">€</div>
-    <div class="symbol" style="top: 40%; left: 30%;">₿</div>
-    <div class="symbol" style="top: 55%; left: 45%;">💹</div>
-    <div class="symbol" style="top: 65%; left: 60%;">📊</div>
-    <div class="symbol" style="top: 75%; left: 80%;">📈</div>
-    <div class="symbol" style="top: 20%; left: 50%;">💸</div>
-    <div class="symbol" style="top: 30%; left: 70%;">💰</div>
-    <div class="symbol" style="top: 60%; left: 80%;">📉</div>
-    <div class="symbol" style="top: 50%; left: 10%;">🏦</div>
-    <!-- Add more symbols to fill the background -->
-</div>
+    <!-- Site Logo -->
+    <img src="image1.png" alt="Site Logo" class="logo">
 
-<script>
-    // Optionally, generate more random symbols dynamically using JavaScript
-    function generateRandomSymbol() {
-        const symbols = ["$", "€", "₿", "💹", "📊", "📈", "💸", "💰", "📉", "🏦"];
-        const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-        const symbolElement = document.createElement("div");
+    <div class="background">
+        <!-- Financial Symbols -->
+        <div class="symbol" style="--random-x: 0.3;">$</div>
+        <div class="symbol" style="--random-x: 0.5;">€</div>
+        <div class="symbol" style="--random-x: 0.7;">₿</div>
+        <div class="symbol" style="--random-x: 0.2;">💹</div>
+        <div class="symbol" style="--random-x: 0.8;">📊</div>
+        <div class="symbol" style="--random-x: 0.6;">📈</div>
+        <div class="symbol" style="--random-x: 0.4;">💸</div>
+        <div class="symbol" style="--random-x: 0.9;">💰</div>
+        <div class="symbol" style="--random-x: 0.1;">📉</div>
+        <div class="symbol" style="--random-x: 0.3;">🏦</div>
+        <!-- Add more symbols if necessary -->
+    </div>
 
-        // Random position and animation speed
-        const topPosition = Math.random() * 100 + "%";
-        const leftPosition = Math.random() * 100 + "%";
-        const fontSize = Math.random() * 50 + 50 + "px";  // Larger font size
-        const animationDuration = Math.random() * 5 + 15 + "s"; // Random animation speed
+    <script>
+        // Optionally, generate more random symbols dynamically using JavaScript
+        function generateRandomSymbol() {
+            const symbols = ["$", "€", "₿", "💹", "📊", "📈", "💸", "💰", "📉", "🏦"];
+            const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const symbolElement = document.createElement("div");
 
-        symbolElement.classList.add("symbol");
-        symbolElement.style.top = topPosition;
-        symbolElement.style.left = leftPosition;
-        symbolElement.style.fontSize = fontSize;
-        symbolElement.innerHTML = randomSymbol;
-        symbolElement.style.animationDuration = animationDuration;
+            // Random position and animation speed
+            const topPosition = Math.random() * -100 + "%";  // Random start position above the screen
+            const leftPosition = Math.random() * 100 + "%";  // Random horizontal position
+            const fontSize = Math.random() * 20 + 30 + "px";  // Random font size for variation
+            const animationDuration = Math.random() * 5 + 5 + "s"; // Random fall duration
 
-        document.querySelector(".background").appendChild(symbolElement);
-    }
+            symbolElement.classList.add("symbol");
+            symbolElement.style.top = topPosition;
+            symbolElement.style.left = leftPosition;
+            symbolElement.style.fontSize = fontSize;
+            symbolElement.innerHTML = randomSymbol;
+            symbolElement.style.animationDuration = animationDuration;
 
-    // Generate 50 random symbols for a fuller background
-    for (let i = 0; i < 50; i++) {
-        setTimeout(generateRandomSymbol, i * 500);
-    }
-</script>
+            // Apply random horizontal movement
+            symbolElement.style.setProperty('--random-x', Math.random());
+
+            document.querySelector(".background").appendChild(symbolElement);
+        }
+
+        // Generate 50 random symbols for a fuller background
+        for (let i = 0; i < 50; i++) {
+            setTimeout(generateRandomSymbol, i * 500);
+        }
+    </script>
 
 </body>
 </html>
