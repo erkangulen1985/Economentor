@@ -9,7 +9,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #001f3d;
+            background: linear-gradient(to bottom, #001f3d 50%, #003b58 50%);
             color: #fff;
             font-family: Arial, sans-serif;
             height: 100vh;
@@ -17,26 +17,7 @@
             position: relative;
         }
 
-        /* Arka plan Mum Çubuğu Grafiği */
-        .candlestick-chart {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            z-index: -2;
-            background: linear-gradient(to top, rgba(0, 255, 204, 0.3), rgba(0, 0, 0, 0.7));
-        }
-
-        .candlestick-bar {
-            position: absolute;
-            bottom: 0;
-            width: 10px;
-            background-color: rgba(255, 255, 255, 0.7);
-            animation: none;  /* Sabit mum çubuğu, animasyon yok */
-        }
-
-        /* Animasyonlu Para Sembolleri */
+        /* Hareketli Para Sembolleri */
         .symbol {
             position: absolute;
             font-size: 60px;
@@ -68,17 +49,42 @@
             }
         }
 
-        /* Sabit Grafik Çubukları */
-        .candlestick-bar:nth-child(1) { left: 5%; height: 70%; }
-        .candlestick-bar:nth-child(2) { left: 15%; height: 50%; }
-        .candlestick-bar:nth-child(3) { left: 25%; height: 60%; }
-        .candlestick-bar:nth-child(4) { left: 35%; height: 40%; }
-        .candlestick-bar:nth-child(5) { left: 45%; height: 80%; }
-        .candlestick-bar:nth-child(6) { left: 55%; height: 30%; }
-        .candlestick-bar:nth-child(7) { left: 65%; height: 50%; }
-        .candlestick-bar:nth-child(8) { left: 75%; height: 70%; }
-        .candlestick-bar:nth-child(9) { left: 85%; height: 60%; }
-        
+        /* Yükselen Hisse Grafiği Çubukları */
+        .bar {
+            position: absolute;
+            bottom: 0;
+            width: 10px;
+            background-color: rgba(0, 255, 204, 0.7);
+            animation: moveBar 10s infinite ease-in-out;
+            will-change: transform, height;
+        }
+
+        .bar:nth-child(1) { left: 5%; animation-duration: 5s; }
+        .bar:nth-child(2) { left: 15%; animation-duration: 6s; }
+        .bar:nth-child(3) { left: 25%; animation-duration: 7s; }
+        .bar:nth-child(4) { left: 35%; animation-duration: 8s; }
+        .bar:nth-child(5) { left: 45%; animation-duration: 9s; }
+        .bar:nth-child(6) { left: 55%; animation-duration: 10s; }
+        .bar:nth-child(7) { left: 65%; animation-duration: 11s; }
+        .bar:nth-child(8) { left: 75%; animation-duration: 12s; }
+        .bar:nth-child(9) { left: 85%; animation-duration: 13s; }
+
+        /* Hisse grafiği animasyonu */
+        @keyframes moveBar {
+            0% {
+                height: 20%;
+                transform: translateY(100%);
+            }
+            50% {
+                height: 80%;
+                transform: translateY(-40%);
+            }
+            100% {
+                height: 40%;
+                transform: translateY(100%);
+            }
+        }
+
         /* Başlangıçta öğe yerleştirme */
         .symbol:nth-child(1) {
             top: 10%;
@@ -126,18 +132,16 @@
         <div class="symbol">$</div>
         <div class="symbol">€</div>
 
-        <!-- Mum Çubuğu Grafik -->
-        <div class="candlestick-chart">
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-        </div>
+        <!-- Yükselen Hisse Grafiği -->
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
     </div>
 </body>
 </html>
