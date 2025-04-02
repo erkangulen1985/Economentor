@@ -23,6 +23,10 @@
             color: white;
             padding: 20px;
             box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
         }
 
         .side-menu a {
@@ -45,10 +49,11 @@
 
         /* Ana içerik alanı */
         .content {
-            flex-grow: 1;
+            margin-left: 250px; /* Sol menü genişliği kadar boşluk bırakıyoruz */
             padding: 20px;
             color: white;
             background-color: #222;
+            flex-grow: 1;
         }
 
         .container {
@@ -125,6 +130,7 @@
         const aboutBtn = document.getElementById('aboutBtn');
         const feedbackBtn = document.getElementById('feedbackBtn');
         const homeBtn = document.getElementById('homeBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
 
         const contentArea = document.getElementById('contentArea');
 
@@ -149,7 +155,12 @@
         announcementBtn.addEventListener('click', () => setContent("Duyuru Düzenle", 'announcementBtn'));
         aboutBtn.addEventListener('click', () => setContent("Hakkında Düzenle", 'aboutBtn'));
         feedbackBtn.addEventListener('click', () => setContent("Dilek ve Şikayetler", 'feedbackBtn'));
-        homeBtn.addEventListener('click', () => setContent("Anasayfa", 'homeBtn'));
+        homeBtn.addEventListener('click', () => window.location.href = "anasayfa.html"); // Anasayfa yönlendirmesi
+
+        // Logout button listener to redirect to login page
+        logoutBtn.addEventListener('click', () => {
+            window.location.href = "index.html";  // Çıkış yapıldığında login sayfasına yönlendir
+        });
     </script>
 </body>
 </html>
