@@ -132,82 +132,82 @@
 
   <!-- Firebase Script -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ", 
-      authDomain: "economentor-8ddc4.firebaseapp.com", 
-      projectId: "economitör-8ddc4", 
-      storageBucket: "economy-8ddc4.appspot.com", 
-      messagingSenderId: "835370350520", 
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d", 
-      measurementId: "G-FS3FMPYVPD"
-    };
+// Firebase yapılandırma
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economitör-8ddc4",
+  storageBucket: "economy-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const errorBox = document.getElementById("errorMsg");
-      const successBox = document.getElementById("successMsg");
-      errorBox.innerText = "";
-      successBox.innerText = "";
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      const fullName = document.getElementById("fullName").value;
-      const dob = document.getElementById("dob").value;
-      const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
+  const errorBox = document.getElementById("errorMsg");
+  const successBox = document.getElementById("successMsg");
+  errorBox.innerText = "";
+  successBox.innerText = "";
 
-      // Şifre kontrolü
-      if (password !== confirmPassword) {
-        errorBox.innerText = "Şifreler uyuşmuyor!";
-        return;
-      }
+  const fullName = document.getElementById("fullName").value;
+  const dob = document.getElementById("dob").value;
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
 
-      try {
-        // Kullanıcıyı Firebase Authentication ile oluştur
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+  if (password !== confirmPassword) {
+    errorBox.innerText = "Şifreler uyuşmuyor!";
+    return;
+  }
 
-        // Firestore'a kullanıcı bilgilerini kaydet
-        const registrationDate = Timestamp.fromDate(new Date());
-        await setDoc(doc(db, "users", user.uid), {
-          fullName,
-          dob,  // "dob" (Doğum Tarihi) string formatında kaydedilecek
-          username,
-          email,
-          registrationDate // Kayıt tarihi
-        });
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-        // Başarı mesajını göster
-        successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
-        successBox.style.display = "block";
-
-        // 2 saniye sonra giriş sayfasına yönlendir
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 2000);
-
-      } catch (error) {
-        console.error("Hata:", error.code, error.message);
-        let message = "Bilinmeyen hata!";
-        if (error.code === 'auth/email-already-in-use') {
-          message = "Bu e-posta adresi zaten kullanımda.";
-        } else if (error.code === 'auth/invalid-email') {
-          message = "Geçersiz e-posta adresi.";
-        } else if (error.code === 'auth/weak-password') {
-          message = "Şifre çok zayıf.";
-        }
-        errorBox.innerText = message;
-        errorBox.style.display = "block";
-      }
+    // Kullanıcı bilgilerini Firestore'a kaydetme
+    const registrationDate = Timestamp.fromDate(new Date());
+    await setDoc(doc(db, "users", user.uid), {
+      fullName,
+      dob,  // Doğum tarihi (string formatında)
+      username,
+      email,
+      registrationDate // Kayıt tarihi
     });
+
+    // Başarı mesajını göster
+    successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
+    successBox.style.display = "block";
+
+    // 2 saniye sonra giriş sayfasına yönlendir
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 2000);
+
+  } catch (error) {
+    console.error("Hata:", error.code, error.message);
+    let message = "Bilinmeyen hata!";
+    if (error.code === 'auth/email-already-in-use') {
+      message = "Bu e-posta adresi zaten kullanımda.";
+    } else if (error.code === 'auth/invalid-email') {
+      message = "Geçersiz e-posta adresi.";
+    } else if (error.code === 'auth/weak-password') {
+      message = "Şifre çok zayıf.";
+    }
+    errorBox.innerText = message;
+    errorBox.style.display = "block";
+  }
+});
   </script>
 </body>
 </html>
