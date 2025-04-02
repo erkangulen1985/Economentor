@@ -28,112 +28,121 @@
             background-position: center; /* Resmi ortalıyoruz */
             background-size: cover; /* Resmin boyutunu sayfaya uyacak şekilde ayarlıyoruz */
         }
+
+        .container {
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            background-color: #fff;
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .link {
+            color: #fff;
+            text-decoration: none;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="background"></div> <!-- Arka planı ekliyoruz -->
-</body>
-</html>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <div class="background"></div>
+    <div class="container">
+        <h1 id="title">Economentor</h1>
+        <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+        <input type="password" id="password" placeholder="Şifre" required>
+        <button id="loginBtn">Giriş Yap</button>
+        <a href="#" class="link" id="forgotPassword">Şifremi Unuttum</a>
+        <a href="#" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
+        <a href="#" class="link" id="signup">Kayıt Ol</a>
+    </div>
 
-    const firebaseConfig = {
-  apiKey : "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ" , 
-  authDomain : "economentor-8ddc4.firebaseapp.com" , 
-  projeKimliği : "ekonomitör-8ddc4" , 
-  storageBucket : "ekonomi-8ddc4.firebasestorage.app" , 
-  mesajlaşmaGönderenKimliği : "835370350520" , 
-  uygulama kimliği : "1:835370350520:web:d9bb275eb4b7502997814d" , 
-  ölçümKimliği : "G-FS3FMPYVPD" 
-    };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const firebaseConfig = {
+            apiKey : "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ", 
+            authDomain : "economentor-8ddc4.firebaseapp.com", 
+            projectId : "economitör-8ddc4", 
+            storageBucket : "economy-8ddc4.appspot.com", 
+            messagingSenderId : "835370350520", 
+            appId : "1:835370350520:web:d9bb275eb4b7502997814d", 
+            measurementId : "G-FS3FMPYVPD"
+        };
 
-    const translations = {
-      tr: {
-        error: "Kullanıcı adı veya şifre hatalı!",
-        success: "Giriş başarılı!",
-        username: "Kullanıcı Adı",
-        password: "Şifre",
-        loginBtn: "Giriş Yap",
-        forgot: "Şifremi Unuttum",
-        forgotUsername: "Kullanıcı Adımı Unuttum",
-        signup: "Kayıt Ol",
-        title: "TuneTRa",
-        slogan: "TuneTRa: Müziğin Doğuş Noktası"
-      },
-      en: {
-        error: "Incorrect username or password!",
-        success: "Login successful!",
-        username: "Username",
-        password: "Password",
-        loginBtn: "Log In",
-        forgot: "Forgot Password",
-        forgotUsername: "Forgot Username",
-        signup: "Sign Up",
-        title: "TuneTRa",
-        slogan: "TuneTRa: The Birthplace of Music"
-      }
-    };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    let currentLang = "tr";
-    window.setLang = function(lang) {
-      currentLang = lang;
-      const t = translations[lang];
-      document.getElementById("username").placeholder = t.username;
-      document.getElementById("password").placeholder = t.password;
-      document.getElementById("loginBtn").value = t.loginBtn;
-      document.getElementById("forgot").innerText = t.forgot;
-      document.getElementById("forgot-username").innerText = t.forgotUsername;
-      document.getElementById("signup").innerText = t.signup;
-      document.getElementById("title").innerText = t.title;
-      document.getElementById("slogan").innerText = t.slogan;
-    };
+        const translations = {
+            tr: {
+                error: "Kullanıcı adı veya şifre hatalı!",
+                success: "Giriş başarılı!",
+                username: "Kullanıcı Adı",
+                password: "Şifre",
+                loginBtn: "Giriş Yap",
+                forgot: "Şifremi Unuttum",
+                forgotUsername: "Kullanıcı Adımı Unuttum",
+                signup: "Kayıt Ol",
+                title: "Economentor"
+            },
+            en: {
+                error: "Incorrect username or password!",
+                success: "Login successful!",
+                username: "Username",
+                password: "Password",
+                loginBtn: "Log In",
+                forgot: "Forgot Password",
+                forgotUsername: "Forgot Username",
+                signup: "Sign Up",
+                title: "Economentor"
+            }
+        };
 
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const usernameInput = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
 
-      try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        let matchedEmail = null;
-        let userRole = null;
-
-        querySnapshot.forEach((doc) => {
-          const user = doc.data();
-          if (user.username === usernameInput) {
-            matchedEmail = user.email;
-            userRole = user.role || "user";
-          }
+            }
         });
-
-        if (!matchedEmail) {
-          alert(translations[currentLang].error);
-          return;
-        }
-
-        await signInWithEmailAndPassword(auth, matchedEmail, password);
-        alert(translations[currentLang].success);
-
-        if (userRole === "admin") {
-          window.location.href = "adminpanel.html";
-        } else {
-          window.location.href = "duyuru.html";
-        }
-      } catch (err) {
-        console.error(err);
-        alert(translations[currentLang].error);
-      }
-    });
-
-    window.addEventListener("DOMContentLoaded", () => {
-      setLang("tr");
-    });
-  </script>
+    </script>
 </body>
 </html>
