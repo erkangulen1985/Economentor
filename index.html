@@ -32,18 +32,16 @@
             font-size: 50px; /* Increased size for better visibility */
             color: rgba(255, 255, 255, 0.8);
             opacity: 0.9;
-            animation: fall 10s linear infinite, rotateSymbol 15s infinite linear;
+            animation: fall 10s linear infinite, rotateSymbol 15s infinite linear, randomMovement 5s linear infinite;
         }
 
         /* Animation for falling symbols */
         @keyframes fall {
             0% {
                 top: -50px; /* Start from the top of the screen */
-                left: calc(100% * var(--random-x)); /* Random horizontal starting position */
             }
             100% {
                 top: 100%; /* Move to the bottom */
-                left: calc(100% * var(--random-x)); /* Continue moving horizontally */
             }
         }
 
@@ -54,6 +52,18 @@
             }
             100% {
                 transform: rotate(360deg);
+            }
+        }
+
+        /* Animation for random movement */
+        @keyframes randomMovement {
+            0% {
+                left: calc(100% * var(--random-x)); /* Random horizontal starting position */
+                top: calc(100% * var(--random-y)); /* Random vertical starting position */
+            }
+            100% {
+                left: calc(100% * var(--random-x)); /* Move horizontally */
+                top: calc(100% * var(--random-y)); /* Move vertically */
             }
         }
 
@@ -71,16 +81,16 @@
 
     <div class="background">
         <!-- Financial Symbols -->
-        <div class="symbol" style="--random-x: 0.3;">$</div>
-        <div class="symbol" style="--random-x: 0.5;">€</div>
-        <div class="symbol" style="--random-x: 0.7;">₿</div>
-        <div class="symbol" style="--random-x: 0.2;">💹</div>
-        <div class="symbol" style="--random-x: 0.8;">📊</div>
-        <div class="symbol" style="--random-x: 0.6;">📈</div>
-        <div class="symbol" style="--random-x: 0.4;">💸</div>
-        <div class="symbol" style="--random-x: 0.9;">💰</div>
-        <div class="symbol" style="--random-x: 0.1;">📉</div>
-        <div class="symbol" style="--random-x: 0.3;">🏦</div>
+        <div class="symbol" style="--random-x: 0.3; --random-y: 0.1;">$</div>
+        <div class="symbol" style="--random-x: 0.5; --random-y: 0.2;">€</div>
+        <div class="symbol" style="--random-x: 0.7; --random-y: 0.3;">₿</div>
+        <div class="symbol" style="--random-x: 0.2; --random-y: 0.4;">💹</div>
+        <div class="symbol" style="--random-x: 0.8; --random-y: 0.5;">📊</div>
+        <div class="symbol" style="--random-x: 0.6; --random-y: 0.6;">📈</div>
+        <div class="symbol" style="--random-x: 0.4; --random-y: 0.7;">💸</div>
+        <div class="symbol" style="--random-x: 0.9; --random-y: 0.8;">💰</div>
+        <div class="symbol" style="--random-x: 0.1; --random-y: 0.9;">📉</div>
+        <div class="symbol" style="--random-x: 0.3; --random-y: 0.5;">🏦</div>
         <!-- Add more symbols if necessary -->
     </div>
 
@@ -92,20 +102,21 @@
             const symbolElement = document.createElement("div");
 
             // Random position and animation speed
-            const topPosition = Math.random() * -100 + "%";  // Random start position above the screen
             const leftPosition = Math.random() * 100 + "%";  // Random horizontal position
+            const topPosition = Math.random() * 100 + "%";  // Random vertical position
             const fontSize = Math.random() * 20 + 30 + "px";  // Random font size for variation
             const animationDuration = Math.random() * 5 + 5 + "s"; // Random fall duration
 
             symbolElement.classList.add("symbol");
-            symbolElement.style.top = topPosition;
             symbolElement.style.left = leftPosition;
+            symbolElement.style.top = topPosition;
             symbolElement.style.fontSize = fontSize;
             symbolElement.innerHTML = randomSymbol;
             symbolElement.style.animationDuration = animationDuration;
 
-            // Apply random horizontal movement
+            // Apply random horizontal and vertical movement
             symbolElement.style.setProperty('--random-x', Math.random());
+            symbolElement.style.setProperty('--random-y', Math.random());
 
             document.querySelector(".background").appendChild(symbolElement);
         }
