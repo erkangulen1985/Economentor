@@ -1,1 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economentor | Admin Paneli</title>
+    <link rel="icon" href="image1.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+        }
 
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            height: 100%;
+            background-color: #0f0f0f;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #ccc;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            height: 100vh;
+            background-color: #121212;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .title {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .content-container {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .section {
+            margin: 20px 0;
+        }
+
+        .section h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .logout-button {
+            background-color: red;
+        }
+
+        .logout-button:hover {
+            background-color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Paneli</h2>
+        <a href="kul-is.html">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="paylasimlar.html">Paylaşımlar</a>
+        <a href="mesaj-admin.html">Tüm Kullanıcılara Mesaj</a>
+        <a href="duyuru-admin.html">Duyuru Düzenle</a>
+        <a href="hakkında-admin.html">Hakkında Düzenle</a>
+        <a href="dil-şik.html">Dilek ve Şikayetler</a>
+        <a href="anasayfa.html">Anasayfa</a>
+        <a href="index.html" class="logout-button">Çıkış</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-container">
+            <h2 class="title">Hoşgeldiniz, Yönetici!</h2>
+
+            <div class="section">
+                <h3>Kullanıcı ve İstatistik Yönetimi</h3>
+                <p>Buradan kullanıcıların istatistiklerini görüntüleyebilir ve yönetebilirsiniz.</p>
+                <button class="button" onclick="window.location.href='kul-is.html'">Yönetici Paneline Git</button>
+            </div>
+
+            <div class="section">
+                <h3>Paylaşımlar</h3>
+                <p>Paylaşımlar yönetimi kısmı buradan yapılabilir.</p>
+                <button class="button" onclick="window.location.href='paylasimlar.html'">Paylaşımları Görüntüle</button>
+            </div>
+
+            <div class="section">
+                <h3>Tüm Kullanıcılara Mesaj</h3>
+                <p>Buradan tüm kullanıcılara mesaj gönderebilirsiniz.</p>
+                <button class="button" onclick="window.location.href='mesaj-admin.html'">Mesaj Gönder</button>
+            </div>
+
+            <div class="section">
+                <h3>Duyuru Düzenle</h3>
+                <p>Site üzerindeki duyuruları buradan düzenleyebilirsiniz.</p>
+                <button class="button" onclick="window.location.href='duyuru-admin.html'">Duyuru Düzenle</button>
+            </div>
+
+            <div class="section">
+                <h3>Hakkında Düzenle</h3>
+                <p>Site hakkında bilgileri buradan düzenleyebilirsiniz.</p>
+                <button class="button" onclick="window.location.href='hakkında-admin.html'">Hakkında Düzenle</button>
+            </div>
+
+            <div class="section">
+                <h3>Dilek ve Şikayetler</h3>
+                <p>Buradan kullanıcıların dilek ve şikayetlerine bakabilirsiniz.</p>
+                <button class="button" onclick="window.location.href='dil-şik.html'">Dilek & Şikayetler</button>
+            </div>
+
+            <div class="section">
+                <h3>Anasayfa</h3>
+                <p>Yönetici olarak anasayfaya buradan ulaşabilirsiniz.</p>
+                <button class="button" onclick="window.location.href='anasayfa.html'">Anasayfaya Git</button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
