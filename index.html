@@ -96,15 +96,20 @@
     <div class="container">
         <h1 id="title">ECONOMENTOR</h1>
         
-        <div class="input-container">
-            <input type="text" id="username" placeholder="Kullanıcı Adı" required>
-        </div>
-        
-        <div class="input-container">
-            <input type="password" id="password" placeholder="Şifre" required>
-        </div>
-        
-        <button id="loginBtn">Giriş Yap</button>
+        <!-- Form alanı ekledik -->
+        <form id="loginForm">
+            <div id="errorMsg"></div>
+            
+            <div class="input-container">
+                <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+            </div>
+            
+            <div class="input-container">
+                <input type="password" id="password" placeholder="Şifre" required>
+            </div>
+            
+            <button type="submit" id="loginBtn">Giriş Yap</button>
+        </form>
         
         <a href="şifremiunuttum.html" class="link" id="forgotPassword">Şifremi Unuttum</a>
         <a href="kullaniciadi.html" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
@@ -114,57 +119,95 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-  authDomain: "economentor-8ddc4.firebaseapp.com",
-  projectId: "economentor-8ddc4",
-  storageBucket: "economentor-8ddc4.firebasestorage.app",
-  messagingSenderId: "835370350520",
-  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-  measurementId: "G-FS3FMPYVPD"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+            authDomain: "economentor-8ddc4.firebaseapp.com",
+            projectId: "economentor-8ddc4",
+            storageBucket: "economentor-8ddc4.firebasestorage.app",
+            messagingSenderId: "835370350520",
+            appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+            measurementId: "G-FS3FMPYVPD"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Giriş işlemi
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        // Giriş işlemi
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorBox = document.getElementById("errorMsg");
+            errorBox.innerText = "";
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value;
+
+            // Kullanıcı adı ile Firestore'dan e-posta adresini al
+            const q = query(collection(db, "users"), where("username", "==", username));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const userData = querySnapshot.docs[0].data(); // İlk belgeyi al
+                const email = userData.email; // Kullanıcının e-posta adresini al
+
+                // E-posta ve şifre ile giriş yap
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        console.log("Giriş başarılı: ", user);
+                        alert("Giriş başarılı!");
+                        window.location.href = "home.html"; // Başarılı giriş sonrası yönlendirme
+                    })
+                    .catch((error) => {
+                        console.error("Hata: ", error.message);
+                        errorBox.innerText = "E-posta veya şifre hatalı!";
+                    });
+
+            } else {
+                errorBox.innerText = "Kullanıcı adı bulunamadı!";
+            }
+        });
+
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      const errorBox = document.getElementById("errorMsg");
-      errorBox.innerText = "";
-
-      const username = document.getElementById("username").value.trim();
+      const usernameInput = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
-      // Kullanıcı adı ile Firestore'dan e-posta adresini al
-      const userRef = doc(db, "users", username);  // 'users' koleksiyonunda kullanıcı adını arıyoruz
-      const docSnap = await getDoc(userRef);
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        let matchedEmail = null;
+        let userRole = null;
 
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const email = userData.email; // Kullanıcının e-posta adresini al
+        querySnapshot.forEach((doc) => {
+          const user = doc.data();
+          if (user.username === usernameInput) {
+            matchedEmail = user.email;
+            userRole = user.role || "user";
+          }
+        });
 
-        // E-posta ve şifre ile giriş yap
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            // Giriş başarılı
-            const user = userCredential.user;
-            console.log("Giriş başarılı: ", user);
-            alert("Giriş başarılı!");
-            window.location.href = "home.html"; // Başarılı giriş sonrası yönlendirme
-          })
-          .catch((error) => {
-            console.error("Hata: ", error.message);
-            errorBox.innerText = "E-posta veya şifre hatalı!";
-          });
+        if (!matchedEmail) {
+          alert(translations[currentLang].error);
+          return;
+        }
 
-      } else {
-        errorBox.innerText = "Kullanıcı adı bulunamadı!";
+        await signInWithEmailAndPassword(auth, matchedEmail, password);
+        alert(translations[currentLang].success);
+
+        if (userRole === "admin") {
+          window.location.href = "adminpanel.html";
+        } else {
+          window.location.href = "duyuru.html";
+        }
+      } catch (err) {
+        console.error(err);
+        alert(translations[currentLang].error);
       }
     });
-</script>
+        
+    </script>
+
 </body>
 </html>
