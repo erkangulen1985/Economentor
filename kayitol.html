@@ -27,7 +27,7 @@
       bottom: 0;
       pointer-events: none;
       z-index: -1;
-      background-image: url('image2.png'); /* Arka plan resmini buraya ekleyin */
+      background-image: url('image2.png');
       background-position: center;
       background-size: cover;
     }
@@ -71,13 +71,14 @@
       background: linear-gradient(to right, #ffcc70, #6a11cb);
     }
 
-    #errorMsg {
-      color: #ffcccc;
-      background: rgba(255, 0, 0, 0.2);
+    #errorMsg, #successMsg {
+      color: #fff;
+      background: rgba(0, 255, 0, 0.2);
       padding: 8px;
       border-radius: 6px;
       margin-bottom: 10px;
       font-size: 0.9em;
+      display: none;
     }
 
     label {
@@ -111,6 +112,7 @@
     <h2>Kayıt Ol</h2>
     <form id="registerForm">
       <div id="errorMsg"></div>
+      <div id="successMsg"></div>
       <label for="dob">Doğum Tarihi</label>
       <input type="date" id="dob" required>
       <label for="fullName">Ad Soyad</label>
@@ -151,7 +153,9 @@
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const errorBox = document.getElementById("errorMsg");
+      const successBox = document.getElementById("successMsg");
       errorBox.innerText = "";
+      successBox.innerText = "";
 
       const fullName = document.getElementById("fullName").value;
       const dob = document.getElementById("dob").value;
@@ -162,6 +166,7 @@
 
       if (password !== confirmPassword) {
         errorBox.innerText = "Şifreler uyuşmuyor!";
+        errorBox.style.display = "block";
         return;
       }
 
@@ -174,14 +179,20 @@
         const registrationDate = Timestamp.fromDate(new Date());
         await setDoc(doc(db, "users", user.uid), {
           fullName,
-          dob,
+          dob,  // "dob" (Doğum Tarihi) string formatında kaydedilecek.
           username,
           email,
           registrationDate
         });
 
-        alert("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
-        window.location.href = "index.html"; // Kayıt başarılı olduğunda giriş sayfasına yönlendir
+        successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
+        successBox.style.display = "block";
+
+        // 2 saniye sonra giriş sayfasına yönlendir
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 2000);
+
       } catch (error) {
         console.error("Hata:", error.code, error.message);
         let message = "Bilinmeyen hata!";
@@ -192,7 +203,8 @@
         } else if (error.code === 'auth/weak-password') {
           message = "Şifre çok zayıf.";
         }
-        errorBox.innerText = message; // Hata mesajı göster
+        errorBox.innerText = message;
+        errorBox.style.display = "block";
       }
     });
   </script>
