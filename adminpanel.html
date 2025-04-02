@@ -82,12 +82,12 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>Admin Paneli</h2>
-        <a href="kul-is.html">Kullanıcı ve İstatistik Yönetimi</a>
-        <a href="paylasimlar.html">Paylaşımlar</a>
-        <a href="mesaj-admin.html">Tüm Kullanıcılara Mesaj</a>
-        <a href="duyuru-admin.html">Duyuru Düzenle</a>
-        <a href="hakkında-admin.html">Hakkında Düzenle</a>
-        <a href="dil-şik.html">Dilek ve Şikayetler</a>
+        <a href="javascript:void(0)" onclick="showContent('kulIs')">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="javascript:void(0)" onclick="showContent('paylasimlar')">Paylaşımlar</a>
+        <a href="javascript:void(0)" onclick="showContent('mesajAdmin')">Tüm Kullanıcılara Mesaj</a>
+        <a href="javascript:void(0)" onclick="showContent('duyuruAdmin')">Duyuru Düzenle</a>
+        <a href="javascript:void(0)" onclick="showContent('hakkindaAdmin')">Hakkında Düzenle</a>
+        <a href="javascript:void(0)" onclick="showContent('dilekSikayet')">Dilek ve Şikayetler</a>
         <a href="anasayfa.html">Anasayfa</a>
         <a href="index.html" class="logout-button">Çıkış</a>
     </div>
@@ -98,11 +98,35 @@
             <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yükleniyor...</span>!</h2>
 
             <!-- İçerik kutuları ve yönetim alanları (Bu kısmı kaldırdık, sadece yönetici adı kalacak) -->
-            <div class="section">
-                <h3>Yönetici Paneli</h3>
-                <p>Yönetici işlemlerini bu panel üzerinden gerçekleştirebilirsiniz.</p>
+            <div class="section" id="kulIs" style="display: none;">
+                <h3>Kullanıcı ve İstatistik Yönetimi</h3>
+                <p>Buradan kullanıcıların istatistiklerini görüntüleyebilir ve yönetebilirsiniz.</p>
             </div>
 
+            <div class="section" id="paylasimlar" style="display: none;">
+                <h3>Paylaşımlar</h3>
+                <p>Paylaşımlar yönetimi kısmı buradan yapılabilir.</p>
+            </div>
+
+            <div class="section" id="mesajAdmin" style="display: none;">
+                <h3>Tüm Kullanıcılara Mesaj</h3>
+                <p>Buradan tüm kullanıcılara mesaj gönderebilirsiniz.</p>
+            </div>
+
+            <div class="section" id="duyuruAdmin" style="display: none;">
+                <h3>Duyuru Düzenle</h3>
+                <p>Site üzerindeki duyuruları buradan düzenleyebilirsiniz.</p>
+            </div>
+
+            <div class="section" id="hakkindaAdmin" style="display: none;">
+                <h3>Hakkında Düzenle</h3>
+                <p>Site hakkında bilgileri buradan düzenleyebilirsiniz.</p>
+            </div>
+
+            <div class="section" id="dilekSikayet" style="display: none;">
+                <h3>Dilek ve Şikayetler</h3>
+                <p>Buradan kullanıcıların dilek ve şikayetlerine bakabilirsiniz.</p>
+            </div>
         </div>
     </div>
 
@@ -142,6 +166,16 @@
 
         // Sayfa yüklendiğinde yönetici adı çekilsin
         window.onload = getAdminUsername;
+
+        // İçerik gösterme fonksiyonu
+        function showContent(contentId) {
+            // Tüm içerikleri gizle
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.style.display = 'none');
+
+            // Seçilen içeriği göster
+            document.getElementById(contentId).style.display = 'block';
+        }
     </script>
 
 </body>
