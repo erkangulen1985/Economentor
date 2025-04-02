@@ -6,162 +6,150 @@
     <title>Economentor | Admin Paneli</title>
     <link rel="icon" href="image1.png">
     <style>
-        body {
+        body {  
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #222;
-            color: white;
-        }
-
-        .sidebar {
-            width: 250px;
-            position: fixed;
-            height: 100%;
-            background-color: #0f0f0f;
-            padding-top: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
-        }
-
-        .sidebar h2 {
-            text-align: center;
-            font-size: 24px;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #ccc;
-            padding: 15px;
-            text-decoration: none;
-            font-size: 18px;
-            margin: 5px 0;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .sidebar a:hover {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
             height: 100vh;
-            background-color: #121212;
+            display: flex;
+            flex-direction: row;
+            background-color: #2a2a2a;
         }
 
-        .button {
+        /* Sol menü kısmı */
+        .side-menu {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .side-menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #444;
+        }
+
+        .side-menu a:hover {
+            background-color: #555;
+        }
+
+        .side-menu a.active {
+            background-color: #6a11cb;
+        }
+
+        /* Ana içerik alanı */
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            color: white;
+            background-color: #222;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 15px;
             background-color: #4CAF50;
             color: white;
-            padding: 12px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
-            margin: 10px 0;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-size: 16px;
+            margin: 10px;
         }
 
-        .button:hover {
+        button:hover {
             background-color: #45a049;
         }
 
-        .title {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-
-        .content-container {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .section {
-            margin: 20px 0;
-        }
-
-        .section h3 {
-            font-size: 24px;
+        #errorMsg {
+            color: #ffcccc;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 6px;
             margin-bottom: 10px;
+            font-size: 0.9em;
         }
 
-        .logout-button {
-            background-color: red;
-        }
-
-        .logout-button:hover {
-            background-color: #ff4d4d;
+        /* Sol menü ve içerik arasındaki ayırıcı çizgi */
+        .divider {
+            border-left: 2px solid #444;
+            height: 100%;
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="side-menu">
         <h2>Admin Paneli</h2>
-        <a href="kul-is.html">Kullanıcı ve İstatistik Yönetimi</a>
-        <a href="paylasimlar.html">Paylaşımlar</a>
-        <a href="mesaj-admin.html">Tüm Kullanıcılara Mesaj</a>
-        <a href="duyuru-admin.html">Duyuru Düzenle</a>
-        <a href="hakkında-admin.html">Hakkında Düzenle</a>
-        <a href="dil-şik.html">Dilek ve Şikayetler</a>
-        <a href="anasayfa.html">Anasayfa</a>
-        <a href="index.html" class="logout-button">Çıkış</a>
+        <a href="#" id="userManagementBtn">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="#" id="shareManagementBtn">Paylaşımlar</a>
+        <a href="#" id="messageBtn">Tüm Kullanıcılara Mesaj</a>
+        <a href="#" id="announcementBtn">Duyuru Düzenle</a>
+        <a href="#" id="aboutBtn">Hakkında Düzenle</a>
+        <a href="#" id="feedbackBtn">Dilek ve Şikayetler</a>
+        <a href="#" id="homeBtn">Anasayfa</a>
+        <a href="index.html" id="logoutBtn">Çıkış</a>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="content-container">
-            <h2 class="title">Hoşgeldiniz, Yönetici!</h2>
+    <div class="divider"></div>
 
-            <div class="section">
-                <h3>Kullanıcı ve İstatistik Yönetimi</h3>
-                <p>Buradan kullanıcıların istatistiklerini görüntüleyebilir ve yönetebilirsiniz.</p>
-                <button class="button" onclick="window.location.href='kul-is.html'">Yönetici Paneline Git</button>
-            </div>
-
-            <div class="section">
-                <h3>Paylaşımlar</h3>
-                <p>Paylaşımlar yönetimi kısmı buradan yapılabilir.</p>
-                <button class="button" onclick="window.location.href='paylasimlar.html'">Paylaşımları Görüntüle</button>
-            </div>
-
-            <div class="section">
-                <h3>Tüm Kullanıcılara Mesaj</h3>
-                <p>Buradan tüm kullanıcılara mesaj gönderebilirsiniz.</p>
-                <button class="button" onclick="window.location.href='mesaj-admin.html'">Mesaj Gönder</button>
-            </div>
-
-            <div class="section">
-                <h3>Duyuru Düzenle</h3>
-                <p>Site üzerindeki duyuruları buradan düzenleyebilirsiniz.</p>
-                <button class="button" onclick="window.location.href='duyuru-admin.html'">Duyuru Düzenle</button>
-            </div>
-
-            <div class="section">
-                <h3>Hakkında Düzenle</h3>
-                <p>Site hakkında bilgileri buradan düzenleyebilirsiniz.</p>
-                <button class="button" onclick="window.location.href='hakkında-admin.html'">Hakkında Düzenle</button>
-            </div>
-
-            <div class="section">
-                <h3>Dilek ve Şikayetler</h3>
-                <p>Buradan kullanıcıların dilek ve şikayetlerine bakabilirsiniz.</p>
-                <button class="button" onclick="window.location.href='dil-şik.html'">Dilek & Şikayetler</button>
-            </div>
-
-            <div class="section">
-                <h3>Anasayfa</h3>
-                <p>Yönetici olarak anasayfaya buradan ulaşabilirsiniz.</p>
-                <button class="button" onclick="window.location.href='anasayfa.html'">Anasayfaya Git</button>
-            </div>
-
+    <div class="content">
+        <div id="contentArea" class="container">
+            <h2>Hoşgeldiniz, Yönetici!</h2>
+            <p>Panel üzerinden yönetim işlemlerinizi gerçekleştirebilirsiniz.</p>
         </div>
     </div>
 
+    <script>
+        // Menu buttons and corresponding content areas
+        const userManagementBtn = document.getElementById('userManagementBtn');
+        const shareManagementBtn = document.getElementById('shareManagementBtn');
+        const messageBtn = document.getElementById('messageBtn');
+        const announcementBtn = document.getElementById('announcementBtn');
+        const aboutBtn = document.getElementById('aboutBtn');
+        const feedbackBtn = document.getElementById('feedbackBtn');
+        const homeBtn = document.getElementById('homeBtn');
+
+        const contentArea = document.getElementById('contentArea');
+
+        // Remove active class from all menu items
+        function clearActive() {
+            document.querySelectorAll('.side-menu a').forEach((item) => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Update content and set active class
+        function setContent(contentText, btnId) {
+            clearActive();
+            contentArea.innerHTML = `<h2>${contentText}</h2><p>Burada yönetim paneline ait detaylı işlemleri gerçekleştirebilirsiniz.</p>`;
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // Event listeners for menu buttons
+        userManagementBtn.addEventListener('click', () => setContent("Kullanıcı ve İstatistik Yönetimi", 'userManagementBtn'));
+        shareManagementBtn.addEventListener('click', () => setContent("Paylaşımlar", 'shareManagementBtn'));
+        messageBtn.addEventListener('click', () => setContent("Tüm Kullanıcılara Mesaj", 'messageBtn'));
+        announcementBtn.addEventListener('click', () => setContent("Duyuru Düzenle", 'announcementBtn'));
+        aboutBtn.addEventListener('click', () => setContent("Hakkında Düzenle", 'aboutBtn'));
+        feedbackBtn.addEventListener('click', () => setContent("Dilek ve Şikayetler", 'feedbackBtn'));
+        homeBtn.addEventListener('click', () => setContent("Anasayfa", 'homeBtn'));
+    </script>
 </body>
 </html>
