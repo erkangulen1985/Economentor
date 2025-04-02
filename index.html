@@ -46,54 +46,44 @@
             font-size: 26px;
         }
 
-        input, button {
-            width: 100%;
-            padding: 12px;
+        .input-container {
             margin: 10px 0;
-            border-radius: 6px;
-            border: none;
-            font-size: 16px;
+            display: flex;
+            justify-content: center;
         }
 
         input {
-            background: #2a2a2a;
-            color: white;
+            width: 80%;
+            padding: 12px;
+            margin: 8px;
+            border-radius: 5px;
+            border: none;
+            background-color: #fff;
+            color: #333;
+            font-size: 15px;
         }
 
         button {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
+            width: 80%;
+            padding: 12px;
+            background-color: #4CAF50;
             color: white;
-            font-weight: bold;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         button:hover {
-            background: linear-gradient(to right, #ffcc70, #6a11cb);
-        }
-
-        #errorMsg {
-            color: #ffcccc;
-            background: rgba(255, 0, 0, 0.2);
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-        }
-
-        label {
-            display: block;
-            text-align: left;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-            font-weight: bold;
+            background-color: #45a049;
         }
 
         .link {
             color: #fff;
             text-decoration: none;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 18px;
+            display: block;
+            font-size: 15px;
         }
 
         .link:hover {
@@ -102,38 +92,39 @@
     </style>
 </head>
 <body>
+    <div class="background"></div>
+    <div class="container">
+        <h1 id="title">ECONOMENTOR</h1>
+        
+        <div class="input-container">
+            <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+        </div>
+        
+        <div class="input-container">
+            <input type="password" id="password" placeholder="Şifre" required>
+        </div>
+        
+        <button id="loginBtn">Giriş Yap</button>
+        
+        <a href="şifremiunuttum.html" class="link" id="forgotPassword">Şifremi Unuttum</a>
+        <a href="kullaniciadi.html" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
+        <a href="kayitol.html" class="link" id="signup">Kayıt Ol</a>
+    </div>
 
-  <div class="background"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  <div class="container">
-    <h1>Kullanıcı Girişi</h1>
-    <form id="loginForm">
-      <div id="errorMsg"></div>
-      <label for="username">Kullanıcı Adı</label>
-      <input type="text" id="username" placeholder="Kullanıcı Adı" required>
-      <label for="password">Şifre</label>
-      <input type="password" id="password" placeholder="Şifre" required>
-      <button type="submit" id="loginBtn">Giriş Yap</button>
-      <a href="register.html" class="link">Kayıt Ol</a>
-    </form>
-  </div>
-
-  <!-- Firebase Script -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "econommentor-8ddc4.firebaseapp.com",
-      projectId: "econommentor-8ddc4",
-      storageBucket: "econommentor-8ddc4.firebasestorage.app",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.firebasestorage.app",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
+};
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -174,7 +165,6 @@
         errorBox.innerText = "Kullanıcı adı bulunamadı!";
       }
     });
-  </script>
-
+</script>
 </body>
 </html>
