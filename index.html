@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Background</title>
+    <link rel="icon" href="image1.png"> <!-- Logo olarak favicon ekliyoruz -->
     <style>
         /* General Styles */
         body, html {
@@ -40,11 +41,11 @@
         @keyframes fall {
             0% {
                 top: -50px; /* Start from the top of the screen */
-                left: 0;
+                left: calc(100% * var(--random-x)); /* Random horizontal starting position */
             }
             100% {
                 top: 100%; /* Move to the bottom */
-                left: calc(100% * var(--random-x)); /* Horizontal movement based on random X position */
+                left: calc(100% * var(--random-x)); /* Continue moving horizontally */
             }
         }
 
