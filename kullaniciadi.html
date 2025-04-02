@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economentor | Kullanıcı Adımı Unuttum</title>
+    <link rel="icon" href="image1.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #001f3d;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
 
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+            background-image: url('image2.png');
+            background-position: center;
+            background-size: cover;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 26px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #errorMsg {
+            color: #ffcccc;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .link {
+            color: #fff;
+            text-decoration: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <h2>Kullanıcı Adımı Unuttum</h2>
+        <form id="usernameRecoveryForm">
+            <div id="errorMsg"></div>
+            <input type="email" id="email" placeholder="E-Posta Adresi" required>
+            <button type="submit">Kullanıcı Adımı Gönder</button>
+        </form>
+        <a href="index.html" class="link">Geri Dön</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+            authDomain: "economentor-8ddc4.firebaseapp.com",
+            projectId: "economentor-8ddc4",
+            storageBucket: "economentor-8ddc4.firebasestorage.app",
+            messagingSenderId: "835370350520",
+            appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+            measurementId: "G-FS3FMPYVPD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById("usernameRecoveryForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorBox = document.getElementById("errorMsg");
+            errorBox.innerText = "";
+
+            const email = document.getElementById("email").value;
+
+            try {
+                // Firestore'da e-posta ile kullanıcıyı bul
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    errorBox.innerText = "E-posta adresiyle ilgili kayıt bulunamadı!";
+                    return;
+                }
+
+                // Kullanıcıyı bulduktan sonra kullanıcı adını al
+                const userData = querySnapshot.docs[0].data();
+                const username = userData.username;
+
+                // Kullanıcı adına bir mesaj gönderme (Burada sadece alert gösteriyoruz, ama mail gönderebilirsiniz)
+                alert("Kullanıcı adınız: " + username);
+                window.location.href = "index.html"; // Giriş sayfasına yönlendirme
+            } catch (error) {
+                console.error("Hata: ", error);
+                errorBox.innerText = "Bir hata oluştu!";
+            }
+        });
+    </script>
+</body>
+</html>
