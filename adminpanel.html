@@ -103,6 +103,12 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>Admin Paneli</h2>
+        <a href="kul-is.html">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="paylasimlar.html">Paylaşımlar</a>
+        <a href="mesaj-admin.html">Tüm Kullanıcılara Mesaj</a>
+        <a href="duyuru-admin.html">Duyuru Düzenle</a>
+        <a href="hakkında-admin.html">Hakkında Düzenle</a>
+        <a href="dil-şik.html">Dilek ve Şikayetler</a>
         <a href="anasayfa.html">Anasayfa</a>
         <a href="index.html" class="logout-button">Çıkış</a>
     </div>
@@ -111,7 +117,7 @@
     <div class="main-content">
         <div class="content-container">
             <h2 class="title">Hoşgeldiniz, Yönetici!</h2>
-            <p>Yönetici: <strong id="adminUsername"></strong></p>
+            <p>Yönetici: <strong id="adminUsername">Yükleniyor...</strong></p> <!-- Yönetici ismini burada göstereceğiz -->
 
             <div class="section">
                 <h3>Kullanıcı ve İstatistik Yönetimi</h3>
@@ -153,8 +159,8 @@
     </div>
 
     <script>
-        // Set admin's username dynamically
-        document.getElementById('adminUsername').textContent = localStorage.getItem('adminUsername') || 'Yönetici'; // Buraya Admin kullanıcı adını ekleyebilirsiniz
+        // Yönetici adı burada dinamik olarak yüklenecek
+        document.getElementById('adminUsername').textContent = localStorage.getItem('adminUsername') || 'Yönetici'; // Eğer admin adı varsa göster, yoksa varsayılan olarak "Yönetici" yazacak
     </script>
 
 </body>
