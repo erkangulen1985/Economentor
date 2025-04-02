@@ -14,6 +14,7 @@
             font-family: Arial, sans-serif;
             height: 100vh;
             overflow: hidden;
+            position: relative;
         }
         
         .background {
@@ -26,26 +27,49 @@
             z-index: -1;
         }
 
-        /* Sembol boyutları, hareket hızları ve rastgele animasyon */
+        /* Sembol ve Grafik öğeleri */
         .symbol {
             position: absolute;
-            font-size: 50px;
+            font-size: 60px;
             opacity: 0;
-            animation: moveSymbol 12s infinite ease-in-out;
+            animation: moveSymbol 15s infinite ease-in-out;
             will-change: transform, opacity;
         }
 
-        .symbol:nth-child(odd) {
-            font-size: 60px;
-            animation-duration: 15s;
+        .bar {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0, 255, 204, 0.7);
+            animation: moveBar 15s infinite ease-in-out;
         }
 
-        .symbol:nth-child(even) {
-            font-size: 40px;
-            animation-duration: 10s;
+        .bar:nth-child(odd) {
+            width: 20px;
+            animation-duration: 12s;
         }
 
-        /* Animasyonun tanımlanması */
+        .bar:nth-child(even) {
+            width: 30px;
+            animation-duration: 18s;
+        }
+
+        /* Grafik hareketi */
+        @keyframes moveBar {
+            0% {
+                height: 0%;
+                transform: translateY(100%);
+            }
+            50% {
+                height: 100%;
+                transform: translateY(-100%);
+            }
+            100% {
+                height: 0%;
+                transform: translateY(100%);
+            }
+        }
+
+        /* Grafik Animasyonu */
         @keyframes moveSymbol {
             0% {
                 opacity: 0;
@@ -69,7 +93,7 @@
             }
         }
 
-        /* Başlangıçta sayfada daha fazla sembol */
+        /* Başlangıçta daha fazla öğe */
         .symbol:nth-child(1) {
             top: 10%;
             left: 10%;
@@ -77,118 +101,82 @@
         }
 
         .symbol:nth-child(2) {
-            top: 30%;
-            left: 15%;
-            animation-delay: 1s;
-        }
-
-        .symbol:nth-child(3) {
-            top: 50%;
-            left: 25%;
+            top: 20%;
+            left: 30%;
             animation-delay: 2s;
         }
 
-        .symbol:nth-child(4) {
-            top: 70%;
-            left: 35%;
-            animation-delay: 3s;
-        }
-
-        .symbol:nth-child(5) {
-            top: 20%;
+        .symbol:nth-child(3) {
+            top: 40%;
             left: 50%;
             animation-delay: 4s;
         }
 
-        .symbol:nth-child(6) {
-            top: 40%;
-            left: 55%;
-            animation-delay: 5s;
-        }
-
-        .symbol:nth-child(7) {
+        .symbol:nth-child(4) {
             top: 60%;
-            left: 60%;
+            left: 70%;
             animation-delay: 6s;
         }
 
-        .symbol:nth-child(8) {
+        .symbol:nth-child(5) {
             top: 80%;
-            left: 70%;
-            animation-delay: 7s;
-        }
-
-        .symbol:nth-child(9) {
-            top: 10%;
-            left: 80%;
+            left: 90%;
             animation-delay: 8s;
         }
 
-        .symbol:nth-child(10) {
-            top: 30%;
-            left: 90%;
+        /* Grafik çubukları yerleştirildi */
+        .bar:nth-child(6) {
+            left: 5%;
+            height: 20%;
+            animation-delay: 1s;
+        }
+
+        .bar:nth-child(7) {
+            left: 15%;
+            height: 40%;
+            animation-delay: 3s;
+        }
+
+        .bar:nth-child(8) {
+            left: 25%;
+            height: 30%;
+            animation-delay: 5s;
+        }
+
+        .bar:nth-child(9) {
+            left: 35%;
+            height: 50%;
+            animation-delay: 7s;
+        }
+
+        .bar:nth-child(10) {
+            left: 45%;
+            height: 70%;
             animation-delay: 9s;
         }
 
-        /* Ek semboller için daha fazla yerleştirme */
-        .symbol:nth-child(11) {
-            top: 40%;
-            left: 80%;
-            animation-delay: 10s;
-        }
-
-        .symbol:nth-child(12) {
-            top: 50%;
-            left: 90%;
+        .bar:nth-child(11) {
+            left: 55%;
+            height: 60%;
             animation-delay: 11s;
         }
 
-        .symbol:nth-child(13) {
-            top: 60%;
-            left: 80%;
-            animation-delay: 12s;
-        }
-
-        .symbol:nth-child(14) {
-            top: 70%;
-            left: 85%;
+        .bar:nth-child(12) {
+            left: 65%;
+            height: 40%;
             animation-delay: 13s;
         }
 
-        .symbol:nth-child(15) {
-            top: 20%;
-            left: 60%;
-            animation-delay: 14s;
-        }
-
-        .symbol:nth-child(16) {
-            top: 40%;
-            left: 50%;
+        .bar:nth-child(13) {
+            left: 75%;
+            height: 30%;
             animation-delay: 15s;
         }
 
-        .symbol:nth-child(17) {
-            top: 60%;
-            left: 30%;
-            animation-delay: 16s;
-        }
-
-        .symbol:nth-child(18) {
-            top: 80%;
-            left: 10%;
+        .bar:nth-child(14) {
+            left: 85%;
+            height: 20%;
             animation-delay: 17s;
-        }
-
-        .symbol:nth-child(19) {
-            top: 15%;
-            left: 40%;
-            animation-delay: 18s;
-        }
-
-        .symbol:nth-child(20) {
-            top: 25%;
-            left: 30%;
-            animation-delay: 19s;
         }
 
     </style>
@@ -206,15 +194,18 @@
         <div class="symbol">₣</div>
         <div class="symbol">$</div>
         <div class="symbol">€</div>
-        <div class="symbol">₹</div>
-        <div class="symbol">₤</div>
-        <div class="symbol">₣</div>
-        <div class="symbol">¥</div>
-        <div class="symbol">$</div>
-        <div class="symbol">€</div>
-        <div class="symbol">£</div>
-        <div class="symbol">₹</div>
-        <div class="symbol">₤</div>
+        
+        <!-- Grafik çubukları -->
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
     </div>
 </body>
 </html>
