@@ -7,6 +7,15 @@
   <link rel="icon" type="image/png" href="image1.png" />
   <style>
     body {
+      margin: 0;
+      padding: 0;
+      background-color: #001f3d;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+
     .background {
       position: absolute;
       top: 0;
@@ -20,7 +29,6 @@
       background-size: cover;
     }
 
-      
     .container {
       background: rgba(0, 0, 0, 0.7);
       padding: 30px;
@@ -29,14 +37,21 @@
       max-width: 400px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
       text-align: center;
+      margin-top: 100px; /* Dikeyde ortalama için */
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 26px;
     }
 
     input, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       border-radius: 6px;
       border: none;
+      font-size: 16px;
     }
 
     input {
@@ -72,108 +87,112 @@
       font-size: 0.9em;
       font-weight: bold;
     }
+
+    .link {
+      color: #fff;
+      text-decoration: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <!-- Form Alanı -->
+  <!-- Arka Plan -->
+  <div class="background"></div>
+
+  <!-- Kayıt Formu -->
   <div class="container">
-    <h2 id="form-title">Kayıt Ol</h2>
+    <h2>Kayıt Ol</h2>
     <form id="registerForm">
       <div id="errorMsg"></div>
-      <label id="dobLabel" for="dob">Doğum Tarihi</label>
+      <label for="dob">Doğum Tarihi</label>
       <input type="date" id="dob" required>
+      <label for="fullName">Ad Soyad</label>
       <input type="text" id="fullName" placeholder="Ad Soyad" required>
+      <label for="username">Kullanıcı Adı</label>
       <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+      <label for="email">E-Posta</label>
       <input type="email" id="email" placeholder="E-Posta" required>
+      <label for="password">Şifre</label>
       <input type="password" id="password" placeholder="Şifre" required>
+      <label for="confirmPassword">Şifre Tekrar</label>
       <input type="password" id="confirmPassword" placeholder="Şifre Tekrar" required>
       <button type="submit" id="registerBtn">Kayıt Ol</button>
-      <button type="button" id="goToLoginBtn" onclick="window.location.href='index.html'">Giriş Yap</button>
+      <a href="index.html" class="link">Giriş Yap</a>
     </form>
   </div>
 
-  <!-- Firebase Kodları (Sayfanın En Altında!) -->
+  <!-- Firebase Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, query, where, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, setDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
-  apiKey : "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ" , 
-  authDomain : "economentor-8ddc4.firebaseapp.com" , 
-  projeKimliği : "ekonomitör-8ddc4" , 
-  storageBucket : "ekonomi-8ddc4.firebasestorage.app" , 
-  mesajlaşmaGönderenKimliği : "835370350520" , 
-  uygulama kimliği : "1:835370350520:web:d9bb275eb4b7502997814d" , 
-  ölçümKimliği : "G-FS3FMPYVPD" 
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ", 
+      authDomain: "economentor-8ddc4.firebaseapp.com", 
+      projectId: "economitör-8ddc4", 
+      storageBucket: "economy-8ddc4.appspot.com", 
+      messagingSenderId: "835370350520", 
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d", 
+      measurementId: "G-FS3FMPYVPD"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const registrationDate = Timestamp.fromDate(new Date()); // Şu anki tarihi alıyoruz
 
-  document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById("errorMsg");
-    errorBox.innerText = "";
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errorBox = document.getElementById("errorMsg");
+      errorBox.innerText = "";
 
-    const fullName = document.getElementById("fullName").value;
-    const dob = document.getElementById("dob").value;
-    const username = document.getElementById("username").value.trim();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
+      const fullName = document.getElementById("fullName").value;
+      const dob = document.getElementById("dob").value;
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
 
-    if (password !== confirmPassword) {
-      errorBox.innerText = translations[currentLang].mismatch;
-      return;
-    }
-
-    // Kullanıcı adı kontrolü
-    const q = query(collection(db, "users"), where("username", "==", username));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      errorBox.innerText = translations[currentLang].usernameUsed;
-      return;
-    }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Kayıt tarihi
-      const registrationDate = Timestamp.fromDate(new Date());
-
-      // Kullanıcı bilgilerini Firestore'a kaydetme
-      await setDoc(doc(db, "users", user.uid), {
-        fullName,
-        dob,
-        username,
-        email,
-        registrationDate // Burada kayıt tarihi ekleniyor
-      });
-
-      alert(translations[currentLang].success);
-      window.location.href = "index.html";
-
-    } catch (err) {
-      console.error("Firebase Hatası:", err.code, err.message);
-      let message;
-      if (err.code === 'auth/email-already-in-use') {
-        message = translations[currentLang].emailUsed;
-      } else if (err.code === 'auth/invalid-email') {
-        message = translations[currentLang].invalidEmail;
-      } else if (err.code === 'auth/weak-password') {
-        message = translations[currentLang].weakPassword;
-      } else {
-        message = `${translations[currentLang].unknown}\n(${err.code}: ${err.message})`;
+      if (password !== confirmPassword) {
+        errorBox.innerText = "Şifreler uyuşmuyor!";
+        return;
       }
 
-      alert(message);
-    }
-  });
-});
-</script>
+      try {
+        // Kullanıcıyı Firebase Authentication ile oluştur
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Firestore'a kullanıcı bilgilerini kaydet
+        const registrationDate = Timestamp.fromDate(new Date());
+        await setDoc(doc(db, "users", user.uid), {
+          fullName,
+          dob,
+          username,
+          email,
+          registrationDate
+        });
+
+        alert("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
+        window.location.href = "index.html"; // Kayıt başarılı olduğunda giriş sayfasına yönlendir
+      } catch (error) {
+        console.error("Hata:", error.code, error.message);
+        let message = "Bilinmeyen hata!";
+        if (error.code === 'auth/email-already-in-use') {
+          message = "Bu e-posta adresi zaten kullanımda.";
+        } else if (error.code === 'auth/invalid-email') {
+          message = "Geçersiz e-posta adresi.";
+        } else if (error.code === 'auth/weak-password') {
+          message = "Şifre çok zayıf.";
+        }
+        errorBox.innerText = message; // Hata mesajı göster
+      }
+    });
+  </script>
 </body>
 </html>
