@@ -34,38 +34,38 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 30px;
+            padding: 20px;
             background-color: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
-            width: 350px;
+            width: 300px;
             text-align: center;
         }
 
         h1 {
-            margin-bottom: 30px;
-            font-size: 28px; /* Increased size of title */
+            margin-bottom: 20px;
+            font-size: 26px; /* Küçültülmüş boyut */
         }
 
         input {
             width: 100%;
-            padding: 15px; /* Increased input size */
-            margin: 15px 0; /* Increased margin */
+            padding: 12px; /* Küçültülmüş input boyutu */
+            margin: 12px 0; /* Küçültülmüş margin */
             border-radius: 5px;
             border: none;
             background-color: #fff;
             color: #333;
-            font-size: 16px; /* Increased font size in inputs */
+            font-size: 15px; /* Küçültülmüş font boyutu */
         }
 
         button {
             width: 100%;
-            padding: 15px; /* Increased button size */
+            padding: 12px; /* Küçültülmüş button boyutu */
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 18px; /* Increased button font size */
+            font-size: 16px; /* Küçültülmüş button font boyutu */
         }
 
         button:hover {
@@ -75,18 +75,18 @@
         .link {
             color: #fff;
             text-decoration: none;
-            margin-top: 20px;
+            margin-top: 18px;
             display: block;
-            font-size: 16px; /* Increased font size */
+            font-size: 15px; /* Küçültülmüş font boyutu */
         }
 
         .link:hover {
             text-decoration: underline;
         }
 
-        /* Additional spacing for links */
+        /* Ekstra spacing için linkler */
         #forgotPassword, #forgotUsername, #signup {
-            margin-top: 20px;
+            margin-top: 18px;
         }
     </style>
 </head>
@@ -146,11 +146,33 @@
             }
         };
 
+        // Giriş yap butonuna tıklanınca giriş yapma işlemi
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            // You can add Firebase login logic here
+            try {
+                // Firebase Authentication ile giriş işlemi
+                const userCredential = await signInWithEmailAndPassword(auth, username, password);
+                alert(translations.tr.success); // Giriş başarılı mesajı
+            } catch (error) {
+                alert(translations.tr.error); // Hata mesajı
+            }
+        });
+
+        // Şifremi unuttum butonuna tıklanınca
+        document.getElementById("forgotPassword").addEventListener("click", () => {
+            alert("Şifremi unuttum butonuna tıklandı");
+        });
+
+        // Kullanıcı adı unuttum butonuna tıklanınca
+        document.getElementById("forgotUsername").addEventListener("click", () => {
+            alert("Kullanıcı adımı unuttum butonuna tıklandı");
+        });
+
+        // Kayıt ol butonuna tıklanınca
+        document.getElementById("signup").addEventListener("click", () => {
+            alert("Kayıt ol butonuna tıklandı");
         });
     </script>
 </body>
