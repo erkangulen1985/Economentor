@@ -34,3 +34,106 @@
     <div class="background"></div> <!-- Arka planı ekliyoruz -->
 </body>
 </html>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+  apiKey : "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ" , 
+  authDomain : "economentor-8ddc4.firebaseapp.com" , 
+  projeKimliği : "ekonomitör-8ddc4" , 
+  storageBucket : "ekonomi-8ddc4.firebasestorage.app" , 
+  mesajlaşmaGönderenKimliği : "835370350520" , 
+  uygulama kimliği : "1:835370350520:web:d9bb275eb4b7502997814d" , 
+  ölçümKimliği : "G-FS3FMPYVPD" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const translations = {
+      tr: {
+        error: "Kullanıcı adı veya şifre hatalı!",
+        success: "Giriş başarılı!",
+        username: "Kullanıcı Adı",
+        password: "Şifre",
+        loginBtn: "Giriş Yap",
+        forgot: "Şifremi Unuttum",
+        forgotUsername: "Kullanıcı Adımı Unuttum",
+        signup: "Kayıt Ol",
+        title: "TuneTRa",
+        slogan: "TuneTRa: Müziğin Doğuş Noktası"
+      },
+      en: {
+        error: "Incorrect username or password!",
+        success: "Login successful!",
+        username: "Username",
+        password: "Password",
+        loginBtn: "Log In",
+        forgot: "Forgot Password",
+        forgotUsername: "Forgot Username",
+        signup: "Sign Up",
+        title: "TuneTRa",
+        slogan: "TuneTRa: The Birthplace of Music"
+      }
+    };
+
+    let currentLang = "tr";
+    window.setLang = function(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.getElementById("username").placeholder = t.username;
+      document.getElementById("password").placeholder = t.password;
+      document.getElementById("loginBtn").value = t.loginBtn;
+      document.getElementById("forgot").innerText = t.forgot;
+      document.getElementById("forgot-username").innerText = t.forgotUsername;
+      document.getElementById("signup").innerText = t.signup;
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("slogan").innerText = t.slogan;
+    };
+
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        let matchedEmail = null;
+        let userRole = null;
+
+        querySnapshot.forEach((doc) => {
+          const user = doc.data();
+          if (user.username === usernameInput) {
+            matchedEmail = user.email;
+            userRole = user.role || "user";
+          }
+        });
+
+        if (!matchedEmail) {
+          alert(translations[currentLang].error);
+          return;
+        }
+
+        await signInWithEmailAndPassword(auth, matchedEmail, password);
+        alert(translations[currentLang].success);
+
+        if (userRole === "admin") {
+          window.location.href = "adminpanel.html";
+        } else {
+          window.location.href = "duyuru.html";
+        }
+      } catch (err) {
+        console.error(err);
+        alert(translations[currentLang].error);
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      setLang("tr");
+    });
+  </script>
+</body>
+</html>
