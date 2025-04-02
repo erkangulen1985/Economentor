@@ -24,9 +24,9 @@
             bottom: 0;
             pointer-events: none;
             z-index: -1;
-            background-image: url('image2.png'); /* Arka planı image2.png ile değiştirdik */
-            background-position: center; /* Resmi ortalıyoruz */
-            background-size: cover; /* Resmin boyutunu sayfaya uyacak şekilde ayarlıyoruz */
+            background-image: url('image2.png');
+            background-position: center;
+            background-size: cover;
         }
 
         .container {
@@ -34,38 +34,44 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px;
+            padding: 30px;
             background-color: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
-            width: 300px;
+            width: 350px;
             text-align: center;
         }
 
         h1 {
             margin-bottom: 20px;
-            font-size: 26px; /* Küçültülmüş boyut */
+            font-size: 26px;
+        }
+
+        .input-container {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
         }
 
         input {
-            width: 100%;
-            padding: 12px; /* Küçültülmüş input boyutu */
-            margin: 12px 0; /* Küçültülmüş margin */
+            width: 80%;
+            padding: 12px;
+            margin: 8px;
             border-radius: 5px;
             border: none;
             background-color: #fff;
             color: #333;
-            font-size: 15px; /* Küçültülmüş font boyutu */
+            font-size: 15px;
         }
 
         button {
-            width: 100%;
-            padding: 12px; /* Küçültülmüş button boyutu */
+            width: 80%;
+            padding: 12px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px; /* Küçültülmüş button font boyutu */
+            font-size: 16px;
         }
 
         button:hover {
@@ -77,16 +83,11 @@
             text-decoration: none;
             margin-top: 18px;
             display: block;
-            font-size: 15px; /* Küçültülmüş font boyutu */
+            font-size: 15px;
         }
 
         .link:hover {
             text-decoration: underline;
-        }
-
-        /* Ekstra spacing için linkler */
-        #forgotPassword, #forgotUsername, #signup {
-            margin-top: 18px;
         }
     </style>
 </head>
@@ -94,12 +95,20 @@
     <div class="background"></div>
     <div class="container">
         <h1 id="title">Economentor</h1>
-        <input type="text" id="username" placeholder="Kullanıcı Adı" required>
-        <input type="password" id="password" placeholder="Şifre" required>
+        
+        <div class="input-container">
+            <input type="text" id="username" placeholder="Kullanıcı Adı" required>
+        </div>
+        
+        <div class="input-container">
+            <input type="password" id="password" placeholder="Şifre" required>
+        </div>
+        
         <button id="loginBtn">Giriş Yap</button>
-        <a href="#" class="link" id="forgotPassword">Şifremi Unuttum</a>
-        <a href="#" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
-        <a href="#" class="link" id="signup">Kayıt Ol</a>
+        
+        <a href="şifremiunuttum.html" class="link" id="forgotPassword">Şifremi Unuttum</a>
+        <a href="kullaniciadi.html" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
+        <a href="kayitol.html" class="link" id="signup">Kayıt Ol</a>
     </div>
 
     <script type="module">
@@ -121,58 +130,17 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const translations = {
-            tr: {
-                error: "Kullanıcı adı veya şifre hatalı!",
-                success: "Giriş başarılı!",
-                username: "Kullanıcı Adı",
-                password: "Şifre",
-                loginBtn: "Giriş Yap",
-                forgot: "Şifremi Unuttum",
-                forgotUsername: "Kullanıcı Adımı Unuttum",
-                signup: "Kayıt Ol",
-                title: "Economentor"
-            },
-            en: {
-                error: "Incorrect username or password!",
-                success: "Login successful!",
-                username: "Username",
-                password: "Password",
-                loginBtn: "Log In",
-                forgot: "Forgot Password",
-                forgotUsername: "Forgot Username",
-                signup: "Sign Up",
-                title: "Economentor"
-            }
-        };
-
-        // Giriş yap butonuna tıklanınca giriş yapma işlemi
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
             try {
                 // Firebase Authentication ile giriş işlemi
-                const userCredential = await signInWithEmailAndPassword(auth, username, password);
-                alert(translations.tr.success); // Giriş başarılı mesajı
+                await signInWithEmailAndPassword(auth, username, password);
+                window.location.href = "giris.html"; // Başarılı giriş sonrası yönlendirme
             } catch (error) {
-                alert(translations.tr.error); // Hata mesajı
+                alert("Kullanıcı adı veya şifre hatalı!"); // Hata mesajı
             }
-        });
-
-        // Şifremi unuttum butonuna tıklanınca
-        document.getElementById("forgotPassword").addEventListener("click", () => {
-            alert("Şifremi unuttum butonuna tıklandı");
-        });
-
-        // Kullanıcı adı unuttum butonuna tıklanınca
-        document.getElementById("forgotUsername").addEventListener("click", () => {
-            alert("Kullanıcı adımı unuttum butonuna tıklandı");
-        });
-
-        // Kayıt ol butonuna tıklanınca
-        document.getElementById("signup").addEventListener("click", () => {
-            alert("Kayıt ol butonuna tıklandı");
         });
     </script>
 </body>
