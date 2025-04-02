@@ -3,156 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Background</title>
+    <title>Hisse Senedi Grafiği</title>
     <link rel="icon" href="image1.png">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #001f3d;  /* Arka planın tek bir renk olması sağlandı */
+            background-color: #001f3d;
             color: #fff;
             font-family: Arial, sans-serif;
             height: 100vh;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-container {
+            width: 80%;
+            height: 70%;
             position: relative;
         }
 
-        /* Yükselen Hisse Grafiği */
-        .candlestick-chart {
+        .candlestick {
             position: absolute;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            height: 70%;  /* Grafik ekranın büyük kısmını kaplayacak */
-            width: 100%;
-            z-index: -1;
+            width: 15px;
+            margin-left: 5px;
+            background-color: transparent;
+            animation: move 5s infinite ease-in-out;
         }
 
-        .candlestick-bar {
-            position: absolute;
-            bottom: 0;
-            width: 15px; /* Çubuğun genişliği */
+        .candlestick.up {
             background-color: rgba(0, 255, 204, 0.8);
-            animation: moveBar 10s infinite ease-in-out;
-            will-change: transform, height;
         }
 
-        /* Yükselen Hisse Grafiği Animasyonu */
-        @keyframes moveBar {
-            0% {
-                height: 20%;
-                transform: translateY(100%);
-            }
-            50% {
-                height: 80%;
-                transform: translateY(-40%);
-            }
-            100% {
-                height: 40%;
-                transform: translateY(100%);
-            }
+        .candlestick.down {
+            background-color: rgba(255, 0, 0, 0.8);
         }
 
-        /* Çubukların konumları */
-        .candlestick-bar:nth-child(1) { left: 5%; animation-duration: 5s; }
-        .candlestick-bar:nth-child(2) { left: 15%; animation-duration: 6s; }
-        .candlestick-bar:nth-child(3) { left: 25%; animation-duration: 7s; }
-        .candlestick-bar:nth-child(4) { left: 35%; animation-duration: 8s; }
-        .candlestick-bar:nth-child(5) { left: 45%; animation-duration: 9s; }
-        .candlestick-bar:nth-child(6) { left: 55%; animation-duration: 10s; }
-        .candlestick-bar:nth-child(7) { left: 65%; animation-duration: 11s; }
-        .candlestick-bar:nth-child(8) { left: 75%; animation-duration: 12s; }
-        .candlestick-bar:nth-child(9) { left: 85%; animation-duration: 13s; }
-
-        /* Hareketli Para Sembolleri */
-        .symbol {
+        .body {
+            width: 100%;
             position: absolute;
-            font-size: 60px;
-            opacity: 0;
-            animation: moveSymbol 12s infinite ease-in-out;
-            will-change: transform, opacity;
+            bottom: 0;
         }
 
-        @keyframes moveSymbol {
+        .wick {
+            position: absolute;
+            width: 3px;
+            background-color: #ffffff;
+        }
+
+        @keyframes move {
             0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            25% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.5) rotate(90deg);
+                transform: translateY(100%);
+                height: 20%;
             }
             50% {
-                opacity: 0;
-                transform: translate(-50%, -50%) rotate(180deg);
-            }
-            75% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.5) rotate(270deg);
+                transform: translateY(-20%);
+                height: 80%;
             }
             100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) rotate(360deg);
+                transform: translateY(100%);
+                height: 40%;
             }
-        }
-
-        /* Başlangıçta öğe yerleştirme */
-        .symbol:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .symbol:nth-child(2) {
-            top: 20%;
-            left: 30%;
-            animation-delay: 2s;
-        }
-
-        .symbol:nth-child(3) {
-            top: 40%;
-            left: 50%;
-            animation-delay: 4s;
-        }
-
-        .symbol:nth-child(4) {
-            top: 60%;
-            left: 70%;
-            animation-delay: 6s;
-        }
-
-        .symbol:nth-child(5) {
-            top: 80%;
-            left: 90%;
-            animation-delay: 8s;
         }
     </style>
 </head>
 <body>
-    <div class="background">
-        <!-- Para sembollerinin her biri burada tanımlanmıştır -->
-        <div class="symbol">$</div>
-        <div class="symbol">€</div>
-        <div class="symbol">£</div>
-        <div class="symbol">¥</div>
-        <div class="symbol">₣</div>
-        <div class="symbol">₹</div>
-        <div class="symbol">₤</div>
-        <div class="symbol">₣</div>
-        <div class="symbol">$</div>
-        <div class="symbol">€</div>
-
-        <!-- Yükselen Hisse Grafiği -->
-        <div class="candlestick-chart">
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
-            <div class="candlestick-bar"></div>
+    <div class="chart-container">
+        <div class="candlestick up" style="left: 5%; animation-duration: 3s;">
+            <div class="wick" style="height: 60%; left: 50%;"></div>
+            <div class="body" style="height: 30%;"></div>
+        </div>
+        <div class="candlestick down" style="left: 15%; animation-duration: 4s;">
+            <div class="wick" style="height: 80%; left: 50%;"></div>
+            <div class="body" style="height: 20%;"></div>
+        </div>
+        <div class="candlestick up" style="left: 25%; animation-duration: 5s;">
+            <div class="wick" style="height: 70%; left: 50%;"></div>
+            <div class="body" style="height: 40%;"></div>
+        </div>
+        <div class="candlestick down" style="left: 35%; animation-duration: 6s;">
+            <div class="wick" style="height: 90%; left: 50%;"></div>
+            <div class="body" style="height: 10%;"></div>
+        </div>
+        <div class="candlestick up" style="left: 45%; animation-duration: 7s;">
+            <div class="wick" style="height: 50%; left: 50%;"></div>
+            <div class="body" style="height: 50%;"></div>
         </div>
     </div>
 </body>
