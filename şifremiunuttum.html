@@ -100,6 +100,7 @@
         <form id="passwordRecoveryForm">
             <div id="errorMsg"></div>
             
+            <input type="text" id="username" placeholder="Kullanıcı Adı" required>
             <input type="email" id="email" placeholder="E-Posta Adresi" required>
             
             <button type="submit">Şifremi Sıfırla</button>
@@ -110,6 +111,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -123,19 +125,36 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         document.getElementById("passwordRecoveryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const errorBox = document.getElementById("errorMsg");
             errorBox.innerText = "";
 
+            const username = document.getElementById("username").value.trim();
             const email = document.getElementById("email").value;
 
             try {
-                // Şifre sıfırlama e-postası gönderme
-                await sendPasswordResetEmail(auth, email);
-                alert("Şifremi sıfırlama talebiniz başarıyla gönderildi. Lütfen e-postanızı kontrol edin.");
-                window.location.href = "index.html"; // Giriş sayfasına yönlendirme
+                // Kullanıcı adıyla Firestore'da e-posta adresini bulma
+                const q = query(collection(db, "users"), where("username", "==", username));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const userData = querySnapshot.docs[0].data();
+                    const storedEmail = userData.email;
+
+                    // E-posta doğrulama
+                    if (storedEmail === email) {
+                        await sendPasswordResetEmail(auth, email);
+                        alert("Şifremi sıfırlama talebiniz başarıyla gönderildi. Lütfen e-postanızı kontrol edin.");
+                        window.location.href = "index.html"; // Giriş sayfasına yönlendirme
+                    } else {
+                        errorBox.innerText = "E-posta adresinizle eşleşen bir kullanıcı bulunamadı!";
+                    }
+                } else {
+                    errorBox.innerText = "Kullanıcı adı bulunamadı!";
+                }
             } catch (error) {
                 console.error("Hata: ", error);
                 errorBox.innerText = "E-posta adresiyle ilgili bir hata oluştu. Lütfen tekrar deneyin!";
