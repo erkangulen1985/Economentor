@@ -33,9 +33,9 @@
 
     nav {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
-      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.85);
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
 
@@ -56,17 +56,6 @@
       border-bottom: 2px solid #fff;
     }
 
-    nav .admin-link {
-      background-color: #007bff;
-      border-radius: 6px;
-      margin-left: auto;
-      margin-right: 15px;
-    }
-
-    nav .admin-link:hover {
-      background-color: #0056b3;
-    }
-
     .content {
       flex-grow: 1;
       display: flex;
@@ -75,6 +64,7 @@
       text-align: center;
       padding: 40px;
       background: rgba(0, 0, 0, 0.6);
+      animation: fadeIn 1.2s ease;
     }
 
     .content h2 {
@@ -84,7 +74,13 @@
     }
 
     #userName {
-      color: #4CAF50;
+      color: #66ccff;
+      font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -94,19 +90,20 @@
     <h1>ECONOMENTOR</h1>
   </header>
 
-  <nav>
+  <nav id="menuNav">
     <a href="mesaj.html">Mesajlar</a>
     <a href="dil-şik.html">Dilek-Şikayet</a>
     <a href="duyuru.html">Duyurular</a>
     <a href="hakkımızda.html">Hakkımızda</a>
     <a href="eğitim.html">Eğitimler</a>
     <a href="analiz.html">Analizler</a>
-    <a id="adminLink" href="adminpanel.html" class="admin-link" style="display:none">🛠️ Admin Panel</a>
+    <span id="adminLinkWrapper"></span>
     <a href="index.html">Çıkış</a>
   </nav>
 
   <div class="content">
-    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz, <span id="userName">Kullanıcı</span> <br> Economentor ile öğrenin, analiz edin ve gelişin.</h2>
+    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz, <span id="userName">Kullanıcı</span><br>
+    Economentor ile öğrenin, analiz edin ve gelişin.</h2>
   </div>
 
   <script type="module">
@@ -130,13 +127,21 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          document.getElementById("userName").textContent = data.username;
-          if (data.role === "admin") {
-            document.getElementById("adminLink").style.display = "inline-block";
+          const username = data.username || "Kullanıcı";
+          const role = data.role || "user";
+
+          document.getElementById("userName").innerText = username;
+
+          // Eğer admin ise Admin Paneline Dön linkini göster
+          if (role === "admin") {
+            const adminLink = document.createElement("a");
+            adminLink.href = "adminpanel.html";
+            adminLink.innerText = "Admin Paneline Dön";
+            document.getElementById("adminLinkWrapper").appendChild(adminLink);
           }
         }
       }
