@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Economentor | Hakkımızda</title>
+  <link rel="icon" href="image1.png" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 50px 30px;
+      background: rgba(0, 0, 0, 0.65);
+    }
+
+    .about-box {
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+
+    .about-box h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #4CAF50;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+
+    .about-box p {
+      font-size: 18px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .back-button {
+      margin-top: 30px;
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <header>ECONOMENTOR | Hakkımızda</header>
+
+  <div class="container">
+    <div class="about-box">
+      <h2>Hakkımızda</h2>
+      <p id="aboutText">Yükleniyor...</p>
+      <a href="anasayfa.html" class="back-button">Anasayfaya Dön</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+      measurementId: "G-FS3FMPYVPD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadAboutText() {
+      const aboutRef = doc(db, "site", "hakkinda");
+      const aboutSnap = await getDoc(aboutRef);
+
+      if (aboutSnap.exists()) {
+        const text = aboutSnap.data().text || "Henüz hakkında bilgisi eklenmemiş.";
+        document.getElementById("aboutText").innerText = text;
+      } else {
+        document.getElementById("aboutText").innerText = "Hakkımızda içeriği bulunamadı.";
+      }
+    }
+
+    loadAboutText();
+  </script>
+
+</body>
+</html>
