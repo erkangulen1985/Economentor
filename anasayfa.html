@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Economentor | Anasayfa</title>
-  <link rel="icon" href="image1.png">
+  <link rel="icon" href="image1.png" />
   <style>
     body {
       margin: 0;
@@ -78,23 +78,6 @@
       font-weight: 600;
     }
 
-    #adminLinkWrapper a {
-      padding: 14px 20px;
-      margin: 0 5px;
-      text-decoration: none;
-      color: #fff;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background 0.3s ease, transform 0.2s;
-      border-bottom: 2px solid transparent;
-    }
-
-    #adminLinkWrapper a:hover {
-      background-color: #4CAF50;
-      transform: translateY(-2px);
-      border-bottom: 2px solid #fff;
-    }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
@@ -114,13 +97,16 @@
     <a href="hakkımızda.html">Hakkımızda</a>
     <a href="eğitim.html">Eğitimler</a>
     <a href="analiz.html">Analizler</a>
-    <span id="adminLinkWrapper"></span>
+    <a href="#" id="adminPanelLink" style="display: none">Yönetici Paneline Dön</a>
     <a href="index.html">Çıkış</a>
   </nav>
 
   <div class="content">
-    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz, <span id="userName">Kullanıcı</span><br>
-    Economentor ile öğrenin, analiz edin ve gelişin.</h2>
+    <h2>
+      Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz,
+      <span id="userName">Kullanıcı</span><br />
+      Economentor ile öğrenin, analiz edin ve gelişin.
+    </h2>
   </div>
 
   <script type="module">
@@ -153,12 +139,11 @@
 
           document.getElementById("userName").innerText = username;
 
-          // Eğer admin ise linki menüye hizalı şekilde ekle
+          // Admin ise butonu görünür yap
           if (role === "admin") {
-            const adminLink = document.createElement("a");
-            adminLink.href = "adminpanel.html";
-            adminLink.innerText = "Yönetici Paneline Dön";
-            document.getElementById("adminLinkWrapper").appendChild(adminLink);
+            const adminBtn = document.getElementById("adminPanelLink");
+            adminBtn.style.display = "inline-block";
+            adminBtn.href = "adminpanel.html";
           }
         }
       }
