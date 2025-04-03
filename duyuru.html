@@ -1,1 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economentor | Duyurular</title>
+  <link rel="icon" href="image1.png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('image2.png');
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      backdrop-filter: brightness(0.6);
+    }
 
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 5px black;
+    }
+
+    .announcement {
+      background-color: rgba(0, 0, 0, 0.7);
+      border-left: 6px solid #4CAF50;
+      padding: 20px;
+      margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .announcement p {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .date {
+      font-size: 14px;
+      color: #ccc;
+      text-align: right;
+    }
+
+    .home-btn {
+      margin-top: 30px;
+      padding: 12px 25px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .home-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Duyurular</h1>
+  <div id="announcementList"></div>
+
+  <button class="home-btn" onclick="window.location.href='anasayfa.html'">Anasayfa</button>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+      measurementId: "G-FS3FMPYVPD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const announcementList = document.getElementById("announcementList");
+
+    async function loadAnnouncements() {
+      const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        announcementList.innerHTML = "<p>Henüz duyuru bulunmamaktadır.</p>";
+        return;
+      }
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "announcement";
+
+        const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
+        div.innerHTML = `
+          <p>${data.text}</p>
+          <div class="date">${date}</div>
+        `;
+
+        announcementList.appendChild(div);
+      });
+    }
+
+    loadAnnouncements();
+  </script>
+
+</body>
+</html>
