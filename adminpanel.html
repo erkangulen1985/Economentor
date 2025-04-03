@@ -64,10 +64,6 @@
             border-radius: 10px;
         }
 
-        .section {
-            margin: 20px 0;
-        }
-
         .logout-button {
             background-color: red;
         }
@@ -76,106 +72,57 @@
             background-color: #ff4d4d;
         }
 
-        /* Duyuru Düzenleme Stil */
-        .duyuru-form {
-            background-color: #444;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .duyuru-form textarea {
+        textarea {
             width: 100%;
             height: 150px;
+            border-radius: 8px;
             padding: 10px;
-            border-radius: 5px;
-            border: none;
             font-size: 16px;
-            color: #333;
+            resize: none;
         }
 
-        .duyuru-form button {
-            width: 100%;
-            padding: 12px;
+        .button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-
-        .duyuru-form button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
-
-    <!-- Sidebar -->
     <div class="sidebar">
         <h2>Admin Paneli</h2>
-        <a href="javascript:void(0)" onclick="showContent('kulIs')">Kullanıcı ve İstatistik Yönetimi</a>
-        <a href="javascript:void(0)" onclick="showContent('paylasimlar')">Paylaşımlar</a>
-        <a href="javascript:void(0)" onclick="showContent('mesajAdmin')">Tüm Kullanıcılara Mesaj</a>
-        <a href="javascript:void(0)" onclick="showContent('duyuruAdmin')">Duyuru Düzenle</a>
-        <a href="javascript:void(0)" onclick="showContent('hakkindaAdmin')">Hakkında Düzenle</a>
-        <a href="javascript:void(0)" onclick="showContent('dilekSikayet')">Dilek ve Şikayetler</a>
+        <a href="#" onclick="showContent('kul-is')">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="#" onclick="showContent('paylasimlar')">Paylaşımlar</a>
+        <a href="#" onclick="showContent('mesaj-admin')">Tüm Kullanıcılara Mesaj</a>
+        <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
+        <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
+        <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
         <a href="anasayfa.html">Anasayfa</a>
         <a href="index.html" class="logout-button">Çıkış</a>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="content-container">
-            <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yükleniyor...</span>!</h2>
-
-            <!-- İçerik kutuları ve yönetim alanları -->
-            <div class="section" id="kulIs" style="display: none;">
-                <h3>Kullanıcı ve İstatistik Yönetimi</h3>
-                <p>Buradan kullanıcıların istatistiklerini görüntüleyebilir ve yönetebilirsiniz.</p>
-            </div>
-
-            <div class="section" id="paylasimlar" style="display: none;">
-                <h3>Paylaşımlar</h3>
-                <p>Paylaşımlar yönetimi kısmı buradan yapılabilir.</p>
-            </div>
-
-            <div class="section" id="mesajAdmin" style="display: none;">
-                <h3>Tüm Kullanıcılara Mesaj</h3>
-                <p>Buradan tüm kullanıcılara mesaj gönderebilirsiniz.</p>
-            </div>
-
-            <div class="section" id="duyuruAdmin" style="display: none;">
-                <h3>Duyuru Düzenle</h3>
-                <div class="duyuru-form">
-                    <h4>Mevcut Duyuru:</h4>
-                    <textarea id="duyuruInput" placeholder="Duyuru içeriğini buraya yazın..." rows="5"></textarea>
-                    <button onclick="saveDuyuru()">Duyuruyu Kaydet</button>
-                </div>
-            </div>
-
-            <div class="section" id="hakkindaAdmin" style="display: none;">
-                <h3>Hakkında Düzenle</h3>
-                <p>Site hakkında bilgileri buradan düzenleyebilirsiniz.</p>
-            </div>
-
-            <div class="section" id="dilekSikayet" style="display: none;">
-                <h3>Dilek ve Şikayetler</h3>
-                <p>Buradan kullanıcıların dilek ve şikayetlerine bakabilirsiniz.</p>
-            </div>
+            <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yönetici</span>!</h2>
+            <div id="dynamicContent"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
             authDomain: "economentor-8ddc4.firebaseapp.com",
             projectId: "economentor-8ddc4",
-            storageBucket: "economentor-8ddc4.firebasestorage.app",
+            storageBucket: "economentor-8ddc4.appspot.com",
             messagingSenderId: "835370350520",
             appId: "1:835370350520:web:d9bb275eb4b7502997814d",
             measurementId: "G-FS3FMPYVPD"
@@ -185,53 +132,60 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Yönetici adı Firebase'den alınacak
-        async function getAdminUsername() {
-            const user = auth.currentUser; // Giriş yapan kullanıcı
+        let currentUserId = null;
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const userDocRef = doc(db, "users", user.uid); // Giriş yapan kullanıcının verileri
-                const docSnap = await getDoc(userDocRef);
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('adminUsername').textContent = userData.username || "Yönetici"; // Kullanıcı adı (eğer varsa) ya da varsayılan "Yönetici"
+                currentUserId = user.uid;
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const username = userSnap.data().username;
+                    document.getElementById("adminUsername").innerText = username;
                 }
-            } else {
-                document.getElementById('adminUsername').textContent = "Yönetici"; // Eğer kullanıcı giriş yapmamışsa, varsayılan yazıyı göster
+            }
+        });
+
+        window.showContent = async function (section) {
+            const container = document.getElementById("dynamicContent");
+            container.innerHTML = "";
+
+            if (section === 'duyuru-admin') {
+                const duyuruRef = doc(db, "site", "duyuru");
+                const duyuruSnap = await getDoc(duyuruRef);
+                const mevcutDuyuru = duyuruSnap.exists() ? duyuruSnap.data().text : "";
+
+                container.innerHTML = `
+                    <h3>Duyuru Düzenle</h3>
+                    <textarea id="duyuruText">${mevcutDuyuru}</textarea>
+                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
+                `;
+            }
+
+            if (section === 'hakkinda-admin') {
+                const hakRef = doc(db, "site", "hakkinda");
+                const hakSnap = await getDoc(hakRef);
+                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
+
+                container.innerHTML = `
+                    <h3>Hakkında Düzenle</h3>
+                    <textarea id="hakText">${mevcut}</textarea>
+                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
+                `;
             }
         }
 
-        // Sayfa yüklendiğinde yönetici adı çekilsin
-        window.onload = getAdminUsername;
-
-        // İçerik gösterme fonksiyonu
-        function showContent(contentId) {
-            // Tüm içerikleri gizle
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => section.style.display = 'none');
-
-            // Seçilen içeriği göster
-            document.getElementById(contentId).style.display = 'block';
+        window.saveDuyuru = async function () {
+            const text = document.getElementById("duyuruText").value;
+            await setDoc(doc(db, "site", "duyuru"), { text });
+            alert("Duyuru kaydedildi.");
         }
 
-        // Duyuru kaydetme işlemi
-        async function saveDuyuru() {
-            const duyuruContent = document.getElementById('duyuruContent').value;
-            try {
-                const docRef = doc(db, "siteSettings", "duyuru"); // Firestore'da siteSettings koleksiyonunda duyuru belgesi
-                await setDoc(docRef, {
-                    duyuru: duyuruContent
-                });
-                alert("Duyuru kaydedildi!");
-            } catch (error) {
-                console.error("Duyuru kaydedilirken hata oluştu: ", error);
-                alert("Duyuru kaydedilemedi.");
-            }
+        window.saveHakkinda = async function () {
+            const text = document.getElementById("hakText").value;
+            await setDoc(doc(db, "site", "hakkinda"), { text });
+            alert("Hakkında bilgisi kaydedildi.");
         }
-
-window.showContent = showContent;
-window.saveDuyuru = saveDuyuru;
-
     </script>
-
 </body>
 </html>
