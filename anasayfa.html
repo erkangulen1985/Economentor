@@ -89,8 +89,26 @@
   </nav>
 
   <div class="content">
-    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz. <br> Economentor ile öğrenin, analiz edin ve gelişin.</h2>
+    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz.<span id="userName">Kullanıcı</span> <br> Economentor ile öğrenin, analiz edin ve gelişin.</h2>
   </div>
 
 </body>
 </html>
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const auth = getAuth();
+const db = getFirestore();
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      const username = docSnap.data().username;
+      document.getElementById("userName").innerText = username;
+    }
+  }
+});
+</script>
