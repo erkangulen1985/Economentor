@@ -34,13 +34,14 @@
     nav {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       background-color: rgba(0, 0, 0, 0.8);
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
 
     nav a {
       padding: 14px 20px;
-      margin: 0 5px;
+      margin: 5px;
       text-decoration: none;
       color: #fff;
       font-weight: bold;
@@ -70,6 +71,11 @@
       line-height: 1.5;
       max-width: 800px;
     }
+
+    #userName {
+      color: #4CAF50;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -78,7 +84,7 @@
     <h1>ECONOMENTOR</h1>
   </header>
 
-  <nav>
+  <nav id="menu">
     <a href="mesaj.html">Mesajlar</a>
     <a href="dil-şik.html">Dilek-Şikayet</a>
     <a href="duyuru.html">Duyurular</a>
@@ -89,26 +95,50 @@
   </nav>
 
   <div class="content">
-    <h2>Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz.<span id="userName">Kullanıcı</span> <br> Economentor ile öğrenin, analiz edin ve gelişin.</h2>
+    <h2>
+      Finansal başarıya giden yolda ilk adımı attığınız için hoş geldiniz, 
+      <span id="userName">Kullanıcı</span>.<br> Economentor ile öğrenin, analiz edin ve gelişin.
+    </h2>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+      measurementId: "G-FS3FMPYVPD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          document.getElementById("userName").innerText = userData.username || "Kullanıcı";
+
+          if (userData.role === "admin") {
+            const menu = document.getElementById("menu");
+            const adminLink = document.createElement("a");
+            adminLink.href = "adminpanel.html";
+            adminLink.textContent = "Admin Paneline Dön";
+            menu.insertBefore(adminLink, menu.lastElementChild); // çıkıştan önce ekle
+          }
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
-<script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const auth = getAuth();
-const db = getFirestore();
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const userRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(userRef);
-    if (docSnap.exists()) {
-      const username = docSnap.data().username;
-      document.getElementById("userName").innerText = username;
-    }
-  }
-});
-</script>
