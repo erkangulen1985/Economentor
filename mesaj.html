@@ -290,16 +290,19 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   const editId = input.dataset.editing;
 
+  // Eğer mesaj boşsa veya kullanıcı seçilmemişse, işlem yapılmaz
   if (!text || !selectedFriendId || !currentUser) return;
 
+  // Mesaj gönderme sırasında tekrar gönderilmesini engelle
   const sendButton = document.querySelector(".send-btn");
-  sendButton.disabled = true;
+  sendButton.disabled = true; // Butonu devre dışı bırak
 
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
   try {
     if (editId) {
+      // Düzenleme yapılıyorsa
       const docRef = doc(msgCol, editId);
       const docSnap = await getDoc(docRef);
 
@@ -308,32 +311,38 @@ window.sendMessage = async () => {
         return;
       }
 
+      // Mesajı güncelle
       await updateDoc(docRef, { text });
-      delete input.dataset.editing;
+      delete input.dataset.editing; // Düzenleme modunu kapat
     } else {
+      // Yeni mesaj ekliyorsak
       const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-      await addDoc(msgCol, msg); // Mesajı Firebase'e ekleyin
+      await addDoc(msgCol, msg); // Mesajı Firebase'e ekleyin, DOM'a eklemiyoruz
 
+      // Arkadaşa bildirim gönder
       await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
 
+      // Metin kutusunu temizle
       input.value = "";
+
+      // Yeni mesaj ekledikten sonra sayfayı en alta kaydırma
+      const area = document.getElementById("messageArea");
+      area.scrollTop = area.scrollHeight;  // Sayfanın en altına kaydır
     }
+
   } catch (error) {
     console.error("Mesaj gönderme hatası:", error);
   } finally {
+    // Butonu tekrar etkinleştir
     sendButton.disabled = false;
   }
-
-  // Sayfanın en altına kaydırma işlemi
-  const area = document.getElementById("messageArea");
-  area.scrollTop = area.scrollHeight; // Son mesaja kaydır
 };
 
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
 
-  // İlk başta mesaj alanını temizleyelim ve "Daha fazla mesaj yükle" butonunu ekleyelim
+  // Mesajları yüklerken sıralama değiştirildi
   area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
 
   loadedMessageIds.clear();
@@ -349,26 +358,22 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // İlk 20 mesajı veritabanından alalım
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
+  // İlk 20 mesajı veritabanından alalım, "asc" sıralaması ile
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
-  for (const msg of messages.reverse()) {
+  for (const msg of messages) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
     loadedMessageIds.add(msg.id);
   }
-  
-  // Sayfayı en son mesaja kaydır
-  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
+  // Sayfayı en son mesaja kaydır
+  area.scrollTop = area.scrollHeight;  // En alta kaydır
   // "Daha fazla mesaj yükle" butonuna tıklanınca eski mesajları yükleyelim
   setupLoadMoreButton(messagesCol);
-  // "Daha fazla mesaj yükle" butonunu ekledikten sonra sayfayı kaydırma işlemi
-  area.lastElementChild?.scrollIntoView({ behavior: "smooth" }); // Son mesajın üst kısmına kaydır
-
 }
 
 
