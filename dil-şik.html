@@ -74,13 +74,11 @@
 </head>
 <body>
 
-  <div class="top-bar">
-    <a href="anasayfa.html">Anasayfa</a>
-  </div>
-
   <h2>Dilek ve Şikayet Formu</h2>
   <textarea id="message" placeholder="Mesajınızı buraya yazın..."></textarea><br>
-  <button onclick="submitFeedback()">Gönder</button>
+
+  <button onclick="submitFeedback()">Gönder</button><br><br> <!-- Gönder butonundan sonra boşluk bırakıldı -->
+  <button onclick="window.location.href='anasayfa.html'">Anasayfa</button> <!-- Anasayfa butonu buraya eklendi -->
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
