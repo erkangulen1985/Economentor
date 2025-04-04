@@ -10,90 +10,83 @@
             background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            margin: 0;
-            padding: 0;
             display: flex;
-            flex-direction: column;
             height: 100vh;
         }
 
-        header {
-            background: rgba(0, 0, 0, 0.7);
+        .chat-sidebar {
+            width: 300px;
+            background-color: rgba(0, 0, 0, 0.7);
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 36px;
-            letter-spacing: 2px;
-        }
-
-        .chat-list {
-            margin: 20px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
             overflow-y: auto;
-            height: 300px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        .chat-item {
+        .chat-sidebar .chat-item {
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            background-color: #333;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #444;
-            cursor: pointer;
+            align-items: center;
         }
 
-        .chat-item .username {
-            font-weight: bold;
+        .chat-sidebar .chat-item:hover {
+            background-color: #444;
         }
 
-        .chat-item .notification {
-            background: red;
+        .chat-sidebar .chat-item .notification {
+            background-color: red;
             color: white;
             border-radius: 50%;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             display: inline-block;
+            text-align: center;
+            line-height: 12px;
+            font-size: 10px;
         }
 
-        .chat-container {
+        .chat-content {
             flex-grow: 1;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            margin: 10px;
-            border-radius: 8px;
             overflow-y: auto;
+            margin-left: 300px;
         }
 
         .message {
             margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .message.sent {
+            background-color: #4CAF50;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background-color: #333;
+            align-self: flex-start;
         }
 
         .message .sender {
             font-weight: bold;
         }
 
-        .message.sent .sender {
-            color: #66ccff;
-        }
-
-        .message.received .sender {
-            color: #fff;
-        }
-
-        textarea {
+        .message textarea {
             width: 100%;
             padding: 10px;
             border-radius: 8px;
-            font-size: 16px;
+            margin-top: 20px;
             resize: none;
+            font-size: 16px;
         }
 
         .send-btn {
@@ -109,36 +102,34 @@
         .send-btn:hover {
             background-color: #3e8e41;
         }
-
-        .load-more {
-            margin-top: 10px;
-            text-align: center;
-            cursor: pointer;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Mesajlar</h1>
-</header>
+<!-- Chat Sidebar -->
+<div class="chat-sidebar" id="chatSidebar">
+    <div class="chat-item" onclick="openChat('user1')">
+        <span>User 1</span>
+        <span class="notification">1</span>
+    </div>
+    <div class="chat-item" onclick="openChat('user2')">
+        <span>User 2</span>
+        <span class="notification">2</span>
+    </div>
+    <!-- Add more users here -->
+</div>
 
-<div class="chat-list" id="chatList"></div>
-
-<div class="chat-container" id="chatContainer">
+<!-- Chat Content -->
+<div class="chat-content" id="chatContent">
     <div id="messageContainer"></div>
     <textarea id="messageInput" placeholder="Mesajınızı buraya yazın..."></textarea>
     <button class="send-btn" onclick="sendMessage()">Gönder</button>
-    <div class="load-more" onclick="loadMoreMessages()">Daha fazla mesaj yükle</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, orderBy, limit, query, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -154,7 +145,7 @@
     const db = getFirestore(app);
 
     let currentUser;
-    let chatPartner = "someUserID";  // Burada bir kullanıcı ID'si olacak, chat seçildiğinde ayarlanacak.
+    let currentChat = "user1"; // Default chat user
 
     // Kullanıcı girişi
     onAuthStateChanged(auth, async (user) => {
@@ -165,42 +156,6 @@
             window.location.href = "index.html";  // Kullanıcı giriş yapmadıysa anasayfaya yönlendir.
         }
     });
-
-    // Mesaj gönderme
-    async function sendMessage() {
-        const message = document.getElementById("messageInput").value;
-        if (!message) return alert("Mesaj boş olamaz!");
-
-        await addDoc(collection(db, "messages"), {
-            sender: currentUser.uid,
-            receiver: chatPartner,
-            message: message,
-            timestamp: Timestamp.now(),
-        });
-
-        document.getElementById("messageInput").value = "";  // Mesaj gönderdikten sonra inputu temizle
-        loadMessages();
-    }
-
-    // Chat listesi yükleme
-    async function loadChatList() {
-        const chatListContainer = document.getElementById("chatList");
-        chatListContainer.innerHTML = "";
-
-        const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(10));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const div = document.createElement("div");
-            div.className = "chat-item";
-            div.innerHTML = `
-                <span class="username">${data.sender}</span>
-                <span class="notification">!</span>
-                <p>${data.message.slice(0, 30)}...</p>
-            `;
-            chatListContainer.appendChild(div);
-        });
-    }
 
     // Mesajları yükleme
     async function loadMessages() {
@@ -229,25 +184,48 @@
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
-    // Daha fazla mesaj yükleme
-    async function loadMoreMessages() {
-        const q = query(
-            collection(db, "messages"),
-            orderBy("timestamp", "desc"),
-            limit(50)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
+    // Mesaj Gönderme
+    async function sendMessage() {
+        const message = document.getElementById("messageInput").value;
+        if (!message) return alert("Mesaj boş olamaz!");
+
+        await addDoc(collection(db, "messages"), {
+            sender: currentUser.uid,
+            receiver: currentChat,
+            message: message,
+            timestamp: Timestamp.now(),
+        });
+
+        document.getElementById("messageInput").value = "";  // Mesaj gönderdikten sonra inputu temizle
+        loadMessages();
+    }
+
+    // Chat listesi yükleme
+    async function loadChatList() {
+        const chatSidebar = document.getElementById("chatSidebar");
+        chatSidebar.innerHTML = "";
+
+        // Kullanıcı listesi burada alınır (örnek olarak sabit kullanıcı eklenmiştir)
+        const users = ["user1", "user2"]; // Bu liste Firestore'dan alınmalı
+
+        users.forEach((user) => {
             const div = document.createElement("div");
-            div.className = `message ${data.sender === currentUser.uid ? 'sent' : 'received'}`;
+            div.className = "chat-item";
             div.innerHTML = `
-                <p class="sender">${data.sender === currentUser.uid ? 'Sen' : data.sender}</p>
-                <p>${data.message}</p>
+                <span>${user}</span>
+                <span class="notification">1</span>
             `;
-            document.getElementById("messageContainer").appendChild(div);
+            div.onclick = () => openChat(user);
+            chatSidebar.appendChild(div);
         });
     }
+
+    // Bir chat'e tıklama
+    function openChat(user) {
+        currentChat = user;
+        loadMessages();
+    }
 </script>
+
 </body>
 </html>
