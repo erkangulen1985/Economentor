@@ -488,7 +488,12 @@ deleteBtn.onclick = async () => {
   div.appendChild(deleteBtn);
 }
 
-  return div;
+function someFunction() {
+  if (msg.sender === currentUser.uid) {
+    // return burada doğru çünkü bir fonksiyon içindeyiz
+    return;
+  }
+}
 }
 
 window.sendMessage = async () => {
