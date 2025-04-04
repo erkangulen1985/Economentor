@@ -221,7 +221,7 @@ onAuthStateChanged(auth, async (user) => {
                     div.innerHTML = `
                         <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
                         <p>${data.message}</p>
-                        <small>${data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
+                        <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
                         <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
                     `;
                     feedbackList.appendChild(div);
