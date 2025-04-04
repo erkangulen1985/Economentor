@@ -416,7 +416,16 @@ window.sendMessage = async () => {
   try {
     if (editId) {
       // Düzenleme yapılıyorsa
-      await updateDoc(doc(msgCol, editId), { text });
+      const docRef = doc(msgCol, editId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error("Belge bulunamadı:", editId);
+        return;
+      }
+
+      // Mesajı güncelle
+      await updateDoc(docRef, { text });
 
       // DOM'da mesajı güncelle
       const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
@@ -427,10 +436,15 @@ window.sendMessage = async () => {
       const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
       const docRef = await addDoc(msgCol, msg);
 
-      // Yeni mesajı anında gör
+      // Mesaj eklenmeden önce id'sinin gelmesi beklenmeli
       const div = await buildMessageDiv({ id: docRef.id, ...msg });
-      area.appendChild(div);  // Mesajı doğru elemana ekleyelim
-      area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
+
+      // Sadece eklenmiş olan mesajı ekleyelim
+      if (!loadedMessageIds.has(docRef.id)) {
+        area.appendChild(div);
+        area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
+        loadedMessageIds.add(docRef.id);
+      }
 
       // Arkadaşa bildirim gönder
       await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
