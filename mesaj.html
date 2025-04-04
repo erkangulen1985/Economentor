@@ -374,54 +374,6 @@ async function openChat(fid, el) {
   setupLoadMoreButton(messagesCol);
 }
 
-// Daha eski mesajları yükleme işlevi
-function setupLoadMoreButton(messagesCol) {
-  const loadBtn = document.getElementById("loadMoreBtn");
-
-  if (!loadBtn || !firstVisible) return;
-
-  loadBtn.onclick = async () => {
-    if (isLoading) return;  // Eğer yükleme işlemi devam ediyorsa, işlem yapılmasın
-    isLoading = true;  // Yükleme işlemi başladı
-
-    const area = document.getElementById("messageArea");
-    const prevScrollHeight = area.scrollHeight;
-
-    // Daha eski mesajları yüklemek için endBefore kullanarak sorguyu yapıyoruz
-    const snap = await getDocs(query(
-      messagesCol,
-      orderBy("timestamp", "desc"),
-      endBefore(firstVisible),
-      limitToLast(20)
-    ));
-
-    const messages = [];
-    snap.forEach(doc => {
-      if (!loadedMessageIds.has(doc.id)) {
-        messages.push({ id: doc.id, ...doc.data() });
-        loadedMessageIds.add(doc.id);
-      }
-    });
-
-    for (const msg of messages.reverse()) {
-      const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling); // Yüklenen mesajları başa ekleyelim
-    }
-
-    // Eğer daha fazla mesaj yoksa butonu gizle
-    if (!snap.empty) {
-      firstVisible = snap.docs[0];
-    } else {
-      loadBtn.style.display = "none";
-    }
-
-    // Yeni mesajlara kaydırma yapalım
-    const newScrollHeight = area.scrollHeight;
-    area.scrollTop = newScrollHeight - prevScrollHeight;
-    isLoading = false;  // Yükleme tamamlandı
-  };
-}
-
 
 // Mesajları DOM'a ekleme fonksiyonu
 async function buildMessageDiv(msg) {
