@@ -464,7 +464,7 @@ const unsubMessages = onSnapshot(messagesCol, snapshot => {
       await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
 
       // DOM'dan mesajı kaldır
-      const divToRemove = document.querySelector(.message[data-id="${msg.id}"]);
+      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (divToRemove) divToRemove.remove();
     }
     // Mesaj silindiğinde, Firestore'dan silme işlemi yapalım
