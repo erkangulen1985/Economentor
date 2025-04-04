@@ -322,7 +322,7 @@ async function openChat(fid, el) {
 }
 
 // Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
-const chatItem = document.querySelector(.chat-item.active);
+const chatItem = document.querySelector(".chat-item.active");
 if (chatItem) {
   const notif = chatItem.querySelector(".notification");
   if (notif) notif.remove();
