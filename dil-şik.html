@@ -2,78 +2,52 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dilek ve Şikayet</title>
-  <link rel="icon" href="image1.png">
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
       background: url('image2.png') no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
+      font-family: Arial, sans-serif;
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      padding-top: 50px;
     }
-
-    .form-box {
-      background: rgba(0,0,0,0.75);
-      padding: 30px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 500px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
     textarea {
-      width: 100%;
-      height: 120px;
+      width: 90%;
+      max-width: 600px;
+      height: 200px;
+      border-radius: 8px;
       padding: 10px;
       font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      resize: none;
+      margin-top: 20px;
     }
-
     button {
-      width: 100%;
-      padding: 12px;
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
       background-color: #4CAF50;
       color: white;
       border: none;
-      font-size: 16px;
-      border-radius: 8px;
       cursor: pointer;
-      margin-top: 10px;
     }
-
-    #status {
-      margin-top: 15px;
-      text-align: center;
+    button:hover {
+      background-color: #3e8e41;
     }
   </style>
 </head>
 <body>
 
-  <div class="form-box">
-    <h2>Dilek veya Şikayetinizi Yazınız</h2>
-    <textarea id="feedback" placeholder="Mesajınızı buraya yazın..."></textarea>
-    <button onclick="submitFeedback()">Gönder</button>
-    <div id="status"></div>
-  </div>
+  <h2>Dilek ve Şikayet Formu</h2>
+  <textarea id="message" placeholder="Mesajınızı buraya yazın..."></textarea><br>
+  <button onclick="submitFeedback()">Gönder</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -85,59 +59,47 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    let currentUsername = null;
+    let currentUsername = "Bilinmiyor";
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          currentUsername = userSnap.data().username;
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          currentUsername = docSnap.data().username || "Bilinmiyor";
         }
-      } else {
-        document.querySelector("textarea").disabled = true;
-        document.querySelector("button").disabled = true;
-        document.getElementById("status").innerText = "Lütfen önce giriş yapınız.";
       }
     });
 
     window.submitFeedback = async function () {
-      const message = document.getElementById("feedback").value.trim();
-      const statusBox = document.getElementById("status");
-
+      const message = document.getElementById("message").value.trim();
       if (!message) {
-        statusBox.innerText = "Lütfen bir mesaj girin.";
+        alert("Lütfen mesajınızı yazın.");
         return;
       }
 
-      try {
-        const docRef = await addDoc(collection(db, "feedback"), {
-          message,
-          username: currentUsername,
-          timestamp: new Date()
-        });
+      // Firestore'a kaydet
+      await addDoc(collection(db, "feedback"), {
+        username: currentUsername,
+        message: message,
+        timestamp: serverTimestamp()
+      });
 
-        // EmailJS: Mesajı e-posta ile bildir
-        emailjs.send("service_XXXX", "template_XXXX", {
-          user_name: currentUsername,
-          message_content: message
-        });
+      // SendGrid ile e-posta bildirimi
+      await addDoc(collection(db, "mail"), {
+        to: "onurgulen2006@gmail.com",
+        message: {
+          subject: "Yeni Dilek/Şikayet Geldi!",
+          text: `Yeni bir mesaj gönderildi:\nKullanıcı: ${currentUsername}\nMesaj: ${message}`
+        }
+      });
 
-        statusBox.innerText = "Mesajınız başarıyla gönderildi.";
-        document.getElementById("feedback").value = "";
-      } catch (err) {
-        statusBox.innerText = "Bir hata oluştu: " + err.message;
-      }
-    };
-  </script>
-
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
-  <script>
-    emailjs.init("YOUR_PUBLIC_KEY"); // EmailJS'den aldığınız public key
+      alert("Mesajınız gönderildi. Teşekkür ederiz!");
+      document.getElementById("message").value = "";
+    }
   </script>
 </body>
 </html>
