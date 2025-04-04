@@ -478,12 +478,6 @@ async function buildMessageDiv(msg) {
   return div;
 }
 
-// Firebase zaman damgasını düzgün formatta göstermek için yardımcı fonksiyon
-function formatTimestamp(ts) {
-  const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
 let isSending = false;  // Mesaj gönderme durumu kontrolü
 
 window.goHome = function() {
