@@ -157,16 +157,32 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const username = userSnap.data().username;
-                    document.getElementById("adminUsername").innerText = username;
-                }
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const username = userData.username || "Yönetici";
+            const role = userData.role || "user";
+
+            if (role !== "admin") {
+                alert("Bu sayfaya erişim izniniz yok!");
+                window.location.href = "anasayfa.html";
+                return;
             }
-        });
+
+            document.getElementById("adminUsername").innerText = username;
+        } else {
+            alert("Kullanıcı bilgisi alınamadı.");
+            window.location.href = "index.html";
+        }
+    } else {
+        // Giriş yapılmamışsa
+        alert("Lütfen giriş yapınız.");
+        window.location.href = "index.html";
+    }
+});
 
         window.showContent = async function (section) {
             const container = document.getElementById("dynamicContent");
