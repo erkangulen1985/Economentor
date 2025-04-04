@@ -231,7 +231,7 @@ function updateTexts() {
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function getConversationId(uid1, uid2) {
