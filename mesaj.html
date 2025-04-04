@@ -257,7 +257,7 @@ onAuthStateChanged(auth, user => {
 });
 
 async function loadChatList(uid) {
-  const friendsSnap = await getDoc(doc(db, "friends", uid));
+  const friendsSnap = await getDoc(doc(db, "users", uid));
   const list = document.getElementById("chatList");
   list.innerHTML = "";
   const friends = friendsSnap.exists() ? friendsSnap.data().list || [] : [];
