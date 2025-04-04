@@ -552,7 +552,9 @@ window.sendMessage = async () => {
   input.value = "";
 };
 
-window.goHome = () => location.href = "anasayfa.html";
+window.goHome = function() {
+  location.href = "anasayfa.html";  // Make sure the path is correct
+};
 
 async function updateChatListItem(friendId) {
   const uid = currentUser.uid;
