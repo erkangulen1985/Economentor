@@ -296,9 +296,6 @@ async function openChat(fid, el) {
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
 
-  const notifDot = el.querySelector(".notification");
-  if (notifDot) notifDot.remove();
-
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
@@ -317,33 +314,32 @@ async function openChat(fid, el) {
   // Sayfayı en son mesaja kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
   
-  // LoadMoreButonu için ayar
-  setupLoadMoreButton(messagesCol);
-
   // Anlık yeni mesajları dinlemek için onSnapshot kullan
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-    const doc = snapshot.docs[snapshot.docs.length - 1];
-    if (!doc) return;
+    snapshot.docChanges().forEach(async (change) => {
+      const msg = { id: change.doc.id, ...change.doc.data() };
 
-    const msg = doc.data();
-    const hasNewMsg = !msg.seenBy?.includes(currentUser.uid);
-
-    if (!loadedMessageIds.has(msg.id)) {
-      loadedMessageIds.add(msg.id);
-      const div = await buildMessageDiv(msg);
-      area.appendChild(div);
-      area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
-
-      // Eğer yeni mesaj ise, "seenBy" kısmını güncelle
-      if (hasNewMsg) {
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid)
-        });
+      if (change.type === "added") {
+        // Yeni mesaj eklendiğinde
+        const div = await buildMessageDiv(msg);
+        area.appendChild(div);
+        area.scrollTop = area.scrollHeight;
+      } else if (change.type === "modified") {
+        // Mesaj düzenlendiğinde
+        const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+        if (div) {
+          div.querySelector(".msg-text").innerText = msg.text;
+        }
+      } else if (change.type === "removed") {
+        // Mesaj silindiğinde
+        const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+        if (div) {
+          div.remove();
+        }
       }
-    }
+    });
   });
 }
-
 
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
@@ -365,7 +361,6 @@ async function buildMessageDiv(msg) {
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
   `;
 
-  // Eğer mesaj kullanıcınızdan geldiyse, düzenleme ve silme butonları ekleyin
   if (msg.sender === currentUser.uid) {
     const editBtn = document.createElement("button");
     editBtn.textContent = "✏️";
@@ -407,14 +402,21 @@ window.sendMessage = async () => {
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
+  // Eğer düzenleme yapılacaksa
   if (editId) {
     await updateDoc(doc(msgCol, editId), { text });
     const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
   } else {
+    // Yeni mesaj eklemek için
     const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-    await addDoc(msgCol, msg);
+    const docRef = await addDoc(msgCol, msg);
+
+    // Yeni mesajı anında gör
+    const div = await buildMessageDiv({ id: docRef.id, ...msg });
+    document.getElementById("messageArea").appendChild(div);
+    area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
     await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
   }
 
