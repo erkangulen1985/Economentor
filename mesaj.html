@@ -285,93 +285,122 @@ async function loadChatList(uid) {
   });
 }
 
-window.sendMessage = async () => {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  const editId = input.dataset.editing;
-
-  if (!text || !selectedFriendId || !currentUser) return;
-
-  const sendButton = document.querySelector(".send-btn");
-  sendButton.disabled = true;
-
-  const convoId = getConversationId(currentUser.uid, selectedFriendId);
-  const msgCol = collection(db, "conversations", convoId, "messages");
-
-  try {
-    if (editId) {
-      const docRef = doc(msgCol, editId);
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) {
-        console.error("Belge bulunamadı:", editId);
-        return;
-      }
-
-      await updateDoc(docRef, { text });
-      delete input.dataset.editing;
-    } else {
-      const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-      await addDoc(msgCol, msg);
-
-      // Kullanıcıya yeni mesaj olduğuna dair bilgi verelim
-      await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
-
-      input.value = "";
-    }
-
-  } catch (error) {
-    console.error("Mesaj gönderme hatası:", error);
-  } finally {
-    sendButton.disabled = false;
-  }
-
-  // Sayfayı en alta kaydır
-  const area = document.getElementById("messageArea");
-  area.scrollTop = area.scrollHeight;
-};
-
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-
-  // İlk başta mesaj alanını temizleyelim ve "Daha fazla mesaj yükle" butonunu ekleyelim
   area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
-
   loadedMessageIds.clear();
   firstVisible = null;
 
-  // Eğer eski dinleyici varsa temizleyelim
   if (unsubMessages) unsubMessages();
-
-  // Mevcut sohbeti aktif hale getirelim
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
+
+  const notifDot = el.querySelector(".notification");
+  if (notifDot) notifDot.remove();
+  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // İlk 20 mesajı veritabanından alalım (en yeni mesajdan başlayarak)
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
-  // Mesajları ters sırayla ekleyelim (en son mesaj en alta)
-  for (const msg of messages.reverse()) {
-    const div = await buildMessageDiv(msg);
-    area.appendChild(div);
-    loadedMessageIds.add(msg.id);
-  }
-  
-  // Sayfayı en son mesaja kaydır
-  area.scrollTop = area.scrollHeight;  // Sayfayı en alta kaydır
+  for (const msg of messages) {
+  const div = await buildMessageDiv(msg);
+  area.appendChild(div);
+  loadedMessageIds.add(msg.id);
 
-  // "Daha fazla mesaj yükle" butonuna tıklanınca eski mesajları yükleyelim
-  setupLoadMoreButton(messagesCol);
+  // Eğer kullanıcı görmemişse Firestore'da güncelle
+  if (!msg.seenBy?.includes(currentUser.uid)) {
+    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+      seenBy: arrayUnion(currentUser.uid)
+    });
+  }
 }
 
+// Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
+const chatItem = document.querySelector(`.chat-item.active`);
+if (chatItem) {
+  const notif = chatItem.querySelector(".notification");
+  if (notif) notif.remove();
+}
 
-// Mesajları DOM'a ekleme fonksiyonu
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+
+  setupLoadMoreButton(messagesCol);
+
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
+  for (const docChange of snapshot.docChanges()) {
+    const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+    if (loadedMessageIds.has(msg.id)) continue;
+
+    loadedMessageIds.add(msg.id);
+    const div = await buildMessageDiv(msg);
+    area.appendChild(div);
+    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+
+    // Önce seenBy güncelle
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid)
+      });
+      await updateDoc(doc(db, "users", currentUser.uid), {
+       inboxHasNew: false
+  });
+    }
+
+    // Sonra listeyi güncelle (bildirim işareti artık görünmemeli)
+    await updateChatListItem(selectedFriendId);
+  }
+});
+}
+
+function setupLoadMoreButton(messagesCol) {
+  const loadBtn = document.getElementById("loadMoreBtn");
+  if (!loadBtn || !firstVisible) return;
+
+  loadBtn.onclick = async () => {
+    if (isLoading) return;
+    isLoading = true;
+
+    const area = document.getElementById("messageArea");
+    const prevScrollHeight = area.scrollHeight;
+
+    const snap = await getDocs(query(
+      messagesCol,
+      orderBy("timestamp", "asc"),
+      endBefore(firstVisible),
+      limitToLast(50)
+    ));
+
+    const messages = [];
+    snap.forEach(doc => {
+      if (!loadedMessageIds.has(doc.id)) {
+        messages.push({ id: doc.id, ...doc.data() });
+        loadedMessageIds.add(doc.id);
+      }
+    });
+
+    for (const msg of messages.reverse()) {
+      const div = await buildMessageDiv(msg);
+      area.insertBefore(div, loadBtn.nextSibling);
+    }
+
+    if (!snap.empty) {
+      firstVisible = snap.docs[0];
+    } else {
+      loadBtn.style.display = "none";
+    }
+
+    const newScrollHeight = area.scrollHeight;
+    area.scrollTop = newScrollHeight - prevScrollHeight;
+    isLoading = false;
+  };
+}
+
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
   div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
@@ -392,123 +421,75 @@ async function buildMessageDiv(msg) {
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
   `;
 
-  if (msg.sender === currentUser.uid) {
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "✏️";
-    editBtn.style.marginLeft = "6px";
-    editBtn.onclick = () => {
-      const input = document.getElementById("messageInput");
-      input.value = msg.text;
-      input.focus();
-      input.dataset.editing = msg.id;
-    };
+if (msg.sender === currentUser.uid) {
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "✏️";
+  editBtn.style.marginLeft = "6px";
+  editBtn.onclick = () => {
+    const input = document.getElementById("messageInput");
+    input.value = msg.text;
+    input.focus();
+    input.dataset.editing = msg.id; // Düzenleme modunu başlat
+  };
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "🗑️";
-    deleteBtn.style.marginLeft = "6px";
-    deleteBtn.onclick = async () => {
-      if (confirm("Mesaj silinsin mi?")) {
-        const convoId = getConversationId(currentUser.uid, selectedFriendId);
-        await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "🗑️";
+  deleteBtn.style.marginLeft = "6px";
+  deleteBtn.onclick = async () => {
+    if (confirm("Mesaj silinsin mi?")) {
+      const convoId = getConversationId(currentUser.uid, selectedFriendId);
+      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
 
-        // DOM'dan mesajı kaldır
-        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (divToRemove) {
-          divToRemove.remove();
-        }
-      }
-    };
+      // DOM'dan mesajı kaldır
+      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (divToRemove) divToRemove.remove();
+    }
+  };
 
-    div.appendChild(editBtn);
-    div.appendChild(deleteBtn);
-  }
+  div.appendChild(editBtn);
+  div.appendChild(deleteBtn);
+}
 
   return div;
 }
 
-let isSending = false;  // Mesaj gönderme durumu kontrolü
+window.sendMessage = async () => {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  const editId = input.dataset.editing;
+  if (!text || !selectedFriendId || !currentUser) return;
 
-window.goHome = function() {
-  location.href = "anasayfa.html";
-};
+  const convoId = getConversationId(currentUser.uid, selectedFriendId);
+  const msgCol = collection(db, "conversations", convoId, "messages");
 
-// Mesajların geçmişini yükleyen buton fonksiyonu (Bu fonksiyonu sadece bir kez tanımlayacağız)
-async function setupLoadMoreButton(messagesCol) {
-  const loadBtn = document.getElementById("loadMoreBtn");
-  if (!loadBtn || !firstVisible) return;
+  if (editId) {
+    await updateDoc(doc(msgCol, editId), { text });
 
-  loadBtn.onclick = async () => {
-    if (isLoading) return;  // Eğer yükleme işlemi devam ediyorsa, işlem yapılmasın
-    isLoading = true;  // Yükleme işlemi başladı
+    // DOM'da mesaj metnini güncelle
+    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+    if (msgDiv) {
+      msgDiv.querySelector(".msg-text").innerText = text;
+    }
 
-    const area = document.getElementById("messageArea");
-    const prevScrollHeight = area.scrollHeight;
+    delete input.dataset.editing;
+  } else {
+    const msg = {
+      sender: currentUser.uid,
+      text,
+      timestamp: Date.now(),
+      seenBy: []
+    };
+    await addDoc(msgCol, msg);
 
-    // Daha eski mesajları yüklemek için endBefore kullanarak sorguyu yapıyoruz
-    const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
-
-
-    const messages = [];
-    snap.forEach(doc => {
-      if (!loadedMessageIds.has(doc.id)) {
-        messages.push({ id: doc.id, ...doc.data() });
-        loadedMessageIds.add(doc.id);
-      }
+    // ✅ Karşı tarafa kırmızı nokta çıkması için
+    await updateDoc(doc(db, "users", selectedFriendId), {
+      inboxHasNew: true
     });
+  }
 
-    for (const msg of messages.reverse()) {
-      const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling); // Yüklenen mesajları başa ekleyelim
-    }
-
-    // Eğer daha fazla mesaj yoksa butonu gizle
-    if (!snap.empty) {
-      firstVisible = snap.docs[0];
-    } else {
-      loadBtn.style.display = "none";
-    }
-
-    // Yeni mesajlara kaydırma yapalım
-    const newScrollHeight = area.scrollHeight;
-    area.scrollTop = newScrollHeight - prevScrollHeight;
-    isLoading = false;  // Yükleme tamamlandı
-  };
-}
-
-const homeBtn = document.getElementById("homeBtn");
-if (homeBtn) {
-  homeBtn.addEventListener("click", () => {
-    location.href = "anasayfa.html";
-  });
-}
-
-  // Anlık yeni mesajları dinlemek için onSnapshot kullan
-unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "desc")), async (snapshot) => {
-  snapshot.docChanges().forEach(async (change) => {
-    const msg = { id: change.doc.id, ...change.doc.data() };
-
-    if (change.type === "added") {
-      // Yeni mesaj eklendiğinde
-      const div = await buildMessageDiv(msg);
-      area.appendChild(div);
-      
-      // Sayfayı en alta kaydır
-      area.scrollTop = area.scrollHeight;
-    } else if (change.type === "modified") {
-      // Mesaj düzenlendiğinde
-      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (div) {
-        div.querySelector(".msg-text").innerText = msg.text;
-      }
-    } else if (change.type === "removed") {
-      // Mesaj silindiğinde
-      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (div) {
-        div.remove();
-      }
-    }
-  });
-});
+  input.value = "";
+};
+  window.goHome = () => location.href = "anasayfa.html";
 
 </script>
 </body>
