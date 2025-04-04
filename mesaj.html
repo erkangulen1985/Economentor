@@ -288,7 +288,7 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = <button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>;
+  area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
   loadedMessageIds.clear();
   firstVisible = null;
 
