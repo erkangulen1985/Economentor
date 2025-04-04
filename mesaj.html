@@ -335,9 +335,6 @@ window.sendMessage = async () => {
   }
 };
 
-let firstVisible = null;  // Son yüklenen mesajın referansı
-let loadedMessageIds = new Set();  // Yüklenen mesajların ID'lerini takip etmek için
-
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
