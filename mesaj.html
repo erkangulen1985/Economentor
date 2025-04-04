@@ -430,7 +430,8 @@ editBtn.onclick = async () => {
   input.value = msg.text;
   input.focus();
   input.dataset.editing = msg.id; // Düzenleme modunu başlat
-
+}
+  
   // Firebase güncelleme işlemi
   const docRef = doc(msgCol, msg.id);
   await updateDoc(docRef, { text: input.value });
