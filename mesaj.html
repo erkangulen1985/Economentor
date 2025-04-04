@@ -257,17 +257,22 @@ onAuthStateChanged(auth, user => {
 });
 
 async function loadChatList(uid) {
-  const friendsSnap = await getDoc(doc(db, "users", uid));
+  // Exclude self and admin
+  const adminUID = "adminUID"; // Replace with your admin UID
+
+  const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatList");
   list.innerHTML = "";
-  const friends = friendsSnap.exists() ? friendsSnap.data().list || [] : [];
+  
+  usersSnap.forEach(async (userDoc) => {
+    const userData = userDoc.data();
+    const userId = userDoc.id;
 
-  for (const fid of friends) {
-    const fdoc = await getDoc(doc(db, "users", fid));
-    if (!fdoc.exists()) continue;
+    // Skip the logged-in user and admin
+    if (userId === uid || userId === adminUID) return;
 
-    const name = fdoc.data().username;
-    const convoId = getConversationId(uid, fid);
+    const name = userData.username;
+    const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
     const lastMsgSnap = await getDocs(
@@ -290,10 +295,10 @@ async function loadChatList(uid) {
       div.appendChild(notif);
     }
 
-    div.onclick = () => openChat(fid, div);
+    div.onclick = () => openChat(userId, div);
     list.appendChild(div);
 
-    // ✅ Her arkadaş için burada dinleyici ekle
+    // Listen for new messages for each user
     onSnapshot(
       query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)),
       async (snapshot) => {
@@ -322,7 +327,7 @@ async function loadChatList(uid) {
         }
       }
     );
-  }
+  });
 }
 
 async function openChat(fid, el) {
@@ -338,7 +343,6 @@ async function openChat(fid, el) {
 
   const notifDot = el.querySelector(".notification");
   if (notifDot) notifDot.remove();
-  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
@@ -349,16 +353,45 @@ async function openChat(fid, el) {
   firstVisible = snap.docs[0];
 
   for (const msg of messages) {
-  const div = await buildMessageDiv(msg);
-  area.appendChild(div);
-  loadedMessageIds.add(msg.id);
+    const div = await buildMessageDiv(msg);
+    area.appendChild(div);
+    loadedMessageIds.add(msg.id);
 
-  // Eğer kullanıcı görmemişse Firestore'da güncelle
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
+    // If the message hasn't been seen, update Firestore
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid)
+      });
+    }
   }
+
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+  setupLoadMoreButton(messagesCol);
+
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
+    for (const docChange of snapshot.docChanges()) {
+      const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+      if (loadedMessageIds.has(msg.id)) continue;
+
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+      setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+
+      // Update seenBy first
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          inboxHasNew: false
+        });
+      }
+
+      // Update chat list item (removes notification)
+      await updateChatListItem(selectedFriendId);
+    }
+  });
 }
 
 // Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
