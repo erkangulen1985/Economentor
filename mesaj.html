@@ -419,38 +419,36 @@ div.innerHTML = `
 `;
 
 
-if (msg.sender === currentUser.uid) {
-  const editBtn = document.createElement("button");
-  editBtn.textContent = "✏️";
-  editBtn.style.marginLeft = "6px";
-  editBtn.onclick = () => {
-    const input = document.getElementById("messageInput");
-    input.value = msg.text;
-    input.focus();
-    input.dataset.editing = msg.id; // Düzenleme modunu başlat
-    // Düzenleme yapıldığında, Firestore'daki veriyi güncelleyin
-async function someFunction() {
+const editBtn = document.createElement("button");
+editBtn.textContent = "✏️";
+editBtn.style.marginLeft = "6px";
+editBtn.onclick = async () => {
+  const input = document.getElementById("messageInput");
+  input.value = msg.text;
+  input.focus();
+  input.dataset.editing = msg.id; // Düzenleme modunu başlat
+
+  // Define convoId here
+  const convoId = getConversationId(currentUser.uid, selectedFriendId);
+
+  // Update Firestore with the new text
   await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
-}
 
-
-// Dinleyiciyi kullanarak anında güncellemeleri diğer tarafa yansıtalım
-const messagesCol = collection(db, "conversations", convoId, "messages");
-const unsubMessages = onSnapshot(messagesCol, snapshot => {
-  snapshot.docChanges().forEach(change => {
-    if (change.type === "modified") {
-      // Mesaj düzenlendiğinde, bunu karşı tarafa yansıtıyoruz
-      const modifiedMessage = change.doc.data();
-      // DOM'da bu mesajı güncelliyoruz
-      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = modifiedMessage.text;
+  // Listen for instant updates to the message
+  const messagesCol = collection(db, "conversations", convoId, "messages");
+  const unsubMessages = onSnapshot(messagesCol, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "modified") {
+        // Update the DOM when the message is modified
+        const modifiedMessage = change.doc.data();
+        const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+        if (msgDiv) {
+          msgDiv.querySelector(".msg-text").innerText = modifiedMessage.text;
+        }
       }
-    }
+    });
   });
-});
-
-  };
+};
 
   const deleteBtn = document.createElement("button");
   deleteBtn.textContent = "🗑️";
