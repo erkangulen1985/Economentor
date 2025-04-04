@@ -292,13 +292,17 @@ async function openChat(fid, el) {
   loadedMessageIds.clear();
   firstVisible = null;
 
-  if (unsubMessages) unsubMessages();
+  if (unsubMessages) unsubMessages(); // Eski dinleyiciyi temizle
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
+
+  const notifDot = el.querySelector(".notification");
+  if (notifDot) notifDot.remove();
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
+  // İlk mesajları yükle
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
@@ -310,9 +314,36 @@ async function openChat(fid, el) {
     loadedMessageIds.add(msg.id);
   }
   
+  // Sayfayı en son mesaja kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+  
+  // LoadMoreButonu için ayar
   setupLoadMoreButton(messagesCol);
+
+  // Anlık yeni mesajları dinlemek için onSnapshot kullan
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+    const doc = snapshot.docs[snapshot.docs.length - 1];
+    if (!doc) return;
+
+    const msg = doc.data();
+    const hasNewMsg = !msg.seenBy?.includes(currentUser.uid);
+
+    if (!loadedMessageIds.has(msg.id)) {
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
+
+      // Eğer yeni mesaj ise, "seenBy" kısmını güncelle
+      if (hasNewMsg) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+      }
+    }
+  });
 }
+
 
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
@@ -334,6 +365,7 @@ async function buildMessageDiv(msg) {
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
   `;
 
+  // Eğer mesaj kullanıcınızdan geldiyse, düzenleme ve silme butonları ekleyin
   if (msg.sender === currentUser.uid) {
     const editBtn = document.createElement("button");
     editBtn.textContent = "✏️";
@@ -353,6 +385,7 @@ async function buildMessageDiv(msg) {
         const convoId = getConversationId(currentUser.uid, selectedFriendId);
         await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
 
+        // DOM'dan mesajı kaldır
         const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
         if (divToRemove) divToRemove.remove();
       }
