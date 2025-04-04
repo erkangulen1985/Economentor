@@ -292,6 +292,7 @@ async function loadChatList(uid) {
 function filterChats() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   const chatItems = document.querySelectorAll(".chat-item");
+
   chatItems.forEach(item => {
     const username = item.querySelector("strong").textContent.toLowerCase();
     if (username.indexOf(query) === -1) {
