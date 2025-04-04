@@ -226,6 +226,10 @@ function updateTexts() {
   document.getElementById("homeBtn").innerText = t[lang].home;
 }
 
+function getConversationId(uid1, uid2) {
+  return [uid1, uid2].sort().join("_");
+}
+  
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
