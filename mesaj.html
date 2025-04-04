@@ -505,7 +505,7 @@ window.sendMessage = async () => {
     await updateDoc(doc(msgCol, editId), { text });
 
     // DOM'da mesaj metnini güncelle
-    const msgDiv = document.querySelector(.message[data-id="${editId}"]);
+    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) {
       msgDiv.querySelector(".msg-text").innerText = text;
     }
