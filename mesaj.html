@@ -483,17 +483,27 @@ deleteBtn.onclick = async () => {
     if (divToRemove) divToRemove.remove();
 
     // Firebase dinleyicisini güncelle
-    const messagesCol = collection(db, "conversations", convoId, "messages");
-    onSnapshot(messagesCol, (snapshot) => {
-      snapshot.docChanges().forEach(change => {
-        if (change.type === "removed") {
-          const removedMsgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-          if (removedMsgDiv) {
-            removedMsgDiv.remove(); // Silinen mesajı UI'dan kaldır
-          }
-        }
-      });
-    });
+const messagesCol = collection(db, "conversations", convoId, "messages");
+
+// Dinleyici kur
+onSnapshot(messagesCol, (snapshot) => {
+  snapshot.docChanges().forEach(change => {
+    const msg = change.doc.data();
+    const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+
+    if (change.type === "removed") {
+      if (msgDiv) msgDiv.remove(); // Silinen mesajı kaldır
+    } else if (change.type === "modified") {
+      if (msgDiv) {
+        msgDiv.querySelector(".msg-text").innerText = msg.text; // Düzenlenen mesajı güncelle
+      }
+    } else if (change.type === "added") {
+      // Yeni mesaj eklenmişse, UI'ya ekle
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+    }
+  });
+});
   }
 };
   
