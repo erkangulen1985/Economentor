@@ -484,22 +484,24 @@ window.goHome = function() {
   location.href = "anasayfa.html";
 };
 
+// Mesajların geçmişini yükleyen buton fonksiyonu (Bu fonksiyonu sadece bir kez tanımlayacağız)
 async function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
   if (!loadBtn || !firstVisible) return;
 
   loadBtn.onclick = async () => {
-    if (isLoading) return;
-    isLoading = true;
+    if (isLoading) return;  // Eğer yükleme işlemi devam ediyorsa, işlem yapılmasın
+    isLoading = true;  // Yükleme işlemi başladı
 
     const area = document.getElementById("messageArea");
     const prevScrollHeight = area.scrollHeight;
 
+    // Daha eski mesajları yüklemek için endBefore kullanarak sorguyu yapıyoruz
     const snap = await getDocs(query(
       messagesCol,
-      orderBy("timestamp", "asc"),
+      orderBy("timestamp", "desc"),
       endBefore(firstVisible),
-      limitToLast(50)
+      limitToLast(20)
     ));
 
     const messages = [];
@@ -512,18 +514,20 @@ async function setupLoadMoreButton(messagesCol) {
 
     for (const msg of messages.reverse()) {
       const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling);
+      area.insertBefore(div, loadBtn.nextSibling); // Yüklenen mesajları başa ekleyelim
     }
 
+    // Eğer daha fazla mesaj yoksa butonu gizle
     if (!snap.empty) {
       firstVisible = snap.docs[0];
     } else {
       loadBtn.style.display = "none";
     }
 
+    // Yeni mesajlara kaydırma yapalım
     const newScrollHeight = area.scrollHeight;
     area.scrollTop = newScrollHeight - prevScrollHeight;
-    isLoading = false;
+    isLoading = false;  // Yükleme tamamlandı
   };
 }
 
