@@ -119,37 +119,17 @@
       }
 
       const timestamp = new Date();
-      const formatted = timestamp.toLocaleString("tr-TR");
+      const readable = timestamp.toLocaleString("tr-TR");
 
-      // 1. Firestore'a ekle
       await addDoc(collection(db, "feedback"), {
         username: currentUsername,
         message: message,
         timestamp: serverTimestamp(),
-        readableTime: formatted
+        readableTime: readable
       });
 
-      // 2. Google Apps Script'e gönder (e-posta için)
-      const scriptURL = "https://script.google.com/macros/s/WEB_APP_URLIN/exec"; // kendi URL'ini buraya yaz
-      try {
-        await fetch(scriptURL, {
-          method: "POST",
-          body: JSON.stringify({
-            username: currentUsername,
-            message: message,
-            readableTime: formatted
-          }),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        });
-
-        alert("Mesajınız gönderildi. Teşekkür ederiz!");
-        document.getElementById("message").value = "";
-      } catch (err) {
-        console.error("Mail gönderim hatası:", err);
-        alert("Mesaj Firestore'a kaydedildi ama e-posta gönderilemedi.");
-      }
+      alert("Mesajınız gönderildi. Teşekkür ederiz!");
+      document.getElementById("message").value = "";
     }
   </script>
 </body>
