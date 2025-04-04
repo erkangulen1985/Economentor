@@ -332,7 +332,7 @@ async function openChat(fid, el) {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
-      if (loadedMessageIds.has(msg.id)) return;
+      if (loadedMessageIds.has(msg.id)) return; 
 
       loadedMessageIds.add(msg.id);
       const div = await buildMessageDiv(msg);
@@ -435,7 +435,10 @@ window.sendMessage = async () => {
 
   input.value = "";
 };
-  window.goHome = () => location.href = "anasayfa.html";
+
+function goHome() {
+  location.href = "anasayfa.html";
+}
 
 </script>
 </body>
