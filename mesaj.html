@@ -138,6 +138,13 @@
       font-weight: bold;
       cursor: pointer;
     }
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+    }
     @media (max-width: 768px) {
       .container { flex-direction: column; }
       .chat-list {
@@ -167,7 +174,10 @@
     </div>
   </header>
   <div class="container">
-    <div class="chat-list" id="chatList">Yükleniyor...</div>
+    <div class="chat-list" id="chatList">
+      <input type="text" id="searchInput" placeholder="Kişi Ara..." onkeyup="filterChats()" />
+      <div id="chatListContent">Yükleniyor...</div>
+    </div>
     <div class="chat-window">
       <div class="messages" id="messageArea"></div>
       <div class="send-box">
@@ -219,23 +229,6 @@ function updateTexts() {
   document.getElementById("messageInput").placeholder = t[lang].placeholder;
   document.querySelector(".send-btn").innerText = t[lang].send;
   document.getElementById("homeBtn").innerText = t[lang].home;
-
-  document.querySelectorAll(".message").forEach(msg => {
-    const isYou = msg.classList.contains("you");
-    const ts = msg.dataset.timestamp;
-    const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
-    msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
-  });
-}
-
-function formatTimestamp(ts) {
-  const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
-
-function getConversationId(uid1, uid2) {
-  return [uid1, uid2].sort().join("_");
 }
 
 onAuthStateChanged(auth, user => {
@@ -247,8 +240,10 @@ onAuthStateChanged(auth, user => {
 
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
-  const list = document.getElementById("chatList");
+  const list = document.getElementById("chatListContent");
   list.innerHTML = "";
+  
+  let chats = [];
   
   usersSnap.forEach(async (userDoc) => {
     const userData = userDoc.data();
@@ -271,17 +266,36 @@ async function loadChatList(uid) {
       hasNew = !msg.seenBy?.includes(uid);
     }
 
+    chats.push({ userId, name, lastMsg, hasNew });
+  });
+
+  // Sort by recent conversations first
+  chats = chats.sort((a, b) => b.hasNew - a.hasNew);
+
+  chats.forEach((chat) => {
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
-    if (hasNew) {
+    div.innerHTML = `<strong>${chat.name}</strong><div class="last-message">${chat.lastMsg}</div>`;
+    if (chat.hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
     }
-
-    div.onclick = () => openChat(userId, div);
+    div.onclick = () => openChat(chat.userId, div);
     list.appendChild(div);
+  });
+}
+
+function filterChats() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const chatItems = document.querySelectorAll(".chat-item");
+  chatItems.forEach(item => {
+    const username = item.querySelector("strong").textContent.toLowerCase();
+    if (username.indexOf(query) === -1) {
+      item.style.display = "none";
+    } else {
+      item.style.display = "block";
+    }
   });
 }
 
@@ -298,7 +312,6 @@ async function openChat(fid, el) {
 
   const notifDot = el.querySelector(".notification");
   if (notifDot) notifDot.remove();
-  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
@@ -313,7 +326,6 @@ async function openChat(fid, el) {
   area.appendChild(div);
   loadedMessageIds.add(msg.id);
 
-  // Eğer kullanıcı görmemişse Firestore'da güncelle
   if (!msg.seenBy?.includes(currentUser.uid)) {
     await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
       seenBy: arrayUnion(currentUser.uid)
@@ -321,37 +333,35 @@ async function openChat(fid, el) {
   }
 }
 
-// Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
 const chatItem = document.querySelector(".chat-item.active");
 if (chatItem) {
   const notif = chatItem.querySelector(".notification");
   if (notif) notif.remove();
 }
 
-  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  setupLoadMoreButton(messagesCol);
+setupLoadMoreButton(messagesCol);
 
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
-  for (const docChange of snapshot.docChanges()) {
-    const msg = { id: docChange.doc.id, ...docChange.doc.data() };
-    if (loadedMessageIds.has(msg.id)) continue;
+unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
+for (const docChange of snapshot.docChanges()) {
+  const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+  if (loadedMessageIds.has(msg.id)) continue;
 
-    loadedMessageIds.add(msg.id);
-    const div = await buildMessageDiv(msg);
-    area.appendChild(div);
-    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+  loadedMessageIds.add(msg.id);
+  const div = await buildMessageDiv(msg);
+  area.appendChild(div);
+  setTimeout(() => area.scrollTop = area.scrollHeight, 100);
 
-    // Önce seenBy güncelle
-    if (!msg.seenBy?.includes(currentUser.uid)) {
-      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-        seenBy: arrayUnion(currentUser.uid)
-      });
-      await updateDoc(doc(db, "users", currentUser.uid), {
-       inboxHasNew: false
-  });
-    }
+  if (!msg.seenBy?.includes(currentUser.uid)) {
+    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+      seenBy: arrayUnion(currentUser.uid)
+    });
+    await updateDoc(doc(db, "users", currentUser.uid), {
+     inboxHasNew: false
+});
   }
+}
 });
 }
 
