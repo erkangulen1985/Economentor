@@ -235,6 +235,9 @@ onAuthStateChanged(auth, user => {
 });
 
 async function loadChatList(uid) {
+  // Exclude self and admin
+  const adminUID = "adminUID"; // Replace with your admin UID
+
   const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatList");
   list.innerHTML = "";
@@ -243,7 +246,8 @@ async function loadChatList(uid) {
     const userData = userDoc.data();
     const userId = userDoc.id;
 
-    if (userId === uid) return;
+    // Skip the logged-in user and admin
+    if (userId === uid || userId === adminUID) return;
 
     const name = userData.username;
     const convoId = getConversationId(uid, userId);
@@ -262,7 +266,7 @@ async function loadChatList(uid) {
 
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+    div.innerHTML = <strong>${name}</strong><div class="last-message">${lastMsg}</div>;
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
@@ -271,6 +275,36 @@ async function loadChatList(uid) {
 
     div.onclick = () => openChat(userId, div);
     list.appendChild(div);
+
+    // Listen for new messages for each user
+    onSnapshot(
+      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)),
+      async (snapshot) => {
+        const doc = snapshot.docs[0];
+        if (!doc) return;
+        const msg = doc.data();
+        const hasNewMsg = !msg.seenBy?.includes(uid);
+
+        const items = document.querySelectorAll(".chat-item");
+        for (const item of items) {
+          if (item.textContent.includes(name)) {
+            const lastMsgDiv = item.querySelector(".last-message");
+            if (lastMsgDiv) lastMsgDiv.textContent = msg.text;
+
+            if (hasNewMsg && !item.querySelector(".notification")) {
+              const notif = document.createElement("div");
+              notif.className = "notification";
+              item.appendChild(notif);
+            }
+
+            if (!hasNewMsg && item.querySelector(".notification")) {
+              item.querySelector(".notification").remove();
+            }
+            break;
+          }
+        }
+      }
+    );
   });
 }
 
