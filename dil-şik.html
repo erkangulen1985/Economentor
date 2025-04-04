@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dilek ve Şikayet</title>
+  <link rel="icon" href="image1.png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .form-box {
+      background: rgba(0,0,0,0.75);
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #status {
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-box">
+    <h2>Dilek veya Şikayetinizi Yazınız</h2>
+    <textarea id="feedback" placeholder="Mesajınızı buraya yazın..."></textarea>
+    <button onclick="submitFeedback()">Gönder</button>
+    <div id="status"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUsername = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          currentUsername = userSnap.data().username;
+        }
+      } else {
+        document.querySelector("textarea").disabled = true;
+        document.querySelector("button").disabled = true;
+        document.getElementById("status").innerText = "Lütfen önce giriş yapınız.";
+      }
+    });
+
+    window.submitFeedback = async function () {
+      const message = document.getElementById("feedback").value.trim();
+      const statusBox = document.getElementById("status");
+
+      if (!message) {
+        statusBox.innerText = "Lütfen bir mesaj girin.";
+        return;
+      }
+
+      try {
+        const docRef = await addDoc(collection(db, "feedback"), {
+          message,
+          username: currentUsername,
+          timestamp: new Date()
+        });
+
+        // EmailJS: Mesajı e-posta ile bildir
+        emailjs.send("service_XXXX", "template_XXXX", {
+          user_name: currentUsername,
+          message_content: message
+        });
+
+        statusBox.innerText = "Mesajınız başarıyla gönderildi.";
+        document.getElementById("feedback").value = "";
+      } catch (err) {
+        statusBox.innerText = "Bir hata oluştu: " + err.message;
+      }
+    };
+  </script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script>
+    emailjs.init("YOUR_PUBLIC_KEY"); // EmailJS'den aldığınız public key
+  </script>
+</body>
+</html>
