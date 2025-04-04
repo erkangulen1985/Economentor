@@ -371,6 +371,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     await updateChatListItem(selectedFriendId);
   });
 });
+}
   
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
