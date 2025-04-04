@@ -32,13 +32,25 @@
       flex: 1;    
       overflow: hidden;    
     }    
-    .chat-list {    
-      width: 30%;    
-      max-width: 250px;    
-      background: rgba(0, 0, 0, 0.4);    
-      padding: 20px;    
-      overflow-y: auto;    
-    }    
+.chat-list {
+    width: 30%;
+    max-width: 250px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    overflow-y: auto;
+    position: relative; /* Bu satırı ekledik */
+}
+
+#chatList:before {
+    content: "Mesajlar"; /* Yazıyı buraya ekliyoruz */
+    position: absolute;
+    top: 10px;  /* Üstten 10px mesafe */
+    left: 20px;  /* Soldan 20px mesafe */
+    font-size: 1.5rem;  /* Yazı boyutu */
+    font-weight: bold;  /* Kalın yazı */
+    color: white;  /* Beyaz renk */
+    z-index: 10;  /* Yazının chat list'in üstünde olması için */
+}
     .chat-item {    
       padding: 10px;    
       background: rgba(255, 255, 255, 0.1);    
