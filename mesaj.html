@@ -10,187 +10,561 @@
     body {
       background: url('ChatGPT Image Apr 4, 2025, 05_32_46 PM.png') no-repeat center center fixed;
       background-size: cover;
-      overflow-x: hidden;
-    }
-    .chat-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 900px;
-      height: 80%;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: gradientShift 15s ease infinite;
+      color: white;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-    .chat-header {
-      background-color: #4A90E2;
-      color: white;
-      padding: 10px;
-      font-size: 18px;
-      text-align: center;
-      border-radius: 10px 10px 0 0;
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .message-list {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 10px;
+    header {
       display: flex;
-      flex-direction: column-reverse;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .chat-list {
+      width: 30%;
+      max-width: 250px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .chat-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+    }
+    .chat-item.active {
+      background: #007bff;
+      font-weight: bold;
+    }
+    .notification {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+    }
+    .last-message {
+      font-size: 0.85em;
+      color: #ccc;
+      margin-top: 5px;
+    }
+    .search-bar {
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 6px;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+    .chat-window {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
     }
     .message {
       padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 5px;
-      background-color: #f1f1f1;
-      max-width: 70%;
-      word-wrap: break-word;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      max-width: 80%;
+      position: relative;
     }
-    .my-message {
-      background-color: #4A90E2;
-      color: white;
+    .message.you {
+      background: rgba(0, 255, 127, 0.3);
       align-self: flex-end;
     }
-    .friend-message {
-      background-color: #e1e1e1;
-      color: black;
-      align-self: flex-start;
+    .sender-label {
+      font-weight: bold;
+      margin-bottom: 5px;
     }
-    .input-container {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-    }
-    .input-container input {
-      flex-grow: 1;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    .input-container button {
-      padding: 10px;
-      background-color: #4A90E2;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .message-time {
-      font-size: 12px;
-      color: gray;
-      text-align: right;
-    }
-    .message-actions {
-      display: flex;
-      justify-content: flex-end;
+    .timestamp {
+      font-size: 0.75rem;
+      opacity: 0.7;
       margin-top: 5px;
     }
-    .message-actions button {
-      margin-left: 5px;
-      background: transparent;
+    .send-box {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
       border: none;
-      color: red;
+      border-radius: 6px;
+    }
+    button.send-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
       cursor: pointer;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+    @media (max-width: 768px) {
+      .container { flex-direction: column; }
+      .chat-list {
+        width: 100%;
+        max-width: none;
+        display: flex;
+        overflow-x: auto;
+        flex-direction: row;
+        padding: 10px;
+        gap: 10px;
+        scroll-snap-type: x mandatory;
+      }
+      .chat-item {
+        flex: 0 0 auto;
+        min-width: 140px;
+        max-width: 200px;
+        scroll-snap-align: start;
+      }
     }
   </style>
 </head>
 <body>
-
-<div class="chat-container">
-  <div class="chat-header">Mesajlaşma</div>
-  <div class="message-list" id="message-list"></div>
-  <div class="input-container">
-    <input type="text" id="message-input" placeholder="Mesajınızı yazın..." />
-    <button id="send-message">Gönder</button>
+  <header>
+    <h2 id="pageTitle">Mesajlar</h2>
+    <div>
+      <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="chat-list" id="chatList">
+      <input type="text" id="searchInput" placeholder="Kişi Ara..." onkeyup="filterChats()" />
+      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
+      Yükleniyor...
+    </div>
+    <div class="chat-window">
+      <div class="messages" id="messageArea"></div>
+      <div class="send-box">
+        <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+        <button class="send-btn" onclick="sendMessage()">Gönder</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.firebasestorage.app",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-    measurementId: "G-FS3FMPYVPD"
-  };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
+  collection, query, orderBy, limitToLast, endBefore,
+  addDoc, getDocs, onSnapshot, arrayUnion
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const auth = firebase.auth();
-  
-  // Kullanıcıyı doğrulama
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      const currentUser = user;
-      loadMessages(currentUser.uid);
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.firebasestorage.app",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let selectedFriendId = null;
+let firstVisible = null;
+let isLoading = false;
+let unsubMessages = null;
+const loadedMessageIds = new Set();
+let lang = localStorage.getItem("lang") || "tr";
+
+const t = {
+  tr: {
+    pageTitle: "Mesajlar", placeholder: "Mesaj yaz...", send: "Gönder",
+    home: "Ana Sayfa", turkish: "🇹🇷 Türkçe", english: "🇬🇧 English",
+    sentAt: "Gönderildi", you: "Sen"
+  },
+};
+
+function updateTexts() {
+  document.getElementById("pageTitle").innerText = t[lang].pageTitle;
+  document.getElementById("messageInput").placeholder = t[lang].placeholder;
+  document.querySelector(".send-btn").innerText = t[lang].send;
+  document.getElementById("homeBtn").innerText = t[lang].home;
+  document.getElementById("btnTr").innerText = t[lang].turkish;
+  document.getElementById("btnEn").innerText = t[lang].english;
+
+  document.querySelectorAll(".message").forEach(msg => {
+    const isYou = msg.classList.contains("you");
+    const ts = msg.dataset.timestamp;
+    const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
+    msg.querySelector(".sender-label").innerText = sender;
+    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
+  });
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem("lang", lang);
+  updateTexts();
+}
+window.setLang = setLang;
+
+function formatTimestamp(ts) {
+  const d = new Date(Number(ts));
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function getConversationId(uid1, uid2) {
+  return [uid1, uid2].sort().join("_");
+}
+
+onAuthStateChanged(auth, user => {
+  if (!user) return location.href = "index.html";
+  currentUser = user;
+  setLang(lang);
+  loadChatList(user.uid);
+});
+
+async function loadChatList(uid) {
+  const usersSnap = await getDocs(collection(db, "users"));
+  const list = document.getElementById("chatList");
+  list.innerHTML = "";
+
+  usersSnap.forEach(async (userDoc) => {
+    const userData = userDoc.data();
+    const userId = userDoc.id;
+
+    if (userId === uid) return;
+
+    const name = userData.username;
+    const convoId = getConversationId(uid, userId);
+    const messagesCol = collection(db, "conversations", convoId, "messages");
+
+    const lastMsgSnap = await getDocs(
+      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+    );
+
+    let lastMsg = "", hasNew = false;
+    if (!lastMsgSnap.empty) {
+      const msg = lastMsgSnap.docs[0].data();
+      lastMsg = msg.text;
+      hasNew = !msg.seenBy?.includes(uid);
+    }
+
+    const div = document.createElement("div");
+    div.className = "chat-item";
+    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+    if (hasNew) {
+      const notif = document.createElement("div");
+      notif.className = "notification";
+      div.appendChild(notif);
+    }
+
+    div.onclick = () => openChat(userId, div);
+    list.appendChild(div);
+  });
+}
+
+function filterChats() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const chatItems = document.querySelectorAll(".chat-item");
+  chatItems.forEach(item => {
+    const username = item.querySelector("strong").textContent.toLowerCase();
+    if (username.indexOf(query) === -1) {
+      item.style.display = "none";
     } else {
-      // Kullanıcı girmemişse, giriş yapmasını iste
-      window.location.replace('/login.html');
+      item.style.display = "block";
     }
   });
+}
+  
+async function openChat(fid, el) {
+  selectedFriendId = fid;
+  const area = document.getElementById("messageArea");
+  area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
+  loadedMessageIds.clear();
+  firstVisible = null;
 
-  // Mesajları yükle
-  function loadMessages(userId) {
-    const messagesRef = db.collection('messages').where('users', 'array-contains', userId);
-    messagesRef.orderBy('timestamp', 'desc').limit(20).onSnapshot(snapshot => {
-      document.getElementById('message-list').innerHTML = '';
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.classList.add(data.sender === userId ? 'my-message' : 'friend-message');
-        
-        messageElement.innerHTML = `
-          <div>${data.message}</div>
-          <div class="message-time">${new Date(data.timestamp.seconds * 1000).toLocaleString()}</div>
-          <div class="message-actions">
-            <button onclick="deleteMessage('${doc.id}')">Sil</button>
-            <button onclick="editMessage('${doc.id}')">Düzenle</button>
-          </div>
-        `;
-        
-        document.getElementById('message-list').prepend(messageElement);
+  if (unsubMessages) unsubMessages();
+  document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+
+  const notifDot = el.querySelector(".notification");
+  if (notifDot) notifDot.remove();
+  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
+
+  const convoId = getConversationId(currentUser.uid, fid);
+  const messagesCol = collection(db, "conversations", convoId, "messages");
+
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+  const messages = [];
+  snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+  firstVisible = snap.docs[0];
+
+  for (const msg of messages) {
+    const div = await buildMessageDiv(msg);
+    area.appendChild(div);
+    loadedMessageIds.add(msg.id);
+
+    // Eğer kullanıcı görmemişse Firestore'da güncelle
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid)
+      });
+    }
+  }
+
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+
+  setupLoadMoreButton(messagesCol);
+
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
+    for (const docChange of snapshot.docChanges()) {
+      const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+      if (loadedMessageIds.has(msg.id)) continue;
+
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+      setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+
+      // Önce seenBy güncelle
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+      }
+    }
+  });
+}
+
+function setupLoadMoreButton(messagesCol) {
+  const loadBtn = document.getElementById("loadMoreBtn");
+  if (!loadBtn || !firstVisible) return;
+
+  loadBtn.onclick = async () => {
+    if (isLoading) return;
+    isLoading = true;
+
+    const area = document.getElementById("messageArea");
+    const prevScrollHeight = area.scrollHeight;
+
+    const snap = await getDocs(query(
+      messagesCol,
+      orderBy("timestamp", "asc"),
+      endBefore(firstVisible),
+      limitToLast(50)
+    ));
+
+    const messages = [];
+    snap.forEach(doc => {
+      if (!loadedMessageIds.has(doc.id)) {
+        messages.push({ id: doc.id, ...doc.data() });
+        loadedMessageIds.add(doc.id);
+      }
+    });
+
+    for (const msg of messages.reverse()) {
+      const div = await buildMessageDiv(msg);
+      area.insertBefore(div, loadBtn.nextSibling);
+    }
+
+    if (!snap.empty) {
+      firstVisible = snap.docs[0];
+    } else {
+      loadBtn.style.display = "none";
+    }
+
+    const newScrollHeight = area.scrollHeight;
+    area.scrollTop = newScrollHeight - prevScrollHeight;
+    isLoading = false;
+  };
+}
+
+async function buildMessageDiv(msg) {
+  const div = document.createElement("div");
+  div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
+  div.setAttribute("data-id", msg.id);
+  div.setAttribute("data-timestamp", msg.timestamp);
+
+  let senderName = t[lang].you;
+  if (msg.sender !== currentUser.uid) {
+    const senderDoc = await getDoc(doc(db, "users", msg.sender));
+    senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
+  }
+
+  div.setAttribute("data-sender-name", senderName);
+
+  div.innerHTML = `
+    <div class="sender-label">${senderName}</div>
+    <div class="msg-text">${msg.text}</div>
+    <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+  `;
+
+if (msg.sender === currentUser.uid) {
+const editBtn = document.createElement("button");
+editBtn.textContent = "✏️";
+editBtn.style.marginLeft = "6px";
+editBtn.onclick = () => {
+  const input = document.getElementById("messageInput");
+  input.value = msg.text;
+  input.focus();
+  input.dataset.editing = msg.id; // Düzenleme modunu başlat
+};
+
+const saveEditBtn = document.createElement("button");
+saveEditBtn.textContent = "💾";
+saveEditBtn.style.marginLeft = "6px";
+saveEditBtn.onclick = async () => {
+  const editedText = document.getElementById("messageInput").value;
+  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text: editedText });
+
+  // DOM'dan mesajı düzenle
+  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+  if (msgDiv) {
+    msgDiv.querySelector(".msg-text").innerText = editedText;
+  }
+
+  // Güncel mesajları dinle
+  const messagesCol = collection(db, "conversations", convoId, "messages");
+  onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "modified") {
+        const updatedMsg = change.doc.data();
+        const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+        if (msgDiv) {
+          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        }
+      }
+    });
+  });
+};
+
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "🗑️";
+deleteBtn.style.marginLeft = "6px";
+deleteBtn.onclick = async () => {
+  if (confirm("Mesaj silinsin mi?")) {
+    const convoId = getConversationId(currentUser.uid, selectedFriendId);
+    await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+
+    // DOM'dan mesajı kaldır
+    const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+    if (divToRemove) divToRemove.remove();
+
+    // Firebase'deki dinleyici diğer kullanıcıya güncellenmiş durumu iletilsin
+    const messagesCol = collection(db, "conversations", convoId, "messages");
+    onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "removed") {
+          const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+          if (msgDiv) msgDiv.remove(); // Silinen mesajı UI'dan kaldır
+        }
       });
     });
   }
+};
 
-  // Mesaj gönderme
-  document.getElementById('send-message').addEventListener('click', () => {
-    const message = document.getElementById('message-input').value;
-    if (message) {
-      const user = auth.currentUser;
-      db.collection('messages').add({
-        message,
-        sender: user.uid,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        users: [user.uid, 'friendUserId'] // Arkadaşın kullanıcı ID'si burada olacak
-      }).then(() => {
-        document.getElementById('message-input').value = '';
-      });
+  div.appendChild(editBtn);
+  div.appendChild(deleteBtn);
+}
+
+  return div;
+}
+
+window.sendMessage = async () => {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  const editId = input.dataset.editing;
+  if (!text || !selectedFriendId || !currentUser) return;
+
+  const convoId = getConversationId(currentUser.uid, selectedFriendId);
+  const msgCol = collection(db, "conversations", convoId, "messages");
+
+  if (editId) {
+    await updateDoc(doc(msgCol, editId), { text });
+
+    // DOM'da mesaj metnini güncelle
+    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+    if (msgDiv) {
+      msgDiv.querySelector(".msg-text").innerText = text;
     }
+
+    delete input.dataset.editing;
+  } else {
+    const msg = {
+      sender: currentUser.uid,
+      text,
+      timestamp: Date.now(),
+      seenBy: []
+    };
+    await addDoc(msgCol, msg);
+
+    // ✅ Karşı tarafa kırmızı nokta çıkması için
+    await updateDoc(doc(db, "users", selectedFriendId), {
+      inboxHasNew: true
+    });
+  }
+
+  input.value = "";
+};
+
+window.goHome = () => location.href = "anasayfa.html";
+
+// Filter the chat list based on the search bar input
+function filterChatList() {
+  const searchQuery = document.getElementById("searchBar").value.toLowerCase();
+  const chatItems = document.querySelectorAll(".chat-item");
+  chatItems.forEach(item => {
+    const name = item.querySelector("strong").textContent.toLowerCase();
+    item.style.display = name.includes(searchQuery) ? "block" : "none";
   });
+}
 
-  // Mesaj silme
-  function deleteMessage(messageId) {
-    db.collection('messages').doc(messageId).delete();
-  }
-
-  // Mesaj düzenleme (ilerleyen zamanlarda)
-  function editMessage(messageId) {
-    // Düzenleme için UI eklenebilir
-  }
-
-  // Mesaj geldiğinde sayfayı aşağı kaydır
-  const messageList = document.getElementById('message-list');
-  messageList.scrollTop = messageList.scrollHeight;
 </script>
 
 </body>
