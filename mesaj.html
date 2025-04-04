@@ -234,52 +234,55 @@ onAuthStateChanged(auth, user => {
 });
 
 async function loadChatList(uid) {
-  const usersSnap = await getDocs(collection(db, "users"));
-  const list = document.getElementById("chatListContent");
-  list.innerHTML = "";  // Yükleniyor ifadesini temizle
+  try {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const list = document.getElementById("chatListContent");
+    list.innerHTML = "Yükleniyor...";  // Yükleniyor ifadesini gösterebiliriz
 
-  let chats = [];
-  
-  // Kullanıcıları çekiyoruz
-  usersSnap.forEach(async (userDoc) => {
-    const userData = userDoc.data();
-    const userId = userDoc.id;
+    let chats = [];
 
-    if (userId === uid) return;  // Mevcut kullanıcıyı hariç tut
+    usersSnap.forEach(async (userDoc) => {
+      const userData = userDoc.data();
+      const userId = userDoc.id;
 
-    const name = userData.username || "Bilinmeyen";  // Kullanıcı adı varsa göster, yoksa "Bilinmeyen" yazdır
-    const convoId = getConversationId(uid, userId);
-    const messagesCol = collection(db, "conversations", convoId, "messages");
+      if (userId === uid) return;  // Mevcut kullanıcıyı hariç tut
 
-    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
-    
-    let lastMsg = "", hasNew = false;
-    if (!lastMsgSnap.empty) {
-      const msg = lastMsgSnap.docs[0].data();
-      lastMsg = msg.text;
-      hasNew = !msg.seenBy?.includes(uid);
-    }
+      const name = userData.username || "Bilinmeyen";  // Kullanıcı adı varsa göster, yoksa "Bilinmeyen" yazdır
+      const convoId = getConversationId(uid, userId);
+      const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    chats.push({ userId, name, lastMsg, hasNew });  // Kullanıcıları ve son mesajları sakla
-  });
+      const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
 
-  // Kullanıcıları sıralıyoruz (yeniden mesajları olanlar önce gelir)
-  chats = chats.sort((a, b) => b.hasNew - a.hasNew);
+      let lastMsg = "", hasNew = false;
+      if (!lastMsgSnap.empty) {
+        const msg = lastMsgSnap.docs[0].data();
+        lastMsg = msg.text;
+        hasNew = !msg.seenBy?.includes(uid);
+      }
 
-  // Kullanıcıları chat listesine ekliyoruz
-  chats.forEach((chat) => {
-    const div = document.createElement("div");
-    div.className = "chat-item";
-    div.innerHTML = `<strong>${chat.name}</strong><div class="last-message">${chat.lastMsg}</div>`;
-    if (chat.hasNew) {
-      const notif = document.createElement("div");
-      notif.className = "notification";
-      div.appendChild(notif);  // Eğer yeni mesaj varsa, bildirim göstermek için
-    }
+      chats.push({ userId, name, lastMsg, hasNew });  // Kullanıcıları ve son mesajları sakla
+    });
 
-    div.onclick = () => openChat(chat.userId, div);  // Kullanıcıya tıklanıldığında sohbeti aç
-    list.appendChild(div);  // Chat listesine kullanıcıyı ekle
-  });
+    // Kullanıcıları sıralıyoruz (yeniden mesajları olanlar önce gelir)
+    chats = chats.sort((a, b) => b.hasNew - a.hasNew);
+
+    // Kullanıcıları chat listesine ekliyoruz
+    chats.forEach((chat) => {
+      const div = document.createElement("div");
+      div.className = "chat-item";
+      div.innerHTML = `<strong>${chat.name}</strong><div class="last-message">${chat.lastMsg}</div>`;
+      if (chat.hasNew) {
+        const notif = document.createElement("div");
+        notif.className = "notification";
+        div.appendChild(notif);  // Eğer yeni mesaj varsa, bildirim göstermek için
+      }
+      div.onclick = () => openChat(chat.userId, div);  // Kullanıcıya tıklanıldığında sohbeti aç
+      list.appendChild(div);  // Chat listesine kullanıcıyı ekle
+    });
+
+  } catch (error) {
+    console.error("Hata oluştu:", error);
+  }
 }
 
 function filterChats() {
