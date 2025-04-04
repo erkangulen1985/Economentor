@@ -288,49 +288,40 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
+
+  // İlk başta mesaj alanını temizleyelim ve "Daha fazla mesaj yükle" butonunu ekleyelim
   area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
+
   loadedMessageIds.clear();
   firstVisible = null;
 
-  if (unsubMessages) unsubMessages();
+  // Eğer eski dinleyici varsa temizleyelim
+  if (unsubMessages) unsubMessages(); 
+
+  // Mevcut sohbeti aktif hale getirelim
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
-
-  const notifDot = el.querySelector(".notification");
-  if (notifDot) notifDot.remove();
-  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
+  // İlk 20 mesajı veritabanından alalım
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
   for (const msg of messages) {
-  const div = await buildMessageDiv(msg);
-  area.appendChild(div);
-  loadedMessageIds.add(msg.id);
-
-  // Eğer kullanıcı görmemişse Firestore'da güncelle
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
+    const div = await buildMessageDiv(msg, messagesCol);  // `msgCol`'u burada geçiriyoruz
+    area.appendChild(div);
+    loadedMessageIds.add(msg.id);
   }
-}
-
-// Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
-const chatItem = document.querySelector(`.chat-item.active`);
-if (chatItem) {
-  const notif = chatItem.querySelector(".notification");
-  if (notif) notif.remove();
-}
-
+  
+  // Sayfayı en son mesaja kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
   setupLoadMoreButton(messagesCol);
+}
 
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
   for (const docChange of snapshot.docChanges()) {
@@ -401,7 +392,7 @@ function setupLoadMoreButton(messagesCol) {
   };
 }
 
-async function buildMessageDiv(msg) {
+async function buildMessageDiv(msg, msgCol) {  // `msgCol` parametresi burada ekleniyor
   const div = document.createElement("div");
   div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
   div.setAttribute("data-id", msg.id);
@@ -421,44 +412,38 @@ async function buildMessageDiv(msg) {
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
   `;
 
-if (msg.sender === currentUser.uid) {
-const editBtn = document.createElement("button");
-editBtn.textContent = "✏️";
-editBtn.style.marginLeft = "6px";
-editBtn.onclick = async () => {
-  const input = document.getElementById("messageInput");
-  input.value = msg.text;
-  input.focus();
-  input.dataset.editing = msg.id; // Düzenleme modunu başlat
-}
-  
-  // Firebase güncelleme işlemi
-  const docRef = doc(msgCol, msg.id);
-  await updateDoc(docRef, { text: input.value });
+  if (msg.sender === currentUser.uid) {
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.style.marginLeft = "6px";
+    editBtn.onclick = async () => {
+      const input = document.getElementById("messageInput");
+      input.value = msg.text;
+      input.focus();
+      input.dataset.editing = msg.id;
 
-  // Gerçek zamanlı dinleyici ile güncellenen mesajı tüm kullanıcılara iletmek
-  const messageDocRef = doc(db, "conversations", convoId, "messages", msg.id);
-  await updateDoc(messageDocRef, { text: input.value });
+      // Firebase güncelleme işlemi
+      await updateDoc(doc(msgCol, msg.id), { text: input.value });
+    };
 
-const deleteBtn = document.createElement("button");
-deleteBtn.textContent = "🗑️";
-deleteBtn.style.marginLeft = "6px";
-deleteBtn.onclick = async () => {
-  if (confirm("Mesaj silinsin mi?")) {
-    const convoId = getConversationId(currentUser.uid, selectedFriendId);
-    await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.style.marginLeft = "6px";
+    deleteBtn.onclick = async () => {
+      if (confirm("Mesaj silinsin mi?")) {
+        await deleteDoc(doc(msgCol, msg.id)); // Mesajı Firestore'dan silme
 
-    // Firestore'dan mesajı silerken, anında karşı tarafın ekranında da silme yapılması
-    const messageDocRef = doc(db, "conversations", convoId, "messages", msg.id);
-    await deleteDoc(messageDocRef);
+        // DOM'dan mesajı kaldır
+        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+        if (divToRemove) {
+          divToRemove.remove();
+        }
+      }
+    };
 
-    // Gerçek zamanlı dinleyici ile anında karşı tarafa silme işlemini bildir
+    div.appendChild(editBtn);
+    div.appendChild(deleteBtn);
   }
-};
-
-  div.appendChild(editBtn);
-  div.appendChild(deleteBtn);
-}
 
   return div;
 }
