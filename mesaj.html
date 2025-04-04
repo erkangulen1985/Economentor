@@ -415,11 +415,12 @@ async function buildMessageDiv(msg) {
 
   div.setAttribute("data-sender-name", senderName);
 
-  div.innerHTML = 
-    <div class="sender-label">${senderName}</div>
-    <div class="msg-text">${msg.text}</div>
-    <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  ;
+div.innerHTML = `
+  <div class="sender-label">${senderName}</div>
+  <div class="msg-text">${msg.text}</div>
+  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+`;
+
 
 if (msg.sender === currentUser.uid) {
   const editBtn = document.createElement("button");
