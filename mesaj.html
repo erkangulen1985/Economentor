@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economentor | Mesajlar</title>
+    <style>
+        body {
+            background: url('image2.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+            letter-spacing: 2px;
+        }
+
+        .chat-list {
+            margin: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            overflow-y: auto;
+            height: 300px;
+        }
+
+        .chat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+        }
+
+        .chat-item .username {
+            font-weight: bold;
+        }
+
+        .chat-item .notification {
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            margin: 10px;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 10px 0;
+        }
+
+        .message .sender {
+            font-weight: bold;
+        }
+
+        .message.sent .sender {
+            color: #66ccff;
+        }
+
+        .message.received .sender {
+            color: #fff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        .send-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .send-btn:hover {
+            background-color: #3e8e41;
+        }
+
+        .load-more {
+            margin-top: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mesajlar</h1>
+</header>
+
+<div class="chat-list" id="chatList"></div>
+
+<div class="chat-container" id="chatContainer">
+    <div id="messageContainer"></div>
+    <textarea id="messageInput" placeholder="Mesajınızı buraya yazın..."></textarea>
+    <button class="send-btn" onclick="sendMessage()">Gönder</button>
+    <div class="load-more" onclick="loadMoreMessages()">Daha fazla mesaj yükle</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, orderBy, limit, query, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+        authDomain: "economentor-8ddc4.firebaseapp.com",
+        projectId: "economentor-8ddc4",
+        storageBucket: "economentor-8ddc4.appspot.com",
+        messagingSenderId: "835370350520",
+        appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser;
+    let chatPartner = "someUserID";  // Burada bir kullanıcı ID'si olacak, chat seçildiğinde ayarlanacak.
+
+    // Kullanıcı girişi
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            loadChatList();
+        } else {
+            window.location.href = "index.html";  // Kullanıcı giriş yapmadıysa anasayfaya yönlendir.
+        }
+    });
+
+    // Mesaj gönderme
+    async function sendMessage() {
+        const message = document.getElementById("messageInput").value;
+        if (!message) return alert("Mesaj boş olamaz!");
+
+        await addDoc(collection(db, "messages"), {
+            sender: currentUser.uid,
+            receiver: chatPartner,
+            message: message,
+            timestamp: Timestamp.now(),
+        });
+
+        document.getElementById("messageInput").value = "";  // Mesaj gönderdikten sonra inputu temizle
+        loadMessages();
+    }
+
+    // Chat listesi yükleme
+    async function loadChatList() {
+        const chatListContainer = document.getElementById("chatList");
+        chatListContainer.innerHTML = "";
+
+        const q = query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(10));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.innerHTML = `
+                <span class="username">${data.sender}</span>
+                <span class="notification">!</span>
+                <p>${data.message.slice(0, 30)}...</p>
+            `;
+            chatListContainer.appendChild(div);
+        });
+    }
+
+    // Mesajları yükleme
+    async function loadMessages() {
+        const messageContainer = document.getElementById("messageContainer");
+        messageContainer.innerHTML = "";
+
+        const q = query(
+            collection(db, "messages"),
+            orderBy("timestamp", "desc"),
+            limit(20)
+        );
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = `message ${data.sender === currentUser.uid ? 'sent' : 'received'}`;
+            div.innerHTML = `
+                <p class="sender">${data.sender === currentUser.uid ? 'Sen' : data.sender}</p>
+                <p>${data.message}</p>
+            `;
+            messageContainer.appendChild(div);
+        });
+
+        // Mesajlar açıldığında en aşağıya kay
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    // Daha fazla mesaj yükleme
+    async function loadMoreMessages() {
+        const q = query(
+            collection(db, "messages"),
+            orderBy("timestamp", "desc"),
+            limit(50)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = `message ${data.sender === currentUser.uid ? 'sent' : 'received'}`;
+            div.innerHTML = `
+                <p class="sender">${data.sender === currentUser.uid ? 'Sen' : data.sender}</p>
+                <p>${data.message}</p>
+            `;
+            document.getElementById("messageContainer").appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
