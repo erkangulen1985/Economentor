@@ -285,6 +285,7 @@ async function loadChatList(uid) {
   });
 }
 
+// Subscribe to real-time updates using onSnapshot
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
@@ -298,64 +299,63 @@ async function openChat(fid, el) {
 
   const notifDot = el.querySelector(".notification");
   if (notifDot) notifDot.remove();
-  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
+  // Fetch the initial 20 messages
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
   for (const msg of messages) {
-  const div = await buildMessageDiv(msg);
-  area.appendChild(div);
-  loadedMessageIds.add(msg.id);
-
-  // Eğer kullanıcı görmemişse Firestore'da güncelle
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
-  }
-}
-
-// Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
-const chatItem = document.querySelector(`.chat-item.active`);
-if (chatItem) {
-  const notif = chatItem.querySelector(".notification");
-  if (notif) notif.remove();
-}
-
-  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
-
-  setupLoadMoreButton(messagesCol);
-
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
-  for (const docChange of snapshot.docChanges()) {
-    const msg = { id: docChange.doc.id, ...docChange.doc.data() };
-    if (loadedMessageIds.has(msg.id)) continue;
-
-    loadedMessageIds.add(msg.id);
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
-    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+    loadedMessageIds.add(msg.id);
 
-    // Önce seenBy güncelle
+    // Update the 'seenBy' field for the current user
     if (!msg.seenBy?.includes(currentUser.uid)) {
       await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
         seenBy: arrayUnion(currentUser.uid)
       });
-      await updateDoc(doc(db, "users", currentUser.uid), {
-       inboxHasNew: false
-  });
     }
-
-    // Sonra listeyi güncelle (bildirim işareti artık görünmemeli)
-    await updateChatListItem(selectedFriendId);
   }
-});
+
+  // Remove the red notification dot on message read
+  const chatItem = document.querySelector(".chat-item.active");
+  if (chatItem) {
+    const notif = chatItem.querySelector(".notification");
+    if (notif) notif.remove();
+  }
+
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+
+  // Real-time message updates
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+    snapshot.docChanges().forEach(async (change) => {
+      const msg = { id: change.doc.id, ...change.doc.data() };
+
+      if (loadedMessageIds.has(msg.id)) return; // Skip already loaded messages
+
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+
+      // Scroll to the latest message
+      setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+
+      // Update the 'seenBy' field for the current user
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+      }
+
+      // Update the chat list with the latest message
+      await updateChatListItem(selectedFriendId);
+    });
+  });
 }
 
 function setupLoadMoreButton(messagesCol) {
@@ -457,22 +457,26 @@ window.sendMessage = async () => {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
   const editId = input.dataset.editing;
+
   if (!text || !selectedFriendId || !currentUser) return;
 
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
   if (editId) {
+    // Update the message text in Firestore
     await updateDoc(doc(msgCol, editId), { text });
 
-    // DOM'da mesaj metnini güncelle
+    // DOM update: change the text of the edited message
     const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) {
       msgDiv.querySelector(".msg-text").innerText = text;
     }
 
+    // Clear the editing mode
     delete input.dataset.editing;
   } else {
+    // Add a new message to Firestore
     const msg = {
       sender: currentUser.uid,
       text,
@@ -481,13 +485,13 @@ window.sendMessage = async () => {
     };
     await addDoc(msgCol, msg);
 
-    // ✅ Karşı tarafa kırmızı nokta çıkması için
+    // Notify the other user about the new message
     await updateDoc(doc(db, "users", selectedFriendId), {
       inboxHasNew: true
     });
   }
 
-  input.value = "";
+  input.value = ""; // Clear the input field
 };
   window.goHome = () => location.href = "anasayfa.html";
 
