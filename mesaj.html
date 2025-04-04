@@ -422,29 +422,38 @@ async function buildMessageDiv(msg) {
   `;
 
 if (msg.sender === currentUser.uid) {
-  const editBtn = document.createElement("button");
-  editBtn.textContent = "✏️";
-  editBtn.style.marginLeft = "6px";
-  editBtn.onclick = () => {
-    const input = document.getElementById("messageInput");
-    input.value = msg.text;
-    input.focus();
-    input.dataset.editing = msg.id; // Düzenleme modunu başlat
-  };
+const editBtn = document.createElement("button");
+editBtn.textContent = "✏️";
+editBtn.style.marginLeft = "6px";
+editBtn.onclick = async () => {
+  const input = document.getElementById("messageInput");
+  input.value = msg.text;
+  input.focus();
+  input.dataset.editing = msg.id; // Düzenleme modunu başlat
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "🗑️";
-  deleteBtn.style.marginLeft = "6px";
-  deleteBtn.onclick = async () => {
-    if (confirm("Mesaj silinsin mi?")) {
-      const convoId = getConversationId(currentUser.uid, selectedFriendId);
-      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+  // Firebase güncelleme işlemi
+  const docRef = doc(msgCol, msg.id);
+  await updateDoc(docRef, { text: input.value });
 
-      // DOM'dan mesajı kaldır
-      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (divToRemove) divToRemove.remove();
-    }
-  };
+  // Gerçek zamanlı dinleyici ile güncellenen mesajı tüm kullanıcılara iletmek
+  const messageDocRef = doc(db, "conversations", convoId, "messages", msg.id);
+  await updateDoc(messageDocRef, { text: input.value });
+
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "🗑️";
+deleteBtn.style.marginLeft = "6px";
+deleteBtn.onclick = async () => {
+  if (confirm("Mesaj silinsin mi?")) {
+    const convoId = getConversationId(currentUser.uid, selectedFriendId);
+    await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+
+    // Firestore'dan mesajı silerken, anında karşı tarafın ekranında da silme yapılması
+    const messageDocRef = doc(db, "conversations", convoId, "messages", msg.id);
+    await deleteDoc(messageDocRef);
+
+    // Gerçek zamanlı dinleyici ile anında karşı tarafa silme işlemini bildir
+  }
+};
 
   div.appendChild(editBtn);
   div.appendChild(deleteBtn);
