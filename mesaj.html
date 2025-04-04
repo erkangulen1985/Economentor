@@ -285,6 +285,57 @@ async function loadChatList(uid) {
   });
 }
 
+// Mesaj gönderme işlemi (sadece veritabanına ekleme, DOM'a eklenmemesi için)
+window.sendMessage = async () => {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  const editId = input.dataset.editing;
+
+  // Eğer mesaj boşsa veya kullanıcı seçilmemişse, işlem yapılmaz
+  if (!text || !selectedFriendId || !currentUser) return;
+
+  // Mesaj gönderme sırasında tekrar gönderilmesini engelle
+  const sendButton = document.querySelector(".send-btn");
+  sendButton.disabled = true; // Butonu devre dışı bırak
+
+  const convoId = getConversationId(currentUser.uid, selectedFriendId);
+  const msgCol = collection(db, "conversations", convoId, "messages");
+
+  try {
+    if (editId) {
+      // Düzenleme yapılıyorsa
+      const docRef = doc(msgCol, editId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error("Belge bulunamadı:", editId);
+        return;
+      }
+
+      // Mesajı güncelle
+      await updateDoc(docRef, { text });
+      delete input.dataset.editing; // Düzenleme modunu kapat
+    } else {
+      // Yeni mesaj ekliyorsak
+      const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
+      await addDoc(msgCol, msg); // Mesajı Firebase'e ekleyin, DOM'a eklemiyoruz
+
+      // Arkadaşa bildirim gönder
+      await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
+
+      // Metin kutusunu temizle
+      input.value = "";
+    }
+
+  } catch (error) {
+    console.error("Mesaj gönderme hatası:", error);
+  } finally {
+    // Butonu tekrar etkinleştir
+    sendButton.disabled = false;
+  }
+};
+
+// onSnapshot ile mesajları dinleyelim (sadece Firebase'ten gelen yeni mesajları DOM'a ekleyelim)
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
@@ -313,7 +364,7 @@ async function openChat(fid, el) {
   
   // Sayfayı en son mesaja kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
-  
+
   // Anlık yeni mesajları dinlemek için onSnapshot kullan
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
@@ -321,9 +372,12 @@ async function openChat(fid, el) {
 
       if (change.type === "added") {
         // Yeni mesaj eklendiğinde
-        const div = await buildMessageDiv(msg);
-        area.appendChild(div);
-        area.scrollTop = area.scrollHeight;
+        if (!loadedMessageIds.has(msg.id)) {  // Eğer mesaj daha önce yüklenmediyse
+          const div = await buildMessageDiv(msg);
+          area.appendChild(div);
+          area.scrollTop = area.scrollHeight; // En son mesaja kaydır
+          loadedMessageIds.add(msg.id);  // Yüklenen mesajı kaydet
+        }
       } else if (change.type === "modified") {
         // Mesaj düzenlendiğinde
         const div = document.querySelector(`.message[data-id="${msg.id}"]`);
@@ -394,72 +448,6 @@ async function buildMessageDiv(msg) {
 }
 
 let isSending = false;  // Mesaj gönderme durumu kontrolü
-
-window.sendMessage = async () => {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  const editId = input.dataset.editing;
-
-  // Eğer mesaj boşsa veya kullanıcı seçilmemişse, işlem yapılmaz
-  if (!text || !selectedFriendId || !currentUser) return;
-
-  // Mesaj gönderme sırasında tekrar gönderilmesini engelle
-  const sendButton = document.querySelector(".send-btn");
-  sendButton.disabled = true; // Butonu devre dışı bırak
-
-  const convoId = getConversationId(currentUser.uid, selectedFriendId);
-  const msgCol = collection(db, "conversations", convoId, "messages");
-
-  // Mesajları eklemek için messageArea öğesini doğru şekilde seçelim
-  const area = document.getElementById("messageArea");
-
-  try {
-    if (editId) {
-      // Düzenleme yapılıyorsa
-      const docRef = doc(msgCol, editId);
-      const docSnap = await getDoc(docRef);
-
-      if (!docSnap.exists()) {
-        console.error("Belge bulunamadı:", editId);
-        return;
-      }
-
-      // Mesajı güncelle
-      await updateDoc(docRef, { text });
-
-      // DOM'da mesajı güncelle
-      const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
-      if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
-      delete input.dataset.editing;
-    } else {
-      // Yeni mesaj ekliyorsak
-      const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-      const docRef = await addDoc(msgCol, msg);
-
-      // Mesaj eklenmeden önce id'sinin gelmesi beklenmeli
-      const div = await buildMessageDiv({ id: docRef.id, ...msg });
-
-      // Sadece eklenmiş olan mesajı ekleyelim
-      if (!loadedMessageIds.has(docRef.id)) {
-        area.appendChild(div);
-        area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
-        loadedMessageIds.add(docRef.id);
-      }
-
-      // Arkadaşa bildirim gönder
-      await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
-    }
-
-    // Metin kutusunu temizle
-    input.value = "";
-
-  } catch (error) {
-    console.error("Mesaj gönderme hatası:", error);
-  } finally {
-    // Butonu tekrar etkinleştir
-    sendButton.disabled = false;
-  }
-};
 
 window.goHome = function() {
   location.href = "anasayfa.html";
