@@ -27,16 +27,6 @@
       padding: 15px 20px;    
       flex-wrap: wrap;    
     }    
-    .lang-btn {    
-      padding: 6px 10px;    
-      border: none;    
-      border-radius: 6px;    
-      background: linear-gradient(to right, #6a11cb, #2575fc);    
-      color: white;    
-      font-weight: bold;    
-      cursor: pointer;    
-      margin-left: 10px;    
-    }    
     .container {    
       display: flex;    
       flex: 1;    
@@ -132,25 +122,7 @@
       font-weight: bold;    
       cursor: pointer;    
     }    
-    @media (max-width: 768px) {    
-      .container { flex-direction: column; }    
-      .chat-list {    
-        width: 100%;    
-        max-width: none;    
-        display: flex;    
-        overflow-x: auto;    
-        flex-direction: row;    
-        padding: 10px;    
-        gap: 10px;    
-        scroll-snap-type: x mandatory;    
-      }    
-      .chat-item {    
-        flex: 0 0 auto;    
-        min-width: 140px;    
-        max-width: 200px;    
-        scroll-snap-align: start;    
-      }    
-    }    
+    
   </style>    
 </head>    
 <body>    
@@ -208,18 +180,13 @@ const t = {
     home: "Ana Sayfa", turkish: "🇹🇷 Türkçe", english: "🇬🇧 English",
     sentAt: "Gönderildi", you: "Sen"
   },
-  en: {
-    pageTitle: "Messages", placeholder: "Type a message...", send: "Send",
-    home: "Home Page", turkish: "🇹🇷 Turkish", english: "🇬🇧 English",
-    sentAt: "Sent at", you: "You"
-  }
 };
 
 function updateTexts() {
   document.getElementById("pageTitle").innerText = t[lang].pageTitle;
   document.getElementById("messageInput").placeholder = t[lang].placeholder;
   document.querySelector(".send-btn").innerText = t[lang].send;
-  document.getElementById("homeBtn").innerText = "🏠 " + t[lang].home;
+  document.getElementById("homeBtn").innerText = t[lang].home;
   document.getElementById("btnTr").innerText = t[lang].turkish;
   document.getElementById("btnEn").innerText = t[lang].english;
 
