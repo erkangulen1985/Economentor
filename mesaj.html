@@ -203,7 +203,8 @@ async function loadChatList(uid) {
     const userData = userDoc.data();
     const userId = userDoc.id;
 
-    if (userId === uid) return;
+    // Kullanıcı sadece kendisi ve admin dışında herkese mesaj atabiliyor
+    if (userId === uid || userId === "adminUID") return;
 
     const name = userData.username;
     const convoId = getConversationId(uid, userId);
