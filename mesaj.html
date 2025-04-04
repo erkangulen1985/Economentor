@@ -6,15 +6,15 @@
   <link rel="icon" type="image/png" href="image1.png" />    
   <style>    
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }    
-     body {
-      background: url('image1.png') no-repeat center center fixed;
-      background-size: cover;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    } 
+body {
+  background: url('image1.png') no-repeat center center fixed;
+  background-size: cover; /* This ensures the image covers the entire screen */
+  min-height: 100vh; /* Ensures the body takes full viewport height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
     @keyframes gradientShift {    
       0% { background-position: 0% 50%; }    
       50% { background-position: 100% 50%; }    
@@ -220,7 +220,7 @@ function updateTexts() {
   document.getElementById("pageTitle").innerText = t[lang].pageTitle;
   document.getElementById("messageInput").placeholder = t[lang].placeholder;
   document.querySelector(".send-btn").innerText = t[lang].send;
-  document.getElementById("homeBtn").innerText = "🏠 " + t[lang].home;
+  document.getElementById("homeBtn").innerText = t[lang].home;
   document.getElementById("btnTr").innerText = t[lang].turkish;
   document.getElementById("btnEn").innerText = t[lang].english;
 
@@ -364,7 +364,7 @@ async function openChat(fid, el) {
       });
     }
   }
-
+}
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
   setupLoadMoreButton(messagesCol);
 
