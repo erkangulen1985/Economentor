@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TuneTRa | Mesajlar</title>
-  <link rel="icon" type="image/png" href="image.png" />
+  <title>Economentor | Mesajlar</title>
+  <link rel="icon" type="image/png" href="image1.png" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body {
-      background: linear-gradient(to right, #6a11cb, #ffcc70, #2575fc);
-      background-size: 400% 400%;
+      background: url('ChatGPT Image Apr 4, 2025, 05_32_46 PM.png') no-repeat center center fixed;
+      background-size: cover;
       animation: gradientShift 15s ease infinite;
       color: white;
       min-height: 100vh;
@@ -194,12 +194,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAZCCTKPRJRpGGkboQR7IYlV1VNkH73ldg",
-  authDomain: "tunetra-2579b.firebaseapp.com",
-  projectId: "tunetra-2579b",
-  storageBucket: "tunetra-2579b.appspot.com",
-  messagingSenderId: "576238823779",
-  appId: "1:576238823779:web:b1796f089427e3b6fecb56"
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.firebasestorage.app",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -431,29 +432,68 @@ async function buildMessageDiv(msg) {
   `;
 
 if (msg.sender === currentUser.uid) {
-  const editBtn = document.createElement("button");
-  editBtn.textContent = "✏️";
-  editBtn.style.marginLeft = "6px";
-  editBtn.onclick = () => {
-    const input = document.getElementById("messageInput");
-    input.value = msg.text;
-    input.focus();
-    input.dataset.editing = msg.id; // Düzenleme modunu başlat
-  };
+const editBtn = document.createElement("button");
+editBtn.textContent = "✏️";
+editBtn.style.marginLeft = "6px";
+editBtn.onclick = () => {
+  const input = document.getElementById("messageInput");
+  input.value = msg.text;
+  input.focus();
+  input.dataset.editing = msg.id; // Düzenleme modunu başlat
+};
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "🗑️";
-  deleteBtn.style.marginLeft = "6px";
-  deleteBtn.onclick = async () => {
-    if (confirm("Mesaj silinsin mi?")) {
-      const convoId = getConversationId(currentUser.uid, selectedFriendId);
-      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+const saveEditBtn = document.createElement("button");
+saveEditBtn.textContent = "💾";
+saveEditBtn.style.marginLeft = "6px";
+saveEditBtn.onclick = async () => {
+  const editedText = document.getElementById("messageInput").value;
+  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text: editedText });
 
-      // DOM'dan mesajı kaldır
-      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (divToRemove) divToRemove.remove();
-    }
-  };
+  // DOM'dan mesajı düzenle
+  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+  if (msgDiv) {
+    msgDiv.querySelector(".msg-text").innerText = editedText;
+  }
+
+  // Güncel mesajları dinle
+  const messagesCol = collection(db, "conversations", convoId, "messages");
+  onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "modified") {
+        const updatedMsg = change.doc.data();
+        const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+        if (msgDiv) {
+          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        }
+      }
+    });
+  });
+};
+
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "🗑️";
+deleteBtn.style.marginLeft = "6px";
+deleteBtn.onclick = async () => {
+  if (confirm("Mesaj silinsin mi?")) {
+    const convoId = getConversationId(currentUser.uid, selectedFriendId);
+    await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+
+    // DOM'dan mesajı kaldır
+    const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+    if (divToRemove) divToRemove.remove();
+
+    // Firebase'deki dinleyici diğer kullanıcıya güncellenmiş durumu iletilsin
+    const messagesCol = collection(db, "conversations", convoId, "messages");
+    onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === "removed") {
+          const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+          if (msgDiv) msgDiv.remove(); // Silinen mesajı UI'dan kaldır
+        }
+      });
+    });
+  }
+};
 
   div.appendChild(editBtn);
   div.appendChild(deleteBtn);
