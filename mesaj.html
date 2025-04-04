@@ -4,40 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Economentor | Mesajlar</title>
-    <link rel="icon" type="image/png" href="image1.png" />
+    <link rel="icon" type="image/png" href="image2.png" />
     <style>    
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }    
-        body {
-            background: url('image2.png') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding-bottom: 50px; /* Alt alanı biraz genişlettim */
-        }
+    body {
+        background: url('image2.png') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding-bottom: 50px; /* Alt alanı biraz genişlettim */
+    }
     
     header {    
-      display: flex;    
-      justify-content: space-between;    
-      align-items: center;    
-      padding: 15px 20px;    
-      flex-wrap: wrap;    
+        display: flex;    
+        justify-content: space-between;    
+        align-items: center;    
+        padding: 15px 20px;    
+        flex-wrap: wrap;    
     }    
     .container {    
-      display: flex;    
-      flex: 1;    
-      overflow: hidden;    
+        display: flex;    
+        flex: 1;    
+        overflow: hidden;    
     }    
 
     .chat-list {
         width: 30%;
         max-width: 250px;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.6);
         padding: 20px;
         overflow-y: auto;
         position: relative;
+        border-radius: 10px;
     }
 
     #chatList:before {
@@ -52,75 +53,75 @@
     }
 
     .chat-item {    
-      padding: 10px;    
-      background: rgba(255, 255, 255, 0.1);    
-      margin-bottom: 10px;    
-      border-radius: 6px;    
-      cursor: pointer;    
-      text-align: left;    
-      position: relative;    
+        padding: 10px;    
+        background: rgba(255, 255, 255, 0.1);    
+        margin-bottom: 10px;    
+        border-radius: 6px;    
+        cursor: pointer;    
+        text-align: left;    
+        position: relative;    
     }    
 
     .chat-item.active {    
-      background: #007bff;    
-      font-weight: bold;    
+        background: #007bff;    
+        font-weight: bold;    
     }    
 
     .notification {    
-      position: absolute;    
-      top: 10px;    
-      right: 10px;    
-      width: 10px;    
-      height: 10px;    
-      background-color: red;    
-      border-radius: 50%;    
+        position: absolute;    
+        top: 10px;    
+        right: 10px;    
+        width: 10px;    
+        height: 10px;    
+        background-color: red;    
+        border-radius: 50%;    
     }
 
     .last-message {    
-      font-size: 0.85em;    
-      color: #ccc;    
-      margin-top: 5px;    
+        font-size: 0.85em;    
+        color: #ccc;    
+        margin-top: 5px;    
     }    
 
     .chat-window {    
-      flex: 1;    
-      padding: 20px;    
-      display: flex;    
-      flex-direction: column;    
-      justify-content: space-between;    
-      background: rgba(0, 0, 0, 0.2);    
-      max-height: 100%; /* Mesaj penceresinin alt kısmı görünür olacak şekilde */
+        flex: 1;    
+        padding: 20px;    
+        display: flex;    
+        flex-direction: column;    
+        justify-content: space-between;    
+        background: rgba(0, 0, 0, 0.5);    
+        max-height: 100%; /* Mesaj penceresinin alt kısmı görünür olacak şekilde */
     }    
 
     .messages {    
-      flex: 1;    
-      overflow-y: auto;    
-      margin-bottom: 20px;    
-      padding-right: 10px;    
-      display: flex;    
-      flex-direction: column;    
+        flex: 1;    
+        overflow-y: auto;    
+        margin-bottom: 20px;    
+        padding-right: 10px;    
+        display: flex;    
+        flex-direction: column;    
     }    
 
     .send-box {    
-      display: flex;    
-      gap: 10px;    
+        display: flex;    
+        gap: 10px;    
     }    
 
     input[type="text"] {    
-      flex: 1;    
-      padding: 10px;    
-      border: none;    
-      border-radius: 6px;    
+        flex: 1;    
+        padding: 10px;    
+        border: none;    
+        border-radius: 6px;    
     }    
 
     button.send-btn {    
-      padding: 10px 20px;    
-      border: none;    
-      border-radius: 6px;    
-      background: linear-gradient(to right, #6a11cb, #2575fc);    
-      color: white;    
-      font-weight: bold;    
-      cursor: pointer;    
+        padding: 10px 20px;    
+        border: none;    
+        border-radius: 6px;    
+        background: linear-gradient(to right, #6a11cb, #2575fc);    
+        color: white;    
+        font-weight: bold;    
+        cursor: pointer;    
     }
 
     .search-container {
@@ -139,169 +140,136 @@
         border: none;
         border-radius: 6px;
     }
-
-  </style>    
+    </style>    
 </head>    
 <body>    
-  <header> 
-    <a href="anasayfa.html" style="color: white; font-weight: bold; padding: 10px 20px; background-color: #4CAF50; border-radius: 6px;">Anasayfa</a>
-  </header>    
+    <header> 
+        <a href="anasayfa.html" style="color: white; font-weight: bold; padding: 10px 20px; background-color: #4CAF50; border-radius: 6px;">Anasayfa</a>
+    </header>    
 
-  <div class="container">    
-    <div class="chat-list" id="chatList">
-      <div class="search-container">
-        <input type="text" class="search-input" id="searchInput" placeholder="Kişi Ara..." oninput="filterChats()">
-      </div>
-      Yükleniyor...
+    <div class="container">    
+        <div class="chat-list" id="chatList">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Kişi Ara..." oninput="filterChats()">
+            </div>
+            Yükleniyor...
+        </div>    
+
+        <div class="chat-window">    
+            <div class="messages" id="messageArea"></div>    
+            <div class="send-box">    
+                <input type="text" id="messageInput" placeholder="Mesaj yaz...">    
+                <button class="send-btn" onclick="sendMessage()">Gönder</button>    
+            </div>    
+        </div>    
     </div>    
 
-    <div class="chat-window">    
-      <div class="messages" id="messageArea"></div>    
-      <div class="send-box">    
-        <input type="text" id="messageInput" placeholder="Mesaj yaz...">    
-        <button class="send-btn" onclick="sendMessage()">Gönder</button>    
-      </div>    
-    </div>    
-  </div>    
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limitToLast, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limitToLast, endBefore, addDoc, getDocs, onSnapshot, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+        authDomain: "economentor-8ddc4.firebaseapp.com",
+        projectId: "economentor-8ddc4",
+        storageBucket: "economentor-8ddc4.appspot.com",
+        messagingSenderId: "835370350520",
+        appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    let currentUser = null;
+    let selectedFriendId = null;
+    let firstVisible = null;
+    let isLoading = false;
 
-let currentUser = null;
-let selectedFriendId = null;
-let firstVisible = null;
-let isLoading = false;
-let unsubMessages = null;
-const loadedMessageIds = new Set();
+    onAuthStateChanged(auth, user => {
+      if (!user) return location.href = "index.html";
+      currentUser = user;
+      loadChatList(user.uid);
+    });
 
-onAuthStateChanged(auth, user => {
-  if (!user) return location.href = "index.html";
-  currentUser = user;
-  loadChatList(user.uid);
-});
+    async function loadChatList(uid) {
+        const friendsSnap = await getDoc(doc(db, "friends", uid));
+        const list = document.getElementById("chatList");
+        list.innerHTML = "";
+        const friends = friendsSnap.exists() ? friendsSnap.data().list || [] : [];
 
-async function loadChatList(uid) {
-  const friendsSnap = await getDoc(doc(db, "friends", uid));
-  const list = document.getElementById("chatList");
-  list.innerHTML = "";
-  const friends = friendsSnap.exists() ? friendsSnap.data().list || [] : [];
+        // Kullanıcıları getir (admin hariç)
+        const usersSnap = await getDocs(collection(db, "users"));
+        const users = usersSnap.docs.filter(doc => doc.id !== uid && doc.data().role !== "admin");
 
-  // Kullanıcıları getir (admin hariç)
-  const usersSnap = await getDocs(collection(db, "users"));
-  const users = usersSnap.docs.filter(doc => doc.id !== uid && doc.data().role !== "admin");
+        // Mesajlaşmaları sırayla göster
+        for (const fid of friends) {
+            const fdoc = await getDoc(doc(db, "users", fid));
+            if (!fdoc.exists()) continue;
 
-  // Mesajlaşmaları sırayla göster
-  for (const fid of friends) {
-    const fdoc = await getDoc(doc(db, "users", fid));
-    if (!fdoc.exists()) continue;
+            const name = fdoc.data().username;
+            const convoId = getConversationId(uid, fid);
+            const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    const name = fdoc.data().username;
-    const convoId = getConversationId(uid, fid);
-    const messagesCol = collection(db, "conversations", convoId, "messages");
+            const lastMsgSnap = await getDocs(
+                query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+            );
 
-    const lastMsgSnap = await getDocs(
-      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
-    );
+            let lastMsg = "", hasNew = false;
+            if (!lastMsgSnap.empty) {
+                const msg = lastMsgSnap.docs[0].data();
+                lastMsg = msg.text;
+                hasNew = !msg.seenBy?.includes(uid);
+            }
 
-    let lastMsg = "", hasNew = false;
-    if (!lastMsgSnap.empty) {
-      const msg = lastMsgSnap.docs[0].data();
-      lastMsg = msg.text;
-      hasNew = !msg.seenBy?.includes(uid);
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+            if (hasNew) {
+                const notif = document.createElement("div");
+                notif.className = "notification";
+                div.appendChild(notif);
+            }
+
+            div.onclick = () => openChat(fid, div);
+            list.appendChild(div);
+        }
+
+        // Mesajlaşmadığın kullanıcıları alt kısımda göster
+        const otherUsers = users.filter(user => !friends.includes(user.id));
+
+        for (const user of otherUsers) {
+            const name = user.data().username;
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.innerHTML = `<strong>${name}</strong><div class="last-message">Henüz mesajlaşmadınız.</div>`;
+
+            div.onclick = () => startNewChat(user.id, div);
+            list.appendChild(div);
+        }
     }
 
-    const div = document.createElement("div");
-    div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
-    if (hasNew) {
-      const notif = document.createElement("div");
-      notif.className = "notification";
-      div.appendChild(notif);
+    async function openChat(fid, el) {
+        selectedFriendId = fid;
+        const area = document.getElementById("messageArea");
+        area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
+        
+        document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
+        el.classList.add("active");
+
+        const convoId = getConversationId(currentUser.uid, fid);
+        const messagesCol = collection(db, "conversations", convoId, "messages");
+
+        const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+        const messages = [];
+        snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+
+        for (const msg of messages) {
+            const div = await buildMessageDiv(msg);
+            area.appendChild(div);
+        }
     }
-
-    div.onclick = () => openChat(fid, div);
-    list.appendChild(div);
-  }
-
-  // Mesajlaşmadığın kullanıcıları alt kısımda göster
-  const otherUsers = users.filter(user => !friends.includes(user.id));
-
-  for (const user of otherUsers) {
-    const name = user.data().username;
-    const div = document.createElement("div");
-    div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">Henüz mesajlaşmadınız.</div>`;
-
-    div.onclick = () => startNewChat(user.id, div);
-    list.appendChild(div);
-  }
-}
-
-async function startNewChat(fid, el) {
-  selectedFriendId = fid;
-  // Yeni bir sohbet başlatmak için
-  // Sohbet açma fonksiyonu yazılacak
-}
-
-function filterChats() {
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
-  const chatItems = document.querySelectorAll(".chat-item");
-
-  chatItems.forEach(item => {
-    const name = item.querySelector("strong").textContent.toLowerCase();
-    if (name.includes(searchValue)) {
-      item.style.display = "";
-    } else {
-      item.style.display = "none";
-    }
-  });
-}
-
-async function openChat(fid, el) {
-  selectedFriendId = fid;
-  const area = document.getElementById("messageArea");
-  area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
-  loadedMessageIds.clear();
-  firstVisible = null;
-
-  if (unsubMessages) unsubMessages();
-  document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
-  el.classList.add("active");
-
-  const notifDot = el.querySelector(".notification");
-  if (notifDot) notifDot.remove();
-
-  const convoId = getConversationId(currentUser.uid, fid);
-  const messagesCol = collection(db, "conversations", convoId, "messages");
-
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
-  const messages = [];
-  snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
-  firstVisible = snap.docs[0];
-
-  for (const msg of messages) {
-    const div = await buildMessageDiv(msg);
-    area.appendChild(div);
-    loadedMessageIds.add(msg.id);
-  }
-
-  setupLoadMoreButton(messagesCol);
-}
-</script>
+    </script>
 </body>
 </html>
