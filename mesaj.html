@@ -170,7 +170,7 @@
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
     <div>
-      <button class="lang-btn" id="homeBtn">Ana Sayfa</button>
+      <button class="lang-btn" id="homeBtn" onclick="goHome()">Ana Sayfa</button>
     </div>
   </header>
   <div class="container">
@@ -186,6 +186,7 @@
       </div>
     </div>
   </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -322,220 +323,51 @@ async function openChat(fid, el) {
   firstVisible = snap.docs[0];
 
   for (const msg of messages) {
-  const div = await buildMessageDiv(msg);
-  area.appendChild(div);
-  loadedMessageIds.add(msg.id);
+    const div = await buildMessageDiv(msg);
+    area.appendChild(div);
+    loadedMessageIds.add(msg.id);
 
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid)
+      });
+    }
   }
-}
 
-const chatItem = document.querySelector(".chat-item.active");
-if (chatItem) {
-  const notif = chatItem.querySelector(".notification");
-  if (notif) notif.remove();
-}
-
-area.lastElementChild?.scrollIntoView({ behavior: "auto" });
-
-setupLoadMoreButton(messagesCol);
-
-unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
-for (const docChange of snapshot.docChanges()) {
-  const msg = { id: docChange.doc.id, ...docChange.doc.data() };
-  if (loadedMessageIds.has(msg.id)) continue;
-
-  loadedMessageIds.add(msg.id);
-  const div = await buildMessageDiv(msg);
-  area.appendChild(div);
-  setTimeout(() => area.scrollTop = area.scrollHeight, 100);
-
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
-    await updateDoc(doc(db, "users", currentUser.uid), {
-     inboxHasNew: false
-});
+  const chatItem = document.querySelector(".chat-item.active");
+  if (chatItem) {
+    const notif = chatItem.querySelector(".notification");
+    if (notif) notif.remove();
   }
-}
-});
-}
 
-function setupLoadMoreButton(messagesCol) {
-  const loadBtn = document.getElementById("loadMoreBtn");
-  if (!loadBtn || !firstVisible) return;
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  loadBtn.onclick = async () => {
-    if (isLoading) return;
-    isLoading = true;
+  setupLoadMoreButton(messagesCol);
 
-    const area = document.getElementById("messageArea");
-    const prevScrollHeight = area.scrollHeight;
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
+    for (const docChange of snapshot.docChanges()) {
+      const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+      if (loadedMessageIds.has(msg.id)) continue;
 
-    const snap = await getDocs(query(
-      messagesCol,
-      orderBy("timestamp", "asc"),
-      endBefore(firstVisible),
-      limitToLast(50)
-    ));
-
-    const messages = [];
-    snap.forEach(doc => {
-      if (!loadedMessageIds.has(doc.id)) {
-        messages.push({ id: doc.id, ...doc.data() });
-        loadedMessageIds.add(doc.id);
-      }
-    });
-
-    for (const msg of messages.reverse()) {
+      loadedMessageIds.add(msg.id);
       const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling);
-    }
+      area.appendChild(div);
+      setTimeout(() => area.scrollTop = area.scrollHeight, 100);
 
-    if (!snap.empty) {
-      firstVisible = snap.docs[0];
-    } else {
-      loadBtn.style.display = "none";
-    }
-
-    const newScrollHeight = area.scrollHeight;
-    area.scrollTop = newScrollHeight - prevScrollHeight;
-    isLoading = false;
-  };
-}
-
-async function buildMessageDiv(msg) {
-  const div = document.createElement("div");
-  div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
-  div.setAttribute("data-id", msg.id);
-  div.setAttribute("data-timestamp", msg.timestamp);
-
-  let senderName = t[lang].you;
-  if (msg.sender !== currentUser.uid) {
-    const senderDoc = await getDoc(doc(db, "users", msg.sender));
-    senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
-  }
-
-  div.setAttribute("data-sender-name", senderName);
-
-div.innerHTML = `
-  <div class="sender-label">${senderName}</div>
-  <div class="msg-text">${msg.text}</div>
-  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-`;
-
-
-if (msg.sender === currentUser.uid) {
-  const editBtn = document.createElement("button");
-  editBtn.textContent = "✏️";
-  editBtn.style.marginLeft = "6px";
-  editBtn.onclick = () => {
-    const input = document.getElementById("messageInput");
-    input.value = msg.text;
-    input.focus();
-    input.dataset.editing = msg.id; // Düzenleme modunu başlat
-    // Düzenleme yapıldığında, Firestore'daki veriyi güncelleyin
-async function someFunction() {
-  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
-}
-
-
-// Dinleyiciyi kullanarak anında güncellemeleri diğer tarafa yansıtalım
-const messagesCol = collection(db, "conversations", convoId, "messages");
-const unsubMessages = onSnapshot(messagesCol, snapshot => {
-  snapshot.docChanges().forEach(change => {
-    if (change.type === "modified") {
-      // Mesaj düzenlendiğinde, bunu karşı tarafa yansıtıyoruz
-      const modifiedMessage = change.doc.data();
-      // DOM'da bu mesajı güncelliyoruz
-      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = modifiedMessage.text;
-      }
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+        await updateDoc(doc(db, "users", currentUser.uid), {
+         inboxHasNew: false
+      });
     }
   });
-});
-
-  };
-
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "🗑️";
-  deleteBtn.style.marginLeft = "6px";
-  deleteBtn.onclick = async () => {
-    if (confirm("Mesaj silinsin mi?")) {
-      const convoId = getConversationId(currentUser.uid, selectedFriendId);
-      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
-
-      // DOM'dan mesajı kaldır
-      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (divToRemove) divToRemove.remove();
-    }
-    // Mesaj silindiğinde, Firestore'dan silme işlemi yapalım
-await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
-
-// Dinleyici kullanarak anında silmeyi karşı tarafa yansıtalım
-const messagesCol = collection(db, "conversations", convoId, "messages");
-const unsubMessages = onSnapshot(messagesCol, snapshot => {
-  snapshot.docChanges().forEach(change => {
-    if (change.type === "removed") {
-      // Silinen mesajı DOM'dan kaldırıyoruz
-      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-      if (msgDiv) {
-        msgDiv.remove(); // DOM'dan mesajı sil
-      }
-    }
-  });
-});
-  };
-
-  div.appendChild(editBtn);
-  div.appendChild(deleteBtn);
 }
 
-  return div;
+function goHome() {
+  location.href = "anasayfa.html"; 
 }
-
-window.sendMessage = async () => {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  const editId = input.dataset.editing;
-  if (!text || !selectedFriendId || !currentUser) return;
-
-  const convoId = getConversationId(currentUser.uid, selectedFriendId);
-  const msgCol = collection(db, "conversations", convoId, "messages");
-
-  if (editId) {
-    await updateDoc(doc(msgCol, editId), { text });
-
-    // DOM'da mesaj metnini güncelle
-    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
-    if (msgDiv) {
-      msgDiv.querySelector(".msg-text").innerText = text;
-    }
-
-    delete input.dataset.editing;
-  } else {
-    const msg = {
-      sender: currentUser.uid,
-      text,
-      timestamp: Date.now(),
-      seenBy: []
-    };
-    await addDoc(msgCol, msg);
-
-    // ✅ Karşı tarafa kırmızı nokta çıkması için
-    await updateDoc(doc(db, "users", selectedFriendId), {
-      inboxHasNew: true
-    });
-  }
-
-  input.value = "";
-};
-  window.goHome = () => location.href = "anasayfa.html";
 
 </script>
 </body>
