@@ -432,7 +432,10 @@ if (msg.sender === currentUser.uid) {
     input.focus();
     input.dataset.editing = msg.id; // Düzenleme modunu başlat
     // Düzenleme yapıldığında, Firestore'daki veriyi güncelleyin
-await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
+async function someFunction() {
+  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
+}
+
 
 // Dinleyiciyi kullanarak anında güncellemeleri diğer tarafa yansıtalım
 const messagesCol = collection(db, "conversations", convoId, "messages");
