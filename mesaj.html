@@ -397,30 +397,49 @@ window.sendMessage = async () => {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
   const editId = input.dataset.editing;
+
+  // Eğer mesaj boşsa veya kullanıcı seçilmemişse, işlem yapılmaz
   if (!text || !selectedFriendId || !currentUser) return;
+
+  // Mesaj gönderme sırasında tekrar gönderilmesini engelle
+  const sendButton = document.querySelector(".send-btn");
+  sendButton.disabled = true; // Butonu devre dışı bırak
 
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
-  // Eğer düzenleme yapılacaksa
-  if (editId) {
-    await updateDoc(doc(msgCol, editId), { text });
-    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
-    if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
-    delete input.dataset.editing;
-  } else {
-    // Yeni mesaj eklemek için
-    const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-    const docRef = await addDoc(msgCol, msg);
+  try {
+    if (editId) {
+      // Düzenleme yapılıyorsa
+      await updateDoc(doc(msgCol, editId), { text });
 
-    // Yeni mesajı anında gör
-    const div = await buildMessageDiv({ id: docRef.id, ...msg });
-    document.getElementById("messageArea").appendChild(div);
-    area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
-    await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
+      // DOM'da mesajı güncelle
+      const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+      if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
+      delete input.dataset.editing;
+    } else {
+      // Yeni mesaj ekliyorsak
+      const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
+      const docRef = await addDoc(msgCol, msg);
+
+      // Yeni mesajı anında gör
+      const div = await buildMessageDiv({ id: docRef.id, ...msg });
+      document.getElementById("messageArea").appendChild(div);
+      area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
+
+      // Arkadaşa bildirim gönder
+      await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
+    }
+
+    // Metin kutusunu temizle
+    input.value = "";
+
+  } catch (error) {
+    console.error("Mesaj gönderme hatası:", error);
+  } finally {
+    // Butonu tekrar etkinleştir
+    sendButton.disabled = false;
   }
-
-  input.value = "";
 };
 
 window.goHome = function() {
