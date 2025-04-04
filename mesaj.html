@@ -157,9 +157,7 @@
   <header>    
     <h2 id="pageTitle">Mesajlar</h2>    
     <div>    
-      <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>    
-      <button class="lang-btn" onclick="setLang('tr')" id="btnTr">🇹🇷 Türkçe</button>    
-      <button class="lang-btn" onclick="setLang('en')" id="btnEn">🇬🇧 English</button>    
+      <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>      
     </div>    
   </header>    
   <div class="container">    
@@ -209,11 +207,6 @@ const t = {
     home: "Ana Sayfa", turkish: "🇹🇷 Türkçe", english: "🇬🇧 English",
     sentAt: "Gönderildi", you: "Sen"
   },
-  en: {
-    pageTitle: "Messages", placeholder: "Type a message...", send: "Send",
-    home: "Home Page", turkish: "🇹🇷 Turkish", english: "🇬🇧 English",
-    sentAt: "Sent at", you: "You"
-  }
 };
 
 function updateTexts() {
@@ -221,8 +214,6 @@ function updateTexts() {
   document.getElementById("messageInput").placeholder = t[lang].placeholder;
   document.querySelector(".send-btn").innerText = t[lang].send;
   document.getElementById("homeBtn").innerText = t[lang].home;
-  document.getElementById("btnTr").innerText = t[lang].turkish;
-  document.getElementById("btnEn").innerText = t[lang].english;
 
   document.querySelectorAll(".message").forEach(msg => {
     const isYou = msg.classList.contains("you");
