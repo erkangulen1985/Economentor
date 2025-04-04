@@ -164,7 +164,7 @@
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
     <div>
-      <button class="lang-btn" id="homeBtn">Ana Sayfa</button>
+      <button class="lang-btn" id="homeBtn" onclick="goHome()">Ana Sayfa</button>
     </div>
   </header>
   <div class="container">
@@ -190,6 +190,7 @@ import {
   addDoc, getDocs, onSnapshot, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
   authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -226,10 +227,6 @@ function updateTexts() {
   document.getElementById("homeBtn").innerText = t[lang].home;
 }
 
-function getConversationId(uid1, uid2) {
-  return [uid1, uid2].sort().join("_");
-}
-  
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
@@ -238,61 +235,47 @@ onAuthStateChanged(auth, user => {
 });
 
 async function loadChatList(uid) {
-  try {
-    const usersSnap = await getDocs(collection(db, "users"));
-    const list = document.getElementById("chatListContent");
-    list.innerHTML = "Yükleniyor...";  // Yükleniyor ifadesini gösterebiliriz
+  const usersSnap = await getDocs(collection(db, "users"));
+  const list = document.getElementById("chatListContent");
+  list.innerHTML = "";
 
-    let chats = [];
+  usersSnap.forEach(async (userDoc) => {
+    const userData = userDoc.data();
+    const userId = userDoc.id;
 
-    usersSnap.forEach(async (userDoc) => {
-      const userData = userDoc.data();
-      const userId = userDoc.id;
+    if (userId === uid) return;
 
-      if (userId === uid) return;  // Mevcut kullanıcıyı hariç tut
+    const name = userData.username;
+    const convoId = getConversationId(uid, userId);
+    const messagesCol = collection(db, "conversations", convoId, "messages");
 
-      const name = userData.username || "Bilinmeyen";  // Kullanıcı adı varsa göster, yoksa "Bilinmeyen" yazdır
-      const convoId = getConversationId(uid, userId);
-      const messagesCol = collection(db, "conversations", convoId, "messages");
+    const lastMsgSnap = await getDocs(
+      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+    );
 
-      const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
+    let lastMsg = "", hasNew = false;
+    if (!lastMsgSnap.empty) {
+      const msg = lastMsgSnap.docs[0].data();
+      lastMsg = msg.text;
+      hasNew = !msg.seenBy?.includes(uid);
+    }
 
-      let lastMsg = "", hasNew = false;
-      if (!lastMsgSnap.empty) {
-        const msg = lastMsgSnap.docs[0].data();
-        lastMsg = msg.text;
-        hasNew = !msg.seenBy?.includes(uid);
-      }
-
-      chats.push({ userId, name, lastMsg, hasNew });  // Kullanıcıları ve son mesajları sakla
-    });
-
-    // Kullanıcıları sıralıyoruz (yeniden mesajları olanlar önce gelir)
-    chats = chats.sort((a, b) => b.hasNew - a.hasNew);
-
-    // Kullanıcıları chat listesine ekliyoruz
-    chats.forEach((chat) => {
-      const div = document.createElement("div");
-      div.className = "chat-item";
-      div.innerHTML = `<strong>${chat.name}</strong><div class="last-message">${chat.lastMsg}</div>`;
-      if (chat.hasNew) {
-        const notif = document.createElement("div");
-        notif.className = "notification";
-        div.appendChild(notif);  // Eğer yeni mesaj varsa, bildirim göstermek için
-      }
-      div.onclick = () => openChat(chat.userId, div);  // Kullanıcıya tıklanıldığında sohbeti aç
-      list.appendChild(div);  // Chat listesine kullanıcıyı ekle
-    });
-
-  } catch (error) {
-    console.error("Hata oluştu:", error);
-  }
+    const div = document.createElement("div");
+    div.className = "chat-item";
+    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+    if (hasNew) {
+      const notif = document.createElement("div");
+      notif.className = "notification";
+      div.appendChild(notif);
+    }
+    div.onclick = () => openChat(userId, div);
+    list.appendChild(div);
+  });
 }
 
 function filterChats() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   const chatItems = document.querySelectorAll(".chat-item");
-
   chatItems.forEach(item => {
     const username = item.querySelector("strong").textContent.toLowerCase();
     if (username.indexOf(query) === -1) {
@@ -349,7 +332,7 @@ async function openChat(fid, el) {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
-      if (loadedMessageIds.has(msg.id)) return; 
+      if (loadedMessageIds.has(msg.id)) return;
 
       loadedMessageIds.add(msg.id);
       const div = await buildMessageDiv(msg);
