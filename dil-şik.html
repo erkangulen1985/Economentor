@@ -118,17 +118,21 @@
         return;
       }
 
+      const timestamp = new Date();
+      const formatted = timestamp.toLocaleString("tr-TR");
+
       await addDoc(collection(db, "feedback"), {
         username: currentUsername,
         message: message,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),  // Firestore'a zaman damgası
+        readableTime: formatted         // İnsan okunabilir hali
       });
 
       await addDoc(collection(db, "mail"), {
         to: "onurgulen2006@gmail.com",
         message: {
           subject: "Yeni Dilek/Şikayet Geldi!",
-          text: `Kullanıcı: ${currentUsername}\nMesaj: ${message}`
+          text: `Kullanıcı: ${currentUsername}\nTarih: ${formatted}\nMesaj: ${message}`
         }
       });
 
