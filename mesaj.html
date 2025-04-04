@@ -225,13 +225,13 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
+    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
   });
 }
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
 }
 
 function getConversationId(uid1, uid2) {
@@ -273,7 +273,7 @@ async function loadChatList(uid) {
 
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+    div.innerHTML = <strong>${name}</strong><div class="last-message">${lastMsg}</div>;
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
@@ -288,8 +288,7 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
-
+  area.innerHTML = <button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>;
   loadedMessageIds.clear();
   firstVisible = null;
 
@@ -299,6 +298,7 @@ async function openChat(fid, el) {
 
   const notifDot = el.querySelector(".notification");
   if (notifDot) notifDot.remove();
+  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
@@ -309,36 +309,54 @@ async function openChat(fid, el) {
   firstVisible = snap.docs[0];
 
   for (const msg of messages) {
-    const div = await buildMessageDiv(msg, messagesCol);  // `messagesCol` parametresini geçiriyoruz
-    area.appendChild(div);
-    loadedMessageIds.add(msg.id);
+  const div = await buildMessageDiv(msg);
+  area.appendChild(div);
+  loadedMessageIds.add(msg.id);
+
+  // Eğer kullanıcı görmemişse Firestore'da güncelle
+  if (!msg.seenBy?.includes(currentUser.uid)) {
+    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+      seenBy: arrayUnion(currentUser.uid)
+    });
   }
+}
+
+// Sohbet açılır açılmaz, UI'daki kırmızı noktayı temizle
+const chatItem = document.querySelector(.chat-item.active);
+if (chatItem) {
+  const notif = chatItem.querySelector(".notification");
+  if (notif) notif.remove();
+}
 
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  setupLoadMoreButton(messagesCol);  // `messagesCol` burada da kullanılıyor
+  setupLoadMoreButton(messagesCol);
 
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
-    for (const docChange of snapshot.docChanges()) {
-      const msg = { id: docChange.doc.id, ...docChange.doc.data() };
-      if (loadedMessageIds.has(msg.id)) continue;
+  for (const docChange of snapshot.docChanges()) {
+    const msg = { id: docChange.doc.id, ...docChange.doc.data() };
+    if (loadedMessageIds.has(msg.id)) continue;
 
-      loadedMessageIds.add(msg.id);
-      const div = await buildMessageDiv(msg, messagesCol); // `messagesCol` parametresini geçiriyoruz
-      area.appendChild(div);
-      setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+    loadedMessageIds.add(msg.id);
+    const div = await buildMessageDiv(msg);
+    area.appendChild(div);
+    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
 
-      if (!msg.seenBy?.includes(currentUser.uid)) {
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid)
-        });
-      }
-    }
+    // Önce seenBy güncelle
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid)
+      });
+      await updateDoc(doc(db, "users", currentUser.uid), {
+       inboxHasNew: false
   });
-}
+    }
 
     // Sonra listeyi güncelle (bildirim işareti artık görünmemeli)
     await updateChatListItem(selectedFriendId);
+  }
+});
+}
 
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
@@ -367,7 +385,7 @@ function setupLoadMoreButton(messagesCol) {
     });
 
     for (const msg of messages.reverse()) {
-      const div = await buildMessageDiv(msg, messagesCol);
+      const div = await buildMessageDiv(msg);
       area.insertBefore(div, loadBtn.nextSibling);
     }
 
@@ -383,7 +401,7 @@ function setupLoadMoreButton(messagesCol) {
   };
 }
 
-async function buildMessageDiv(msg, messagesCol) {
+async function buildMessageDiv(msg) {
   const div = document.createElement("div");
   div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
   div.setAttribute("data-id", msg.id);
@@ -397,44 +415,75 @@ async function buildMessageDiv(msg, messagesCol) {
 
   div.setAttribute("data-sender-name", senderName);
 
-  div.innerHTML = `
+  div.innerHTML = 
     <div class="sender-label">${senderName}</div>
     <div class="msg-text">${msg.text}</div>
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  `;
+  ;
 
-  if (msg.sender === currentUser.uid) {
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "✏️";
-    editBtn.style.marginLeft = "6px";
-    editBtn.onclick = async () => {
-      const input = document.getElementById("messageInput");
-      input.value = msg.text;
-      input.focus();
-      input.dataset.editing = msg.id;
+if (msg.sender === currentUser.uid) {
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "✏️";
+  editBtn.style.marginLeft = "6px";
+  editBtn.onclick = () => {
+    const input = document.getElementById("messageInput");
+    input.value = msg.text;
+    input.focus();
+    input.dataset.editing = msg.id; // Düzenleme modunu başlat
+    // Düzenleme yapıldığında, Firestore'daki veriyi güncelleyin
+await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
 
-      // Firebase güncelleme işlemi
-      await updateDoc(doc(messagesCol, msg.id), { text: input.value });
-    };
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "🗑️";
-    deleteBtn.style.marginLeft = "6px";
-    deleteBtn.onclick = async () => {
-      if (confirm("Mesaj silinsin mi?")) {
-        await deleteDoc(doc(messagesCol, msg.id)); // Mesajı Firestore'dan silme
-
-        // DOM'dan mesajı kaldır
-        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (divToRemove) {
-          divToRemove.remove();
-        }
+// Dinleyiciyi kullanarak anında güncellemeleri diğer tarafa yansıtalım
+const messagesCol = collection(db, "conversations", convoId, "messages");
+const unsubMessages = onSnapshot(messagesCol, snapshot => {
+  snapshot.docChanges().forEach(change => {
+    if (change.type === "modified") {
+      // Mesaj düzenlendiğinde, bunu karşı tarafa yansıtıyoruz
+      const modifiedMessage = change.doc.data();
+      // DOM'da bu mesajı güncelliyoruz
+      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+      if (msgDiv) {
+        msgDiv.querySelector(".msg-text").innerText = modifiedMessage.text;
       }
-    };
+    }
+  });
+});
 
-    div.appendChild(editBtn);
-    div.appendChild(deleteBtn);
-  }
+  };
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "🗑️";
+  deleteBtn.style.marginLeft = "6px";
+  deleteBtn.onclick = async () => {
+    if (confirm("Mesaj silinsin mi?")) {
+      const convoId = getConversationId(currentUser.uid, selectedFriendId);
+      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+
+      // DOM'dan mesajı kaldır
+      const divToRemove = document.querySelector(.message[data-id="${msg.id}"]);
+      if (divToRemove) divToRemove.remove();
+    }
+    // Mesaj silindiğinde, Firestore'dan silme işlemi yapalım
+await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+
+// Dinleyici kullanarak anında silmeyi karşı tarafa yansıtalım
+const messagesCol = collection(db, "conversations", convoId, "messages");
+const unsubMessages = onSnapshot(messagesCol, snapshot => {
+  snapshot.docChanges().forEach(change => {
+    if (change.type === "removed") {
+      // Silinen mesajı DOM'dan kaldırıyoruz
+      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+      if (msgDiv) {
+        msgDiv.remove(); // DOM'dan mesajı sil
+      }
+    }
+  });
+});
+  };
+
+  div.appendChild(editBtn);
+  div.appendChild(deleteBtn);
+}
 
   return div;
 }
@@ -452,7 +501,7 @@ window.sendMessage = async () => {
     await updateDoc(doc(msgCol, editId), { text });
 
     // DOM'da mesaj metnini güncelle
-    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+    const msgDiv = document.querySelector(.message[data-id="${editId}"]);
     if (msgDiv) {
       msgDiv.querySelector(".msg-text").innerText = text;
     }
