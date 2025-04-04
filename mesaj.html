@@ -455,11 +455,11 @@ saveEditBtn.onclick = async () => {
     msgDiv.querySelector(".msg-text").innerText = editedText;
   }
 
-  // Güncel mesajları dinle
+  // Firebase dinleyicisini güncelle
   const messagesCol = collection(db, "conversations", convoId, "messages");
-  onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+  onSnapshot(messagesCol, (snapshot) => {
     snapshot.docChanges().forEach(change => {
-      if (change.type === "modified") {
+      if (change.type === "modified" && change.doc.id === msg.id) {
         const updatedMsg = change.doc.data();
         const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
         if (msgDiv) {
@@ -482,19 +482,21 @@ deleteBtn.onclick = async () => {
     const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
     if (divToRemove) divToRemove.remove();
 
-    // Firebase'deki dinleyici diğer kullanıcıya güncellenmiş durumu iletilsin
+    // Firebase dinleyicisini güncelle
     const messagesCol = collection(db, "conversations", convoId, "messages");
-    onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
+    onSnapshot(messagesCol, (snapshot) => {
       snapshot.docChanges().forEach(change => {
         if (change.type === "removed") {
-          const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-          if (msgDiv) msgDiv.remove(); // Silinen mesajı UI'dan kaldır
+          const removedMsgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
+          if (removedMsgDiv) {
+            removedMsgDiv.remove(); // Silinen mesajı UI'dan kaldır
+          }
         }
       });
     });
   }
 };
-
+  
   div.appendChild(editBtn);
   div.appendChild(deleteBtn);
 }
