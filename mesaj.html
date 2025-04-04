@@ -236,9 +236,9 @@ onAuthStateChanged(auth, user => {
 
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
-  const list = document.getElementById("chatListContent");
+  const list = document.getElementById("chatList");
   list.innerHTML = "";
-
+  
   usersSnap.forEach(async (userDoc) => {
     const userData = userDoc.data();
     const userId = userDoc.id;
@@ -268,6 +268,7 @@ async function loadChatList(uid) {
       notif.className = "notification";
       div.appendChild(notif);
     }
+
     div.onclick = () => openChat(userId, div);
     list.appendChild(div);
   });
