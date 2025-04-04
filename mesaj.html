@@ -6,15 +6,16 @@
   <link rel="icon" type="image/png" href="image1.png" />    
   <style>    
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }    
-    body {    
+    body {
       background: url('image1.png') no-repeat center center fixed;
-      background-size: cover;    
-      animation: gradientShift 15s ease infinite;    
-      color: white;    
-      min-height: 100vh;    
-      display: flex;    
-      flex-direction: column;    
-    }    
+      background-size: cover; /* Ensures the image covers the full viewport */
+      min-height: 100vh; /* Ensures the body takes up the full height of the screen */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
     @keyframes gradientShift {    
       0% { background-position: 0% 50%; }    
       50% { background-position: 100% 50%; }    
@@ -561,7 +562,9 @@ window.sendMessage = async () => {
   input.value = "";
 };
 
-window.goHome = () => location.href = "anasayfa.html";
+window.goHome = () => {
+  location.href = "anasayfa.html"; // Ensure this is the correct path to the homepage
+};
 
 async function updateChatListItem(friendId) {
   const uid = currentUser.uid;
