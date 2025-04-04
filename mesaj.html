@@ -140,13 +140,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-    #searchInput {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: none;
-    }
     @media (max-width: 768px) {
       .container { flex-direction: column; }
       .chat-list {
@@ -172,12 +165,13 @@
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
     <div>
-      <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
+      <button class="lang-btn" onclick="goHome()" id="homeBtn">🏠 Ana Sayfa</button>
+      <button class="lang-btn" onclick="setLang('tr')" id="btnTr">🇹🇷 Türkçe</button>
+      <button class="lang-btn" onclick="setLang('en')" id="btnEn">🇬🇧 English</button>
     </div>
   </header>
   <div class="container">
     <div class="chat-list" id="chatList">
-      <input type="text" id="searchInput" placeholder="Kişi Ara..." onkeyup="filterChats()" />
       <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
       Yükleniyor...
     </div>
@@ -227,13 +221,18 @@ const t = {
     home: "Ana Sayfa", turkish: "🇹🇷 Türkçe", english: "🇬🇧 English",
     sentAt: "Gönderildi", you: "Sen"
   },
+  en: {
+    pageTitle: "Messages", placeholder: "Type a message...", send: "Send",
+    home: "Home Page", turkish: "🇹🇷 Turkish", english: "🇬🇧 English",
+    sentAt: "Sent at", you: "You"
+  }
 };
 
 function updateTexts() {
   document.getElementById("pageTitle").innerText = t[lang].pageTitle;
   document.getElementById("messageInput").placeholder = t[lang].placeholder;
   document.querySelector(".send-btn").innerText = t[lang].send;
-  document.getElementById("homeBtn").innerText = t[lang].home;
+  document.getElementById("homeBtn").innerText = "🏠 " + t[lang].home;
   document.getElementById("btnTr").innerText = t[lang].turkish;
   document.getElementById("btnEn").innerText = t[lang].english;
 
@@ -309,19 +308,6 @@ async function loadChatList(uid) {
   });
 }
 
-function filterChats() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  const chatItems = document.querySelectorAll(".chat-item");
-  chatItems.forEach(item => {
-    const username = item.querySelector("strong").textContent.toLowerCase();
-    if (username.indexOf(query) === -1) {
-      item.style.display = "none";
-    } else {
-      item.style.display = "block";
-    }
-  });
-}
-  
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
