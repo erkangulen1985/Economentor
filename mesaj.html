@@ -332,6 +332,7 @@ if (chatItem) {
 
   setupLoadMoreButton(messagesCol);
 
+// Karşı tarafın mesajları anında görmesi için
 unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
   snapshot.docChanges().forEach(async (change) => {
     const msg = { id: change.doc.id, ...change.doc.data() };
@@ -351,7 +352,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       // Mesaj silindiğinde
       const div = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (div) {
-        div.remove(); // Mesaj DOM'dan da silinir
+        div.remove(); // Silinen mesaj DOM'dan da silinir
       }
     }
 
