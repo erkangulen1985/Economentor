@@ -236,24 +236,23 @@ onAuthStateChanged(auth, user => {
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatListContent");
-  list.innerHTML = "";
-  
+  list.innerHTML = "";  // Yükleniyor ifadesini temizle
+
   let chats = [];
   
+  // Kullanıcıları çekiyoruz
   usersSnap.forEach(async (userDoc) => {
     const userData = userDoc.data();
     const userId = userDoc.id;
 
-    if (userId === uid) return;
+    if (userId === uid) return;  // Mevcut kullanıcıyı hariç tut
 
-    const name = userData.username;
+    const name = userData.username || "Bilinmeyen";  // Kullanıcı adı varsa göster, yoksa "Bilinmeyen" yazdır
     const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    const lastMsgSnap = await getDocs(
-      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
-    );
-
+    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
+    
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
@@ -261,12 +260,13 @@ async function loadChatList(uid) {
       hasNew = !msg.seenBy?.includes(uid);
     }
 
-    chats.push({ userId, name, lastMsg, hasNew });
+    chats.push({ userId, name, lastMsg, hasNew });  // Kullanıcıları ve son mesajları sakla
   });
 
-  // Sort by recent conversations first
+  // Kullanıcıları sıralıyoruz (yeniden mesajları olanlar önce gelir)
   chats = chats.sort((a, b) => b.hasNew - a.hasNew);
 
+  // Kullanıcıları chat listesine ekliyoruz
   chats.forEach((chat) => {
     const div = document.createElement("div");
     div.className = "chat-item";
@@ -274,10 +274,11 @@ async function loadChatList(uid) {
     if (chat.hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
-      div.appendChild(notif);
+      div.appendChild(notif);  // Eğer yeni mesaj varsa, bildirim göstermek için
     }
-    div.onclick = () => openChat(chat.userId, div);
-    list.appendChild(div);
+
+    div.onclick = () => openChat(chat.userId, div);  // Kullanıcıya tıklanıldığında sohbeti aç
+    list.appendChild(div);  // Chat listesine kullanıcıyı ekle
   });
 }
 
