@@ -313,6 +313,7 @@ window.sendMessage = async () => {
       const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
       await addDoc(msgCol, msg);
 
+      // Kullanıcıya yeni mesaj olduğuna dair bilgi verelim
       await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
 
       input.value = "";
@@ -323,6 +324,10 @@ window.sendMessage = async () => {
   } finally {
     sendButton.disabled = false;
   }
+
+  // Sayfayı en alta kaydır
+  const area = document.getElementById("messageArea");
+  area.scrollTop = area.scrollHeight;
 };
 
 async function openChat(fid, el) {
@@ -345,12 +350,13 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // İlk 20 mesajı veritabanından alalım
+  // İlk 20 mesajı veritabanından alalım (en yeni mesajdan başlayarak)
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
+  // Mesajları ters sırayla ekleyelim (en son mesaj en alta)
   for (const msg of messages.reverse()) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
@@ -439,12 +445,8 @@ async function setupLoadMoreButton(messagesCol) {
     const prevScrollHeight = area.scrollHeight;
 
     // Daha eski mesajları yüklemek için endBefore kullanarak sorguyu yapıyoruz
-    const snap = await getDocs(query(
-      messagesCol,
-      orderBy("timestamp", "desc"),
-      endBefore(firstVisible),
-      limitToLast(20)
-    ));
+    const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
+
 
     const messages = [];
     snap.forEach(doc => {
