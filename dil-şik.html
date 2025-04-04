@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Dilek ve Şikayet</title>
+  <title>Economentor | Dilek ve Şikayet</title>
   <style>
     body {
       background: url('image2.png') no-repeat center center fixed;
@@ -12,8 +12,35 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 50px;
+      padding-top: 60px;
     }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 15px 0;
+      text-align: center;
+      z-index: 1000;
+    }
+
+    .top-bar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 20px;
+      border: 2px solid white;
+      border-radius: 6px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .top-bar a:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+
     textarea {
       width: 90%;
       max-width: 600px;
@@ -21,11 +48,12 @@
       border-radius: 8px;
       padding: 10px;
       font-size: 16px;
-      margin-top: 20px;
+      margin-top: 30px;
     }
+
     button {
       margin-top: 15px;
-      padding: 10px 20px;
+      padding: 10px 25px;
       font-size: 16px;
       border-radius: 6px;
       background-color: #4CAF50;
@@ -33,12 +61,21 @@
       border: none;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #3e8e41;
+    }
+
+    h2 {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
+
+  <div class="top-bar">
+    <a href="anasayfa.html">Anasayfa</a>
+  </div>
 
   <h2>Dilek ve Şikayet Formu</h2>
   <textarea id="message" placeholder="Mesajınızı buraya yazın..."></textarea><br>
@@ -81,19 +118,17 @@
         return;
       }
 
-      // Firestore'a kaydet
       await addDoc(collection(db, "feedback"), {
         username: currentUsername,
         message: message,
         timestamp: serverTimestamp()
       });
 
-      // SendGrid ile e-posta bildirimi
       await addDoc(collection(db, "mail"), {
         to: "onurgulen2006@gmail.com",
         message: {
           subject: "Yeni Dilek/Şikayet Geldi!",
-          text: `Yeni bir mesaj gönderildi:\nKullanıcı: ${currentUsername}\nMesaj: ${message}`
+          text: `Kullanıcı: ${currentUsername}\nMesaj: ${message}`
         }
       });
 
