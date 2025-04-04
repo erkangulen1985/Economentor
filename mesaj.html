@@ -393,6 +393,8 @@ async function buildMessageDiv(msg) {
   return div;
 }
 
+let isSending = false;  // Mesaj gönderme durumu kontrolü
+
 window.sendMessage = async () => {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
@@ -407,6 +409,9 @@ window.sendMessage = async () => {
 
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
+
+  // Mesajları eklemek için messageArea öğesini doğru şekilde seçelim
+  const area = document.getElementById("messageArea");
 
   try {
     if (editId) {
@@ -424,7 +429,7 @@ window.sendMessage = async () => {
 
       // Yeni mesajı anında gör
       const div = await buildMessageDiv({ id: docRef.id, ...msg });
-      document.getElementById("messageArea").appendChild(div);
+      area.appendChild(div);  // Mesajı doğru elemana ekleyelim
       area.scrollTop = area.scrollHeight;  // Son mesaja kaydır
 
       // Arkadaşa bildirim gönder
