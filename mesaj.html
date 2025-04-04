@@ -412,80 +412,42 @@ async function buildMessageDiv(msg) {
 
   div.setAttribute("data-sender-name", senderName);
 
-div.innerHTML = `
-  <div class="sender-label">${senderName}</div>
-  <div class="msg-text">${msg.text}</div>
-  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-`;
+  div.innerHTML = `
+    <div class="sender-label">${senderName}</div>
+    <div class="msg-text">${msg.text}</div>
+    <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+  `;
 
-if (msg.sender === currentUser.uid) {
-const editBtn = document.createElement("button");
-editBtn.textContent = "✏️";
-editBtn.style.marginLeft = "6px";
-editBtn.onclick = async () => {
-  const input = document.getElementById("messageInput");
-  input.value = msg.text;
-  input.focus();
-  input.dataset.editing = msg.id; // Düzenleme modunu başlat
+  if (msg.sender === currentUser.uid) {
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "✏️";
+    editBtn.style.marginLeft = "6px";
+    editBtn.onclick = () => {
+      const input = document.getElementById("messageInput");
+      input.value = msg.text;
+      input.focus();
+      input.dataset.editing = msg.id; // Düzenleme modunu başlat
+    };
 
-  // Define convoId here
-  const convoId = getConversationId(currentUser.uid, selectedFriendId);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.style.marginLeft = "6px";
+    deleteBtn.onclick = async () => {
+      if (confirm("Mesaj silinsin mi?")) {
+        const convoId = getConversationId(currentUser.uid, selectedFriendId);
+        await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
 
-  // Update Firestore with the new text
-  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text });
-
-  // Listen for instant updates to the message
-  const messagesCol = collection(db, "conversations", convoId, "messages");
-  const unsubMessages = onSnapshot(messagesCol, snapshot => {
-    snapshot.docChanges().forEach(change => {
-      if (change.type === "modified") {
-        // Update the DOM when the message is modified
-        const modifiedMessage = change.doc.data();
-        const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-        if (msgDiv) {
-          msgDiv.querySelector(".msg-text").innerText = modifiedMessage.text;
-        }
+        // DOM'dan mesajı kaldır
+        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+        if (divToRemove) divToRemove.remove();
       }
-    });
-  });
-};
-}
-  
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "🗑️";
-  deleteBtn.style.marginLeft = "6px";
-  deleteBtn.onclick = async () => {
-    if (confirm("Mesaj silinsin mi?")) {
-      const convoId = getConversationId(currentUser.uid, selectedFriendId);
-      await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+    };
 
-      // DOM'dan mesajı kaldır
-      const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (divToRemove) divToRemove.remove();
-    }
-    // Mesaj silindiğinde, Firestore'dan silme işlemi yapalım
-await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
+    div.appendChild(editBtn);
+    div.appendChild(deleteBtn);
+  }
 
-// Dinleyici kullanarak anında silmeyi karşı tarafa yansıtalım
-const messagesCol = collection(db, "conversations", convoId, "messages");
-const unsubMessages = onSnapshot(messagesCol, snapshot => {
-  snapshot.docChanges().forEach(change => {
-    if (change.type === "removed") {
-      // Silinen mesajı DOM'dan kaldırıyoruz
-      const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-      if (msgDiv) {
-        msgDiv.remove(); // DOM'dan mesajı sil
-      }
-    }
-  });
-});
-  };
-
-  div.appendChild(editBtn);
-  div.appendChild(deleteBtn);
-}
-
-  return div;
+  return div; // This return statement should be inside the function
 }
 
 window.sendMessage = async () => {
