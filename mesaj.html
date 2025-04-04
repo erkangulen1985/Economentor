@@ -335,28 +335,37 @@ window.sendMessage = async () => {
   }
 };
 
-// onSnapshot ile mesajları dinleyelim (sadece Firebase'ten gelen yeni mesajları DOM'a ekleyelim)
+let isLoading = false;
+let firstVisible = null;  // Son yüklenen mesajın referansı
+let loadedMessageIds = new Set();  // Yüklenen mesajların ID'lerini takip etmek için
+
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
+
+  // İlk başta mesaj alanını temizleyelim ve "Daha fazla mesaj yükle" butonunu ekleyelim
   area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
+
   loadedMessageIds.clear();
   firstVisible = null;
 
-  if (unsubMessages) unsubMessages(); // Eski dinleyiciyi temizle
+  // Eğer eski dinleyici varsa temizleyelim
+  if (unsubMessages) unsubMessages(); 
+
+  // Mevcut sohbeti aktif hale getirelim
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // İlk mesajları yükle
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+  // İlk 20 mesajı veritabanından alalım
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
-  for (const msg of messages) {
+  for (const msg of messages.reverse()) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
     loadedMessageIds.add(msg.id);
@@ -365,36 +374,59 @@ async function openChat(fid, el) {
   // Sayfayı en son mesaja kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  // Anlık yeni mesajları dinlemek için onSnapshot kullan
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-    snapshot.docChanges().forEach(async (change) => {
-      const msg = { id: change.doc.id, ...change.doc.data() };
-
-      if (change.type === "added") {
-        // Yeni mesaj eklendiğinde
-        if (!loadedMessageIds.has(msg.id)) {  // Eğer mesaj daha önce yüklenmediyse
-          const div = await buildMessageDiv(msg);
-          area.appendChild(div);
-          area.scrollTop = area.scrollHeight; // En son mesaja kaydır
-          loadedMessageIds.add(msg.id);  // Yüklenen mesajı kaydet
-        }
-      } else if (change.type === "modified") {
-        // Mesaj düzenlendiğinde
-        const div = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (div) {
-          div.querySelector(".msg-text").innerText = msg.text;
-        }
-      } else if (change.type === "removed") {
-        // Mesaj silindiğinde
-        const div = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (div) {
-          div.remove();
-        }
-      }
-    });
-  });
+  // "Daha fazla mesaj yükle" butonuna tıklanınca eski mesajları yükleyelim
+  setupLoadMoreButton(messagesCol);
 }
 
+// Daha eski mesajları yükleme işlevi
+function setupLoadMoreButton(messagesCol) {
+  const loadBtn = document.getElementById("loadMoreBtn");
+
+  if (!loadBtn || !firstVisible) return;
+
+  loadBtn.onclick = async () => {
+    if (isLoading) return;
+    isLoading = true;
+
+    const area = document.getElementById("messageArea");
+    const prevScrollHeight = area.scrollHeight;
+
+    // Daha eski mesajları yüklemek için endBefore kullanarak sorguyu yapıyoruz
+    const snap = await getDocs(query(
+      messagesCol,
+      orderBy("timestamp", "desc"),
+      endBefore(firstVisible),
+      limitToLast(20)
+    ));
+
+    const messages = [];
+    snap.forEach(doc => {
+      if (!loadedMessageIds.has(doc.id)) {
+        messages.push({ id: doc.id, ...doc.data() });
+        loadedMessageIds.add(doc.id);
+      }
+    });
+
+    for (const msg of messages.reverse()) {
+      const div = await buildMessageDiv(msg);
+      area.insertBefore(div, loadBtn.nextSibling); // Yüklenen mesajları başa ekleyelim
+    }
+
+    // Eğer daha fazla mesaj yoksa butonu gizle
+    if (!snap.empty) {
+      firstVisible = snap.docs[0];
+    } else {
+      loadBtn.style.display = "none";
+    }
+
+    // Yeni mesajlara kaydırma yapalım
+    const newScrollHeight = area.scrollHeight;
+    area.scrollTop = newScrollHeight - prevScrollHeight;
+    isLoading = false;
+  };
+}
+
+// Mesajları DOM'a ekleme fonksiyonu
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
   div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
@@ -436,7 +468,9 @@ async function buildMessageDiv(msg) {
 
         // DOM'dan mesajı kaldır
         const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (divToRemove) divToRemove.remove();
+        if (divToRemove) {
+          divToRemove.remove();
+        }
       }
     };
 
@@ -445,6 +479,12 @@ async function buildMessageDiv(msg) {
   }
 
   return div;
+}
+
+// Firebase zaman damgasını düzgün formatta göstermek için yardımcı fonksiyon
+function formatTimestamp(ts) {
+  const d = new Date(Number(ts));
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 let isSending = false;  // Mesaj gönderme durumu kontrolü
