@@ -385,8 +385,8 @@ function setupLoadMoreButton(messagesCol) {
   if (!loadBtn || !firstVisible) return;
 
   loadBtn.onclick = async () => {
-    if (isLoading) return;
-    isLoading = true;
+    if (isLoading) return;  // Eğer yükleme işlemi devam ediyorsa, işlem yapılmasın
+    isLoading = true;  // Yükleme işlemi başladı
 
     const area = document.getElementById("messageArea");
     const prevScrollHeight = area.scrollHeight;
@@ -422,9 +422,10 @@ function setupLoadMoreButton(messagesCol) {
     // Yeni mesajlara kaydırma yapalım
     const newScrollHeight = area.scrollHeight;
     area.scrollTop = newScrollHeight - prevScrollHeight;
-    isLoading = false;
+    isLoading = false;  // Yükleme tamamlandı
   };
 }
+
 
 // Mesajları DOM'a ekleme fonksiyonu
 async function buildMessageDiv(msg) {
