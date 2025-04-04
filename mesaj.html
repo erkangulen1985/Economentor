@@ -332,32 +332,46 @@ if (chatItem) {
 
   setupLoadMoreButton(messagesCol);
 
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)), async (snapshot) => {
-  for (const docChange of snapshot.docChanges()) {
-    const msg = { id: docChange.doc.id, ...docChange.doc.data() };
-    if (loadedMessageIds.has(msg.id)) continue;
+unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+  snapshot.docChanges().forEach(async (change) => {
+    const msg = { id: change.doc.id, ...change.doc.data() };
 
-    loadedMessageIds.add(msg.id);
-    const div = await buildMessageDiv(msg);
-    area.appendChild(div);
-    setTimeout(() => area.scrollTop = area.scrollHeight, 100);
+    if (change.type === "added") {
+      // Yeni mesaj eklendiğinde
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight; // Sayfayı en alta kaydır
+    } else if (change.type === "modified") {
+      // Mesaj düzenlendiğinde
+      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (div) {
+        div.querySelector(".msg-text").innerText = msg.text;
+      }
+    } else if (change.type === "removed") {
+      // Mesaj silindiğinde
+      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (div) {
+        div.remove(); // Mesaj DOM'dan da silinir
+      }
+    }
 
-    // Önce seenBy güncelle
+    // Mesaj görüldüyse "seenBy" alanını güncelle
     if (!msg.seenBy?.includes(currentUser.uid)) {
       await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
         seenBy: arrayUnion(currentUser.uid)
       });
+
+      // Inbox bildirimini kapat
       await updateDoc(doc(db, "users", currentUser.uid), {
-       inboxHasNew: false
-  });
+        inboxHasNew: false
+      });
     }
 
-    // Sonra listeyi güncelle (bildirim işareti artık görünmemeli)
+    // Listeyi güncelle (bildirim işareti artık görünmemeli)
     await updateChatListItem(selectedFriendId);
-  }
+  });
 });
-}
-
+  
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
   if (!loadBtn || !firstVisible) return;
