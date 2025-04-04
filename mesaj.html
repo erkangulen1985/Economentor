@@ -360,7 +360,10 @@ async function openChat(fid, el) {
 
       // Önce seenBy güncelle
       if (!msg.seenBy?.includes(currentUser.uid)) {
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        async function updateMessage(convoId, msg) {
+  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text: editedText });
+}
+
           seenBy: arrayUnion(currentUser.uid)
         });
       }
