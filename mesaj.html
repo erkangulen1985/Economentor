@@ -423,43 +423,46 @@ async function buildMessageDiv(msg) {
   `;
 
 if (msg.sender === currentUser.uid) {
-const editBtn = document.createElement("button");
-editBtn.textContent = "✏️";
-editBtn.style.marginLeft = "6px";
-editBtn.onclick = () => {
-  const input = document.getElementById("messageInput");
-  input.value = msg.text;
-  input.focus();
-  input.dataset.editing = msg.id; // Düzenleme modunu başlat
-};
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "✏️";
+  editBtn.style.marginLeft = "6px";
+  editBtn.onclick = () => {
+    const input = document.getElementById("messageInput");
+    input.value = msg.text;  // Eski mesaj metni input'a aktarılıyor
+    input.focus();
+    input.dataset.editing = msg.id; // Düzenleme modunu başlat
+  };
 
-const saveEditBtn = document.createElement("button");
-saveEditBtn.textContent = "💾";
-saveEditBtn.style.marginLeft = "6px";
-saveEditBtn.onclick = async () => {
-  const editedText = document.getElementById("messageInput").value;
-  await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), { text: editedText });
+  // Mesaj düzenlendiğinde Firestore'a kaydet
+  const saveEditedMessage = async () => {
+    const editingMessageId = input.dataset.editing;  // Düzenlenen mesajın ID'si
+    const editedMessageText = input.value;  // Kullanıcı tarafından girilen yeni mesaj
 
-  // DOM'dan mesajı düzenle
-  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-  if (msgDiv) {
-    msgDiv.querySelector(".msg-text").innerText = editedText;
-  }
+    if (editedMessageText) {
+      try {
+        // Firestore'da mesajı güncelle
+        await updateDoc(doc(db, "conversations", convoId, "messages", editingMessageId), {
+          text: editedMessageText,  // Yeni mesaj metni
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()  // Zaman damgasını güncelle
+        });
 
-  // Güncel mesajları dinle
-  const messagesCol = collection(db, "conversations", convoId, "messages");
-  onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
-    snapshot.docChanges().forEach(change => {
-      if (change.type === "modified") {
-        const updatedMsg = change.doc.data();
-        const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-        if (msgDiv) {
-          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
-        }
+        console.log("Mesaj başarıyla düzenlendi");
+
+        // Düzenleme işlemi sonrasında input'u temizle ve düzenleme modunu kapat
+        input.value = "";
+        delete input.dataset.editing;
+      } catch (error) {
+        console.error("Mesaj düzenleme hatası: ", error);
       }
-    });
-  });
-};
+    }
+  };
+
+  // Düzenle butonunu DOM'a ekle
+  messageActions.appendChild(editBtn);
+
+  // Mesaj düzenle butonuna tıklanıldığında, düzenleme yapılacak mesajı input'a aktar
+  input.addEventListener("input", saveEditedMessage);
+}
 
 const deleteBtn = document.createElement("button");
 deleteBtn.textContent = "🗑️";
@@ -467,22 +470,17 @@ deleteBtn.style.marginLeft = "6px";
 deleteBtn.onclick = async () => {
   if (confirm("Mesaj silinsin mi?")) {
     const convoId = getConversationId(currentUser.uid, selectedFriendId);
+
+    // Firestore'dan mesajı sil
     await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
 
     // DOM'dan mesajı kaldır
     const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
     if (divToRemove) divToRemove.remove();
 
-    // Firebase'deki dinleyici diğer kullanıcıya güncellenmiş durumu iletilsin
-    const messagesCol = collection(db, "conversations", convoId, "messages");
-    onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), (snapshot) => {
-      snapshot.docChanges().forEach(change => {
-        if (change.type === "removed") {
-          const msgDiv = document.querySelector(`.message[data-id="${change.doc.id}"]`);
-          if (msgDiv) msgDiv.remove(); // Silinen mesajı UI'dan kaldır
-        }
-      });
-    });
+    // Firebase'deki dinleyici, diğer kullanıcıya güncellenmiş durumu iletmek için zaten çalışıyor.
+    // Bu yüzden ek bir dinleyici başlatmaya gerek yok.
+
   }
 };
 
