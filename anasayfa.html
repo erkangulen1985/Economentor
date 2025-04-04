@@ -128,26 +128,35 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const username = data.username || "Kullanıcı";
-          const role = data.role || "user";
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // Kullanıcı giriş yapmamışsa yönlendir
+    alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
+    window.location.href = "index.html";
+    return;
+  }
 
-          document.getElementById("userName").innerText = username;
+  const userRef = doc(db, "users", user.uid);
+  const docSnap = await getDoc(userRef);
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const username = data.username || "Kullanıcı";
+    const role = data.role || "user";
 
-          // Admin ise butonu görünür yap
-          if (role === "admin") {
-            const adminBtn = document.getElementById("adminPanelLink");
-            adminBtn.style.display = "inline-block";
-            adminBtn.href = "adminpanel.html";
-          }
-        }
-      }
-    });
+    document.getElementById("userName").innerText = username;
+
+    // Adminse butonu göster
+    if (role === "admin") {
+      const adminBtn = document.getElementById("adminPanelLink");
+      adminBtn.style.display = "inline-block";
+      adminBtn.href = "adminpanel.html";
+    }
+  } else {
+    alert("Kullanıcı bilgisi bulunamadı.");
+    window.location.href = "index.html";
+  }
+});
+
   </script>
 
 </body>
