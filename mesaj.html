@@ -290,50 +290,37 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   const editId = input.dataset.editing;
 
-  // Eğer mesaj boşsa veya kullanıcı seçilmemişse, işlem yapılmaz
   if (!text || !selectedFriendId || !currentUser) return;
 
-  // Mesaj gönderme sırasında tekrar gönderilmesini engelle
   const sendButton = document.querySelector(".send-btn");
-  sendButton.disabled = true; // Butonu devre dışı bırak
+  sendButton.disabled = true;
 
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
   try {
     if (editId) {
-      // Düzenleme yapılıyorsa
       const docRef = doc(msgCol, editId);
       const docSnap = await getDoc(docRef);
-
       if (!docSnap.exists()) {
         console.error("Belge bulunamadı:", editId);
         return;
       }
 
-      // Mesajı güncelle
       await updateDoc(docRef, { text });
-      delete input.dataset.editing; // Düzenleme modunu kapat
+      delete input.dataset.editing;
     } else {
-      // Yeni mesaj ekliyorsak
       const msg = { sender: currentUser.uid, text, timestamp: Date.now(), seenBy: [] };
-      await addDoc(msgCol, msg); // Mesajı Firebase'e ekleyin, DOM'a eklemiyoruz
+      await addDoc(msgCol, msg);
 
-      // Arkadaşa bildirim gönder
       await updateDoc(doc(db, "users", selectedFriendId), { inboxHasNew: true });
 
-      // Metin kutusunu temizle
       input.value = "";
-
-      // Yeni mesaj ekledikten sonra sayfayı en alta kaydırma
-      const area = document.getElementById("messageArea");
-      area.scrollTop = area.scrollHeight;  // Sayfanın en altına kaydır
     }
 
   } catch (error) {
     console.error("Mesaj gönderme hatası:", error);
   } finally {
-    // Butonu tekrar etkinleştir
     sendButton.disabled = false;
   }
 };
@@ -342,14 +329,14 @@ async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
 
-  // Mesajları yüklerken sıralama değiştirildi
+  // İlk başta mesaj alanını temizleyelim ve "Daha fazla mesaj yükle" butonunu ekleyelim
   area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
 
   loadedMessageIds.clear();
   firstVisible = null;
 
   // Eğer eski dinleyici varsa temizleyelim
-  if (unsubMessages) unsubMessages(); 
+  if (unsubMessages) unsubMessages();
 
   // Mevcut sohbeti aktif hale getirelim
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
@@ -358,20 +345,21 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // İlk 20 mesajı veritabanından alalım, "asc" sıralaması ile
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+  // İlk 20 mesajı veritabanından alalım
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
-  for (const msg of messages) {
+  for (const msg of messages.reverse()) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
     loadedMessageIds.add(msg.id);
   }
-
+  
   // Sayfayı en son mesaja kaydır
-  area.scrollTop = area.scrollHeight;  // En alta kaydır
+  area.scrollTop = area.scrollHeight;  // Sayfayı en alta kaydır
+
   // "Daha fazla mesaj yükle" butonuna tıklanınca eski mesajları yükleyelim
   setupLoadMoreButton(messagesCol);
 }
@@ -491,6 +479,35 @@ if (homeBtn) {
     location.href = "anasayfa.html";
   });
 }
+
+  // Anlık yeni mesajları dinlemek için onSnapshot kullan
+unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "desc")), async (snapshot) => {
+  snapshot.docChanges().forEach(async (change) => {
+    const msg = { id: change.doc.id, ...change.doc.data() };
+
+    if (change.type === "added") {
+      // Yeni mesaj eklendiğinde
+      const div = await buildMessageDiv(msg);
+      area.appendChild(div);
+      
+      // Sayfayı en alta kaydır
+      area.scrollTop = area.scrollHeight;
+    } else if (change.type === "modified") {
+      // Mesaj düzenlendiğinde
+      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (div) {
+        div.querySelector(".msg-text").innerText = msg.text;
+      }
+    } else if (change.type === "removed") {
+      // Mesaj silindiğinde
+      const div = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (div) {
+        div.remove();
+      }
+    }
+  });
+});
+
 </script>
 </body>
 </html>
