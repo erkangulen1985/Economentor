@@ -301,13 +301,12 @@ if (notification) {
   notification.remove();
 }
   });
-
-    // Sohbeti tıklanabilir hale getirme
+    
+  // Sohbeti tıklanabilir hale getirme
     div.onclick = () => openChat(userId, div);
     list.appendChild(div);
-  });
-}
-
+  }
+  
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
