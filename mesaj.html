@@ -302,17 +302,20 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = `<button id="loadMoreBtn" style="margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;">⬆️ Daha eski mesajları yükle</button>`;
+  area.innerHTML = "";
+
+  const loadBtn = document.createElement("button");
+  loadBtn.id = "loadMoreBtn";
+  loadBtn.textContent = "⬆️ Daha eski mesajları yükle";
+  loadBtn.style = "margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;";
+  area.appendChild(loadBtn);
+
   loadedMessageIds.clear();
   firstVisible = null;
 
   if (unsubMessages) unsubMessages();
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
-
-  const notifDot = el.querySelector(".notification");
-  if (notifDot) notifDot.remove();
-  // Sohbet açıldığında kırmızı bildirim kalmasın diye tüm son mesajları seenBy'ya ekle
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
@@ -322,22 +325,18 @@ async function openChat(fid, el) {
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
   firstVisible = snap.docs[0];
 
-  for (const msg of messages.reverse()) {
+  for (const msg of messages) {
     const div = await buildMessageDiv(msg);
-    area.insertBefore(div, area.firstChild); // En üste ekle
-  }
-
-    // Eğer kullanıcı görmemişse Firestore'da güncelle
-    if (!msg.seenBy?.includes(currentUser.uid)) {
-      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-        seenBy: arrayUnion(currentUser.uid)
-      });
-    }
+    area.appendChild(div);
+    loadedMessageIds.add(msg.id);
   }
 
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
   setupLoadMoreButton(messagesCol);
+
+  // ...onSnapshot burada kalabilir...
+}
 
 unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
   snapshot.docChanges().forEach(async (change) => {
@@ -401,7 +400,7 @@ function setupLoadMoreButton(messagesCol) {
       const div = await buildMessageDiv(msg);
       area.insertBefore(div, loadBtn.nextSibling);
     }
-  
+
     if (!snap.empty) {
       firstVisible = snap.docs[0];
     } else {
@@ -409,7 +408,7 @@ function setupLoadMoreButton(messagesCol) {
     }
 
     const newScrollHeight = area.scrollHeight;
-    area.scrollTop = newScrollHeight - prevScrollHeight;
+    area.scrollTop += newScrollHeight - prevScrollHeight;
     isLoading = false;
   };
 }
