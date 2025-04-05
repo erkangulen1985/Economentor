@@ -164,9 +164,12 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let currentUser = null;  // currentUser değişkeni burada tanımlanmalı
+
     // Kullanıcı Girişi Kontrolü
     onAuthStateChanged(auth, async (user) => {
         if (user) {
+            currentUser = user;  // Kullanıcı girişi yapıldıysa currentUser'a ata
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
