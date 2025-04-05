@@ -284,7 +284,7 @@ async function loadChatList(uid) {
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text;
-      
+
       // Görülmemiş mesaj var mı? Eğer varsa bildirim gösterilecek
       hasNew = !msg.seenBy?.includes(uid);
     }
@@ -349,42 +349,41 @@ async function openChat(fid, el) {
 
   setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
 
-  // Gerçek zamanlı mesajları dinlemek için onSnapshot'ı başlatıyoruz
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-    snapshot.docChanges().forEach(async (change) => {
-      const msg = { id: change.doc.id, ...change.doc.data() };
+unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+  snapshot.docChanges().forEach(async (change) => {
+    const msg = { id: change.doc.id, ...change.doc.data() };
 
-      if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
-        loadedMessageIds.add(msg.id);
-        const div = await buildMessageDiv(msg);
-        document.getElementById("messageArea").appendChild(div);
-        setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
+    if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      document.getElementById("messageArea").appendChild(div);
+      setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
 
-        if (!msg.seenBy?.includes(currentUser.uid)) {
-          await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-            seenBy: arrayUnion(currentUser.uid)
-          });
-        }
+      // Yeni mesaj geldiğinde, eğer bu mesaj görülmemişse, bildirim işareti ekle
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid) // Bu mesajı görünmüş olarak işaretle
+        });
       }
+    }
 
-      if (change.type === "modified") {
-        const updatedMsg = change.doc.data();
-        const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (msgDiv) {
-          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
-        }
+    if (change.type === "modified") {
+      const updatedMsg = change.doc.data();
+      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (msgDiv) {
+        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
       }
+    }
 
-      if (change.type === "removed") {
-        const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (msgDiv) msgDiv.remove();
-      }
-    });
-
-    // Yeni mesajlar geldikçe sayfayı en alta kaydırıyoruz
-    area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+    if (change.type === "removed") {
+      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (msgDiv) msgDiv.remove();
+    }
   });
-}
+
+  // Yeni mesaj geldikçe sayfayı en alta kaydırıyoruz
+  document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
+});
   
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
