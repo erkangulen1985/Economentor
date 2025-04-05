@@ -274,7 +274,7 @@ async function loadChatList(uid) {
 
   list.innerHTML = ""; // Listeyi temizle
 
-  // Arama çubuğunu sabit tutmak için yeniden ekle
+  // Arama çubuğunu her zaman en üstte tutmak için yeniden ekle
   list.appendChild(searchBar);
 
   usersSnap.forEach(async (userDoc) => {
