@@ -265,20 +265,22 @@
     });
 
 async function uploadImage(imageFile) {
-  const { data, error } = await supabase.storage
-    .from('anasayfa-paylasimlari') // buraya resim yüklenecek
-    .upload('images/' + imageFile.name, imageFile);  // 'images' klasörüne resim yükleniyor
+// Resmi Supabase'ye yüklemek ve URL almak
+const { data, error } = await supabase.storage
+  .from('anasayfa-paylasimlari') // Resimlerin bulunduğu bucket
+  .upload('images/' + imageFile.name, imageFile); // Yükleme işlemi
 
-  if (error) {
-    console.error("Resim yüklenirken hata oluştu:", error);
-    alert("Resim yüklenirken bir hata oluştu.");
-    return;  // 'return' burada bir fonksiyon içinde kullanılıyor
-  }
+if (error) {
+  console.error("Resim yüklenirken hata oluştu:", error);
+  return;
+}
 
-  // Resmin URL'sini almak için
-  const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/images/${data.path}`;
-
-  return imageUrl; // imageUrl'yi döndürüyoruz
+// Resmin URL'sini almak
+const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/images/${data.path}`;
+  console.log("Resmin URL'si:", imageUrl);
+  
+  // Burada resmin URL'sini Firestore'a kaydedebilir veya diğer işlemleri yapabilirsiniz.
+  return imageUrl; // Bu URL'yi kullanarak resmi sayfada gösterebilirsiniz.
 }
 
 async function loadPosts() {
@@ -291,27 +293,21 @@ async function loadPosts() {
     const postElement = document.createElement('div');
     postElement.classList.add('post');
 
-    // Resmi yüklerken async fonksiyon çağırıyoruz
-    uploadImage(post.imageFile)  // imageFile, resim dosyanız
-      .then((imageUrl) => {
-        const postImage = `<img src="${imageUrl}" alt="Resim">`;
-        const postDescription = `<p>${post.description}</p>`;
+    // Resmi Firestore'dan alıyoruz
+    const postImage = `<img src="${post.imageUrl}" alt="Resim">`;  // Burada Firestore'dan alınan URL kullanılıyor
+    const postDescription = `<p>${post.description}</p>`;
 
-        const postFooter = `
-          <div class="post-footer">
-            <button class="like-button" onclick="likePost('${doc.id}')"><i class="fas fa-heart"></i> Beğen</button>
-            <span class="likes">Beğeniler: ${post.likes || 0}</span>
-            <button class="dislike-button" onclick="dislikePost('${doc.id}')"><i class="fas fa-thumbs-down"></i> Beğenme</button>
-            <span class="comments">Yorumlar: ${post.comments || 0}</span>
-          </div>
-        `;
+    const postFooter = `
+      <div class="post-footer">
+        <button class="like-button" onclick="likePost('${doc.id}')"><i class="fas fa-heart"></i> Beğen</button>
+        <span class="likes">Beğeniler: ${post.likes || 0}</span>
+        <button class="dislike-button" onclick="dislikePost('${doc.id}')"><i class="fas fa-thumbs-down"></i> Beğenme</button>
+        <span class="comments">Yorumlar: ${post.comments || 0}</span>
+      </div>
+    `;
 
-        postElement.innerHTML = postImage + postDescription + postFooter;
-        document.getElementById('postsContainer').appendChild(postElement);
-      })
-      .catch((error) => {
-        console.error("Resim yüklenirken hata oluştu:", error);
-      });
+    postElement.innerHTML = postImage + postDescription + postFooter;
+    document.getElementById('postsContainer').appendChild(postElement);
   });
 }
 
