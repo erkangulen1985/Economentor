@@ -315,6 +315,7 @@ list.appendChild(div);
 await updateDoc(doc(db, "conversations", convoId), {
   inboxHasNew: false // Görülmemiş mesajları sil
 });
+  }
   
 async function openChat(fid, el) {
   selectedFriendId = fid;
