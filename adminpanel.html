@@ -143,163 +143,88 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+        getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp,
+        query, orderBy, limitToLast, onSnapshot, arrayUnion
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-            authDomain: "economentor-8ddc4.firebaseapp.com",
-            projectId: "economentor-8ddc4",
-            storageBucket: "economentor-8ddc4.appspot.com",
-            messagingSenderId: "835370350520",
-            appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+        authDomain: "economentor-8ddc4.firebaseapp.com",
+        projectId: "economentor-8ddc4",
+        storageBucket: "economentor-8ddc4.appspot.com",
+        messagingSenderId: "835370350520",
+        appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    const username = userData.username || "Yönetici";
-                    const role = userData.role || "user";
+    // Kullanıcı Girişi Kontrolü
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const username = userData.username || "Yönetici";
+                const role = userData.role || "user";
 
-                    if (role !== "admin") {
-                        alert("Bu sayfaya erişim izniniz yok!");
-                        window.location.href = "anasayfa.html";
-                        return;
-                    }
-
-                    document.getElementById("adminUsername").innerText = username;
-                } else {
-                    alert("Kullanıcı bilgisi alınamadı.");
-                    window.location.href = "index.html";
+                if (role !== "admin") {
+                    alert("Bu sayfaya erişim izniniz yok!");
+                    window.location.href = "anasayfa.html";
+                    return;
                 }
+
+                document.getElementById("adminUsername").innerText = username;
             } else {
-                // Giriş yapılmamışsa
-                alert("Lütfen giriş yapınız.");
+                alert("Kullanıcı bilgisi alınamadı.");
                 window.location.href = "index.html";
             }
-        });
-
-        window.showContent = async function (section) {
-            const container = document.getElementById("dynamicContent");
-            container.innerHTML = "";
-
-            if (section === 'mesaj-admin') {
-                container.innerHTML = `
-                    <h3>Kullanıcılar ile Mesajlaşma</h3>
-                    <div id="chatList">Yükleniyor...</div>
-                    <div id="messageArea">Mesajlar Yükleniyor...</div>
-                `;
-                loadChatList();
-            }
-
-            if (section === 'duyuru-admin') {
-                container.innerHTML = `
-                    <h3>Yeni Duyuru Ekle</h3>
-                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
-                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
-                    <div id="duyuruList"></div>
-                `;
-                loadDuyurular();
-            }
-
-            if (section === 'hakkinda-admin') {
-                const hakRef = doc(db, "site", "hakkinda");
-                const hakSnap = await getDoc(hakRef);
-                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
-                container.innerHTML = `
-                    <h3>Hakkında Düzenle</h3>
-                    <textarea id="hakText">${mevcut}</textarea>
-                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
-                `;
-            }
-
-            if (section === 'dil-sik') {
-                container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
-                loadFeedback();
-            }
+        } else {
+            alert("Lütfen giriş yapınız.");
+            window.location.href = "index.html";
         }
+    });
 
-        window.loadChatList = async function () {
-            const list = document.getElementById("chatList");
-            const usersSnap = await getDocs(collection(db, "users"));
-            usersSnap.forEach(async (userDoc) => {
-                const userData = userDoc.data();
-                const userId = userDoc.id;
-                const name = userData.username;
-                const convoId = getConversationId(userId);
+    // Sohbet Kimliği Fonksiyonu
+    function getConversationId(uid1, uid2) {
+        return [uid1, uid2].sort().join("_");
+    }
 
-                const div = document.createElement("div");
-                div.className = "chat-item";
-                div.innerHTML = `<strong>${name}</strong>`;
-                div.onclick = () => openChat(userId);
-                list.appendChild(div);
-            });
-        };
+    // İçerik Gösterme Fonksiyonu
+    window.showContent = async function (section) {
+        const container = document.getElementById("dynamicContent");
+        container.innerHTML = "";
 
-        window.openChat = async function (userId) {
-            const area = document.getElementById("messageArea");
-            area.innerHTML = "Mesajlar Yükleniyor...";
-            const convoId = getConversationId(userId);
-
-            // Mesajları yükle
-            const snap = await getDocs(collection(db, "conversations", convoId, "messages"));
-            snap.forEach((doc) => {
-                const msg = doc.data();
-                const div = document.createElement("div");
-                div.innerHTML = `<p>${msg.text}</p>`;
-                area.appendChild(div);
-            });
-        };
-
-        window.saveDuyuru = async function () {
-            const text = document.getElementById("duyuruText").value.trim();
-            if (!text) return alert("Duyuru metni boş olamaz.");
-            await addDoc(collection(db, "announcements"), {
-                text,
-                createdAt: Timestamp.now()
-            });
-            document.getElementById("duyuruText").value = "";
+        if (section === 'duyuru-admin') {
+            container.innerHTML = `
+                <h3>Yeni Duyuru Ekle</h3>
+                <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
+                <button class="button" onclick="saveDuyuru()">Kaydet</button>
+                <h3 style="margin-top:30px">Tüm Duyurular</h3>
+                <div id="duyuruList"></div>
+            `;
             loadDuyurular();
         }
 
-        window.loadDuyurular = async function () {
-            const duyuruList = document.getElementById("duyuruList");
-            duyuruList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "announcements"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const div = document.createElement("div");
-                div.className = "announcement";
-                div.innerHTML = `
-                    <p>${data.text}</p>
-                    <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-                `;
-                duyuruList.appendChild(div);
-            });
+        if (section === 'hakkinda-admin') {
+            const hakRef = doc(db, "site", "hakkinda");
+            const hakSnap = await getDoc(hakRef);
+            const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
+            container.innerHTML = `
+                <h3>Hakkında Düzenle</h3>
+                <textarea id="hakText">${mevcut}</textarea>
+                <button class="button" onclick="saveHakkinda()">Kaydet</button>
+            `;
         }
 
-        window.deleteDuyuru = async function (id) {
-            await deleteDoc(doc(db, "announcements", id));
-            loadDuyurular();
-        }
-
-        window.saveHakkinda = async function () {
-            const text = document.getElementById("hakText").value;
-            await setDoc(doc(db, "site", "hakkinda"), { text });
-            alert("Hakkında bilgisi kaydedildi.");
-        }
-
-        window.loadFeedback = async function () {
+        if (section === 'dil-sik') {
+            container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
             const feedbackList = document.getElementById("feedbackList");
             const snapshot = await getDocs(collection(db, "feedback"));
             snapshot.forEach((docSnap) => {
@@ -309,16 +234,132 @@
                 div.innerHTML = `
                     <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
                     <p>${data.message}</p>
+                    <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
                     <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
                 `;
                 feedbackList.appendChild(div);
             });
         }
 
-        window.deleteFeedback = async function (id) {
-            await deleteDoc(doc(db, "feedback", id));
-            showContent('dil-sik');
+        if (section === 'mesaj-admin') {
+            container.innerHTML = `<h3>Kullanıcılarla Mesajlaşma</h3><div id="chatList"></div>`;
+            loadChatList();
         }
-    </script>
+    }
+
+    // Duyuru Kaydetme Fonksiyonu
+    window.saveDuyuru = async function () {
+        const text = document.getElementById("duyuruText").value.trim();
+        if (!text) return alert("Duyuru metni boş olamaz.");
+        await addDoc(collection(db, "announcements"), {
+            text,
+            createdAt: Timestamp.now()
+        });
+        document.getElementById("duyuruText").value = "";
+        loadDuyurular();
+    }
+
+    // Duyuruları Yükleme Fonksiyonu
+    window.loadDuyurular = async function () {
+        const duyuruList = document.getElementById("duyuruList");
+        if (!duyuruList) return;
+        duyuruList.innerHTML = "";
+        const querySnapshot = await getDocs(collection(db, "announcements"));
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const div = document.createElement("div");
+            div.className = "announcement";
+            const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
+            div.innerHTML = `
+                <p>${data.text}</p>
+                <small>${tarih}</small>
+                <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
+            `;
+            duyuruList.appendChild(div);
+        });
+    }
+
+    // Duyuru Silme Fonksiyonu
+    window.deleteDuyuru = async function (id) {
+        await deleteDoc(doc(db, "announcements", id));
+        loadDuyurular();
+    }
+
+    // Hakkında Kaydetme Fonksiyonu
+    window.saveHakkinda = async function () {
+        const text = document.getElementById("hakText").value;
+        await setDoc(doc(db, "site", "hakkinda"), { text });
+        alert("Hakkında bilgisi kaydedildi.");
+    }
+
+    // Dilek ve Şikayet Silme Fonksiyonu
+    window.deleteFeedback = async function (id) {
+        await deleteDoc(doc(db, "feedback", id));
+        showContent('dil-sik');
+    }
+
+    // Kullanıcı Sohbetlerini Yükleme Fonksiyonu
+    async function loadChatList() {
+        const usersSnap = await getDocs(collection(db, "users"));
+        const list = document.getElementById("chatList");
+        list.innerHTML = "";
+
+        usersSnap.forEach(async (userDoc) => {
+            const userData = userDoc.data();
+            const userId = userDoc.id;
+
+            const name = userData.username;
+            const convoId = getConversationId(currentUser.uid, userId);
+            const messagesCol = collection(db, "conversations", convoId, "messages");
+
+            const lastMsgSnap = await getDocs(
+                query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+            );
+
+            let lastMsg = "", hasNew = false;
+            if (!lastMsgSnap.empty) {
+                const msg = lastMsgSnap.docs[0].data();
+                lastMsg = msg.text;
+                hasNew = !msg.seenBy?.includes(currentUser.uid);
+            }
+
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+            if (hasNew) {
+                const notif = document.createElement("div");
+                notif.className = "notification";
+                div.appendChild(notif);
+            }
+
+            div.onclick = () => openChat(userId, div);
+            list.appendChild(div);
+        });
+    }
+
+    // Sohbet Açma Fonksiyonu
+    async function openChat(fid, el) {
+        const area = document.getElementById("messageArea");
+        area.innerHTML = "<p>Mesajlar Yükleniyor...</p>";
+
+        const convoId = getConversationId(currentUser.uid, fid);
+        const messagesCol = collection(db, "conversations", convoId, "messages");
+
+        const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+        const messages = [];
+        snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+
+        area.innerHTML = "";
+        messages.forEach(msg => {
+            const div = document.createElement("div");
+            div.className = "message";
+            div.innerHTML = `
+                <strong>${msg.sender === currentUser.uid ? "Sen" : msg.sender}</strong>: ${msg.text}
+                <br><small>${new Date(msg.timestamp).toLocaleString()}</small>
+            `;
+            area.appendChild(div);
+        });
+    }
+</script>
 </body>
 </html>
