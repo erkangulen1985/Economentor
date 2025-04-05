@@ -221,64 +221,78 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Resim Yükle ve Paylaş
-    async function uploadPost() {
-      const imageFile = document.getElementById("imageUpload").files[0];
-      const title = document.getElementById("imageTitle").value;
-      const description = document.getElementById("imageDescription").value;
+async function uploadPost() {
+  const imageFile = document.getElementById("imageUpload").files[0];
+  const title = document.getElementById("imageTitle").value;
+  const description = document.getElementById("imageDescription").value;
 
-      if (!imageFile || !title || !description) {
-        alert("Lütfen tüm alanları doldurun!");
-        return;
-      }
+  if (!imageFile || !title || !description) {
+    alert("Lütfen tüm alanları doldurun!");
+    return;
+  }
 
-      // Resmi Supabase'e Yükle
-      const { data, error } = await supabase.storage
-        .from('songs')
-        .upload('images/' + imageFile.name, imageFile);
+  // Resmi Supabase'e Yükle
+  const { data, error } = await supabase.storage
+    .from('songs')
+    .upload('images/' + imageFile.name, imageFile);
 
-      if (error) {
-        console.error("Resim yüklenirken hata oluştu: ", error);
-        return;
-      }
+  if (error) {
+    console.error("Resim yüklenirken hata oluştu: ", error);
+    alert("Resim yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+    return;
+  }
 
-      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/songs/images/${data.path}`;
-      
-      // Paylaşımı Firestore'a Kaydet
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        description: description,
-        imageUrl: imageUrl,
-        timestamp: new Date(),
-      });
+  const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/songs/images/${data.path}`;
+  
+  // Paylaşımı Firestore'a Kaydet
+  await addDoc(collection(db, "posts"), {
+    title: title,
+    description: description,
+    imageUrl: imageUrl,
+    timestamp: new Date(),
+  });
 
-      loadPosts();  // Paylaşımı yenileyerek sayfada göster
-    }
+  // Paylaşım başarılı olduğunda bildirim göster
+  alert("Paylaşım başarıyla yapıldı!");
 
-    // Paylaşımları Yükle
-    async function loadPosts() {
-      const postsRef = collection(db, "posts");
-      const querySnapshot = await getDocs(postsRef);
+  loadPosts();  // Paylaşımı yenileyerek sayfada göster
+}
 
-      const postsContainer = document.getElementById('postsContainer');
-      postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
+    if (!imageFile || !title || !description) {
+  alert("Lütfen tüm alanları doldurun!");
+  return;
+}
 
-      querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-          <img src="${post.imageUrl}" alt="Resim">
-          <h3>${post.title}</h3>
-          <p>${post.description}</p>
-          <div class="post-footer">
-            <button onclick="deletePost('${doc.id}')">Sil</button>
-            <button class="edit-button" onclick="editPost('${doc.id}')">Düzenle</button>
-          </div>
-        `;
-        postsContainer.appendChild(postElement);
-      });
-    }
+
+async function loadPosts() {
+  const postsRef = collection(db, "posts");
+  const querySnapshot = await getDocs(postsRef);
+
+  const postsContainer = document.getElementById('postsContainer');
+  postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
+
+  if (querySnapshot.empty) {
+    postsContainer.innerHTML = `<p>Henüz hiçbir paylaşım yapılmamış.</p>`;
+    return;
+  }
+
+  querySnapshot.forEach((doc) => {
+    const post = doc.data();
+    const postElement = document.createElement('div');
+    postElement.classList.add('post');
+    postElement.innerHTML = `
+      <img src="${post.imageUrl}" alt="Resim">
+      <h3>${post.title}</h3>
+      <p>${post.description}</p>
+      <div class="post-footer">
+        <button onclick="deletePost('${doc.id}')">Sil</button>
+        <button class="edit-button" onclick="editPost('${doc.id}')">Düzenle</button>
+      </div>
+    `;
+    postsContainer.appendChild(postElement);
+  });
+}
+
 
     // Paylaşımı Sil
     async function deletePost(postId) {
