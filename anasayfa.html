@@ -264,6 +264,20 @@
       }
     });
 
+    const { data, error } = await supabase.storage
+  .from('anasayfa-paylasimlari') // buraya resim yüklenecek
+  .upload('images/' + imageFile.name, imageFile);  // 'images' klasörüne resim yükleniyor
+
+if (error) {
+  console.error("Resim yüklenirken hata oluştu:", error);
+  alert("Resim yüklenirken bir hata oluştu.");
+  return;
+}
+
+// Resmin URL'sini almak için
+const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/images/${data.path}`;
+
+
     // Postları Firestore'dan Al
     async function loadPosts() {
       const postsRef = collection(db, "posts");
