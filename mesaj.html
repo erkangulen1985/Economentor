@@ -370,7 +370,6 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     }
   });
 });
-}
 
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
@@ -402,7 +401,7 @@ function setupLoadMoreButton(messagesCol) {
       const div = await buildMessageDiv(msg);
       area.insertBefore(div, loadBtn.nextSibling);
     }
-
+  
     if (!snap.empty) {
       firstVisible = snap.docs[0];
     } else {
@@ -414,7 +413,7 @@ function setupLoadMoreButton(messagesCol) {
     isLoading = false;
   };
 }
-
+  
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
   div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
