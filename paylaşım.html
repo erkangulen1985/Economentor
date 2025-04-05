@@ -216,6 +216,7 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Resim Yükle ve Paylaş
     async function uploadPost() {
       const imageFile = document.getElementById("imageUpload").files[0];
       const title = document.getElementById("imageTitle").value;
@@ -251,6 +252,7 @@
       loadPosts();  // Paylaşımları yenileyerek göster
     }
 
+    // Paylaşımları Yükle
     async function loadPosts() {
       const postsRef = collection(db, "posts");
       const querySnapshot = await getDocs(postsRef);
@@ -304,6 +306,5 @@
 
     loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
   </script>
-
 </body>
 </html>
