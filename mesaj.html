@@ -77,13 +77,16 @@
       color: #ccc;
       margin-top: 5px;
     }
-    .search-bar {
-      margin-bottom: 15px;
-      padding: 8px;
-      border-radius: 6px;
-      width: 100%;
-      border: 1px solid #ddd;
-    }
+.search-bar {
+  margin-bottom: 15px;
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+  border: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 10; /* Arama çubuğunun üstte kalmasını sağlar */
+}
     .chat-window {
       flex: 1;
       padding: 20px;
@@ -262,11 +265,11 @@ onAuthStateChanged(auth, user => {
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatList");
-  const searchBar = document.getElementById("searchBar"); // Arama çubuğunu sabitlemek için
+  const searchBar = document.getElementById("searchBar");
 
   list.innerHTML = ""; // Listeyi temizle
 
-  // Arama çubuğunu her zaman en üstte tutmak için
+  // Arama çubuğunu sabit tutmak için yeniden ekle
   list.appendChild(searchBar);
 
   usersSnap.forEach(async (userDoc) => {
@@ -309,7 +312,7 @@ async function loadChatList(uid) {
     // Yeni sohbeti listeye ekle
     list.appendChild(div);
 
-    // Yeni mesaj geldiğinde, sohbeti listenin en üstüne taşı
+    // Yalnızca yeni mesaj geldiyse, sohbeti üstte göstermek için
     if (hasNew) {
       list.prepend(div); // Yeni mesajı olan kişi en üste taşınır
     }
@@ -403,7 +406,7 @@ async function openChat(fid, el) {
     document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Move the selected chat to the top of the list
+  // Sohbeti listeye ekleyelim
   const chatList = document.getElementById("chatList");
   const chatItem = el;
   chatList.prepend(chatItem); // This will move the selected chat item to the top
