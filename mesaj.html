@@ -321,12 +321,12 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // Son 20 mesajı alıyoruz (timestamp küçükten büyüğe sıralanmış)
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+  // Son 20 mesajı alıyoruz
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-  // Mesajları ters çeviriyoruz, çünkü Firebase'den alınan mesajlar küçükten büyüğe sıralanıyor, biz en son olanı en alta eklemeliyiz
+  // Mesajları ters çeviriyoruz, çünkü son 20'yi yukarı ekliyoruz
   const sortedMessages = messages.reverse();
   for (const msg of sortedMessages) {
     const div = await buildMessageDiv(msg);
@@ -336,8 +336,7 @@ async function openChat(fid, el) {
 
   firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
 
-  // Scroll pozisyonu her zaman en altta kalsın
-  area.scrollTop = area.scrollHeight;
+  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
   setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
 
