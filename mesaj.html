@@ -546,7 +546,9 @@ function filterChatList() {
     item.style.display = name.includes(searchQuery) ? "block" : "none";
   });
 }
-
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("searchBar").addEventListener("input", filterChatList);
+});
 </script>
 </body>
 </html>
