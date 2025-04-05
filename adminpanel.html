@@ -273,6 +273,78 @@
             await deleteDoc(doc(db, "feedback", id));
             showContent('dil-sik');
         }
+
+   window.sendMessage = async function () {
+    const text = document.getElementById("messageText").value.trim();
+    if (!text) return alert("Mesaj boş olamaz.");
+    
+    const messageData = {
+        text,
+        timestamp: Timestamp.now(),
+        userId: auth.currentUser .uid // Adminin ID'si
+    };
+    
+    await addDoc(collection(db, "messages"), messageData);
+    document.getElementById("messageText").value = "";
+    loadMessages();
+}
+
+window.loadMessages = async function () {
+    const messageList = document.getElementById("messageList");
+    messageList.innerHTML = "";
+    const querySnapshot = await getDocs(collection(db, "messages"));
+    querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "message";
+        const tarih = data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok";
+        div.innerHTML = `
+            <p>${data.text}</p>
+            <small>${tarih}</small>
+            <button onclick="deleteMessage('${docSnap.id}')">Sil</button>
+            <button onclick="editMessage('${docSnap.id}', '${data.text}')">Düzenle</button>
+        `;
+        messageList.appendChild(div);
+    });
+}
+
+window.deleteMessage = async function (id) {
+    await deleteDoc(doc(db, "messages", id));
+    loadMessages();
+}
+
+window.showContent = async function (section) {
+    const container = document.getElementById("dynamicContent");
+    container.innerHTML = "";
+
+    if (section === 'mesaj-admin') {
+        container.innerHTML = `
+            <h3>Kullanıcılarla Mesajlaşma</h3>
+            <input type="text" id="filterUser " placeholder="Kullanıcı Ara..." oninput="filterMessages()">
+            <div id="messageList"></div>
+            <textarea id="messageText" placeholder="Mesajınızı buraya yazın..."></textarea>
+            <button class="button" onclick="sendMessage()">Gönder</button>
+        `;
+        loadMessages();
+    }
+}
+        
+window.editMessage = async function (id, currentText) {
+    const newText = prompt("Mesajı düzenleyin:", currentText);
+    if (newText) {
+        await setDoc(doc(db, "messages", id), { text: newText }, { merge: true });
+        loadMessages();
+    }
+}
+
+        window.filterMessages = function () {
+    const filterValue = document.getElementById("filterUser ").value.toLowerCase();
+    const messages = document.querySelectorAll(".message");
+    messages.forEach(message => {
+        const text = message.innerText.toLowerCase();
+        message.style.display = text.includes(filterValue) ? "" : "none";
+    });
+}
     </script>
 </body>
 </html>
