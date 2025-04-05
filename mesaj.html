@@ -262,46 +262,43 @@ onAuthStateChanged(auth, user => {
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatList");
-  list.innerHTML = ""; // Temizle
+  list.innerHTML = ""; // Clear the chat list
 
-  // Kullanıcılar arasında dolaş
   usersSnap.forEach(async (userDoc) => {
     const userData = userDoc.data();
     const userId = userDoc.id;
 
-    if (userId === uid) return; // Kendini ekleme
+    if (userId === uid) return; // Skip the current user
 
     const name = userData.username;
     const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    // Son mesajı almak için Firestore sorgusu
-    const lastMsgSnap = await getDocs(
-      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)) // Son mesajı al
-    );
+    // Get the last message from Firestore
+    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
 
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text;
 
-      // Görülmemiş mesaj var mı? Eğer varsa bildirim gösterilecek
+      // Check if there's any unseen message
       hasNew = !msg.seenBy?.includes(uid);
     }
 
-    // Chat öğesini oluştur
+    // Create chat item element
     const div = document.createElement("div");
     div.className = "chat-item";
     div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
 
-    // Eğer yeni mesaj varsa, bildirim ekle
+    // If there's a new message, show the notification
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
     }
 
-    // Sohbeti tıklanabilir hale getirme
+    // Make the chat item clickable
     div.onclick = () => openChat(userId, div);
     list.appendChild(div);
   });
@@ -310,53 +307,54 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = ""; // Mesaj alanını temizle
+  area.innerHTML = ""; // Clear message area
 
-  // "Daha eski mesajları yükle" butonunu oluştur
+  // Create a "Load More" button
   const loadBtn = document.createElement("button");
   loadBtn.id = "loadMoreBtn";
-  loadBtn.textContent = "⬆️ Daha eski mesajları yükle";
+  loadBtn.textContent = "⬆️ Load Older Messages";
   loadBtn.style = "margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;";
   area.appendChild(loadBtn);
 
-  loadedMessageIds.clear();  // Yüklenen mesaj ID'lerini temizle
-  firstVisible = null;  // İlk görülen mesajı sıfırla
+  loadedMessageIds.clear(); // Clear loaded message IDs
+  firstVisible = null; // Reset first visible message
 
-  if (unsubMessages) unsubMessages(); // Eski dinleyiciyi kaldır
+  if (unsubMessages) unsubMessages(); // Unsubscribe from previous messages
 
+  // Remove the active class from other chats
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   const notif = el.querySelector(".notification");
-  if (notif) notif.remove(); // Bildirimi hemen kaldır
+  if (notif) notif.remove(); // Remove notification in the UI
   el.classList.add("active");
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // Tüm mesajları alıyoruz (en yeni mesajlar ilk sırada olacak)
+  // Fetch all messages (latest ones first)
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc")));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-  // Mesajları ekle
+  // Add messages to the chat window
   for (const msg of messages.reverse()) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
-    loadedMessageIds.add(msg.id);  // Yüklediğimiz mesajları ID olarak kaydediyoruz
+    loadedMessageIds.add(msg.id); // Add message ID to the set
   }
 
-  firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
+  firstVisible = snap.docs[0]; // Set the first visible message
 
-  // Sayfanın en altına kaydır
+  // Scroll to the bottom of the page
   area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
 
-  setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
+  setupLoadMoreButton(messagesCol);  // Setup "Load Older Messages" button
 
-  // Sohbete tıklandığında bildirim işaretini kaldırma ve Firestore'a bu bilgiyi güncelleme
+  // When the chat is opened, update Firestore and mark inboxHasNew as false
   await updateDoc(doc(db, "conversations", convoId), {
-    inboxHasNew: false // Görülmemiş mesajları sil
+    inboxHasNew: false // Mark as no new messages
   });
 
-  // Gerçek zamanlı mesajları dinlemek için onSnapshot'ı başlatıyoruz
+  // Start listening for new messages in real-time
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
@@ -367,10 +365,10 @@ async function openChat(fid, el) {
         document.getElementById("messageArea").appendChild(div);
         setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
 
-        // Yeni mesaj geldiğinde, eğer bu mesaj görülmemişse, bildirim işareti ekle
+        // If the message is not seen by the user, mark it as seen
         if (!msg.seenBy?.includes(currentUser.uid)) {
           await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-            seenBy: arrayUnion(currentUser.uid) // Bu mesajı görünmüş olarak işaretle
+            seenBy: arrayUnion(currentUser.uid) // Mark as seen
           });
         }
       }
@@ -389,7 +387,7 @@ async function openChat(fid, el) {
       }
     });
 
-    // Yeni mesaj geldikçe sayfayı en alta kaydırıyoruz
+    // Auto-scroll to the newest message when a new message arrives
     document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
   });
 }
