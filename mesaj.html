@@ -374,7 +374,6 @@ async function openChat(fid, el) {
   });
 }
   
-// "Daha eski mesajları yükle" butonunun işlevini düzeltiyoruz
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
   if (!loadBtn || !firstVisible) return;
@@ -419,6 +418,7 @@ function setupLoadMoreButton(messagesCol) {
     isLoading = false;
   };
 }
+
 
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
