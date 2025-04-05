@@ -301,7 +301,7 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = "";
+  area.innerHTML = ""; // Boş bir alan oluştur
 
   // "Daha eski mesajları yükle" butonu oluştur
   const loadBtn = document.createElement("button");
@@ -310,36 +310,37 @@ async function openChat(fid, el) {
   loadBtn.style = "margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;";
   area.appendChild(loadBtn);
 
-  loadedMessageIds.clear();
-  firstVisible = null;
+  loadedMessageIds.clear();  // Önceki mesajları temizle
+  firstVisible = null;  // İlk görülen mesajı sıfırla
 
-  if (unsubMessages) unsubMessages();
+  if (unsubMessages) unsubMessages(); // Eski dinleyiciyi kaldır
+
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
 
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // ✅ SADECE SON 20 MESAJI ÇEK
+  // Son 20 mesajı çekiyoruz
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-  // 🔁 SIRAYI DOĞRU YAP
+  // Mesajları ters çeviriyoruz, çünkü son 20'yi yukarı ekliyoruz
   const sortedMessages = messages.reverse();
   for (const msg of sortedMessages) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
-    loadedMessageIds.add(msg.id);
+    loadedMessageIds.add(msg.id);  // Mesaj ID'lerini yükledik
   }
 
-  firstVisible = snap.docs[0]; // Daha eski mesajlar için
+  firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
 
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  setupLoadMoreButton(messagesCol);
+  setupLoadMoreButton(messagesCol);  // Daha fazla mesaj yüklemek için butonu kur
 
-  // ✅ GERÇEK ZAMANLI YENİ MESAJLARI DİNLE
+  // Gerçek zamanlı mesajları dinlemek için onSnapshot'ı başlatıyoruz
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
@@ -373,23 +374,24 @@ async function openChat(fid, el) {
   });
 }
 
+
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
   if (!loadBtn || !firstVisible) return;
 
   loadBtn.onclick = async () => {
-    if (isLoading) return;
+    if (isLoading) return;  // Eğer yükleniyorsa, tekrar yükleme yapma
     isLoading = true;
 
     const area = document.getElementById("messageArea");
     const prevScrollHeight = area.scrollHeight;
 
-    // Daha eski mesajları çek
+    // Eski mesajları çekiyoruz (50 mesaj birden)
     const snap = await getDocs(query(
       messagesCol,
-      orderBy("timestamp", "asc"),
-      endBefore(firstVisible),  // firstVisible, şu anki son 20 mesajın ilkini gösteriyor
-      limitToLast(50)  // daha eski mesajları 50'lik grup halinde al
+      orderBy("timestamp", "asc"),  // Zaman sırasına göre en eskiyi önce alıyoruz
+      endBefore(firstVisible),  // Son görülen mesajdan önceki mesajları alıyoruz
+      limitToLast(50)  // 50 tane eski mesaj alıyoruz
     ));
 
     const messages = [];
@@ -400,20 +402,20 @@ function setupLoadMoreButton(messagesCol) {
       }
     });
 
+    // Eski mesajları ters sıralıyoruz
     for (const msg of messages.reverse()) {
       const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling);  // Yeni mesajları butonun üstüne ekle
+      area.insertBefore(div, loadBtn.nextSibling);  // Yüklenen eski mesajları butonun üstüne ekliyoruz
     }
 
-    // Yeni mesajların yüklendiği en eski mesajı ayarla
     if (!snap.empty) {
-      firstVisible = snap.docs[0];
+      firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
     } else {
-      loadBtn.style.display = "none";  // Eğer eski mesaj yoksa butonu gizle
+      loadBtn.style.display = "none";  // Eğer eski mesaj yoksa, butonu gizliyoruz
     }
 
     const newScrollHeight = area.scrollHeight;
-    area.scrollTop = newScrollHeight - prevScrollHeight;  // Scroll pozisyonunu koru
+    area.scrollTop = newScrollHeight - prevScrollHeight;  // Scroll pozisyonunu koruyoruz
     isLoading = false;
   };
 }
