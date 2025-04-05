@@ -44,15 +44,15 @@
       overflow: hidden;
     }
 
-/* Container'ın yüksekliğini yeterli tutalım */
 .chat-list {
   width: 30%;
   max-width: 250px;
   background: rgba(0, 0, 0, 0.4);
   padding: 20px;
+  padding-top: 60px;  /* Arama çubuğunun üstüne gelmesini engelliyor */
   overflow-y: auto;
-  position: relative;  /* Chat listesi için gerekli */
-  height: 100vh;  /* Container'ın yüksekliğini belirliyoruz */
+  position: relative;
+  height: 100vh;
 }
     .chat-item {
       padding: 10px;
@@ -87,10 +87,9 @@
   border-radius: 6px;
   width: 100%;
   border: 1px solid #ddd;
-  position: sticky;
-  top: 0;  /* Sayfa kaydırıldıkça üstte sabit kalacak */
-  background-color: rgba(0, 0, 0, 0.6);  /* Arka planı şeffaf yaparak görsel uyum sağlıyoruz */
-  z-index: 20;  /* Arama çubuğunun üstte kalması için yüksek bir z-index değeri veriyoruz */
+  position: relative;  /* Arama çubuğunun sabit kalmasını engelliyoruz */
+  background-color: rgba(0, 0, 0, 0.6); 
+  z-index: 20;  
 }
     .chat-window {
       flex: 1;
