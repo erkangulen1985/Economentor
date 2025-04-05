@@ -1,279 +1,343 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economentor | Admin Paneli</title>
-    <link rel="icon" href="image1.png">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #222;
-            color: white;
-        }
-        .sidebar {
-            width: 250px;
-            position: fixed;
-            height: 100%;
-            background-color: #0f0f0f;
-            padding-top: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
-        }
-        .sidebar h2 {
-            text-align: center;
-            font-size: 24px;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-        .sidebar a {
-            display: block;
-            color: #ccc;
-            padding: 15px;
-            text-decoration: none;
-            font-size: 18px;
-            margin: 5px 0;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar a:hover {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
-            height: 100vh;
-            background-color: #121212;
-            overflow-y: auto;
-        }
-        .title {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-        .content-container {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .logout-button {
-            background-color: red;
-        }
-        .logout-button:hover {
-            background-color: #ff4d4d;
-        }
-        textarea {
-            width: 100%;
-            height: 120px;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 16px;
-            resize: none;
-        }
-        .button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .announcement {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            position: relative;
-        }
-        .announcement button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .feedback {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            position: relative;
-        }
-        .feedback button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Economentor | Admin Paneli - Mesajlar</title>
+  <link rel="icon" href="image1.png" />
+  <style>
+    /* Admin paneli stilini olduğu gibi bırakıyoruz */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: white;
+    }
+    .sidebar {
+      width: 250px;
+      position: fixed;
+      height: 100%;
+      background-color: #0f0f0f;
+      padding-top: 20px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
+    }
+    .sidebar h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 30px;
+    }
+    .sidebar a {
+      display: block;
+      color: #ccc;
+      padding: 15px;
+      text-decoration: none;
+      font-size: 18px;
+      margin: 5px 0;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 30px;
+      height: 100vh;
+      background-color: #121212;
+      overflow-y: auto;
+    }
+    .title {
+      font-size: 30px;
+      margin-bottom: 20px;
+    }
+    .content-container {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .logout-button {
+      background-color: red;
+    }
+    .logout-button:hover {
+      background-color: #ff4d4d;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 16px;
+      resize: none;
+    }
+    .button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .announcement {
+      background-color: #444;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .announcement button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .feedback {
+      background-color: #444;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .feedback button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* Chat kısmı için stil */
+    .chat-list {
+      width: 30%;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .chat-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+    }
+    .chat-item.active {
+      background: #007bff;
+      font-weight: bold;
+    }
+    .notification {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+    }
+    .last-message {
+      font-size: 0.85em;
+      color: #ccc;
+      margin-top: 5px;
+    }
+    .search-bar {
+      margin-bottom: 15px;
+      padding: 8px;
+      border-radius: 6px;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+    .chat-window {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      max-width: 80%;
+      position: relative;
+    }
+    .message.you {
+      background: rgba(0, 255, 127, 0.3);
+      align-self: flex-end;
+    }
+    .sender-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .timestamp {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+    .send-box {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+    }
+    button.send-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Admin Paneli</h2>
-        <a href="#" onclick="showContent('kul-is')">Kullanıcı ve İstatistik Yönetimi</a>
-        <a href="#" onclick="showContent('paylasimlar')">Paylaşımlar</a>
-        <a href="#" onclick="showContent('mesaj-admin')">Tüm Kullanıcılara Mesaj</a>
-        <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
-        <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
-        <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
-        <a href="anasayfa.html">Anasayfa</a>
-        <a href="index.html" class="logout-button">Çıkış</a>
+  <div class="sidebar">
+    <h2>Admin Paneli</h2>
+    <a href="#" onclick="showContent('kul-is')">Kullanıcı ve İstatistik Yönetimi</a>
+    <a href="#" onclick="showContent('paylasimlar')">Paylaşımlar</a>
+    <a href="#" onclick="showContent('mesaj-admin')">Tüm Kullanıcılara Mesaj</a>
+    <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
+    <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
+    <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
+    <a href="anasayfa.html">Anasayfa</a>
+    <a href="index.html" class="logout-button">Çıkış</a>
+  </div>
+
+  <div class="main-content">
+    <div class="content-container">
+      <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yönetici</span>!</h2>
+      <div id="dynamicContent"></div>
     </div>
+  </div>
 
-    <div class="main-content">
-        <div class="content-container">
-            <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yönetici</span>!</h2>
-            <div id="dynamicContent"></div>
-        </div>
-    </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc, Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-            authDomain: "economentor-8ddc4.firebaseapp.com",
-            projectId: "economentor-8ddc4",
-            storageBucket: "economentor-8ddc4.appspot.com",
-            messagingSenderId: "835370350520",
-            appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-        };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const username = userData.username || "Yönetici";
-            const role = userData.role || "user";
+          const userData = userSnap.data();
+          const username = userData.username || "Yönetici";
+          const role = userData.role || "user";
 
-            if (role !== "admin") {
-                alert("Bu sayfaya erişim izniniz yok!");
-                window.location.href = "anasayfa.html";
-                return;
-            }
+          if (role !== "admin") {
+            alert("Bu sayfaya erişim izniniz yok!");
+            window.location.href = "anasayfa.html";
+            return;
+          }
 
-            document.getElementById("adminUsername").innerText = username;
+          document.getElementById("adminUsername").innerText = username;
         } else {
-            alert("Kullanıcı bilgisi alınamadı.");
-            window.location.href = "index.html";
+          alert("Kullanıcı bilgisi alınamadı.");
+          window.location.href = "index.html";
         }
-    } else {
+      } else {
         // Giriş yapılmamışsa
         alert("Lütfen giriş yapınız.");
         window.location.href = "index.html";
+      }
+    });
+
+    window.showContent = async function (section) {
+      const container = document.getElementById("dynamicContent");
+      container.innerHTML = "";
+
+      if (section === 'mesaj-admin') {
+        container.innerHTML = `
+          <h3>Tüm Kullanıcılara Mesaj Gönder</h3>
+          <input type="text" id="messageInput" placeholder="Mesaj yazın...">
+          <button class="button" onclick="sendMessage()">Gönder</button>
+          <h3 style="margin-top:30px">Kullanıcı Listesi</h3>
+          <div id="chatList"></div>
+        `;
+        loadUsers();
+      }
     }
-});
 
-        window.showContent = async function (section) {
-            const container = document.getElementById("dynamicContent");
-            container.innerHTML = "";
+    async function loadUsers() {
+      const chatList = document.getElementById("chatList");
+      const usersSnap = await getDocs(collection(db, "users"));
+      usersSnap.forEach(async (docSnap) => {
+        const userData = docSnap.data();
+        const userId = docSnap.id;
 
-            if (section === 'duyuru-admin') {
-                container.innerHTML = `
-                    <h3>Yeni Duyuru Ekle</h3>
-                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
-                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
-                    <div id="duyuruList"></div>
-                `;
-                loadDuyurular();
-            }
+        const div = document.createElement("div");
+        div.className = "chat-item";
+        div.innerHTML = `<strong>${userData.username}</strong>`;
+        div.onclick = () => openChat(userId);
 
-            if (section === 'hakkinda-admin') {
-                const hakRef = doc(db, "site", "hakkinda");
-                const hakSnap = await getDoc(hakRef);
-                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
-                container.innerHTML = `
-                    <h3>Hakkında Düzenle</h3>
-                    <textarea id="hakText">${mevcut}</textarea>
-                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
-                `;
-            }
+        chatList.appendChild(div);
+      });
+    }
 
-            if (section === 'dil-sik') {
-                container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
-                const feedbackList = document.getElementById("feedbackList");
-                const snapshot = await getDocs(collection(db, "feedback"));
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const div = document.createElement("div");
-                    div.className = "feedback";
-                    div.innerHTML = `
-                        <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
-                        <p>${data.message}</p>
-                        <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
-                        <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
-                    `;
-                    feedbackList.appendChild(div);
-                });
-            }
-        }
+    function openChat(userId) {
+      // Seçilen kullanıcıyla sohbet açma işlemi
+      alert(`Sohbete giriliyor: ${userId}`);
+    }
 
-        window.saveDuyuru = async function () {
-            const text = document.getElementById("duyuruText").value.trim();
-            if (!text) return alert("Duyuru metni boş olamaz.");
-            await addDoc(collection(db, "announcements"), {
-                text,
-                createdAt: Timestamp.now()
-            });
-            document.getElementById("duyuruText").value = "";
-            loadDuyurular();
-        }
+    async function sendMessage() {
+      const messageInput = document.getElementById("messageInput").value;
+      if (!messageInput) return alert("Mesaj boş olamaz!");
 
-        window.loadDuyurular = async function () {
-            const duyuruList = document.getElementById("duyuruList");
-            if (!duyuruList) return;
-            duyuruList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "announcements"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const div = document.createElement("div");
-                div.className = "announcement";
-                const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
-                div.innerHTML = `
-                    <p>${data.text}</p>
-                    <small>${tarih}</small>
-                    <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-                `;
-                duyuruList.appendChild(div);
-            });
-        }
+      const message = {
+        text: messageInput,
+        timestamp: Timestamp.now(),
+        sender: "admin",
+        receiver: "user_id_placeholder" // Buraya doğru kullanıcı ID'si eklenmeli
+      };
 
-        window.deleteDuyuru = async function (id) {
-            await deleteDoc(doc(db, "announcements", id));
-            loadDuyurular();
-        }
+      await addDoc(collection(db, "messages"), message);
+      alert("Mesaj gönderildi!");
+    }
 
-        window.saveHakkinda = async function () {
-            const text = document.getElementById("hakText").value;
-            await setDoc(doc(db, "site", "hakkinda"), { text });
-            alert("Hakkında bilgisi kaydedildi.");
-        }
-
-        window.deleteFeedback = async function (id) {
-            await deleteDoc(doc(db, "feedback", id));
-            showContent('dil-sik');
-        }
-    </script>
+  </script>
 </body>
 </html>
