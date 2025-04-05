@@ -277,7 +277,7 @@ async function loadChatList(uid) {
 
     // Son mesajı almak için Firestore sorgusu
     const lastMsgSnap = await getDocs(
-      query(messagesCol, orderBy("timestamp", "desc"), limitToLast(1)) // Son mesajı al
+      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)) // Son mesajı al
     );
 
     let lastMsg = "", hasNew = false;
