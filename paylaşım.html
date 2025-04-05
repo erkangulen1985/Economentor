@@ -6,7 +6,6 @@
   <title>Admin Panel | Economentor</title>
   <link rel="icon" href="image1.png" />
   <style>
-    /* Stil kodları aynı kalacak */
     body {
       margin: 0;
       padding: 0;
@@ -61,8 +60,7 @@
       flex-direction: column;
     }
 
-    .upload-section, .history-section, .analysis-section {
-      display: none; /* Başlangıçta gizli */
+    .upload-section, .history-section {
       width: 80%;
       background-color: #fff;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -71,11 +69,7 @@
       margin-bottom: 30px;
     }
 
-    .upload-section.active, .history-section.active, .analysis-section.active {
-      display: block; /* Aktif olduğunda göster */
-    }
-
-    .upload-section h2, .history-section h2, .analysis-section h2 {
+    .upload-section h2, .history-section h2 {
       text-align: center;
       margin-bottom: 20px;
       font-size: 24px;
@@ -176,14 +170,14 @@
   </header>
 
   <nav>
-    <a href="javascript:void(0)" id="goToShare" onclick="showShareContent()">Anasayfa Paylaşımları</a>
-    <a href="javascript:void(0)" id="goToAnalyze" onclick="showAnalysisContent()">Analiz</a>
     <a href="adminpanel.html">Yönetici Paneline Dön</a>
+    <a href="analiz.html">Analiz</a>
+    <a href="anasayfa.html">Anasayfa Paylaşımları</a>
   </nav>
 
   <div class="content">
-    <!-- Paylaşım Yap -->
-    <div class="upload-section" id="uploadSection">
+    <!-- Upload Resim ve Açıklama -->
+    <div class="upload-section">
       <h2>Paylaşım Yap</h2>
       <input type="file" id="imageUpload" accept="image/*">
       <input type="text" id="imageTitle" placeholder="Başlık Girin">
@@ -191,16 +185,10 @@
       <button onclick="uploadPost()">Paylaş</button>
     </div>
 
-    <!-- Geçmiş Paylaşımlar -->
-    <div class="history-section" id="historySection">
+    <!-- Paylaşımlar Geçmişi -->
+    <div class="history-section" id="postsContainer">
       <h2>Paylaşılan Resimler</h2>
-      <div id="postsContainer"></div> <!-- Paylaşımlar burada gösterilecek -->
-    </div>
-
-    <!-- Analiz Bölümü -->
-    <div class="analysis-section" id="analysisSection">
-      <h2>Analiz Kısmı</h2>
-      <p>Bu alanda analizler yapılacak. Videolar veya analiz içerikleri buraya eklenecek.</p>
+      <!-- Burada paylaşılan resimler listelenecek -->
     </div>
   </div>
 
@@ -234,20 +222,7 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Sayfa içeriklerini göstermek ve gizlemek için fonksiyonlar
-    function showShareContent() {
-      document.getElementById('uploadSection').classList.add('active');
-      document.getElementById('historySection').classList.add('active');
-      document.getElementById('analysisSection').classList.remove('active');
-    }
-
-    function showAnalysisContent() {
-      document.getElementById('uploadSection').classList.remove('active');
-      document.getElementById('historySection').classList.remove('active');
-      document.getElementById('analysisSection').classList.add('active');
-    }
-
-    // Paylaşım Yapma işlemi
+    // Resim Yükle ve Paylaş
     async function uploadPost() {
       const imageFile = document.getElementById("imageUpload").files[0];
       const title = document.getElementById("imageTitle").value;
