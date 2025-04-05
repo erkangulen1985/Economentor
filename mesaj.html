@@ -389,7 +389,7 @@ function setupLoadMoreButton(messagesCol) {
     // Eski mesajları çekiyoruz (50 mesaj birden)
     const snap = await getDocs(query(
       messagesCol,
-      orderBy("timestamp", "desc"),  // Zaman sırasına göre en eskiyi önce alıyoruz
+      orderBy("timestamp", "asc"),  // Zaman sırasına göre en eskiyi önce alıyoruz
       endBefore(firstVisible),  // Son görülen mesajdan önceki mesajları alıyoruz
       limitToLast(50)  // 50 tane eski mesaj alıyoruz
     ));
