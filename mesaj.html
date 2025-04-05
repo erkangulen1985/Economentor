@@ -21,6 +21,13 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      flex-wrap: wrap;
+    }
     .lang-btn {
       padding: 6px 10px;
       border: none;
@@ -74,24 +81,16 @@
       color: #ccc;
       margin-top: 5px;
     }
-    header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  flex-wrap: wrap;
-}
-header div {
-  display: flex;
-  align-items: center;
-}
-
 .search-bar {
-  margin-right: 15px; /* Arama çubuğu ile buton arasına boşluk ekleyelim */
+  margin-bottom: 15px;
   padding: 8px;
   border-radius: 6px;
-  width: 200px; /* Arama çubuğunun genişliği */
+  width: 100%;
   border: 1px solid #ddd;
+  position: sticky;
+  top: 0;  /* Sayfa kaydırıldıkça üstte sabit kalacak */
+  background-color: rgba(0, 0, 0, 0.6);  /* Arka planı şeffaf yaparak görsel uyum sağlıyoruz */
+  z-index: 20;  /* Arama çubuğunun üstte kalması için yüksek bir z-index değeri veriyoruz */
 }
     .chat-window {
       flex: 1;
@@ -173,13 +172,13 @@ header div {
 <body>
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
-    <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
     <div>
       <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
     </div>
   </header>
   <div class="container">
     <div class="chat-list" id="chatList">
+      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
       Yükleniyor...
     </div>
     <div class="chat-window">
