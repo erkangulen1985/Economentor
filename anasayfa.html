@@ -150,7 +150,7 @@
   </div>
 
   <div class="post-container" id="postsContainer">
-    <!-- Postlar burada yüklenecek -->
+    <!-- Paylaşımlar burada görüntülenecek -->
   </div>
 
   <script type="module">
@@ -159,7 +159,7 @@
     import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    // Firebase configuration
+    // Firebase Konfigürasyonu
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
       authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -170,7 +170,7 @@
       measurementId: "G-FS3FMPYVPD"
     };
 
-    // Supabase configuration
+    // Supabase Konfigürasyonu
     const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
 
@@ -179,10 +179,10 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Kullanıcı giriş durumu kontrolü
+    // Kullanıcı Giriş Durumu
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // Kullanıcı giriş yapmamışsa yönlendir
+        // Giriş Yapmamış Kullanıcıyı Yönlendirme
         alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
         window.location.href = "index.html";
         return;
@@ -193,14 +193,24 @@
       if (docSnap.exists()) {
         const data = docSnap.data();
         const username = data.username || "Kullanıcı";
+        const role = data.role || "user";  // Kullanıcı rolünü alıyoruz
+
+        // Kullanıcı adını göster
         document.getElementById("userName").innerText = username;
+
+        // Eğer adminse, admin paneline dön butonunu göster
+        if (role === "admin") {
+          const adminBtn = document.getElementById("adminPanelLink");
+          adminBtn.style.display = "inline-block";  // Admin için buton görünür hale gelir
+          adminBtn.href = "adminpanel.html";  // Admin paneline yönlendir
+        }
       } else {
         alert("Kullanıcı bilgisi bulunamadı.");
         window.location.href = "index.html";
       }
     });
 
-    // Postları Firestore'dan al ve Supabase'den resimleri yükle
+    // Postları Firestore'dan Al
     async function loadPosts() {
       const postsRef = collection(db, "posts");
       const q = query(postsRef, orderBy("timestamp", "desc"));
@@ -228,13 +238,13 @@
 
     loadPosts();
 
-    // Beğenme işlemi
+    // Beğenme İşlemi
     function likePost(postId) {
       // Beğenme işlemi için Firebase Firestore'da işlem yapılacak
       alert("Beğenildi: " + postId);
     }
 
-    // Beğenme işlemi
+    // Beğenmeme İşlemi
     function dislikePost(postId) {
       // Beğenme işlemi için Firebase Firestore'da işlem yapılacak
       alert("Beğenilmedi: " + postId);
