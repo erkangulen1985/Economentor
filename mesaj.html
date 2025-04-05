@@ -321,14 +321,13 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // Son 20 mesajı alıyoruz (en yeni mesajlar ilk sırada olacak)
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
+  // İlk başta en son mesajı alıyoruz (en yeni mesaj ilk sırada olacak)
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(1)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-  // Mesajları ters çeviriyoruz çünkü son 20'yi yukarı ekliyoruz
-  const sortedMessages = messages.reverse();
-  for (const msg of sortedMessages) {
+  // En son mesajı ekle
+  for (const msg of messages.reverse()) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
     loadedMessageIds.add(msg.id);  // Yüklediğimiz mesajları ID olarak kaydediyoruz
@@ -336,7 +335,7 @@ async function openChat(fid, el) {
 
   firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
 
-  // Sayfanın en altına kaydırma
+  // Sayfanın en altına kaydır
   area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
 
   setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
@@ -426,7 +425,6 @@ function setupLoadMoreButton(messagesCol) {
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
   };
 }
-
 
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
