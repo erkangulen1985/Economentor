@@ -301,16 +301,16 @@ async function loadChatList(uid) {
 async function openChat(fid, el) {
   selectedFriendId = fid;
   const area = document.getElementById("messageArea");
-  area.innerHTML = ""; // Boş bir alan oluştur
+  area.innerHTML = ""; // Mesaj alanını temizle
 
-  // "Daha eski mesajları yükle" butonu oluştur
+  // "Daha eski mesajları yükle" butonunu oluştur
   const loadBtn = document.createElement("button");
   loadBtn.id = "loadMoreBtn";
   loadBtn.textContent = "⬆️ Daha eski mesajları yükle";
   loadBtn.style = "margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;";
   area.appendChild(loadBtn);
 
-  loadedMessageIds.clear();  // Önceki mesajları temizle
+  loadedMessageIds.clear();  // Yüklenen mesaj ID'lerini temizle
   firstVisible = null;  // İlk görülen mesajı sıfırla
 
   if (unsubMessages) unsubMessages(); // Eski dinleyiciyi kaldır
@@ -321,7 +321,7 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // Son 20 mesajı çekiyoruz
+  // Son 20 mesajı alıyoruz
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
@@ -331,44 +331,33 @@ async function openChat(fid, el) {
   for (const msg of sortedMessages) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
-    loadedMessageIds.add(msg.id);  // Mesaj ID'lerini yükledik
+    loadedMessageIds.add(msg.id);  // Yüklediğimiz mesajları ID olarak kaydediyoruz
   }
 
   firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
 
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
-  setupLoadMoreButton(messagesCol);  // Daha fazla mesaj yüklemek için butonu kur
+  setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
 
-const now = Date.now();
-unsubMessages = onSnapshot(
-  query(messagesCol, orderBy("timestamp", "asc"), 
-        // Sadece yeni mesajları dinle
-        // Buradaki timestamp, sayfa yüklendikten sonra gönderilenler olacak
-        // Böylece geçmiş mesajlar tekrar gelmeyecek
-        ), 
-  async (snapshot) => {
+  // Gerçek zamanlı mesajları dinlemek için onSnapshot'ı başlatıyoruz
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
-      // Yeni mesaj ise ve daha önce yüklenmemişse
-      if (change.type === "added" && !loadedMessageIds.has(msg.id) && msg.timestamp > now) {
+      if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
         loadedMessageIds.add(msg.id);
         const div = await buildMessageDiv(msg);
         document.getElementById("messageArea").appendChild(div);
-        setTimeout(() => {
-          document.getElementById("messageArea").scrollTop =
-            document.getElementById("messageArea").scrollHeight;
-        }, 100);
+        setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
 
         if (!msg.seenBy?.includes(currentUser.uid)) {
           await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-            seenBy: arrayUnion(currentUser.uid),
+            seenBy: arrayUnion(currentUser.uid)
           });
         }
       }
 
-      // Düzenleme ve silme olayları eskisi gibi kalsın
       if (change.type === "modified") {
         const updatedMsg = change.doc.data();
         const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
@@ -382,8 +371,7 @@ unsubMessages = onSnapshot(
         if (msgDiv) msgDiv.remove();
       }
     });
-  }
-);
+  });
 }
   
 // "Daha eski mesajları yükle" butonunun işlevini düzeltiyoruz
