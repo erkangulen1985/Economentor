@@ -175,7 +175,6 @@
   </nav>
 
   <div class="content">
-    <!-- Upload Resim ve Açıklama -->
     <div class="upload-section">
       <h2>Paylaşım Yap</h2>
       <input type="file" id="imageUpload" accept="image/*">
@@ -184,10 +183,8 @@
       <button onclick="uploadPost()">Paylaş</button>
     </div>
 
-    <!-- Paylaşımlar Geçmişi -->
     <div class="history-section" id="postsContainer">
       <h2>Paylaşılan Resimler</h2>
-      <!-- Burada paylaşılan resimler listelenecek -->
     </div>
   </div>
 
@@ -201,7 +198,6 @@
     import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
       authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -212,7 +208,6 @@
       measurementId: "G-FS3FMPYVPD"
     };
 
-    // Supabase Configuration
     const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
 
@@ -221,7 +216,6 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Resim Yükle ve Paylaş
     async function uploadPost() {
       const imageFile = document.getElementById("imageUpload").files[0];
       const title = document.getElementById("imageTitle").value;
@@ -232,7 +226,7 @@
         return;
       }
 
-      // Resmi Supabase'e Yükle
+      // Supabase'e Resim Yükleme
       const { data, error } = await supabase.storage
         .from('songs')
         .upload('images/' + imageFile.name, imageFile);
@@ -245,7 +239,7 @@
 
       const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/songs/images/${data.path}`;
       
-      // Paylaşımı Firestore'a Kaydet
+      // Firestore'a Kaydetme
       await addDoc(collection(db, "posts"), {
         title: title,
         description: description,
@@ -253,16 +247,13 @@
         timestamp: new Date(),
       });
 
-      // Paylaşım başarılı olduğunda bildirim göster
       alert("Paylaşım başarıyla yapıldı!");
-
-      loadPosts();  // Paylaşımı yenileyerek sayfada göster
+      loadPosts();  // Paylaşımları yenileyerek göster
     }
 
     async function loadPosts() {
       const postsRef = collection(db, "posts");
       const querySnapshot = await getDocs(postsRef);
-
       const postsContainer = document.getElementById('postsContainer');
       postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
 
@@ -288,24 +279,30 @@
       });
     }
 
-    // Paylaşımı Sil
     async function deletePost(postId) {
-      // Firestore'dan silme işlemi
-      await deleteDoc(doc(db, "posts", postId));
+      const postRef = doc(db, "posts", postId);
+      const postSnapshot = await getDoc(postRef);
+      const postData = postSnapshot.data();
+      
+      // Supabase'ten Resmi Sil
+      const { error } = await supabase.storage
+        .from('songs')
+        .remove([`images/${postData.imageUrl.split('/').pop()}`]);
 
-      // Supabase'ten resmi sil
-      // Kodun burasında resmin URL'sini alıp Supabase'ten silme işlemi yapılacak
+      if (error) {
+        console.error("Resim silinirken hata oluştu:", error);
+      }
 
+      // Firestore'dan Sil
+      await deleteDoc(postRef);
       loadPosts(); // Sayfayı güncelle
     }
 
-    // Paylaşımı Düzenle
     async function editPost(postId) {
-      // Düzenleme işlemi için gerekli formu açacak işlem yapılabilir
       alert("Düzenleme işlemi burada yapılacak!");
     }
 
-    loadPosts();  // Başlangıçta paylaşımları yükle
+    loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
   </script>
 
 </body>
