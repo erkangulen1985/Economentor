@@ -295,11 +295,12 @@ async function loadChatList(uid) {
     div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
 
     // Eğer yeni mesaj varsa, bildirim ekle
-    if (hasNew) {
-      const notif = document.createElement("div");
-      notif.className = "notification";
-      div.appendChild(notif);
-    }
+// Bildirimi UI'dan kaldırma
+const notification = el.querySelector(".notification");
+if (notification) {
+  notification.remove();
+}
+
 
     // Sohbeti tıklanabilir hale getirme
     div.onclick = () => openChat(userId, div);
@@ -388,9 +389,7 @@ async function openChat(fid, el) {
     });
 
     // Yeni mesaj geldikçe sayfayı en alta kaydırıyoruz
-    document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
-  });
-}
+    document.getElementById("messageArea").last
   
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
