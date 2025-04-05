@@ -336,7 +336,8 @@ async function openChat(fid, el) {
 
   firstVisible = snap.docs[0];  // Eski mesajların ilkini ayarladık
 
-  area.lastElementChild?.scrollIntoView({ behavior: "auto" });
+  // Sayfanın en altına kaydırma
+  area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
 
   setupLoadMoreButton(messagesCol);  // "Daha eski mesajları yükle" butonunu ayarlıyoruz
 
@@ -371,6 +372,9 @@ async function openChat(fid, el) {
         if (msgDiv) msgDiv.remove();
       }
     });
+
+    // Yeni mesajlar geldikçe sayfayı en alta kaydırıyoruz
+    area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
   });
 }
 
@@ -417,6 +421,9 @@ function setupLoadMoreButton(messagesCol) {
     const newScrollHeight = area.scrollHeight;
     area.scrollTop = newScrollHeight - prevScrollHeight;  // Scroll pozisyonunu koruyoruz
     isLoading = false;
+
+    // Eski mesajlar yüklendikten sonra en alta kaydırıyoruz
+    area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
   };
 }
 
