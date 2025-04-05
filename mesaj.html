@@ -54,6 +54,7 @@
   position: relative;
   height: 100vh;
 }
+
     .chat-item {
       padding: 10px;
       background: rgba(255, 255, 255, 0.1);
@@ -85,13 +86,16 @@
   margin-bottom: 15px;
   padding: 8px;
   border-radius: 6px;
-  width: 100%;
+  width: 100%;  /* Arama çubuğunu genişletiyoruz */
+  max-width: 100%;  /* Arama çubuğunun maksimum genişliği */
   border: 1px solid #ddd;
-  position: absolute;  /* Arama çubuğunu sabit bir konuma alıyoruz */
-  top: 20px;  /* Arama çubuğunu belirli bir mesafeye koyuyoruz */
-  background-color: rgba(0, 0, 0, 0.6); 
-  z-index: 20;  
+  position: absolute;
+  top: 20px;  /* Arama çubuğunu biraz yukarıya yerleştiriyoruz */
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 20;
+  margin-top: 10px;  /* Arama çubuğunun ilk kişiyle birleşmesini engelliyoruz */
 }
+    
     .chat-window {
       flex: 1;
       padding: 20px;
