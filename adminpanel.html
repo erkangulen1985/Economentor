@@ -1,123 +1,183 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economentor | Admin Paneli</title>
-    <link rel="icon" href="image1.png">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #222;
-            color: white;
-        }
-        .sidebar {
-            width: 250px;
-            position: fixed;
-            height: 100%;
-            background-color: #0f0f0f;
-            padding-top: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
-        }
-        .sidebar h2 {
-            text-align: center;
-            font-size: 24px;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-        .sidebar a {
-            display: block;
-            color: #ccc;
-            padding: 15px;
-            text-decoration: none;
-            font-size: 18px;
-            margin: 5px 0;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .sidebar a:hover {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 30px;
-            height: 100vh;
-            background-color: #121212;
-            overflow-y: auto;
-        }
-        .title {
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-        .content-container {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .logout-button {
-            background-color: red;
-        }
-        .logout-button:hover {
-            background-color: #ff4d4d;
-        }
-        textarea {
-            width: 100%;
-            height: 120px;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 16px;
-            resize: none;
-        }
-        .button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .announcement {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            position: relative;
-        }
-        .announcement button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .feedback {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            position: relative;
-        }
-        .feedback button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Economentor | Admin Paneli</title>
+  <link rel="icon" href="image1.png" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: white;
+    }
+    .sidebar {
+      width: 250px;
+      position: fixed;
+      height: 100%;
+      background-color: #0f0f0f;
+      padding-top: 20px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
+    }
+    .sidebar h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 30px;
+    }
+    .sidebar a {
+      display: block;
+      color: #ccc;
+      padding: 15px;
+      text-decoration: none;
+      font-size: 18px;
+      margin: 5px 0;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 30px;
+      height: 100vh;
+      background-color: #121212;
+      overflow-y: auto;
+    }
+    .title {
+      font-size: 30px;
+      margin-bottom: 20px;
+    }
+    .content-container {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .logout-button {
+      background-color: red;
+    }
+    .logout-button:hover {
+      background-color: #ff4d4d;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 16px;
+      resize: none;
+    }
+    .button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .announcement {
+      background-color: #444;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .announcement button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .feedback {
+      background-color: #444;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .feedback button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .chat-list {
+      width: 30%;
+      max-width: 250px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .chat-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+    }
+    .chat-item.active {
+      background: #007bff;
+      font-weight: bold;
+    }
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      max-width: 80%;
+      position: relative;
+    }
+    .message.you {
+      background: rgba(0, 255, 127, 0.3);
+      align-self: flex-end;
+    }
+    .sender-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .timestamp {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+    .send-box {
+      display: flex;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+    }
+    button.send-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
     <div class="sidebar">
@@ -187,164 +247,130 @@
             const container = document.getElementById("dynamicContent");
             container.innerHTML = "";
 
-            if (section === 'duyuru-admin') {
+            if (section === 'mesaj-admin') {
                 container.innerHTML = `
-                    <h3>Yeni Duyuru Ekle</h3>
-                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
-                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
-                    <div id="duyuruList"></div>
+                    <h3>Mesajlaşma</h3>
+                    <div class="chat-list" id="chatList">
+                      Yükleniyor...
+                    </div>
+                    <div class="chat-window">
+                      <div class="messages" id="messageArea"></div>
+                      <div class="send-box">
+                        <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+                        <button class="send-btn" onclick="sendMessage()">Gönder</button>
+                      </div>
+                    </div>
                 `;
-                loadDuyurular();
-            }
-
-            if (section === 'hakkinda-admin') {
-                const hakRef = doc(db, "site", "hakkinda");
-                const hakSnap = await getDoc(hakRef);
-                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
-                container.innerHTML = `
-                    <h3>Hakkında Düzenle</h3>
-                    <textarea id="hakText">${mevcut}</textarea>
-                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
-                `;
-            }
-
-            if (section === 'dil-sik') {
-                container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
-                const feedbackList = document.getElementById("feedbackList");
-                const snapshot = await getDocs(collection(db, "feedback"));
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const div = document.createElement("div");
-                    div.className = "feedback";
-                    div.innerHTML = `
-                        <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
-                        <p>${data.message}</p>
-                        <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
-                        <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
-                    `;
-                    feedbackList.appendChild(div);
-                });
+                loadChatList();
             }
         }
 
-        window.saveDuyuru = async function () {
-            const text = document.getElementById("duyuruText").value.trim();
-            if (!text) return alert("Duyuru metni boş olamaz.");
-            await addDoc(collection(db, "announcements"), {
-                text,
-                createdAt: Timestamp.now()
-            });
-            document.getElementById("duyuruText").value = "";
-            loadDuyurular();
-        }
+        window.loadChatList = async function () {
+            const usersSnap = await getDocs(collection(db, "users"));
+            const list = document.getElementById("chatList");
+            list.innerHTML = "";
 
-        window.loadDuyurular = async function () {
-            const duyuruList = document.getElementById("duyuruList");
-            if (!duyuruList) return;
-            duyuruList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "announcements"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
+            usersSnap.forEach(async (userDoc) => {
+                const userData = userDoc.data();
+                const userId = userDoc.id;
+
+                if (userId === auth.currentUser.uid) return;
+
+                const name = userData.username;
+                const convoId = [auth.currentUser.uid, userId].sort().join("_");
+                const messagesCol = collection(db, "conversations", convoId, "messages");
+
+                const lastMsgSnap = await getDocs(
+                    query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+                );
+
+                let lastMsg = "", hasNew = false;
+                if (!lastMsgSnap.empty) {
+                    const msg = lastMsgSnap.docs[0].data();
+                    lastMsg = msg.text;
+                    hasNew = !msg.seenBy?.includes(auth.currentUser.uid);
+                }
+
                 const div = document.createElement("div");
-                div.className = "announcement";
-                const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
-                div.innerHTML = `
-                    <p>${data.text}</p>
-                    <small>${tarih}</small>
-                    <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-                `;
-                duyuruList.appendChild(div);
+                div.className = "chat-item";
+                div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+                if (hasNew) {
+                    const notif = document.createElement("div");
+                    notif.className = "notification";
+                    div.appendChild(notif);
+                }
+
+                div.onclick = () => openChat(userId, div);
+                list.appendChild(div);
             });
+        };
+
+        window.openChat = async function (fid, el) {
+            const area = document.getElementById("messageArea");
+            area.innerHTML = "";
+
+            const convoId = [auth.currentUser.uid, fid].sort().join("_");
+            const messagesCol = collection(db, "conversations", convoId, "messages");
+
+            const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+            const messages = [];
+            snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+
+            for (const msg of messages) {
+                const div = await buildMessageDiv(msg);
+                area.appendChild(div);
+            }
+
+            const loadMoreBtn = document.createElement("button");
+            loadMoreBtn.innerHTML = "Daha fazla mesaj yükle";
+            loadMoreBtn.onclick = async function() {
+                loadMoreMessages(messagesCol);
+            };
+
+            area.appendChild(loadMoreBtn);
         }
 
-        window.deleteDuyuru = async function (id) {
-            await deleteDoc(doc(db, "announcements", id));
-            loadDuyurular();
+        async function buildMessageDiv(msg) {
+            const div = document.createElement("div");
+            div.className = "message" + (msg.sender === auth.currentUser.uid ? " you" : "");
+            div.setAttribute("data-id", msg.id);
+
+            let senderName = msg.sender === auth.currentUser.uid ? "Sen" : msg.sender;
+            div.innerHTML = `
+                <div class="sender-label">${senderName}</div>
+                <div class="msg-text">${msg.text}</div>
+                <div class="timestamp">${msg.timestamp}</div>
+            `;
+            return div;
         }
 
-        window.saveHakkinda = async function () {
-            const text = document.getElementById("hakText").value;
-            await setDoc(doc(db, "site", "hakkinda"), { text });
-            alert("Hakkında bilgisi kaydedildi.");
-        }
+        window.sendMessage = async function () {
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            const convoId = [auth.currentUser.uid, selectedFriendId].sort().join("_");
+            const msgCol = collection(db, "conversations", convoId, "messages");
 
-        window.deleteFeedback = async function (id) {
-            await deleteDoc(doc(db, "feedback", id));
-            showContent('dil-sik');
-        }
+            const msg = {
+                sender: auth.currentUser.uid,
+                text: text,
+                timestamp: Date.now(),
+                seenBy: []
+            };
 
-   window.sendMessage = async function () {
-    const text = document.getElementById("messageText").value.trim();
-    if (!text) return alert("Mesaj boş olamaz.");
-    
-    const messageData = {
-        text,
-        timestamp: Timestamp.now(),
-        userId: auth.currentUser .uid // Adminin ID'si
-    };
-    
-    await addDoc(collection(db, "messages"), messageData);
-    document.getElementById("messageText").value = "";
-    loadMessages();
-}
+            await addDoc(msgCol, msg);
+            input.value = "";
+        };
 
-window.loadMessages = async function () {
-    const messageList = document.getElementById("messageList");
-    messageList.innerHTML = "";
-    const querySnapshot = await getDocs(collection(db, "messages"));
-    querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "message";
-        const tarih = data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok";
-        div.innerHTML = `
-            <p>${data.text}</p>
-            <small>${tarih}</small>
-            <button onclick="deleteMessage('${docSnap.id}')">Sil</button>
-            <button onclick="editMessage('${docSnap.id}', '${data.text}')">Düzenle</button>
-        `;
-        messageList.appendChild(div);
-    });
-}
+        window.loadMoreMessages = async function(messagesCol) {
+            const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+            const messages = [];
+            snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-window.deleteMessage = async function (id) {
-    await deleteDoc(doc(db, "messages", id));
-    loadMessages();
-}
-
-window.showContent = async function (section) {
-    const container = document.getElementById("dynamicContent");
-    container.innerHTML = "";
-
-    if (section === 'mesaj-admin') {
-        container.innerHTML = `
-            <h3>Kullanıcılarla Mesajlaşma</h3>
-            <input type="text" id="filterUser " placeholder="Kullanıcı Ara..." oninput="filterMessages()">
-            <div id="messageList"></div>
-            <textarea id="messageText" placeholder="Mesajınızı buraya yazın..."></textarea>
-            <button class="button" onclick="sendMessage()">Gönder</button>
-        `;
-        loadMessages();
-    }
-}
-        
-window.editMessage = async function (id, currentText) {
-    const newText = prompt("Mesajı düzenleyin:", currentText);
-    if (newText) {
-        await setDoc(doc(db, "messages", id), { text: newText }, { merge: true });
-        loadMessages();
-    }
-}
-
-        window.filterMessages = function () {
-    const filterValue = document.getElementById("filterUser ").value.toLowerCase();
-    const messages = document.querySelectorAll(".message");
-    messages.forEach(message => {
-        const text = message.innerText.toLowerCase();
-        message.style.display = text.includes(filterValue) ? "" : "none";
-    });
-}
+            messages.forEach(async (msg) => {
+                const div = await buildMessageDiv(msg);
+                document.getElementById("messageArea").appendChild(div);
+            });
+        };
     </script>
 </body>
 </html>
