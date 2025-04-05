@@ -63,80 +63,6 @@
     .logout-button:hover {
       background-color: #ff4d4d;
     }
-    textarea {
-      width: 100%;
-      height: 120px;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 16px;
-      resize: none;
-    }
-    .button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .announcement {
-      background-color: #444;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      position: relative;
-    }
-    .announcement button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: red;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .feedback {
-      background-color: #444;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      position: relative;
-    }
-    .feedback button {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: red;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .chat-list {
-      width: 30%;
-      max-width: 250px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .chat-item {
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      margin-bottom: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: left;
-      position: relative;
-    }
-    .chat-item.active {
-      background: #007bff;
-      font-weight: bold;
-    }
     .message {
       padding: 10px;
       margin-bottom: 10px;
@@ -177,17 +103,41 @@
       font-weight: bold;
       cursor: pointer;
     }
+    .chat-list {
+      width: 30%;
+      max-width: 250px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .chat-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+    }
+    .chat-item.active {
+      background: #007bff;
+      font-weight: bold;
+    }
+    .notification {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Admin Paneli</h2>
-        <a href="#" onclick="showContent('kul-is')">Kullanıcı ve İstatistik Yönetimi</a>
-        <a href="#" onclick="showContent('paylasimlar')">Paylaşımlar</a>
-        <a href="#" onclick="showContent('mesaj-admin')">Tüm Kullanıcılara Mesaj</a>
-        <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
-        <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
-        <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
+        <a href="#" onclick="showContent('mesaj-admin')">Mesajlar</a>
         <a href="anasayfa.html">Anasayfa</a>
         <a href="index.html" class="logout-button">Çıkış</a>
     </div>
@@ -202,7 +152,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp, query, orderBy, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -217,30 +167,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let currentUser = null;
+        let selectedFriendId = null;
+
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    const username = userData.username || "Yönetici";
-                    const role = userData.role || "user";
-
-                    if (role !== "admin") {
-                        alert("Bu sayfaya erişim izniniz yok!");
-                        window.location.href = "anasayfa.html";
-                        return;
-                    }
-
-                    document.getElementById("adminUsername").innerText = username;
-                } else {
-                    alert("Kullanıcı bilgisi alınamadı.");
-                    window.location.href = "index.html";
-                }
-            } else {
-                alert("Lütfen giriş yapınız.");
-                window.location.href = "index.html";
-            }
+            if (!user) return location.href = "index.html";
+            currentUser = user;
+            loadChatList(user.uid);
         });
 
         window.showContent = async function (section) {
@@ -265,7 +198,7 @@
             }
         }
 
-        window.loadChatList = async function () {
+        async function loadChatList() {
             const usersSnap = await getDocs(collection(db, "users"));
             const list = document.getElementById("chatList");
             list.innerHTML = "";
@@ -274,10 +207,10 @@
                 const userData = userDoc.data();
                 const userId = userDoc.id;
 
-                if (userId === auth.currentUser.uid) return;
+                if (userId === currentUser.uid) return;
 
                 const name = userData.username;
-                const convoId = [auth.currentUser.uid, userId].sort().join("_");
+                const convoId = [currentUser.uid, userId].sort().join("_");
                 const messagesCol = collection(db, "conversations", convoId, "messages");
 
                 const lastMsgSnap = await getDocs(
@@ -288,7 +221,7 @@
                 if (!lastMsgSnap.empty) {
                     const msg = lastMsgSnap.docs[0].data();
                     lastMsg = msg.text;
-                    hasNew = !msg.seenBy?.includes(auth.currentUser.uid);
+                    hasNew = !msg.seenBy?.includes(currentUser.uid);
                 }
 
                 const div = document.createElement("div");
@@ -303,13 +236,14 @@
                 div.onclick = () => openChat(userId, div);
                 list.appendChild(div);
             });
-        };
+        }
 
-        window.openChat = async function (fid, el) {
+        async function openChat(fid, el) {
+            selectedFriendId = fid;
             const area = document.getElementById("messageArea");
             area.innerHTML = "";
-
-            const convoId = [auth.currentUser.uid, fid].sort().join("_");
+            
+            const convoId = [currentUser.uid, fid].sort().join("_");
             const messagesCol = collection(db, "conversations", convoId, "messages");
 
             const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
@@ -332,10 +266,10 @@
 
         async function buildMessageDiv(msg) {
             const div = document.createElement("div");
-            div.className = "message" + (msg.sender === auth.currentUser.uid ? " you" : "");
+            div.className = "message" + (msg.sender === currentUser.uid ? " you" : "");
             div.setAttribute("data-id", msg.id);
 
-            let senderName = msg.sender === auth.currentUser.uid ? "Sen" : msg.sender;
+            let senderName = msg.sender === currentUser.uid ? "Sen" : msg.sender;
             div.innerHTML = `
                 <div class="sender-label">${senderName}</div>
                 <div class="msg-text">${msg.text}</div>
@@ -347,11 +281,11 @@
         window.sendMessage = async function () {
             const input = document.getElementById("messageInput");
             const text = input.value.trim();
-            const convoId = [auth.currentUser.uid, selectedFriendId].sort().join("_");
+            const convoId = [currentUser.uid, selectedFriendId].sort().join("_");
             const msgCol = collection(db, "conversations", convoId, "messages");
 
             const msg = {
-                sender: auth.currentUser.uid,
+                sender: currentUser.uid,
                 text: text,
                 timestamp: Date.now(),
                 seenBy: []
