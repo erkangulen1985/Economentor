@@ -180,7 +180,8 @@
       <input type="file" id="imageUpload" accept="image/*">
       <input type="text" id="imageTitle" placeholder="Başlık Girin">
       <textarea id="imageDescription" placeholder="Açıklama Girin" rows="4"></textarea>
-      <button onclick="uploadPost()">Paylaş</button>
+      <!-- Butona ID verdik -->
+      <button id="uploadButton">Paylaş</button>
     </div>
 
     <div class="history-section" id="postsContainer">
@@ -193,121 +194,126 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+    document.addEventListener('DOMContentLoaded', function() {
+      // Firebase ve Supabase ile ilgili kodlar burada olacak
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.firebasestorage.app",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
-    };
+      const firebaseConfig = {
+        apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+        authDomain: "economentor-8ddc4.firebaseapp.com",
+        projectId: "economentor-8ddc4",
+        storageBucket: "economentor-8ddc4.firebasestorage.app",
+        messagingSenderId: "835370350520",
+        appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+        measurementId: "G-FS3FMPYVPD"
+      };
 
-    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+      const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+      const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const supabase = createClient(supabaseUrl, supabaseKey);
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
-    async function uploadPost() {
-      const imageFile = document.getElementById("imageUpload").files[0];
-      const title = document.getElementById("imageTitle").value;
-      const description = document.getElementById("imageDescription").value;
+      // Resim Yükle ve Paylaş
+      async function uploadPost() {
+        const imageFile = document.getElementById("imageUpload").files[0];
+        const title = document.getElementById("imageTitle").value;
+        const description = document.getElementById("imageDescription").value;
 
-      if (!imageFile || !title || !description) {
-        alert("Lütfen tüm alanları doldurun!");
-        return;
+        if (!imageFile || !title || !description) {
+          alert("Lütfen tüm alanları doldurun!");
+          return;
+        }
+
+        // Supabase'e Resim Yükleme
+        const { data, error } = await supabase.storage
+          .from('songs')
+          .upload('images/' + imageFile.name, imageFile);
+
+        if (error) {
+          console.error("Resim yüklenirken hata oluştu: ", error);
+          alert("Resim yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+          return;
+        }
+
+        const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/songs/images/${data.path}`;
+        
+        // Firestore'a Kaydetme
+        await addDoc(collection(db, "posts"), {
+          title: title,
+          description: description,
+          imageUrl: imageUrl,
+          timestamp: new Date(),
+        });
+
+        alert("Paylaşım başarıyla yapıldı!");
+        loadPosts();  // Paylaşımları yenileyerek göster
       }
 
-      // Supabase'e Resim Yükleme
-      const { data, error } = await supabase.storage
-        .from('songs')
-        .upload('images/' + imageFile.name, imageFile);
+      // Paylaşımları Yükle
+      async function loadPosts() {
+        const postsRef = collection(db, "posts");
+        const querySnapshot = await getDocs(postsRef);
+        const postsContainer = document.getElementById('postsContainer');
+        postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
 
-      if (error) {
-        console.error("Resim yüklenirken hata oluştu: ", error);
-        alert("Resim yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
-        return;
+        if (querySnapshot.empty) {
+          postsContainer.innerHTML = `<p>Henüz hiçbir paylaşım yapılmamış.</p>`;
+          return;
+        }
+
+        querySnapshot.forEach((doc) => {
+          const post = doc.data();
+          const postElement = document.createElement('div');
+          postElement.classList.add('post');
+          postElement.innerHTML = `
+            <img src="${post.imageUrl}" alt="Resim">
+            <h3>${post.title}</h3>
+            <p>${post.description}</p>
+            <div class="post-footer">
+              <button onclick="deletePost('${doc.id}')">Sil</button>
+              <button class="edit-button" onclick="editPost('${doc.id}')">Düzenle</button>
+            </div>
+          `;
+          postsContainer.appendChild(postElement);
+        });
       }
 
-      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/songs/images/${data.path}`;
-      
-      // Firestore'a Kaydetme
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        description: description,
-        imageUrl: imageUrl,
-        timestamp: new Date(),
-      });
+      async function deletePost(postId) {
+        const postRef = doc(db, "posts", postId);
+        const postSnapshot = await getDoc(postRef);
+        const postData = postSnapshot.data();
+        
+        // Supabase'ten Resmi Sil
+        const { error } = await supabase.storage
+          .from('songs')
+          .remove([`images/${postData.imageUrl.split('/').pop()}`]);
 
-      alert("Paylaşım başarıyla yapıldı!");
-      loadPosts();  // Paylaşımları yenileyerek göster
-    }
+        if (error) {
+          console.error("Resim silinirken hata oluştu:", error);
+        }
 
-    // Paylaşımları Yükle
-    async function loadPosts() {
-      const postsRef = collection(db, "posts");
-      const querySnapshot = await getDocs(postsRef);
-      const postsContainer = document.getElementById('postsContainer');
-      postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
-
-      if (querySnapshot.empty) {
-        postsContainer.innerHTML = `<p>Henüz hiçbir paylaşım yapılmamış.</p>`;
-        return;
+        // Firestore'dan Sil
+        await deleteDoc(postRef);
+        loadPosts(); // Sayfayı güncelle
       }
 
-      querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-          <img src="${post.imageUrl}" alt="Resim">
-          <h3>${post.title}</h3>
-          <p>${post.description}</p>
-          <div class="post-footer">
-            <button onclick="deletePost('${doc.id}')">Sil</button>
-            <button class="edit-button" onclick="editPost('${doc.id}')">Düzenle</button>
-          </div>
-        `;
-        postsContainer.appendChild(postElement);
-      });
-    }
-
-    async function deletePost(postId) {
-      const postRef = doc(db, "posts", postId);
-      const postSnapshot = await getDoc(postRef);
-      const postData = postSnapshot.data();
-      
-      // Supabase'ten Resmi Sil
-      const { error } = await supabase.storage
-        .from('songs')
-        .remove([`images/${postData.imageUrl.split('/').pop()}`]);
-
-      if (error) {
-        console.error("Resim silinirken hata oluştu:", error);
+      async function editPost(postId) {
+        alert("Düzenleme işlemi burada yapılacak!");
       }
 
-      // Firestore'dan Sil
-      await deleteDoc(postRef);
-      loadPosts(); // Sayfayı güncelle
-    }
+      loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
 
-    async function editPost(postId) {
-      alert("Düzenleme işlemi burada yapılacak!");
-    }
-
-    loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
-
-    // Button için event listener
-    document.getElementById("uploadButton").addEventListener("click", uploadPost);
+      // Buton için event listener
+      document.getElementById("uploadButton").addEventListener("click", uploadPost);
+    });
   </script>
 
 </body>
 </html>
+
