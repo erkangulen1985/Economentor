@@ -527,13 +527,17 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 window.goHome = () => location.href = "anasayfa.html";
 
 function filterChatList() {
-  const searchQuery = document.getElementById("searchBar").value.toLowerCase();
-  const chatItems = document.querySelectorAll(".chat-item");
+  const searchQuery = document.getElementById("searchBar").value.toLowerCase(); // Get the search input
+  const chatItems = document.querySelectorAll(".chat-item"); // Select all chat items
+
+  // Loop through each chat item
   chatItems.forEach(item => {
-    const name = item.querySelector("strong").textContent.toLowerCase();
+    const name = item.querySelector("strong").textContent.toLowerCase(); // Get the username
+    // If the username includes the search query, show it; otherwise, hide it
     item.style.display = name.includes(searchQuery) ? "block" : "none";
   });
 }
+
 </script>
 </body>
 </html>
