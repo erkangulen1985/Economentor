@@ -49,7 +49,7 @@
   max-width: 250px;
   background: rgba(0, 0, 0, 0.4);
   padding: 20px;
-  padding-top: 60px;  /* Arama çubuğunun üstüne gelmesini engelliyor */
+  padding-top: 60px;  /* Arama çubuğunun üstüne gelmesini engellemek için ekstra boşluk */
   overflow-y: auto;
   position: relative;
   height: 100vh;
@@ -87,7 +87,8 @@
   border-radius: 6px;
   width: 100%;
   border: 1px solid #ddd;
-  position: relative;  /* Arama çubuğunun sabit kalmasını engelliyoruz */
+  position: absolute;  /* Arama çubuğunu sabit bir konuma alıyoruz */
+  top: 20px;  /* Arama çubuğunu belirli bir mesafeye koyuyoruz */
   background-color: rgba(0, 0, 0, 0.6); 
   z-index: 20;  
 }
