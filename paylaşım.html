@@ -232,7 +232,7 @@
 
       // Supabase'e Resim Yükleme
       const { data, error } = await supabase.storage
-        .from('songs')
+        .from('anasayfa-paylasimlari')
         .upload('images/' + imageFile.name, imageFile);
 
       if (error) {
