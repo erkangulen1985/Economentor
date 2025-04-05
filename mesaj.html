@@ -384,11 +384,12 @@ function setupLoadMoreButton(messagesCol) {
     const area = document.getElementById("messageArea");
     const prevScrollHeight = area.scrollHeight;
 
+    // Daha eski mesajları çek
     const snap = await getDocs(query(
       messagesCol,
       orderBy("timestamp", "asc"),
-      endBefore(firstVisible),
-      limitToLast(50)
+      endBefore(firstVisible),  // firstVisible, şu anki son 20 mesajın ilkini gösteriyor
+      limitToLast(50)  // daha eski mesajları 50'lik grup halinde al
     ));
 
     const messages = [];
@@ -401,17 +402,18 @@ function setupLoadMoreButton(messagesCol) {
 
     for (const msg of messages.reverse()) {
       const div = await buildMessageDiv(msg);
-      area.insertBefore(div, loadBtn.nextSibling);
+      area.insertBefore(div, loadBtn.nextSibling);  // Yeni mesajları butonun üstüne ekle
     }
 
+    // Yeni mesajların yüklendiği en eski mesajı ayarla
     if (!snap.empty) {
       firstVisible = snap.docs[0];
     } else {
-      loadBtn.style.display = "none";
+      loadBtn.style.display = "none";  // Eğer eski mesaj yoksa butonu gizle
     }
 
     const newScrollHeight = area.scrollHeight;
-    area.scrollTop += newScrollHeight - prevScrollHeight;
+    area.scrollTop = newScrollHeight - prevScrollHeight;  // Scroll pozisyonunu koru
     isLoading = false;
   };
 }
