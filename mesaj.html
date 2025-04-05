@@ -84,8 +84,9 @@
   width: 100%;
   border: 1px solid #ddd;
   position: sticky;
-  top: 0;
-  z-index: 10; /* Arama çubuğunun üstte kalmasını sağlar */
+  top: 0; /* Sabit kalmasını sağlar */
+  background-color: rgba(0, 0, 0, 0.4); /* Arka plan şeffaf olmalı ki diğer içerik görünmesin */
+  z-index: 5; /* Arama çubuğunun üstte olmasını sağlar */
 }
     .chat-window {
       flex: 1;
