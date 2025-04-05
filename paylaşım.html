@@ -216,7 +216,6 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Resim Yükle ve Paylaş
     async function uploadPost() {
       const imageFile = document.getElementById("imageUpload").files[0];
       const title = document.getElementById("imageTitle").value;
@@ -305,6 +304,10 @@
     }
 
     loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
+
+    // Button için event listener
+    document.getElementById("uploadButton").addEventListener("click", uploadPost);
   </script>
+
 </body>
 </html>
