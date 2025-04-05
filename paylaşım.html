@@ -180,7 +180,6 @@
       <input type="file" id="imageUpload" accept="image/*">
       <input type="text" id="imageTitle" placeholder="Başlık Girin">
       <textarea id="imageDescription" placeholder="Açıklama Girin" rows="4"></textarea>
-      <!-- Butona ID verdik -->
       <button id="uploadButton">Paylaş</button>
     </div>
 
@@ -195,7 +194,7 @@
 
   <!-- Buradaki Script tag'ini module olarak ekliyoruz ve fonksiyonlarımız burada -->
   <script type="module">
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
       // Firebase ve Supabase ile ilgili kodlar burada olacak
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
