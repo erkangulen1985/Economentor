@@ -321,12 +321,12 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  // Son 20 mesajı alıyoruz
+  // Son 20 mesajı alıyoruz (en yeni mesajlar ilk sırada olacak)
   const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
 
-  // Mesajları ters çeviriyoruz, çünkü son 20'yi yukarı ekliyoruz
+  // Mesajları ters çeviriyoruz çünkü son 20'yi yukarı ekliyoruz
   const sortedMessages = messages.reverse();
   for (const msg of sortedMessages) {
     const div = await buildMessageDiv(msg);
@@ -388,7 +388,7 @@ function setupLoadMoreButton(messagesCol) {
     // Eski mesajları çekiyoruz (50 mesaj birden)
     const snap = await getDocs(query(
       messagesCol,
-      orderBy("timestamp", "asc"),  // Zaman sırasına göre en eskiyi önce alıyoruz
+      orderBy("timestamp", "desc"),  // Zaman sırasına göre en eskiyi önce alıyoruz
       endBefore(firstVisible),  // Son görülen mesajdan önceki mesajları alıyoruz
       limitToLast(50)  // 50 tane eski mesaj alıyoruz
     ));
