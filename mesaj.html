@@ -340,24 +340,35 @@ async function openChat(fid, el) {
 
   setupLoadMoreButton(messagesCol);  // Daha fazla mesaj yüklemek için butonu kur
 
-  // Gerçek zamanlı mesajları dinlemek için onSnapshot'ı başlatıyoruz
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+const now = Date.now();
+unsubMessages = onSnapshot(
+  query(messagesCol, orderBy("timestamp", "asc"), 
+        // Sadece yeni mesajları dinle
+        // Buradaki timestamp, sayfa yüklendikten sonra gönderilenler olacak
+        // Böylece geçmiş mesajlar tekrar gelmeyecek
+        ), 
+  async (snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
-      if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+      // Yeni mesaj ise ve daha önce yüklenmemişse
+      if (change.type === "added" && !loadedMessageIds.has(msg.id) && msg.timestamp > now) {
         loadedMessageIds.add(msg.id);
         const div = await buildMessageDiv(msg);
         document.getElementById("messageArea").appendChild(div);
-        setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
+        setTimeout(() => {
+          document.getElementById("messageArea").scrollTop =
+            document.getElementById("messageArea").scrollHeight;
+        }, 100);
 
         if (!msg.seenBy?.includes(currentUser.uid)) {
           await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-            seenBy: arrayUnion(currentUser.uid)
+            seenBy: arrayUnion(currentUser.uid),
           });
         }
       }
 
+      // Düzenleme ve silme olayları eskisi gibi kalsın
       if (change.type === "modified") {
         const updatedMsg = change.doc.data();
         const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
@@ -371,9 +382,9 @@ async function openChat(fid, el) {
         if (msgDiv) msgDiv.remove();
       }
     });
-  });
-}
-
+  }
+);
+  
 // "Daha eski mesajları yükle" butonunun işlevini düzeltiyoruz
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
