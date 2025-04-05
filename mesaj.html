@@ -318,13 +318,6 @@ async function openChat(fid, el) {
   const area = document.getElementById("messageArea");
   area.innerHTML = ""; // Clear message area
 
-  // Create a "Load More" button
-  const loadBtn = document.createElement("button");
-  loadBtn.id = "loadMoreBtn";
-  loadBtn.textContent = "⬆️ Load Older Messages";
-  loadBtn.style = "margin-bottom: 10px; padding: 6px; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer;";
-  area.appendChild(loadBtn);
-
   loadedMessageIds.clear(); // Clear loaded message IDs
   firstVisible = null; // Reset first visible message
 
