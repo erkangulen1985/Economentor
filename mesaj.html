@@ -536,13 +536,13 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 window.goHome = () => location.href = "anasayfa.html";
 
 function filterChatList() {
-  const searchQuery = document.getElementById("searchBar").value.toLowerCase(); // Get the search input
-  const chatItems = document.querySelectorAll(".chat-item"); // Select all chat items
+  const searchQuery = document.getElementById("searchBar").value.toLowerCase(); // Arama çubuğunun değerini al
+  const chatItems = document.querySelectorAll(".chat-item"); // Tüm chat öğelerini seç
 
-  // Loop through each chat item
+  // Her bir chat öğesinde döngü
   chatItems.forEach(item => {
-    const name = item.querySelector("strong").textContent.toLowerCase(); // Get the username
-    // If the username includes the search query, show it; otherwise, hide it
+    const name = item.querySelector("strong").textContent.toLowerCase(); // Kullanıcı adını al
+    // Kullanıcı adı arama çubuğu değeri ile eşleşiyor mu?
     item.style.display = name.includes(searchQuery) ? "block" : "none";
   });
 }
