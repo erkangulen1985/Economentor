@@ -274,7 +274,7 @@ async function loadChatList(uid) {
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
     const lastMsgSnap = await getDocs(
-      query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1))
+      query(messagesCol, orderBy("timestamp", "desc"), limitToLast(1))
     );
 
     let lastMsg = "", hasNew = false;
