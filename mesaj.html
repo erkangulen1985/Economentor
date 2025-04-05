@@ -303,6 +303,7 @@ async function openChat(fid, el) {
   const area = document.getElementById("messageArea");
   area.innerHTML = "";
 
+  // "Daha eski mesajları yükle" butonu oluştur
   const loadBtn = document.createElement("button");
   loadBtn.id = "loadMoreBtn";
   loadBtn.textContent = "⬆️ Daha eski mesajları yükle";
@@ -319,23 +320,28 @@ async function openChat(fid, el) {
   const convoId = getConversationId(currentUser.uid, fid);
   const messagesCol = collection(db, "conversations", convoId, "messages");
 
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(20)));
+  // ✅ SADECE SON 20 MESAJI ÇEK
+  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(20)));
   const messages = [];
   snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
-  firstVisible = snap.docs[0];
 
-  for (const msg of messages) {
+  // 🔁 SIRAYI DOĞRU YAP
+  const sortedMessages = messages.reverse();
+  for (const msg of sortedMessages) {
     const div = await buildMessageDiv(msg);
     area.appendChild(div);
     loadedMessageIds.add(msg.id);
   }
 
+  firstVisible = snap.docs[0]; // Daha eski mesajlar için
+
   area.lastElementChild?.scrollIntoView({ behavior: "auto" });
 
   setupLoadMoreButton(messagesCol);
 
+  // ✅ GERÇEK ZAMANLI YENİ MESAJLARI DİNLE
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-    for (const change of snapshot.docChanges()) {
+    snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
       if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
@@ -354,14 +360,16 @@ async function openChat(fid, el) {
       if (change.type === "modified") {
         const updatedMsg = change.doc.data();
         const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-        if (msgDiv) msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        if (msgDiv) {
+          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        }
       }
 
       if (change.type === "removed") {
         const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
         if (msgDiv) msgDiv.remove();
       }
-    }
+    });
   });
 }
 
