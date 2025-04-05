@@ -262,11 +262,11 @@ onAuthStateChanged(auth, user => {
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
   const list = document.getElementById("chatList");
-  const searchBar = document.getElementById("searchBar");
+  const searchBar = document.getElementById("searchBar"); // Arama çubuğunu sabitlemek için
 
   list.innerHTML = ""; // Listeyi temizle
 
-  // Arama çubuğunu yeniden ekle
+  // Arama çubuğunu her zaman en üstte tutmak için
   list.appendChild(searchBar);
 
   usersSnap.forEach(async (userDoc) => {
@@ -305,6 +305,8 @@ async function loadChatList(uid) {
 
     // Sohbeti tıklanabilir hale getirme
     div.onclick = () => openChat(userId, div);
+    
+    // Yeni sohbeti listeye ekle
     list.appendChild(div);
 
     // Yeni mesaj geldiğinde, sohbeti listenin en üstüne taşı
