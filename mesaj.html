@@ -282,7 +282,7 @@ async function loadChatList(uid) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text;
 
-      // Check if there's any unseen message (only show notification if there are new messages)
+      // Check if the current user has seen the message (based on seenBy field)
       hasNew = !msg.seenBy?.includes(uid);
     }
 
@@ -349,10 +349,14 @@ async function openChat(fid, el) {
 
   setupLoadMoreButton(messagesCol);  // Setup "Load Older Messages" button
 
-  // When the chat is opened, update Firestore and mark inboxHasNew as false
-  await updateDoc(doc(db, "conversations", convoId), {
-    inboxHasNew: false // Mark as no new messages
-  });
+  // Mark messages as seen by the current user
+  for (const msg of messages) {
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+        seenBy: arrayUnion(currentUser.uid) // Add current user to seenBy
+      });
+    }
+  }
 
   // Start listening for new messages in real-time
   unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
