@@ -326,9 +326,7 @@ async function openChat(fid, el) {
 
   document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
   const notif = el.querySelector(".notification");
-  if (notif) {
-    notif.remove();  // Bildirimi hemen kaldır
-  }
+  if (notif) notif.remove(); // Bildirimi hemen kaldır
   el.classList.add("active");
 
   const convoId = getConversationId(currentUser.uid, fid);
