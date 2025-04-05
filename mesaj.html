@@ -302,7 +302,18 @@ async function loadChatList(uid) {
     }
 
     // Sohbeti tıklanabilir hale getirme
-    div.onclick = () => openChat(userId, div);
+    div.onclick = async () => {
+      // Sohbet açıldığında bildirim işaretini kaldır
+      const notif = div.querySelector(".notification");
+      if (notif) notif.remove();
+
+      // Firestore'da 'inboxHasNew' değerini false yap
+      await updateDoc(doc(db, "conversations", convoId), {
+        inboxHasNew: false // Görülmemiş mesajları sil
+      });
+
+      openChat(userId, div);
+    };
     list.appendChild(div);
   });
 }
