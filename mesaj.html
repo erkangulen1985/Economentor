@@ -282,7 +282,7 @@ async function loadChatList(uid) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text;
 
-      // Check if there's any unseen message
+      // Check if there's any unseen message (only show notification if there are new messages)
       hasNew = !msg.seenBy?.includes(uid);
     }
 
