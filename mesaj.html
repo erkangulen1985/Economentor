@@ -172,13 +172,13 @@
 <body>
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
+    <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
     <div>
       <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
     </div>
   </header>
   <div class="container">
     <div class="chat-list" id="chatList">
-      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
       Yükleniyor...
     </div>
     <div class="chat-window">
