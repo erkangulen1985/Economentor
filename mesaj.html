@@ -43,17 +43,13 @@
       flex: 1;
       overflow: hidden;
     }
-
-/* Container'ın yüksekliğini yeterli tutalım */
-.chat-list {
-  width: 30%;
-  max-width: 250px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 20px;
-  overflow-y: auto;
-  position: relative;  /* Chat listesi için gerekli */
-  height: 100vh;  /* Container'ın yüksekliğini belirliyoruz */
-}
+    .chat-list {
+      width: 30%;
+      max-width: 250px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      overflow-y: auto;
+    }
     .chat-item {
       padding: 10px;
       background: rgba(255, 255, 255, 0.1);
@@ -81,17 +77,26 @@
       color: #ccc;
       margin-top: 5px;
     }
-.search-bar {
-  margin-bottom: 15px;
-  padding: 8px;
-  border-radius: 6px;
-  width: 100%;
-  border: 1px solid #ddd;
-  position: sticky;
-  top: 0;  /* Sayfa kaydırıldıkça üstte sabit kalacak */
-  background-color: rgba(0, 0, 0, 0.6);  /* Arka planı şeffaf yaparak görsel uyum sağlıyoruz */
-  z-index: 20;  /* Arama çubuğunun üstte kalması için yüksek bir z-index değeri veriyoruz */
-}
+
+    /* Yeni Arama Çubuğu düzenlemesi */
+    header .search-bar-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .search-bar {
+      margin-left: 20px;
+      padding: 8px;
+      border-radius: 6px;
+      width: 200px;
+      border: 1px solid #ddd;
+      position: sticky;
+      top: 15px; /* Sabit olmasını sağlamak için */
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
     .chat-window {
       flex: 1;
       padding: 20px;
@@ -148,6 +153,8 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    /* Mobile uyumlu stil */
     @media (max-width: 768px) {
       .container { flex-direction: column; }
       .chat-list {
@@ -172,13 +179,12 @@
 <body>
   <header>
     <h2 id="pageTitle">Mesajlar</h2>
-    <div>
-      <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
+    <div class="search-bar-container">
+      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
     </div>
   </header>
   <div class="container">
     <div class="chat-list" id="chatList">
-      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
       Yükleniyor...
     </div>
     <div class="chat-window">
