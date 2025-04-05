@@ -280,32 +280,41 @@ async function loadChatList(uid) {
       query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)) // Son mesajı al
     );
 
-    let lastMsg = "", hasNew = false;
-    if (!lastMsgSnap.empty) {
-      const msg = lastMsgSnap.docs[0].data();
-      lastMsg = msg.text;
+let lastMsg = "", hasNew = false;
+if (!lastMsgSnap.empty) {
+  const msg = lastMsgSnap.docs[0].data();
+  lastMsg = msg.text;
 
-      // Görülmemiş mesaj var mı? Eğer varsa bildirim gösterilecek
-      hasNew = !msg.seenBy?.includes(uid);
-    }
+  // Görülmemiş mesaj var mı? Eğer varsa bildirim gösterilecek
+  hasNew = !msg.seenBy?.includes(uid);
+}
 
-    // Chat öğesini oluştur
-    const div = document.createElement("div");
-    div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+// Chat öğesini oluştur
+const div = document.createElement("div");
+div.className = "chat-item";
+div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
 
-    // Eğer yeni mesaj varsa, bildirim ekle
+// Eğer yeni mesaj varsa, bildirim ekle
+if (hasNew) {
+  const notif = document.createElement("div");
+  notif.className = "notification";
+  div.appendChild(notif);
+}
+
 // Bildirimi UI'dan kaldırma
 const notification = el.querySelector(".notification");
 if (notification) {
-  notification.remove();
+  notification.remove(); // Bildirimi sil
 }
-  });
-    
-  // Sohbeti tıklanabilir hale getirme
-    div.onclick = () => openChat(userId, div);
-    list.appendChild(div);
-  }
+
+// Sohbeti tıklanabilir hale getirme
+div.onclick = () => openChat(userId, div);
+list.appendChild(div);
+
+// Firestore'da görülen mesajları güncelleme
+await updateDoc(doc(db, "conversations", convoId), {
+  inboxHasNew: false // Görülmemiş mesajları sil
+});
   
 async function openChat(fid, el) {
   selectedFriendId = fid;
