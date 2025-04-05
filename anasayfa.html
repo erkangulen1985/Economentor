@@ -97,11 +97,11 @@
     }
 
     .post img {
-      width: 100%; /* Resmin genişliğini %100 yaparak container'a uyduruyoruz */
-      height: 500px; /* Yüksekliği artırarak daha büyük bir görünüm sağlıyoruz */
-      object-fit: cover; /* Resmin kesilmesini engeller, düzgün şekilde fit eder */
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
       display: block;
-      margin: 0 auto; /* Ortalamak için */
+      margin: 0 auto;
     }
 
     .post-footer {
@@ -146,6 +146,35 @@
       color: #ccc;
     }
 
+    .comments-section {
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    .comment {
+      background-color: #333;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .comment button {
+      background-color: #e74c3c;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .comment button:hover {
+      background-color: #c0392b;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
@@ -184,7 +213,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
     // Firebase Konfigürasyonu
