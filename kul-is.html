@@ -201,8 +201,16 @@
     Legend 
   } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js'; 
 
-  // Register necessary components for "line" chart
-  Chart.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend);
+  // Register all necessary components for chart.js
+  Chart.register(
+    CategoryScale, 
+    LinearScale, 
+    LineElement, 
+    PointElement, 
+    Title, 
+    Tooltip, 
+    Legend
+  );
 
   const firebaseConfig = {
     apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -401,5 +409,6 @@
   loadUserList();
   loadCharts();
 </script>
+
 </body>
 </html>
