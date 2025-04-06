@@ -263,6 +263,7 @@
         const post = doc.data();
         const postElement = document.createElement('div');
         postElement.classList.add('post');
+        postElement.id = `post-${doc.id}`;
 
         const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
         const postDescription = `<p>${post.description}</p>`;
@@ -292,14 +293,14 @@
         const dislikeButton = postElement.querySelector(".dislike-button");
         const commentButton = postElement.querySelector(".comment-button");
 
-        likeButton.addEventListener("click", () => likePost(doc.id, post));
-        dislikeButton.addEventListener("click", () => dislikePost(doc.id, post));
-        commentButton.addEventListener("click", () => postComment(doc.id));
+        likeButton.addEventListener("click", () => likePost(doc.id, post, postElement));
+        dislikeButton.addEventListener("click", () => dislikePost(doc.id, post, postElement));
+        commentButton.addEventListener("click", () => postComment(doc.id, postElement));
       });
     }
 
     // Beğenme İşlemi
-    async function likePost(postId, post) {
+    async function likePost(postId, post, postElement) {
       const user = auth.currentUser;
       if (!user) {
         alert("Önce giriş yapmalısınız!");
@@ -322,12 +323,15 @@
       // Kullanıcıyı beğeni olarak kaydediyoruz
       await setDoc(userLikesRef, { userId: user.uid });
 
+      // Sayfada sadece bu postu güncelle
+      const likeCountElement = postElement.querySelector('.likes');
+      likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
+
       alert("Beğenildi");
-      loadPosts(); // Güncel beğenilerle tekrar yükleyin
     }
 
     // Beğenmeme İşlemi
-    async function dislikePost(postId, post) {
+    async function dislikePost(postId, post, postElement) {
       const user = auth.currentUser;
       if (!user) {
         alert("Önce giriş yapmalısınız!");
@@ -350,12 +354,15 @@
       // Kullanıcıyı beğenmeme olarak kaydediyoruz
       await setDoc(userDislikesRef, { userId: user.uid });
 
+      // Sayfada sadece bu postu güncelle
+      const dislikeCountElement = postElement.querySelector('.dislikes');
+      dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
+
       alert("Beğenilmedi");
-      loadPosts(); // Güncel beğenme ile tekrar yükleyin
     }
 
     // Yorum Yapma İşlemi
-    async function postComment(postId) {
+    async function postComment(postId, postElement) {
       const commentInput = document.getElementById(`commentInput-${postId}`);
       const commentText = commentInput.value;
 
@@ -376,7 +383,13 @@
       });
 
       commentInput.value = "";
-      loadPosts();
+
+      // Yorumları anında sayfada güncelle
+      const commentsCountElement = postElement.querySelector('.comments');
+      const newCommentsCount = (post.comments ? post.comments.length : 0) + 1;
+      commentsCountElement.textContent = `Yorumlar: ${newCommentsCount}`;
+
+      alert("Yorum yapıldı");
     }
 
     loadPosts();
