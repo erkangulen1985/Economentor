@@ -203,10 +203,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "index.html";  // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+  if (!user) {
+    return location.href = "index.html";  // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+  }
 
-  const uid = user.uid;  // Kullanıcının UID'sini buradan alıyoruz
-  const userDoc = await getDoc(doc(db, "users", uid));  // Kullanıcı verilerini al
+  uid = user.uid;  // Giriş yapan kullanıcının UID'sini al
+
+  const userDoc = await getDoc(doc(db, "users", uid));
   const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";  // Kullanıcı adını al, yoksa "Kullanıcı" kullan
 
   const container = document.getElementById("videoContainer");
