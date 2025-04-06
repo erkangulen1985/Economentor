@@ -149,6 +149,10 @@
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+  // Chart.js controller kaydını yapıyoruz
+  import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js';
+  Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement);
+
   const firebaseConfig = {
     apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
     authDomain: "economentor-8ddc4.firebaseapp.com",
