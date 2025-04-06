@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eğitim Ekle | Admin Panel</title>
+  <link rel="icon" href="image1.png" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f1f1f1;
+      color: #333;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 15px 0;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      padding: 10px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .bullet-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bullet-input input {
+      flex: 1;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .training {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .training ul {
+      margin-top: 10px;
+    }
+
+    .training-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .training-actions button {
+      background-color: #f39c12;
+    }
+
+    .training-actions button:last-child {
+      background-color: #e74c3c;
+    }
+
+    .training-actions button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <header>Eğitim Ekle</header>
+
+  <nav>
+    <a href="adminpanel.html">Yönetici Paneli</a>
+    <a href="analiz.html">Analiz</a>
+  </nav>
+
+  <div class="container">
+    <h2>Yeni Eğitim Oluştur</h2>
+    <input type="text" id="title" placeholder="Eğitim Başlığı">
+    <textarea id="description" placeholder="Açıklama"></textarea>
+    <div id="bullets"></div>
+    <div class="bullet-input">
+      <input type="text" id="bulletText" placeholder="Madde ekle">
+      <button onclick="addBullet()">Ekle</button>
+    </div>
+    <button onclick="saveTraining()">Kaydet</button>
+  </div>
+
+  <div class="container">
+    <h2>Eklenen Eğitimler</h2>
+    <div id="trainingList"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      doc,
+      deleteDoc,
+      updateDoc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const trainingRef = collection(db, "trainings");
+
+    let bullets = [];
+
+    window.addBullet = () => {
+      const text = document.getElementById("bulletText").value;
+      if (text.trim()) {
+        bullets.push(text);
+        renderBullets();
+        document.getElementById("bulletText").value = "";
+      }
+    };
+
+    function renderBullets() {
+      const container = document.getElementById("bullets");
+      container.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
+    }
+
+    window.saveTraining = async () => {
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      if (!title || !description) return alert("Lütfen başlık ve açıklama girin.");
+
+      await addDoc(trainingRef, {
+        title,
+        description,
+        bullets,
+        timestamp: new Date()
+      });
+
+      bullets = [];
+      document.getElementById("title").value = "";
+      document.getElementById("description").value = "";
+      document.getElementById("bulletText").value = "";
+      renderBullets();
+      loadTrainings();
+    };
+
+    window.deleteTraining = async (id) => {
+      if (confirm("Bu eğitimi silmek istiyor musunuz?")) {
+        await deleteDoc(doc(db, "trainings", id));
+        loadTrainings();
+      }
+    };
+
+    window.editTraining = async (id) => {
+      const ref = doc(db, "trainings", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+
+      const newTitle = prompt("Yeni başlık:", data.title);
+      const newDesc = prompt("Yeni açıklama:", data.description);
+
+      if (newTitle && newDesc) {
+        await updateDoc(ref, { title: newTitle, description: newDesc });
+        loadTrainings();
+      }
+    };
+
+    async function loadTrainings() {
+      const list = document.getElementById("trainingList");
+      list.innerHTML = "";
+      const snapshot = await getDocs(trainingRef);
+      snapshot.forEach(docSnap => {
+        const t = docSnap.data();
+        const el = document.createElement("div");
+        el.className = "training";
+        el.innerHTML = `
+          <h3>${t.title}</h3>
+          <p>${t.description}</p>
+          <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+          <p><em>Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</em></p>
+          <div class="training-actions">
+            <button onclick="editTraining('${docSnap.id}')">Düzenle</button>
+            <button onclick="deleteTraining('${docSnap.id}')">Sil</button>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    loadTrainings();
+  </script>
+</body>
+</html>
