@@ -196,37 +196,20 @@ onAuthStateChanged(auth, async (user) => {
     }
   });
 
-  // E-posta değiştir
   document.getElementById("changeEmailBtn").addEventListener("click", async () => {
     const newEmail = document.getElementById("newEmail").value.trim();
 
     if (!newEmail) {
-      alert("Lütfen geçerli bir e-posta girin.");
+      alert("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
 
-    // Mevcut şifreyi alıyoruz
-    const password = prompt("Mevcut şifrenizi girin");
-    if (!password) {
-      alert("Şifre gereklidir.");
-      return;
-    }
-
-    const credential = EmailAuthProvider.credential(user.email, password);
-
+    // Yeni e-posta adresine doğrulama e-postası gönder
     try {
-      // Kullanıcıyı yeniden doğrulama işlemi
-      await reauthenticateWithCredential(user, credential);
-
-      // E-posta adresini güncelleme işlemi
-      await updateEmail(user, newEmail);
-      alert("E-posta adresiniz başarıyla güncellenmiştir.");
+      await sendEmailVerification(user);  // E-posta doğrulama e-postası gönder
+      alert("Yeni e-posta adresinize doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
     } catch (error) {
-      if (error.code === "auth/requires-recent-login") {
-        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
-      } else {
-        alert("E-posta güncelleme hatası: " + error.message);
-      }
+      alert("E-posta gönderme hatası: " + error.message);
     }
   });
 });
