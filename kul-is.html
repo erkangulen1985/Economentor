@@ -183,30 +183,31 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, doc,
-      deleteDoc, onSnapshot, query, orderBy
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getFirestore, collection, getDocs, doc, 
+    deleteDoc, onSnapshot, query, orderBy 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+    authDomain: "economentor-8ddc4.firebaseapp.com",
+    projectId: "economentor-8ddc4",
+    storageBucket: "economentor-8ddc4.appspot.com",
+    messagingSenderId: "835370350520",
+    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-    // Genel istatistikleri getir
-    async function loadStatistics() {
+  // Genel istatistikleri getir
+  async function loadStatistics() {
+    try {
       const analizler = await getDocs(collection(db, "analizler"));
       const fotolar = await getDocs(collection(db, "posts"));
       const users = await getDocs(collection(db, "users"));
@@ -215,15 +216,19 @@
       document.getElementById("totalUsers").textContent = users.size;
       document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
       document.getElementById("totalFeedbacks").textContent = feedbacks.size;
+    } catch (error) {
+      console.error("Veri çekme hatası: ", error);
     }
+  }
 
-    loadStatistics();
+  loadStatistics();
 
-    // Kullanıcıyı listele ve sil
-    async function loadUserList() {
-      const userContainer = document.getElementById("userTableBody");
-      userContainer.innerHTML = "";
+  // Kullanıcıyı listele ve sil
+  async function loadUserList() {
+    const userContainer = document.getElementById("userTableBody");
+    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
 
+    try {
       const users = await getDocs(collection(db, "users"));
       users.forEach(docSnap => {
         const data = docSnap.data();
@@ -236,47 +241,53 @@
         `;
         userContainer.appendChild(row);
       });
+    } catch (error) {
+      console.error("Kullanıcı verileri çekilemedi: ", error);
     }
+  }
 
-    document.getElementById("searchInput").addEventListener("input", async (e) => {
-      const keyword = e.target.value.toLowerCase();
-      const userContainer = document.getElementById("userTableBody");
-      userContainer.innerHTML = "";
-      const users = await getDocs(collection(db, "users"));
-      users.forEach(docSnap => {
-        const data = docSnap.data();
-        const username = (data.username || "").toLowerCase();
-        const fullName = (data.fullName || "").toLowerCase();
-        if (username.includes(keyword) || fullName.includes(keyword)) {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${data.username || "-"}</td>
-            <td>${data.fullName || "-"}</td>
-            <td>${docSnap.id}</td>
-            <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-          `;
-          userContainer.appendChild(row);
-        }
-      });
-    });
-
-    document.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("deleteBtn")) {
-        const uid = e.target.dataset.uid;
-        if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
-
-        try {
-          await deleteDoc(doc(db, "users", uid));
-          alert("Kullanıcı başarıyla silindi.");
-          loadUserList();
-        } catch (err) {
-          alert("Silme hatası: " + err.message);
-        }
+  // Arama inputu
+  document.getElementById("searchInput").addEventListener("input", async (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const userContainer = document.getElementById("userTableBody");
+    userContainer.innerHTML = "";
+    const users = await getDocs(collection(db, "users"));
+    users.forEach(docSnap => {
+      const data = docSnap.data();
+      const username = (data.username || "").toLowerCase();
+      const fullName = (data.fullName || "").toLowerCase();
+      if (username.includes(keyword) || fullName.includes(keyword)) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.username || "-"}</td>
+          <td>${data.fullName || "-"}</td>
+          <td>${docSnap.id}</td>
+          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
+        `;
+        userContainer.appendChild(row);
       }
     });
+  });
 
-    // Dinamik grafik yükleme fonksiyonu
-    async function loadCharts() {
+  // Silme işlemi
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("deleteBtn")) {
+      const uid = e.target.dataset.uid;
+      if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+
+      try {
+        await deleteDoc(doc(db, "users", uid));
+        alert("Kullanıcı başarıyla silindi.");
+        loadUserList();
+      } catch (err) {
+        alert("Silme hatası: " + err.message);
+      }
+    }
+  });
+
+  // Dinamik grafik yükleme fonksiyonu
+  async function loadCharts() {
+    try {
       const userQ = query(collection(db, "users"), orderBy("timestamp"));
       const userSnapshot = await getDocs(userQ);
 
@@ -315,7 +326,8 @@
         commentCounts.push((doc.data().comments || []).length);
       });
 
-      new Chart(document.getElementById("chart-users"), {
+      // Kullanıcı artışı grafiği
+      new Chart(document.getElementById("userGrowthChart"), {
         type: 'line',
         data: {
           labels: userLabels,
@@ -328,7 +340,8 @@
         options: { responsive: true }
       });
 
-      new Chart(document.getElementById("chart-likes"), {
+      // Beğeni sayısı grafiği
+      new Chart(document.getElementById("contentLikesChart"), {
         type: 'line',
         data: {
           labels: likeCounts.map((_, i) => "İçerik " + (i + 1)),
@@ -341,7 +354,8 @@
         options: { responsive: true }
       });
 
-      new Chart(document.getElementById("chart-dislikes"), {
+      // Beğenmeme sayısı grafiği
+      new Chart(document.getElementById("contentDislikesChart"), {
         type: 'line',
         data: {
           labels: dislikeCounts.map((_, i) => "İçerik " + (i + 1)),
@@ -354,7 +368,8 @@
         options: { responsive: true }
       });
 
-      new Chart(document.getElementById("chart-comments"), {
+      // Yorum sayısı grafiği
+      new Chart(document.getElementById("contentCommentsChart"), {
         type: 'line',
         data: {
           labels: commentCounts.map((_, i) => "İçerik " + (i + 1)),
@@ -366,10 +381,14 @@
         },
         options: { responsive: true }
       });
+    } catch (error) {
+      console.error("Grafikler yüklenemedi: ", error);
     }
+  }
 
-    loadUserList();
-    loadCharts();
-  </script>
+  loadUserList();
+  loadCharts();
+</script>
+
 </body>
 </html>
