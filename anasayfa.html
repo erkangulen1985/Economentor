@@ -234,6 +234,7 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Kullanıcı Giriş Durumu
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
@@ -316,7 +317,7 @@
       await updateDoc(postRef, {
         comments: arrayUnion({
           text: commentText,
-          user: "Kullanıcı", // Burada kullanıcının ismini alabiliriz.
+          user: "Kullanıcı", // Burada kullanıcının ismini alabilirsiniz.
           timestamp: new Date().toISOString()
         })
       });
