@@ -298,31 +298,39 @@ onAuthStateChanged(auth, async (user) => {
       container.appendChild(div);
 
       // 🎯 Düzenle butonu
-      div.querySelector(".edit-button").addEventListener("click", async () => {
-        const ref = doc(db, "analizler", id);
-        const snap = await getDoc(ref);
-        const data = snap.data();
-        const newTitle = prompt("Yeni başlık:", data.title);
-        const newDesc = prompt("Yeni açıklama:", data.description);
-        if (!newTitle || !newDesc) return;
-        await updateDoc(ref, { title: newTitle, description: newDesc });
-        div.querySelector("h3").textContent = newTitle;
-        div.querySelector("p").textContent = newDesc;
-      });
+div.querySelector(".edit-button").addEventListener("click", async () => {
+  const ref = doc(db, "analizler", id);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const newTitle = prompt("Yeni başlık:", data.title);
+  const newDesc = prompt("Yeni açıklama:", data.description);
+  if (!newTitle || !newDesc) return;
+
+  await updateDoc(ref, { title: newTitle, description: newDesc });
+
+  // DOM'u güncelle
+  div.querySelector("h3").textContent = newTitle;
+  div.querySelector("p").textContent = newDesc;
+});
 
       // 🎯 Sil butonu
-      div.querySelector(".delete-button").addEventListener("click", async () => {
-        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-        if (!confirmed) return;
-        const path = div.querySelector(".delete-button").dataset.path;
-        const { error } = await supabase.storage.from("analizler").remove([path]);
-        if (error) {
-          alert("Supabase videosu silinemedi: " + error.message);
-          return;
-        }
-        await deleteDoc(doc(db, "analizler", id));
-        div.remove();
-      });
+div.querySelector(".delete-button").addEventListener("click", async () => {
+  const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+  if (!confirmed) return;
+
+  const path = div.querySelector(".delete-button").dataset.path;
+
+  const { error } = await supabase.storage.from("analizler").remove([path]);
+  if (error) {
+    alert("Supabase videosu silinemedi: " + error.message);
+    return;
+  }
+
+  await deleteDoc(doc(db, "analizler", id));
+
+  // DOM'dan videoyu sil
+  div.remove();
+});
 
       // 🎯 Yorum silme
       div.querySelectorAll(".delete-comment").forEach(btn => {
