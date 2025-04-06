@@ -269,9 +269,9 @@
 
         const postFooter = `
           <div class="post-footer">
-            <button class="like-button" onclick="likePost('${doc.id}')"><i class="fas fa-heart"></i> Beğen</button>
+            <button class="like-button">Beğen</button>
             <span class="likes">Beğeniler: ${post.likes || 0}</span>
-            <button class="dislike-button" onclick="dislikePost('${doc.id}')"><i class="fas fa-thumbs-down"></i> Beğenme</button>
+            <button class="dislike-button">Beğenme</button>
             <span class="comments">Yorumlar: ${post.comments || 0}</span>
           </div>
         `;
@@ -279,12 +279,21 @@
         const commentSection = `
           <div class="comments-section">
             <input type="text" id="commentInput-${doc.id}" placeholder="Yorumunuzu yapın" />
-            <button onclick="postComment('${doc.id}')">Yorum Yap</button>
+            <button class="comment-button">Yorum Yap</button>
           </div>
         `;
 
         postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
         document.getElementById('postsContainer').appendChild(postElement);
+
+        // Event listeners
+        const likeButton = postElement.querySelector(".like-button");
+        const dislikeButton = postElement.querySelector(".dislike-button");
+        const commentButton = postElement.querySelector(".comment-button");
+
+        likeButton.addEventListener("click", () => likePost(doc.id));
+        dislikeButton.addEventListener("click", () => dislikePost(doc.id));
+        commentButton.addEventListener("click", () => postComment(doc.id));
       });
     }
 
