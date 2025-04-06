@@ -59,18 +59,20 @@ body {
   }
 
 .content {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: 50vh;
-  min-height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed;
+  top: 80px; /* nav’dan sonra biraz aşağı */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  width: 100%;
+  max-width: 1200px;
+  height: auto;
   text-align: center;
-  padding: 40px 20px;
-  background: rgba(0, 0, 0, 0.7);
-  animation: fadeIn 1.2s ease;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 1s ease;
 }
 
   .content h2 {
@@ -84,9 +86,9 @@ body {
     font-weight: 600;
   }
 
-  #postsContainer {
+#postsContainer {
+  margin-top: 250px; /* content'in kaplamasını telafi ediyoruz */
   padding: 40px 20px;
-  margin-top: 20px;
   z-index: 1;
 }
 
