@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analiz Ekle | Economentor</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: 2px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 15px 0;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .upload-section, .history-section {
+      width: 80%;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .upload-section h2, .history-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .upload-section input[type="file"] {
+      margin-bottom: 15px;
+    }
+
+    .upload-section input[type="text"], .upload-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .upload-section button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .upload-section button:hover {
+      background-color: #45a049;
+    }
+
+    .history-section {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .history-section .post {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-section .post video {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .post-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .post-footer button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .post-footer button:hover {
+      background-color: #c0392b;
+    }
+
+    .post-footer .edit-button {
+      background-color: #f39c12;
+    }
+
+    .post-footer .edit-button:hover {
+      background-color: #e67e22;
+    }
+
+    .footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .comment-section {
+      padding: 10px;
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    .comment {
+      background-color: #333;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      color: white;
+    }
+
+    .comment button {
+      background-color: #e74c3c;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .comment button:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Economentor Admin Panel | Analiz Yükle</h1>
+  </header>
+
+  <nav>
+    <a href="adminpanel.html">Yönetici Paneline Dön</a>
+    <a href="analiz.html">Analizler Sayfası</a>
+  </nav>
+
+  <div class="content">
+    <div class="upload-section">
+      <h2>Analiz Videosu Paylaş</h2>
+      <input type="file" id="videoUpload" accept="video/*">
+      <input type="text" id="videoTitle" placeholder="Başlık Girin">
+      <textarea id="videoDescription" placeholder="Açıklama Girin" rows="4"></textarea>
+      <button id="uploadButton">Videoyu Paylaş</button>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Analiz başlığı ya da açıklama ara..." style="width: 80%; padding: 10px; margin: 20px auto; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; display: block;" />
+
+    <div class="history-section" id="videosContainer">
+      <h2>Yüklenmiş Analizler</h2>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  arrayUnion,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const supabase = createClient(
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
+);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
+  const uid = user.uid;
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
+
+  document.getElementById("uploadBtn").addEventListener("click", async () => {
+    const file = document.getElementById("videoFile").files[0];
+    const title = document.getElementById("videoTitle").value;
+    const description = document.getElementById("videoDesc").value;
+
+    if (!file || !title || !description) return alert("Tüm alanları doldurun.");
+
+    const path = `analiz/${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage.from("analizler").upload(path, file);
+    if (error) return alert("Video yükleme hatası: " + error.message);
+
+    const videoUrl = `${supabase.storage.from("analizler").getPublicUrl(path).data.publicUrl}`;
+
+    await addDoc(collection(db, "analizler"), {
+      title,
+      description,
+      videoUrl,
+      videoPath: path,
+      likes: 0,
+      dislikes: 0,
+      comments: [],
+      timestamp: new Date()
+    });
+
+    alert("Video başarıyla yüklendi!");
+    location.reload();
+  });
+});
+
+// Ek olarak: loadVideos, deleteVideo, editVideo, handleComments gibi fonksiyonları da sayfada kullanacaksan aşağıda devam edebilirim.
+</script>
+
+<div class="upload-section">
+  <h2>Analiz Videosu Ekle</h2>
+  <input type="file" id="videoFile" accept="video/*" /><br>
+  <input type="text" id="videoTitle" placeholder="Başlık" /><br>
+  <textarea id="videoDesc" placeholder="Açıklama" rows="4"></textarea><br>
+  <button id="uploadBtn">Yükle</button>
+</div>
+
+<style>
+.upload-section {
+  background: #fff;
+  color: #333;
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+.upload-section input,
+.upload-section textarea {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.upload-section button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.upload-section button:hover {
+  background-color: #388e3c;
+}
+</style>
+
+</body>
+</html>
