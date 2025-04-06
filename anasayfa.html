@@ -210,197 +210,209 @@
     <!-- Paylaşımlar burada görüntülenecek -->
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; // deleteDoc burada import edildi
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs, updateDoc, arrayUnion, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.firebasestorage.app",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+    authDomain: "economentor-8ddc4.firebaseapp.com",
+    projectId: "economentor-8ddc4",
+    storageBucket: "economentor-8ddc4.firebasestorage.app",
+    messagingSenderId: "835370350520",
+    appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+    measurementId: "G-FS3FMPYVPD"
+  };
+
+  const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const username = data.username || "Kullanıcı";
+      document.getElementById("userName").innerText = username;
+    } else {
+      alert("Kullanıcı bilgisi bulunamadı.");
+      window.location.href = "index.html";
+    }
+  });
+
+  async function loadPosts() {
+    const postsRef = collection(db, "posts");
+    const q = query(postsRef, orderBy("timestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      const post = doc.data();
+      const postElement = document.createElement('div');
+      postElement.classList.add('post');
+      postElement.id = `post-${doc.id}`;
+
+      const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
+      const postDescription = `<p>${post.description}</p>`;
+
+      const postFooter = `
+        <div class="post-footer">
+          <button class="like-button">Beğen</button>
+          <span class="likes">Beğeniler: ${post.likes || 0}</span>
+          <button class="dislike-button">Beğenme</button>
+          <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
+          <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
+        </div>
+      `;
+
+      const commentSection = `
+        <div class="comments-section">
+          <button class="toggle-comments" style="margin-bottom: 10px;">🗨️ Yorumları Göster/Gizle</button>
+          <div class="comment-list" style="display: none;"></div>
+          <input type="text" id="commentInput-${doc.id}" placeholder="Yorumunuzu yapın" />
+          <button class="comment-button">Yorum Yap</button>
+        </div>
+      `;
+
+      postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
+      document.getElementById('postsContainer').appendChild(postElement);
+
+      const likeButton = postElement.querySelector(".like-button");
+      const dislikeButton = postElement.querySelector(".dislike-button");
+      const commentButton = postElement.querySelector(".comment-button");
+
+      likeButton.addEventListener("click", () => likePost(doc.id, post, postElement));
+      dislikeButton.addEventListener("click", () => dislikePost(doc.id, post, postElement));
+      commentButton.addEventListener("click", () => postComment(doc.id, post, postElement));
+
+      const commentListElement = postElement.querySelector(".comment-list");
+      const currentUserId = auth.currentUser?.uid;
+      renderComments(commentListElement, post.comments || [], currentUserId);
+
+      const toggleButton = postElement.querySelector(".toggle-comments");
+      toggleButton.addEventListener("click", () => {
+        commentListElement.style.display = commentListElement.style.display === "none" ? "block" : "none";
+      });
+
+      commentListElement.addEventListener("click", async (e) => {
+        if (e.target.classList.contains("delete-comment")) {
+          const index = parseInt(e.target.dataset.index);
+          const updatedComments = (post.comments || []).filter((_, i) => i !== index);
+          await updateDoc(doc(db, "posts", doc.id), {
+            comments: updatedComments
+          });
+          post.comments = updatedComments;
+          renderComments(commentListElement, updatedComments, currentUserId);
+          postElement.querySelector('.comments').textContent = `Yorumlar: ${updatedComments.length}`;
+        }
+      });
+    });
+  }
+
+  async function likePost(postId, post, postElement) {
+    const user = auth.currentUser;
+    if (!user) return alert("Önce giriş yapmalısınız!");
+    const postRef = doc(db, "posts", postId);
+    const userLikesRef = doc(db, "posts", postId, "likes", user.uid);
+    const userLikeDoc = await getDoc(userLikesRef);
+    const updatedPostSnap = await getDoc(postRef);
+    const updatedPost = updatedPostSnap.data();
+    let likeCount = updatedPost.likes || 0;
+
+    if (userLikeDoc.exists()) {
+      await updateDoc(postRef, { likes: likeCount - 1 });
+      await deleteDoc(userLikesRef);
+      postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount - 1}`;
+    } else {
+      await updateDoc(postRef, { likes: likeCount + 1 });
+      await setDoc(userLikesRef, { userId: user.uid });
+      postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount + 1}`;
+    }
+  }
+
+  async function dislikePost(postId, post, postElement) {
+    const user = auth.currentUser;
+    if (!user) return alert("Önce giriş yapmalısınız!");
+    const postRef = doc(db, "posts", postId);
+    const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid);
+    const userDislikeDoc = await getDoc(userDislikesRef);
+    const updatedPostSnap = await getDoc(postRef);
+    const updatedPost = updatedPostSnap.data();
+    let dislikeCount = updatedPost.dislikes || 0;
+
+    if (userDislikeDoc.exists()) {
+      await updateDoc(postRef, { dislikes: dislikeCount - 1 });
+      await deleteDoc(userDislikesRef);
+      postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount - 1}`;
+    } else {
+      await updateDoc(postRef, { dislikes: dislikeCount + 1 });
+      await setDoc(userDislikesRef, { userId: user.uid });
+      postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount + 1}`;
+    }
+  }
+
+  async function postComment(postId, post, postElement) {
+    const commentInput = document.getElementById(`commentInput-${postId}`);
+    const commentText = commentInput.value.trim();
+    if (commentText === "") return alert("Yorum boş olamaz.");
+    const postRef = doc(db, "posts", postId);
+    const user = auth.currentUser;
+
+    const newComment = {
+      text: commentText,
+      user: user.uid,
+      username: user.displayName || "Kullanıcı",
+      timestamp: new Date().toISOString()
     };
 
-    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+    await updateDoc(postRef, {
+      comments: arrayUnion(newComment)
+    });
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    commentInput.value = "";
+    const updatedComments = [...(post.comments || []), newComment];
+    post.comments = updatedComments;
 
-    // Kullanıcı Giriş Durumu
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
-        window.location.href = "index.html";
-        return;
+    postElement.querySelector('.comments').textContent = `Yorumlar: ${updatedComments.length}`;
+    renderComments(postElement.querySelector(".comment-list"), updatedComments, user.uid);
+  }
+
+  function renderComments(commentListElement, commentsArray, currentUserId) {
+    commentListElement.innerHTML = "";
+    commentsArray.forEach((comment, index) => {
+      const commentDiv = document.createElement("div");
+      commentDiv.classList.add("comment");
+
+      const commentText = `
+        <div>
+          <strong>${comment.username}</strong><br />
+          <span>${comment.text}</span>
+        </div>
+      `;
+
+      let deleteButton = "";
+      if (comment.user === currentUserId) {
+        deleteButton = `<button data-index="${index}" class="delete-comment">❌</button>`;
       }
 
-      const userRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(userRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const username = data.username || "Kullanıcı";
-        document.getElementById("userName").innerText = username;
-      } else {
-        alert("Kullanıcı bilgisi bulunamadı.");
-        window.location.href = "index.html";
-      }
+      commentDiv.innerHTML = commentText + deleteButton;
+      commentListElement.appendChild(commentDiv);
     });
-
-    async function loadPosts() {
-      const postsRef = collection(db, "posts");
-      const q = query(postsRef, orderBy("timestamp", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.id = `post-${doc.id}`;
-
-        const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
-        const postDescription = `<p>${post.description}</p>`;
-
-        const postFooter = `
-          <div class="post-footer">
-            <button class="like-button">Beğen</button>
-            <span class="likes">Beğeniler: ${post.likes || 0}</span>
-            <button class="dislike-button">Beğenme</button>
-            <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
-            <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
-          </div>
-        `;
-
-        const commentSection = `
-          <div class="comments-section">
-            <input type="text" id="commentInput-${doc.id}" placeholder="Yorumunuzu yapın" />
-            <button class="comment-button">Yorum Yap</button>
-          </div>
-        `;
-
-        postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
-        document.getElementById('postsContainer').appendChild(postElement);
-
-        // Event listeners
-        const likeButton = postElement.querySelector(".like-button");
-        const dislikeButton = postElement.querySelector(".dislike-button");
-        const commentButton = postElement.querySelector(".comment-button");
-
-        likeButton.addEventListener("click", () => likePost(doc.id, post, postElement));
-        dislikeButton.addEventListener("click", () => dislikePost(doc.id, post, postElement));
-        commentButton.addEventListener("click", () => postComment(doc.id, post, postElement));
-      });
-    }
-
-async function likePost(postId, post, postElement) {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Önce giriş yapmalısınız!");
-    return;
   }
 
-  const postRef = doc(db, "posts", postId);
-  const userLikesRef = doc(db, "posts", postId, "likes", user.uid);
-  const userLikeDoc = await getDoc(userLikesRef);
-
-  // ✅ Firestore'dan en güncel post verisini çek
-  const updatedPostSnap = await getDoc(postRef);
-  const updatedPost = updatedPostSnap.data();
-
-  let likeCount = updatedPost.likes || 0;
-
-  if (userLikeDoc.exists()) {
-    await updateDoc(postRef, {
-      likes: likeCount - 1
-    });
-    await deleteDoc(userLikesRef);
-    alert("Beğeni iptal edildi");
-    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount - 1}`;
-  } else {
-    await updateDoc(postRef, {
-      likes: likeCount + 1
-    });
-    await setDoc(userLikesRef, { userId: user.uid });
-    alert("Beğenildi");
-    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount + 1}`;
-  }
-}
-
-async function dislikePost(postId, post, postElement) {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Önce giriş yapmalısınız!");
-    return;
-  }
-
-  const postRef = doc(db, "posts", postId);
-  const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid);
-  const userDislikeDoc = await getDoc(userDislikesRef);
-
-  // ✅ Firestore'dan en güncel post verisini çek
-  const updatedPostSnap = await getDoc(postRef);
-  const updatedPost = updatedPostSnap.data();
-
-  let dislikeCount = updatedPost.dislikes || 0;
-
-  if (userDislikeDoc.exists()) {
-    await updateDoc(postRef, {
-      dislikes: dislikeCount - 1
-    });
-    await deleteDoc(userDislikesRef);
-    alert("Beğenme iptal edildi");
-    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount - 1}`;
-  } else {
-    await updateDoc(postRef, {
-      dislikes: dislikeCount + 1
-    });
-    await setDoc(userDislikesRef, { userId: user.uid });
-    alert("Beğenilmedi");
-    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount + 1}`;
-  }
-}
-
-
-    // Yorum Yapma İşlemi
-    async function postComment(postId, post, postElement) {
-      const commentInput = document.getElementById(`commentInput-${postId}`);
-      const commentText = commentInput.value;
-
-      if (commentText.trim() === "") {
-        alert("Yorum boş olamaz.");
-        return;
-      }
-
-      const postRef = doc(db, "posts", postId);
-      const user = auth.currentUser;
-      await updateDoc(postRef, {
-        comments: arrayUnion({
-          text: commentText,
-          user: user.uid,
-          username: user.displayName || "Kullanıcı", // Kullanıcı adı
-          timestamp: new Date().toISOString()
-        })
-      });
-
-      commentInput.value = "";
-
-      // Yorumları anında sayfada güncelle
-      const commentsCountElement = postElement.querySelector('.comments');
-      const newCommentsCount = (post.comments ? post.comments.length : 0) + 1;
-      commentsCountElement.textContent = `Yorumlar: ${newCommentsCount}`;
-
-      alert("Yorum yapıldı");
-    }
-
-    loadPosts();
-  </script>
+  loadPosts();
+</script>
 
 </body>
 </html>
