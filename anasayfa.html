@@ -318,6 +318,9 @@
         });
         await deleteDoc(userLikesRef); // Kullanıcının beğenisini sil
         alert("Beğeni iptal edildi");
+        // Sayfada sadece bu postu güncelle
+        const likeCountElement = postElement.querySelector('.likes');
+        likeCountElement.textContent = `Beğeniler: ${post.likes - 1}`;
       } else {
         // Beğeniyi ekle
         await updateDoc(postRef, {
@@ -325,11 +328,10 @@
         });
         await setDoc(userLikesRef, { userId: user.uid }); // Kullanıcıyı beğeni olarak kaydet
         alert("Beğenildi");
+        // Sayfada sadece bu postu güncelle
+        const likeCountElement = postElement.querySelector('.likes');
+        likeCountElement.textContent = `Beğeniler: ${post.likes + 1}`;
       }
-
-      // Sayfada sadece bu postu güncelle
-      const likeCountElement = postElement.querySelector('.likes');
-      likeCountElement.textContent = `Beğeniler: ${post.likes || 0}`;
     }
 
     // Beğenmeme İşlemi
@@ -351,6 +353,9 @@
         });
         await deleteDoc(userDislikesRef); // Kullanıcının beğenmemesini sil
         alert("Beğenme iptal edildi");
+        // Sayfada sadece bu postu güncelle
+        const dislikeCountElement = postElement.querySelector('.dislikes');
+        dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes - 1}`;
       } else {
         // Beğenmeyi ekle
         await updateDoc(postRef, {
@@ -358,11 +363,10 @@
         });
         await setDoc(userDislikesRef, { userId: user.uid }); // Kullanıcıyı beğenmeme olarak kaydet
         alert("Beğenilmedi");
+        // Sayfada sadece bu postu güncelle
+        const dislikeCountElement = postElement.querySelector('.dislikes');
+        dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes + 1}`;
       }
-
-      // Sayfada sadece bu postu güncelle
-      const dislikeCountElement = postElement.querySelector('.dislikes');
-      dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes || 0}`;
     }
 
     // Yorum Yapma İşlemi
