@@ -6,6 +6,7 @@
     <title>Economentor | Admin Paneli</title>
     <link rel="icon" href="image1.png">
     <style>
+        /* Stil tanımlamaları */
         body {
             margin: 0;
             padding: 0;
@@ -81,14 +82,14 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .announcement {
+        .announcement, .feedback, .user-card {
             background-color: #444;
             padding: 15px;
             border-radius: 8px;
             margin: 10px 0;
             position: relative;
         }
-        .announcement button {
+        .announcement button, .feedback button, .user-card button {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -99,23 +100,18 @@
             padding: 5px 10px;
             cursor: pointer;
         }
-        .feedback {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            position: relative;
-        }
-        .feedback button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
             border: none;
-            border-radius: 4px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
+            font-size: 16px;
+        }
+        canvas {
+            background-color: #fff;
+            border-radius: 8px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -126,7 +122,7 @@
         <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
         <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
         <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
-        <a href="paylaşım.html">Paylaşımlar</a>
+        <a href="paylasim.html">Paylaşımlar</a>
         <a href="mesaj.html">Mesajlar</a>
         <a href="profil.html">Profil</a>
         <a href="anasayfa.html">Anasayfa</a>
@@ -140,141 +136,142 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, deleteDoc,
+  collection, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-            authDomain: "economentor-8ddc4.firebaseapp.com",
-            projectId: "economentor-8ddc4",
-            storageBucket: "economentor-8ddc4.appspot.com",
-            messagingSenderId: "835370350520",
-            appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const username = userData.username || "Yönetici";
-            const role = userData.role || "user";
+// Kullanıcı silme
+window.deleteUserFromAdmin = async (uid) => {
+  if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
+  try {
+    await deleteDoc(doc(db, "users", uid));
+    alert("Kullanıcı silindi!");
+    showContent('kul-is');
+  } catch (err) {
+    alert("Hata oluştu: " + err.message);
+  }
+};
 
-            if (role !== "admin") {
-                alert("Bu sayfaya erişim izniniz yok!");
-                window.location.href = "anasayfa.html";
-                return;
-            }
+// Kullanıcıları ve istatistikleri getir
+window.showContent = async (section) => {
+  const container = document.getElementById("dynamicContent");
+  container.innerHTML = "";
 
-            document.getElementById("adminUsername").innerText = username;
-        } else {
-            alert("Kullanıcı bilgisi alınamadı.");
-            window.location.href = "index.html";
+  if (section === "kul-is") {
+    container.innerHTML = `
+      <h3>Kullanıcı ve İstatistik Yönetimi</h3>
+      <input type="text" id="searchUser" placeholder="Kullanıcı adı veya isim ara..." style="width:100%;padding:10px;border-radius:6px;margin-bottom:20px;">
+      <div id="stats" style="margin-bottom:40px;"></div>
+      <canvas id="userGrowthChart" height="100"></canvas>
+      <canvas id="likeChart" height="100"></canvas>
+      <canvas id="dislikeChart" height="100"></canvas>
+      <canvas id="commentChart" height="100"></canvas>
+      <h4 style="margin-top:40px;">Tüm Kullanıcılar</h4>
+      <div id="userList"></div>
+    `;
+
+    // Sayılar
+    const analizSnap = await getDocs(collection(db, "analizler"));
+    const photoSnap = await getDocs(collection(db, "photos"));
+    const feedbackSnap = await getDocs(collection(db, "feedback"));
+    const userSnap = await getDocs(collection(db, "users"));
+
+    const statsDiv = document.getElementById("stats");
+    statsDiv.innerHTML = `
+      <p>Toplam Analiz: <b>${analizSnap.size}</b></p>
+      <p>Toplam Fotoğraf: <b>${photoSnap.size}</b></p>
+      <p>Toplam Dilek/Şikayet: <b>${feedbackSnap.size}</b></p>
+      <p>Toplam Kullanıcı: <b>${userSnap.size}</b></p>
+    `;
+
+    // Grafik verileri
+    const growthData = {};
+    const likeData = {};
+    const dislikeData = {};
+    const commentData = {};
+
+    analizSnap.forEach(doc => {
+      const data = doc.data();
+      const date = data.timestamp?.toDate().toLocaleDateString("tr-TR") || "Bilinmiyor";
+      growthData[date] = (growthData[date] || 0) + 1;
+      likeData[date] = (likeData[date] || 0) + (data.likes || 0);
+      dislikeData[date] = (dislikeData[date] || 0) + (data.dislikes || 0);
+      commentData[date] = (commentData[date] || 0) + (data.comments?.length || 0);
+    });
+
+    const labels = Object.keys(growthData);
+
+    const makeChart = (ctxId, label, dataObj, color) => {
+      new Chart(document.getElementById(ctxId), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data: labels.map(l => dataObj[l]),
+            borderColor: color,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true }
+          }
         }
-    } else {
-        // Giriş yapılmamışsa
-        alert("Lütfen giriş yapınız.");
-        window.location.href = "index.html";
-    }
-});
+      });
+    };
 
-        window.showContent = async function (section) {
-            const container = document.getElementById("dynamicContent");
-            container.innerHTML = "";
+    makeChart("userGrowthChart", "Analiz Yükleme Grafiği", growthData, "#4CAF50");
+    makeChart("likeChart", "Beğeniler", likeData, "#2980b9");
+    makeChart("dislikeChart", "Beğenmeme", dislikeData, "#e74c3c");
+    makeChart("commentChart", "Yorumlar", commentData, "#f1c40f");
 
-            if (section === 'duyuru-admin') {
-                container.innerHTML = `
-                    <h3>Yeni Duyuru Ekle</h3>
-                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
-                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
-                    <div id="duyuruList"></div>
-                `;
-                loadDuyurular();
-            }
+    // Kullanıcı listesi
+    const list = document.getElementById("userList");
+    const renderUsers = (docs) => {
+      list.innerHTML = "";
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.style = "background:#444;margin:8px 0;padding:10px;border-radius:6px;";
+        div.innerHTML = `
+          <p><b>Kullanıcı Adı:</b> ${data.username || "Yok"} | <b>Ad Soyad:</b> ${data.fullName || "Yok"}</p>
+          <p><b>UID:</b> ${docSnap.id}</p>
+          <button onclick="deleteUserFromAdmin('${docSnap.id}')" style="background:red;color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;">Sil</button>
+        `;
+        list.appendChild(div);
+      });
+    };
 
-            if (section === 'hakkinda-admin') {
-                const hakRef = doc(db, "site", "hakkinda");
-                const hakSnap = await getDoc(hakRef);
-                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
-                container.innerHTML = `
-                    <h3>Hakkında Düzenle</h3>
-                    <textarea id="hakText">${mevcut}</textarea>
-                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
-                `;
-            }
+    renderUsers(userSnap.docs);
 
-            if (section === 'dil-sik') {
-                container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
-                const feedbackList = document.getElementById("feedbackList");
-                const snapshot = await getDocs(collection(db, "feedback"));
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const div = document.createElement("div");
-                    div.className = "feedback";
-                    div.innerHTML = `
-                        <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
-                        <p>${data.message}</p>
-                        <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
-                        <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
-                    `;
-                    feedbackList.appendChild(div);
-                });
-            }
-        }
-
-        window.saveDuyuru = async function () {
-            const text = document.getElementById("duyuruText").value.trim();
-            if (!text) return alert("Duyuru metni boş olamaz.");
-            await addDoc(collection(db, "announcements"), {
-                text,
-                createdAt: Timestamp.now()
-            });
-            document.getElementById("duyuruText").value = "";
-            loadDuyurular();
-        }
-
-        window.loadDuyurular = async function () {
-            const duyuruList = document.getElementById("duyuruList");
-            if (!duyuruList) return;
-            duyuruList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "announcements"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const div = document.createElement("div");
-                div.className = "announcement";
-                const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
-                div.innerHTML = `
-                    <p>${data.text}</p>
-                    <small>${tarih}</small>
-                    <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-                `;
-                duyuruList.appendChild(div);
-            });
-        }
-
-        window.deleteDuyuru = async function (id) {
-            await deleteDoc(doc(db, "announcements", id));
-            loadDuyurular();
-        }
-
-        window.saveHakkinda = async function () {
-            const text = document.getElementById("hakText").value;
-            await setDoc(doc(db, "site", "hakkinda"), { text });
-            alert("Hakkında bilgisi kaydedildi.");
-        }
-
-        window.deleteFeedback = async function (id) {
-            await deleteDoc(doc(db, "feedback", id));
-            showContent('dil-sik');
-        }
-    </script>
-</body>
-</html>
+    document.getElementById("searchUser").addEventListener("input", (e) => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = userSnap.docs.filter(d =>
+        (d.data().username || "").toLowerCase().includes(keyword) ||
+        (d.data().fullName || "").toLowerCase().includes(keyword)
+      );
+      renderUsers(filtered);
+    });
+  }
+};
+</script>
