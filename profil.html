@@ -118,11 +118,6 @@
     <input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
     <button id="changePasswordBtn">Şifreyi Değiştir</button>
 
-    <label>Yeni E-posta</label>
-    <input type="email" id="newEmail" placeholder="Yeni E-posta">
-
-    <button id="changeEmailBtn">E-posta Değiştir</button>
-
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
   </div>
 
@@ -134,9 +129,7 @@ import {
   updatePassword,
   deleteUser,
   EmailAuthProvider,
-  reauthenticateWithCredential,
-  updateEmail,
-  sendEmailVerification
+  reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
@@ -160,10 +153,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("Lütfen giriş yapın.");
-    return;
-  }
+  if (!user) return location.href = "index.html";
   
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
@@ -196,24 +186,6 @@ onAuthStateChanged(auth, async (user) => {
       alert("Hata: " + err.message);
     }
   });
-
-  document.getElementById("changeEmailBtn").addEventListener("click", async () => {
-    const newEmail = document.getElementById("newEmail").value.trim();
-
-    if (!newEmail) {
-      alert("Lütfen geçerli bir e-posta adresi girin.");
-      return;
-    }
-
-    // Yeni e-posta adresine doğrulama e-postası gönder
-    try {
-      await sendEmailVerification(user);  // E-posta doğrulama e-postası gönder
-      alert("Yeni e-posta adresinize doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
-    } catch (error) {
-      alert("E-posta gönderme hatası: " + error.message);
-    }
-  });
-});
 
   // Hesap sil
   document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
@@ -254,7 +226,7 @@ onAuthStateChanged(auth, async (user) => {
       }
     }
   });
-
+});
 </script>
 </body>
 </html>
