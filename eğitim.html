@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Economentor | Eğitimler</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    header {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      text-align: center;
+      font-size: 32px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 15px 0;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #4CAF50;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .training {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #4CAF50;
+      border-radius: 8px;
+    }
+
+    .training h3 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #66ccff;
+    }
+
+    .training p {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .training ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    .training li {
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .contact-line {
+      font-style: italic;
+      margin-top: 10px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>Economentor | Eğitimler</header>
+  <nav>
+    <a href="anasayfa.html">Anasayfa</a>
+  </nav>
+
+  <div class="container" id="trainingList">
+    <!-- Eğitimler buraya yüklenecek -->
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const trainingRef = collection(db, "trainings");
+
+    async function loadTrainings() {
+      const list = document.getElementById("trainingList");
+      const snapshot = await getDocs(trainingRef);
+
+      if (snapshot.empty) {
+        list.innerHTML = '<p>Şu anda listelenecek eğitim bulunmamaktadır.</p>';
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const t = docSnap.data();
+        const el = document.createElement("div");
+        el.className = "training";
+        el.innerHTML = `
+          <h3>${t.title}</h3>
+          <p>${t.description}</p>
+          <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+          <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    loadTrainings();
+  </script>
+</body>
+</html>
