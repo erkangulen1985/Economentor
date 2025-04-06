@@ -312,22 +312,24 @@
       const userLikeDoc = await getDoc(userLikesRef);
 
       if (userLikeDoc.exists()) {
-        alert("Bu gönderiyi zaten beğendiniz!");
-        return;
+        // Beğeniyi iptal et
+        await updateDoc(postRef, {
+          likes: (post.likes || 0) - 1
+        });
+        await deleteDoc(userLikesRef); // Kullanıcının beğenisini sil
+        alert("Beğeni iptal edildi");
+      } else {
+        // Beğeniyi ekle
+        await updateDoc(postRef, {
+          likes: (post.likes || 0) + 1
+        });
+        await setDoc(userLikesRef, { userId: user.uid }); // Kullanıcıyı beğeni olarak kaydet
+        alert("Beğenildi");
       }
-
-      await updateDoc(postRef, {
-        likes: (post.likes || 0) + 1
-      });
-
-      // Kullanıcıyı beğeni olarak kaydediyoruz
-      await setDoc(userLikesRef, { userId: user.uid });
 
       // Sayfada sadece bu postu güncelle
       const likeCountElement = postElement.querySelector('.likes');
       likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
-
-      alert("Beğenildi");
     }
 
     // Beğenmeme İşlemi
@@ -343,22 +345,24 @@
       const userDislikeDoc = await getDoc(userDislikesRef);
 
       if (userDislikeDoc.exists()) {
-        alert("Bu gönderiyi zaten beğenmediniz!");
-        return;
+        // Beğenmeyi iptal et
+        await updateDoc(postRef, {
+          dislikes: (post.dislikes || 0) - 1
+        });
+        await deleteDoc(userDislikesRef); // Kullanıcının beğenmemesini sil
+        alert("Beğenme iptal edildi");
+      } else {
+        // Beğenmeyi ekle
+        await updateDoc(postRef, {
+          dislikes: (post.dislikes || 0) + 1
+        });
+        await setDoc(userDislikesRef, { userId: user.uid }); // Kullanıcıyı beğenmeme olarak kaydet
+        alert("Beğenilmedi");
       }
-
-      await updateDoc(postRef, {
-        dislikes: (post.dislikes || 0) + 1
-      });
-
-      // Kullanıcıyı beğenmeme olarak kaydediyoruz
-      await setDoc(userDislikesRef, { userId: user.uid });
 
       // Sayfada sadece bu postu güncelle
       const dislikeCountElement = postElement.querySelector('.dislikes');
       dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
-
-      alert("Beğenilmedi");
     }
 
     // Yorum Yapma İşlemi
