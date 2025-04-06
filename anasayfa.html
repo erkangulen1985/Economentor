@@ -346,15 +346,19 @@ async function loadPosts() {
     const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
     const postDescription = `<p>${post.description}</p>`;
 
-    const postFooter = `
-      <div class="post-footer">
-        <button class="like-button">Beğen</button>
-        <span class="likes">Beğeniler: ${post.likes || 0}</span>
-        <button class="dislike-button">Beğenme</button>
-        <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
-        <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
-      </div>
-    `;
+const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp); // Firestore Timestamp veya string olabilir
+const formattedDate = new Date(postDate).toLocaleString("tr-TR");
+
+const postFooter = `
+  <div class="post-footer">
+    <button class="like-button">Beğen</button>
+    <span class="likes">Beğeniler: ${post.likes || 0}</span>
+    <button class="dislike-button">Beğenme</button>
+    <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
+    <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
+    <span class="post-date">🕒 ${formattedDate}</span>
+  </div>
+`;
 
     const commentSection = `
       <div class="comments-section">
