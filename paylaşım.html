@@ -257,7 +257,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// PAYLAŞIM YÜKLE
+// ✅ Post yükleme
 document.getElementById("uploadButton").addEventListener("click", uploadPost);
 
 async function uploadPost() {
@@ -270,22 +270,25 @@ async function uploadPost() {
     return;
   }
 
-  const filePath = 'images/' + Date.now() + "-" + imageFile.name;
-  const { data, error } = await supabase.storage
+  const filePath = 'images/' + Date.now() + '-' + imageFile.name;
+  const { data, error } = await supabase
+    .storage
     .from('anasayfa-paylasimlari')
     .upload(filePath, imageFile);
 
   if (error) {
-    alert("Resim yüklenemedi.");
+    console.error("Supabase yükleme hatası:", error.message);
+    alert("Resim yüklenemedi!");
     return;
   }
 
   const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
+
   await addDoc(collection(db, "posts"), {
     title,
     description,
     imageUrl,
-    imagePath: filePath, // 🔑 silme için ekledik
+    imagePath: filePath,
     likes: 0,
     dislikes: 0,
     comments: [],
@@ -296,7 +299,7 @@ async function uploadPost() {
   loadPosts();
 }
 
-// POSTLARI YÜKLE
+// ✅ Postları yükle
 async function loadPosts() {
   const postsContainer = document.getElementById("postsContainer");
   postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
@@ -313,7 +316,7 @@ async function loadPosts() {
 
     const postElement = document.createElement("div");
     postElement.classList.add("post");
-    postElement.style.margin = "0 auto"; // ✅ Ortala
+    postElement.style.margin = "0 auto";
 
     const comments = (post.comments || []).map((c, i) => `
       <div class="comment">
@@ -345,7 +348,7 @@ async function loadPosts() {
   });
 }
 
-// POST SİL (Resimle birlikte)
+// ✅ Post sil (Supabase + Firestore)
 window.deletePost = async function(postId, imagePath) {
   const confirmed = confirm("Bu paylaşımı silmek istediğinize emin misiniz?");
   if (!confirmed) return;
@@ -360,7 +363,7 @@ window.deletePost = async function(postId, imagePath) {
   loadPosts();
 };
 
-// POST DÜZENLE
+// ✅ Post düzenle
 window.editPost = async function(postId) {
   const postRef = doc(db, "posts", postId);
   const snap = await getDoc(postRef);
@@ -380,7 +383,7 @@ window.editPost = async function(postId) {
   }
 };
 
-// YORUM SİL
+// ✅ Yorum sil
 window.deleteComment = async function(postId, index) {
   const postRef = doc(db, "posts", postId);
   const snap = await getDoc(postRef);
@@ -392,7 +395,7 @@ window.deleteComment = async function(postId, index) {
   loadPosts();
 };
 
-// ARAMA
+// ✅ Arama
 document.getElementById("searchInput")?.addEventListener("input", async (e) => {
   const keyword = e.target.value.toLowerCase();
   const snapshot = await getDocs(collection(db, "posts"));
