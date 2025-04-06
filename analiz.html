@@ -244,27 +244,16 @@ onAuthStateChanged(auth, async (user) => {
         <button class="commentBtn" data-id="${id}">Yorum Yap</button>
         <div class="commentList" id="commentList-${id}">
           ${comments.map((c, i) => `
-  <div class="comment">
-    <span>
-      <b>${c.username}</b> 
-      (${new Date(data.timestamp.seconds * 1000).toLocaleString()}): 
-      ${c.text}
-    </span>
-    ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-  </div>
-      `).join("")}
+            <div class="comment" data-index="${i}">
+              <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+              ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+            </div>
+          `).join("")}
         </div>
       </div>
-      <div class="video-uploaded-time">
-        <p>Paylaşıldı: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-      </div>
     `;
-
     container.appendChild(card);
-
-    // Like and Dislike logic continues here...
   });
-});
 
   // Beğeni
   document.addEventListener("click", async (e) => {
