@@ -140,140 +140,216 @@
     <div id="trainingList"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      doc,
-      deleteDoc,
-      updateDoc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getFirestore, collection, getDocs, doc, 
+    deleteDoc, onSnapshot, query, orderBy 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+    authDomain: "economentor-8ddc4.firebaseapp.com",
+    projectId: "economentor-8ddc4",
+    storageBucket: "economentor-8ddc4.appspot.com",
+    messagingSenderId: "835370350520",
+    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const trainingRef = collection(db, "trainings");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-    let bullets = [];
+  // Genel istatistikleri getir
+  async function loadStatistics() {
+    try {
+      const analizler = await getDocs(collection(db, "analizler"));
+      const fotolar = await getDocs(collection(db, "posts"));
+      const users = await getDocs(collection(db, "users"));
+      const feedbacks = await getDocs(collection(db, "feedback"));
 
-    window.addBullet = () => {
-      const text = document.getElementById("bulletText").value;
-      if (text.trim()) {
-        bullets.push(text);
-        renderBullets();
-        document.getElementById("bulletText").value = "";
-      }
-    };
+      document.getElementById("totalUsers").textContent = users.size;
+      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
+      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
+    } catch (error) {
+      console.error("Veri çekme hatası: ", error);
+    }
+  }
 
-    document.getElementById("bulletText").addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addBullet();
+  loadStatistics();
+
+  // Kullanıcıyı listele ve sil
+  async function loadUserList() {
+    const userContainer = document.getElementById("userTableBody");
+    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
+
+    try {
+      const users = await getDocs(collection(db, "users"));
+      users.forEach(docSnap => {
+        const data = docSnap.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.username || "-"}</td>
+          <td>${data.fullName || "-"}</td>
+          <td>${docSnap.id}</td>
+          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
+        `;
+        userContainer.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Kullanıcı verileri çekilemedi: ", error);
+    }
+  }
+
+  // Arama inputu
+  document.getElementById("searchInput").addEventListener("input", async (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const userContainer = document.getElementById("userTableBody");
+    userContainer.innerHTML = "";
+    const users = await getDocs(collection(db, "users"));
+    users.forEach(docSnap => {
+      const data = docSnap.data();
+      const username = (data.username || "").toLowerCase();
+      const fullName = (data.fullName || "").toLowerCase();
+      if (username.includes(keyword) || fullName.includes(keyword)) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.username || "-"}</td>
+          <td>${data.fullName || "-"}</td>
+          <td>${docSnap.id}</td>
+          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
+        `;
+        userContainer.appendChild(row);
       }
     });
+  });
 
-    function renderBullets() {
-      const container = document.getElementById("bullets");
-      container.innerHTML = bullets.map((b, index) => `
-        <li>
-          ${b} <button onclick="editBullet(${index})">Düzenle</button>
-        </li>
-      `).join('');
-    }
+  // Silme işlemi
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("deleteBtn")) {
+      const uid = e.target.dataset.uid;
+      if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
 
-    // Maddeyi düzenlemek
-    window.editBullet = (index) => {
-      const newBullet = prompt("Maddeyi düzenleyin:", bullets[index]);
-      if (newBullet !== null && newBullet.trim()) {
-        bullets[index] = newBullet;
-        renderBullets();
+      try {
+        await deleteDoc(doc(db, "users", uid));
+        alert("Kullanıcı başarıyla silindi.");
+        loadUserList();
+      } catch (err) {
+        alert("Silme hatası: " + err.message);
       }
-    };
+    }
+  });
 
-    window.saveTraining = async () => {
-      const title = document.getElementById("title").value;
-      const description = document.getElementById("description").value;
-      if (!title || !description) return alert("Lütfen başlık ve açıklama girin.");
+  // Dinamik grafik yükleme fonksiyonu
+  async function loadCharts() {
+    try {
+      const userQ = query(collection(db, "users"), orderBy("timestamp"));
+      const userSnapshot = await getDocs(userQ);
 
-      await addDoc(trainingRef, {
-        title,
-        description,
-        bullets,
-        timestamp: new Date()
+      const userLabels = [];
+      const userCounts = [];
+      const likeCounts = [];
+      const dislikeCounts = [];
+      const commentCounts = [];
+
+      const userDateMap = {};
+
+      userSnapshot.forEach(doc => {
+        const ts = doc.data().timestamp;
+        if (!ts) return;
+        const date = new Date(ts.seconds * 1000).toLocaleDateString();
+        userDateMap[date] = (userDateMap[date] || 0) + 1;
       });
 
-      bullets = [];
-      document.getElementById("title").value = "";
-      document.getElementById("description").value = "";
-      document.getElementById("bulletText").value = "";
-      renderBullets();
-      loadTrainings();
-    };
-
-    window.deleteTraining = async (id) => {
-      if (confirm("Bu eğitimi silmek istiyor musunuz?")) {
-        await deleteDoc(doc(db, "trainings", id));
-        loadTrainings();
-      }
-    };
-
-    window.editTraining = async (id) => {
-      const ref = doc(db, "trainings", id);
-      const snap = await getDoc(ref);
-      const data = snap.data();
-
-      // Yeni başlık ve açıklamayı almak
-      const newTitle = prompt("Yeni başlık:", data.title);
-      const newDesc = prompt("Yeni açıklama:", data.description);
-
-      // Eğitim maddelerini düzenlemek
-      let newBullets = [...data.bullets];
-      const bulletText = prompt("Maddeyi düzenleyin:", newBullets.join(', '));
-      if (bulletText) {
-        newBullets = bulletText.split(',').map(item => item.trim());
+      for (const [date, count] of Object.entries(userDateMap)) {
+        userLabels.push(date);
+        userCounts.push(count);
       }
 
-      if (newTitle && newDesc) {
-        await updateDoc(ref, { title: newTitle, description: newDesc, bullets: newBullets });
-        loadTrainings();
-      }
-    };
+      const analizSnapshot = await getDocs(collection(db, "analizler"));
+      const fotoSnapshot = await getDocs(collection(db, "posts"));
 
-    async function loadTrainings() {
-      const list = document.getElementById("trainingList");
-      list.innerHTML = "";
-      const snapshot = await getDocs(trainingRef);
-      snapshot.forEach(docSnap => {
-        const t = docSnap.data();
-        const el = document.createElement("div");
-        el.className = "training";
-        el.innerHTML = `
-          <h3>${t.title}</h3>
-          <p>${t.description}</p>
-          <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
-          <p><em>Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</em></p>
-          <div class="training-actions">
-            <button onclick="editTraining('${docSnap.id}')">Düzenle</button>
-            <button onclick="deleteTraining('${docSnap.id}')">Sil</button>
-          </div>
-        `;
-        list.appendChild(el);
+      analizSnapshot.forEach(doc => {
+        likeCounts.push(doc.data().likes || 0);
+        dislikeCounts.push(doc.data().dislikes || 0);
+        commentCounts.push((doc.data().comments || []).length);
       });
-    }
 
-    loadTrainings();
-  </script>
+      fotoSnapshot.forEach(doc => {
+        likeCounts.push(doc.data().likes || 0);
+        dislikeCounts.push(doc.data().dislikes || 0);
+        commentCounts.push((doc.data().comments || []).length);
+      });
+
+      // Kullanıcı artışı grafiği
+      new Chart(document.getElementById("userGrowthChart"), {
+        type: 'line',
+        data: {
+          labels: userLabels,
+          datasets: [{
+            label: 'Kullanıcı Artışı',
+            data: userCounts,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      // Beğeni sayısı grafiği
+      new Chart(document.getElementById("contentLikesChart"), {
+        type: 'line',
+        data: {
+          labels: likeCounts.map((_, i) => "İçerik " + (i + 1)),
+          datasets: [{
+            label: 'Beğeniler',
+            data: likeCounts,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      // Beğenmeme sayısı grafiği
+      new Chart(document.getElementById("contentDislikesChart"), {
+        type: 'line',
+        data: {
+          labels: dislikeCounts.map((_, i) => "İçerik " + (i + 1)),
+          datasets: [{
+            label: 'Beğenmeme',
+            data: dislikeCounts,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      // Yorum sayısı grafiği
+      new Chart(document.getElementById("contentCommentsChart"), {
+        type: 'line',
+        data: {
+          labels: commentCounts.map((_, i) => "İçerik " + (i + 1)),
+          datasets: [{
+            label: 'Yorumlar',
+            data: commentCounts,
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true }
+      });
+    } catch (error) {
+      console.error("Grafikler yüklenemedi: ", error);
+    }
+  }
+
+  // Sayfa yüklendiğinde grafik ve kullanıcı verilerini yükle
+  window.addEventListener("DOMContentLoaded", () => {
+    loadUserList();
+    loadStatistics();
+    loadCharts();
+  });
+</script>
+
 </body>
 </html>
