@@ -113,6 +113,14 @@
     .training-actions button:hover {
       opacity: 0.9;
     }
+    .stat-box {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: white;
+  font-size: 1.5rem;
+}
   </style>
 </head>
 <body>
@@ -166,87 +174,14 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  // Genel istatistikleri getir
-  async function loadStatistics() {
-    try {
-      const analizler = await getDocs(collection(db, "analizler"));
-      const fotolar = await getDocs(collection(db, "posts"));
-      const users = await getDocs(collection(db, "users"));
-      const feedbacks = await getDocs(collection(db, "feedback"));
-
-      document.getElementById("totalUsers").textContent = users.size;
-      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
-      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
-    } catch (error) {
-      console.error("Veri çekme hatası: ", error);
-    }
+  // Son 10 günün artışını ya da azalışını hesapla
+  function getDayDifference(lastTimestamp) {
+    const currentDate = new Date();
+    const diffInTime = currentDate - lastTimestamp;
+    return Math.floor(diffInTime / (1000 * 3600 * 24)); // Gün cinsinden fark
   }
 
-  loadStatistics();
-
-  // Kullanıcıyı listele ve sil
-  async function loadUserList() {
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
-
-    try {
-      const users = await getDocs(collection(db, "users"));
-      users.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Kullanıcı verileri çekilemedi: ", error);
-    }
-  }
-
-  // Arama inputu
-  document.getElementById("searchInput").addEventListener("input", async (e) => {
-    const keyword = e.target.value.toLowerCase();
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = "";
-    const users = await getDocs(collection(db, "users"));
-    users.forEach(docSnap => {
-      const data = docSnap.data();
-      const username = (data.username || "").toLowerCase();
-      const fullName = (data.fullName || "").toLowerCase();
-      if (username.includes(keyword) || fullName.includes(keyword)) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      }
-    });
-  });
-
-  // Silme işlemi
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("deleteBtn")) {
-      const uid = e.target.dataset.uid;
-      if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
-
-      try {
-        await deleteDoc(doc(db, "users", uid));
-        alert("Kullanıcı başarıyla silindi.");
-        loadUserList();
-      } catch (err) {
-        alert("Silme hatası: " + err.message);
-      }
-    }
-  });
-
-  // Dinamik grafik yükleme fonksiyonu
+  // Grafik verisi ve kutu oluşturma fonksiyonu
   async function loadCharts() {
     try {
       const userQ = query(collection(db, "users"), orderBy("timestamp"));
@@ -259,7 +194,7 @@
       const commentCounts = [];
 
       const userDateMap = {};
-
+      
       userSnapshot.forEach(doc => {
         const ts = doc.data().timestamp;
         if (!ts) return;
@@ -267,10 +202,29 @@
         userDateMap[date] = (userDateMap[date] || 0) + 1;
       });
 
-      for (const [date, count] of Object.entries(userDateMap)) {
-        userLabels.push(date);
-        userCounts.push(count);
+      // Son 10 günlük veriyi alıp, artış/azalış hesapla
+      function calculate10DayChange() {
+        const dates = Object.keys(userDateMap);
+        const last10Days = dates.slice(-10);
+        let change = userDateMap[last10Days[last10Days.length - 1]] - userDateMap[last10Days[0]];
+        
+        // Renk seçimi
+        if (change > 0) {
+          return { change, color: 'green' }; // Artış
+        } else if (change < 0) {
+          return { change, color: 'red' }; // Azalış
+        } else {
+          return { change, color: 'yellow' }; // Nötr
+        }
       }
+
+      const { change, color } = calculate10DayChange();
+
+      // Son 10 gün için renkli kutu oluştur
+      const statBox = document.getElementById('statBox');
+      statBox.innerHTML = `<div class="stat-box" style="background-color: ${color};">
+                            Son 10 Günlük Değişim: <strong>${change}</strong>
+                          </div>`;
 
       const analizSnapshot = await getDocs(collection(db, "analizler"));
       const fotoSnapshot = await getDocs(collection(db, "posts"));
@@ -349,8 +303,6 @@
 
   // Sayfa yüklendiğinde grafik ve kullanıcı verilerini yükle
   window.addEventListener("DOMContentLoaded", () => {
-    loadUserList();
-    loadStatistics();
     loadCharts();
   });
 </script>
