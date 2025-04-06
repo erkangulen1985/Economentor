@@ -299,75 +299,74 @@
       });
     }
 
-    // Beğenme İşlemi
-    async function likePost(postId, post, postElement) {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Önce giriş yapmalısınız!");
-        return;
-      }
+async function likePost(postId, post, postElement) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Önce giriş yapmalısınız!");
+    return;
+  }
 
-      const postRef = doc(db, "posts", postId);
-      const userLikesRef = doc(db, "posts", postId, "likes", user.uid); // Kullanıcıya ait beğeniler
-      const userLikeDoc = await getDoc(userLikesRef);
+  const postRef = doc(db, "posts", postId);
+  const userLikesRef = doc(db, "posts", postId, "likes", user.uid);
+  const userLikeDoc = await getDoc(userLikesRef);
 
-      if (userLikeDoc.exists()) {
-        // Beğeniyi iptal et, sadece 1 sayıda düşür
-        await updateDoc(postRef, {
-          likes: (post.likes || 0) - 0,5
-        });
-        await deleteDoc(userLikesRef); // Kullanıcının beğenisini sil
-        alert("Beğeni iptal edildi");
-        // Sayfada sadece bu postu güncelle
-        const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) - 0,5}`;
-      } else {
-        // Beğeniyi ekle
-        await updateDoc(postRef, {
-          likes: (post.likes || 0) + 1
-        });
-        await setDoc(userLikesRef, { userId: user.uid }); // Kullanıcıyı beğeni olarak kaydet
-        alert("Beğenildi");
-        // Sayfada sadece bu postu güncelle
-        const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
-      }
-    }
+  // ✅ Firestore'dan en güncel post verisini çek
+  const updatedPostSnap = await getDoc(postRef);
+  const updatedPost = updatedPostSnap.data();
 
-    // Beğenmeme İşlemi
-    async function dislikePost(postId, post, postElement) {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Önce giriş yapmalısınız!");
-        return;
-      }
+  let likeCount = updatedPost.likes || 0;
 
-      const postRef = doc(db, "posts", postId);
-      const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid); // Kullanıcıya ait beğenmeme
-      const userDislikeDoc = await getDoc(userDislikesRef);
+  if (userLikeDoc.exists()) {
+    await updateDoc(postRef, {
+      likes: likeCount - 1
+    });
+    await deleteDoc(userLikesRef);
+    alert("Beğeni iptal edildi");
+    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount - 1}`;
+  } else {
+    await updateDoc(postRef, {
+      likes: likeCount + 1
+    });
+    await setDoc(userLikesRef, { userId: user.uid });
+    alert("Beğenildi");
+    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount + 1}`;
+  }
+}
 
-      if (userDislikeDoc.exists()) {
-        // Beğenmeyi iptal et, sadece 1 sayıda düşür
-        await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) - 0,5
-        });
-        await deleteDoc(userDislikesRef); // Kullanıcının beğenmemesini sil
-        alert("Beğenme iptal edildi");
-        // Sayfada sadece bu postu güncelle
-        const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) - 0,5}`;
-      } else {
-        // Beğenmeyi ekle
-        await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) + 1
-        });
-        await setDoc(userDislikesRef, { userId: user.uid }); // Kullanıcıyı beğenmeme olarak kaydet
-        alert("Beğenilmedi");
-        // Sayfada sadece bu postu güncelle
-        const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
-      }
-    }
+async function dislikePost(postId, post, postElement) {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Önce giriş yapmalısınız!");
+    return;
+  }
+
+  const postRef = doc(db, "posts", postId);
+  const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid);
+  const userDislikeDoc = await getDoc(userDislikesRef);
+
+  // ✅ Firestore'dan en güncel post verisini çek
+  const updatedPostSnap = await getDoc(postRef);
+  const updatedPost = updatedPostSnap.data();
+
+  let dislikeCount = updatedPost.dislikes || 0;
+
+  if (userDislikeDoc.exists()) {
+    await updateDoc(postRef, {
+      dislikes: dislikeCount - 1
+    });
+    await deleteDoc(userDislikesRef);
+    alert("Beğenme iptal edildi");
+    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount - 1}`;
+  } else {
+    await updateDoc(postRef, {
+      dislikes: dislikeCount + 1
+    });
+    await setDoc(userDislikesRef, { userId: user.uid });
+    alert("Beğenilmedi");
+    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount + 1}`;
+  }
+}
+
 
     // Yorum Yapma İşlemi
     async function postComment(postId, post, postElement) {
