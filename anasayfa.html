@@ -59,37 +59,37 @@ body {
   }
 
 .content {
-  position: fixed;
-  top: 80px; /* nav’dan sonra biraz aşağı */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-  width: 100%;
-  max-width: 1200px;
-  height: auto;
+  position: sticky;
+  top: 100px; /* navigasyonun biraz altında sabit kalsın */
+  z-index: 10;
+  padding: 40px;
   text-align: center;
-  padding: 30px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
+  animation: fadeIn 1.2s ease;
+  max-width: 1000px;
+  margin: 0 auto;
   border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 1s ease;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 
-  .content h2 {
-    font-size: 32px;
-    line-height: 1.5;
-    max-width: 800px;
-  }
+.content h2 {
+  font-size: 32px;
+  line-height: 1.5;
+  color: #fff;
+}
 
-  #userName {
-    color: #66ccff;
-    font-weight: 600;
-  }
+#userName {
+  color: #66ccff;
+  font-weight: bold;
+}
 
 #postsContainer {
-  margin-top: 250px; /* content'in kaplamasını telafi ediyoruz */
+  margin-top: 50px; /* giriş yazısına çarpmaması için boşluk */
   padding: 40px 20px;
-  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
 }
 
 .post-container {
