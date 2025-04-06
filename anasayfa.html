@@ -314,13 +314,13 @@
       if (userLikeDoc.exists()) {
         // Beğeniyi iptal et, sadece 1 sayıda düşür
         await updateDoc(postRef, {
-          likes: (post.likes || 0) - 0.5
+          likes: (post.likes || 0) - 0,5
         });
         await deleteDoc(userLikesRef); // Kullanıcının beğenisini sil
         alert("Beğeni iptal edildi");
         // Sayfada sadece bu postu güncelle
         const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) - 0.5}`;
+        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) - 0,5}`;
       } else {
         // Beğeniyi ekle
         await updateDoc(postRef, {
@@ -349,13 +349,13 @@
       if (userDislikeDoc.exists()) {
         // Beğenmeyi iptal et, sadece 1 sayıda düşür
         await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) - 0.5
+          dislikes: (post.dislikes || 0) - 0,5
         });
         await deleteDoc(userDislikesRef); // Kullanıcının beğenmemesini sil
         alert("Beğenme iptal edildi");
         // Sayfada sadece bu postu güncelle
         const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) - 0.5}`;
+        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) - 0,5}`;
       } else {
         // Beğenmeyi ekle
         await updateDoc(postRef, {
