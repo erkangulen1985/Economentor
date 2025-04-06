@@ -178,14 +178,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  getDoc,
-  arrayUnion,
-  deleteDoc,
+  getFirestore, collection, getDocs, doc,
+  updateDoc, getDoc, arrayUnion, deleteDoc,
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -212,144 +206,191 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
   const uid = user.uid;
-  const userSnap = await getDoc(doc(db, "users", uid));
-  const username = userSnap.exists() ? userSnap.data().username : "Kullanıcı";
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
 
-  const videoContainer = document.getElementById("videoContainer");
-  videoContainer.innerHTML = "";
+  const container = document.getElementById("videoContainer");
+  container.innerHTML = "";
+
   const snapshot = await getDocs(collection(db, "analizler"));
-
-  for (const docSnap of snapshot.docs) {
+  snapshot.forEach(async (docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
     const comments = data.comments || [];
 
-    const refLikes = doc(db, "analizler", id, "likes", uid);
-    const refDislikes = doc(db, "analizler", id, "dislikes", uid);
-    const likeSnap = await getDoc(refLikes);
-    const dislikeSnap = await getDoc(refDislikes);
+    const likeRef = doc(db, "analizler", id, "likes", uid);
+    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
+    const [likeSnap, dislikeSnap] = await Promise.all([
+      getDoc(likeRef),
+      getDoc(dislikeRef)
+    ]);
 
     const card = document.createElement("div");
     card.classList.add("video-card");
-
     card.innerHTML = `
       <h2>${data.title}</h2>
       <video controls src="${data.videoUrl}"></video>
       <div class="video-footer">
         <div>
-          <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 ${data.likes || 0}</button>
-          <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 ${data.dislikes || 0}</button>
+          <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
+          <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
         </div>
-        <div><button class="toggle-comments" data-id="${id}">💬 ${comments.length} yorum</button></div>
+        <div>
+          <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
+        </div>
       </div>
-      <div class="comment-section" id="comments-${id}" style="display: none;">
-        <input placeholder="Yorumunuzu yazın..." id="input-${id}" />
-        <button data-id="${id}" class="commentBtn">Yorum Yap</button>
-        <div id="commentList-${id}">
+      <div class="comment-section" id="comments-${id}" style="display:none;">
+        <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
+        <button class="commentBtn" data-id="${id}">Yorum Yap</button>
+        <div class="commentList" id="commentList-${id}">
           ${comments.map((c, i) => `
-            <div class="comment">
+            <div class="comment" data-index="${i}">
               <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
               ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-            </div>`).join("")}
+            </div>
+          `).join("")}
         </div>
       </div>
     `;
+    container.appendChild(card);
+  });
 
-    videoContainer.appendChild(card);
-  }
-
-  // Beğeni ve beğenmeme
-  document.querySelectorAll(".like-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
+  // Beğeni
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("like-btn")) {
+      const id = e.target.dataset.id;
       const ref = doc(db, "analizler", id);
       const likeRef = doc(db, "analizler", id, "likes", uid);
       const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-      const [snap, likeSnap] = await Promise.all([getDoc(ref), getDoc(likeRef)]);
-      let count = snap.data().likes || 0;
-      if (likeSnap.exists()) {
+      const snap = await getDoc(ref);
+      let likeCount = snap.data().likes || 0;
+      let dislikeCount = snap.data().dislikes || 0;
+      const likeExists = (await getDoc(likeRef)).exists();
+
+      if (likeExists) {
         await deleteDoc(likeRef);
-        await updateDoc(ref, { likes: count - 1 });
+        await updateDoc(ref, { likes: likeCount - 1 });
+        e.target.style.backgroundColor = "#f39c12";
+        e.target.querySelector(".like-count").innerText = likeCount - 1;
       } else {
-        await setDoc(likeRef, { userId: uid });
-        await updateDoc(ref, { likes: count + 1 });
+        await setDoc(likeRef, { uid });
+        await updateDoc(ref, { likes: likeCount + 1 });
+        e.target.style.backgroundColor = "#27ae60";
+        e.target.querySelector(".like-count").innerText = likeCount + 1;
+
+        // Eğer dislike varsa iptal et
         const disSnap = await getDoc(dislikeRef);
         if (disSnap.exists()) {
           await deleteDoc(dislikeRef);
-          await updateDoc(ref, { dislikes: (snap.data().dislikes || 0) - 1 });
+          await updateDoc(ref, { dislikes: dislikeCount - 1 });
+          const disBtn = document.querySelector(`.dislike-btn[data-id="${id}"]`);
+          if (disBtn) {
+            disBtn.style.backgroundColor = "#e74c3c";
+            disBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
+          }
         }
       }
-      location.reload();
-    });
+    }
   });
 
-  document.querySelectorAll(".dislike-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
+  // Beğenmeme
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("dislike-btn")) {
+      const id = e.target.dataset.id;
       const ref = doc(db, "analizler", id);
-      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
       const likeRef = doc(db, "analizler", id, "likes", uid);
-      const [snap, disSnap] = await Promise.all([getDoc(ref), getDoc(dislikeRef)]);
-      let count = snap.data().dislikes || 0;
-      if (disSnap.exists()) {
+      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
+      const snap = await getDoc(ref);
+      let likeCount = snap.data().likes || 0;
+      let dislikeCount = snap.data().dislikes || 0;
+      const disExists = (await getDoc(dislikeRef)).exists();
+
+      if (disExists) {
         await deleteDoc(dislikeRef);
-        await updateDoc(ref, { dislikes: count - 1 });
+        await updateDoc(ref, { dislikes: dislikeCount - 1 });
+        e.target.style.backgroundColor = "#e74c3c";
+        e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;
       } else {
-        await setDoc(dislikeRef, { userId: uid });
-        await updateDoc(ref, { dislikes: count + 1 });
+        await setDoc(dislikeRef, { uid });
+        await updateDoc(ref, { dislikes: dislikeCount + 1 });
+        e.target.style.backgroundColor = "#c0392b";
+        e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;
+
+        // Eğer like varsa iptal et
         const likeSnap = await getDoc(likeRef);
         if (likeSnap.exists()) {
           await deleteDoc(likeRef);
-          await updateDoc(ref, { likes: (snap.data().likes || 0) - 1 });
+          await updateDoc(ref, { likes: likeCount - 1 });
+          const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);
+          if (likeBtn) {
+            likeBtn.style.backgroundColor = "#f39c12";
+            likeBtn.querySelector(".like-count").innerText = likeCount - 1;
+          }
         }
       }
-      location.reload();
-    });
+    }
   });
 
-  // Yorum yapma
-  document.querySelectorAll(".commentBtn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
+  // Yorum yap
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("commentBtn")) {
+      const id = e.target.dataset.id;
       const input = document.getElementById("input-" + id);
       const text = input.value.trim();
       if (!text) return;
+      const ref = doc(db, "analizler", id);
       const comment = {
         user: uid,
         username,
         text,
         timestamp: new Date().toISOString()
       };
-      const ref = doc(db, "analizler", id);
       await updateDoc(ref, {
         comments: arrayUnion(comment)
       });
+
+      const list = document.getElementById("commentList-" + id);
+      const div = document.createElement("div");
+      div.classList.add("comment");
+      div.innerHTML = `
+        <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
+        <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
+      `;
+      list.appendChild(div);
       input.value = "";
-      location.reload();
-    });
+    }
   });
 
-  // Yorum silme
-  document.querySelectorAll(".delete-comment").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
-      const index = parseInt(btn.dataset.index);
+  // Yorum sil
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("delete-comment")) {
+      const id = e.target.dataset.id;
+      const index = parseInt(e.target.dataset.index);
       const ref = doc(db, "analizler", id);
       const snap = await getDoc(ref);
       const comments = snap.data().comments || [];
       comments.splice(index, 1);
       await updateDoc(ref, { comments });
-      location.reload();
-    });
+
+      // yorum listesini güncelle
+      const list = document.getElementById("commentList-" + id);
+      list.innerHTML = comments.map((c, i) => `
+        <div class="comment">
+          <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+          ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+        </div>
+      `).join("");
+    }
   });
 
   // Yorum göster/gizle
-  document.querySelectorAll(".toggle-comments").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.id;
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("toggle-comments")) {
+      const id = e.target.dataset.id;
       const section = document.getElementById("comments-" + id);
       section.style.display = section.style.display === "none" ? "block" : "none";
-    });
+      e.target.textContent = section.style.display === "block" ? "💬 Yorumları Gizle" : "💬 Yorumları Göster";
+    }
   });
 });
 </script>
