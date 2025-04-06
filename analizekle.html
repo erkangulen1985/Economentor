@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Analiz Ekle | Economentor</title>
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -11,214 +11,158 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      color: #333;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
     }
 
     header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-      letter-spacing: 2px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
     nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #333;
-      padding: 15px 0;
+      background-color: rgba(0, 0, 0, 0.85);
+      text-align: center;
+      padding: 15px;
     }
 
     nav a {
-      text-decoration: none;
       color: white;
+      margin: 0 15px;
       font-weight: bold;
+      text-decoration: none;
       font-size: 16px;
-      padding: 10px;
-      transition: background 0.3s ease;
     }
 
     nav a:hover {
-      background-color: #4CAF50;
-    }
-
-    .content {
-      flex-grow: 1;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+      color: #4CAF50;
     }
 
     .upload-section, .history-section {
-      width: 80%;
-      background-color: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
+      max-width: 900px;
+      margin: 40px auto;
+      background: rgba(0,0,0,0.7);
       padding: 20px;
-      margin-bottom: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    .upload-section h2, .history-section h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 24px;
-      color: #333;
-    }
-
-    .upload-section input[type="file"] {
-      margin-bottom: 15px;
-    }
-
-    .upload-section input[type="text"], .upload-section textarea {
+    .upload-section input,
+    .upload-section textarea {
       width: 100%;
       padding: 10px;
-      margin-bottom: 15px;
+      margin: 10px 0;
       font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      border-radius: 6px;
+      border: none;
     }
 
     .upload-section button {
-      background-color: #4CAF50;
+      background: #4CAF50;
       color: white;
       border: none;
       padding: 12px 20px;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
     }
 
     .upload-section button:hover {
-      background-color: #45a049;
+      background: #45a049;
     }
 
-    .history-section {
-      background-color: #f9f9f9;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .history-section .post {
-      background-color: #fff;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .history-section .post video {
+    video {
       width: 100%;
-      border-radius: 8px;
+      border-radius: 10px;
+      margin-top: 10px;
     }
 
-    .post-footer {
+    .video-card {
+      background-color: #111;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .video-footer {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-top: 10px;
+      align-items: center;
     }
 
-    .post-footer button {
-      background-color: #e74c3c;
-      color: white;
+    .video-footer button {
       border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
+      border-radius: 6px;
+      padding: 8px 12px;
       cursor: pointer;
+      font-size: 14px;
     }
 
-    .post-footer button:hover {
-      background-color: #c0392b;
-    }
-
-    .post-footer .edit-button {
-      background-color: #f39c12;
-    }
-
-    .post-footer .edit-button:hover {
-      background-color: #e67e22;
-    }
-
-    .footer {
-      background-color: #333;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-    }
+    .like { background: #f39c12; color: white; }
+    .dislike { background: #e74c3c; color: white; }
+    .edit-button { background: #3498db; color: white; }
+    .delete-button { background: #c0392b; color: white; }
 
     .comment-section {
-      padding: 10px;
-      margin-top: 10px;
-      border-top: 1px solid #ddd;
+      margin-top: 15px;
+    }
+
+    .comment-section input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 8px;
     }
 
     .comment {
       background-color: #333;
-      padding: 8px;
-      margin-bottom: 8px;
-      border-radius: 5px;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
       display: flex;
       justify-content: space-between;
       color: white;
     }
 
     .comment button {
-      background-color: #e74c3c;
-      color: white;
-      padding: 6px 12px;
+      background: #e74c3c;
       border: none;
+      padding: 4px 10px;
       border-radius: 5px;
       cursor: pointer;
     }
 
-    .comment button:hover {
-      background-color: #c0392b;
+    .footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      margin-top: 40px;
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>Economentor Admin Panel | Analiz Yükle</h1>
-  </header>
+  <header><h1>Economentor | Analiz Yükle</h1></header>
 
   <nav>
-    <a href="adminpanel.html">Yönetici Paneline Dön</a>
+    <a href="adminpanel.html">Yönetici Paneli</a>
     <a href="analiz.html">Analizler Sayfası</a>
   </nav>
 
-  <div class="content">
-    <div class="upload-section">
-      <h2>Analiz Videosu Paylaş</h2>
-      <input type="file" id="videoUpload" accept="video/*">
-      <input type="text" id="videoTitle" placeholder="Başlık Girin">
-      <textarea id="videoDescription" placeholder="Açıklama Girin" rows="4"></textarea>
-      <button id="uploadButton">Videoyu Paylaş</button>
-    </div>
+  <div class="upload-section">
+    <h2>Analiz Videosu Paylaş</h2>
+    <input type="file" id="videoFile" accept="video/*" />
+    <input type="text" id="videoTitle" placeholder="Başlık" />
+    <textarea id="videoDesc" placeholder="Açıklama" rows="4"></textarea>
+    <button id="uploadBtn">Videoyu Paylaş</button>
+  </div>
 
-    <input type="text" id="searchInput" placeholder="Analiz başlığı ya da açıklama ara..." style="width: 80%; padding: 10px; margin: 20px auto; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; display: block;" />
-
-    <div class="history-section" id="videosContainer">
-      <h2>Yüklenmiş Analizler</h2>
-    </div>
+  <div class="history-section" id="videosContainer">
+    <h2>Yüklenen Analizler</h2>
   </div>
 
   <div class="footer">
@@ -228,15 +172,8 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc,
-  arrayUnion,
-  getDoc
+  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -250,93 +187,160 @@ const firebaseConfig = {
   appId: "1:835370350520:web:d9bb275eb4b7502997814d"
 };
 
+const supabase = createClient(
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+);
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const supabase = createClient(
-  "https://rvwsvhgihatxxhnbmouw.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
-);
 
+// Kullanıcıyı kontrol et ve username al
+let currentUsername = "Kullanıcı";
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
   const uid = user.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
-  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
-
-  document.getElementById("uploadBtn").addEventListener("click", async () => {
-    const file = document.getElementById("videoFile").files[0];
-    const title = document.getElementById("videoTitle").value;
-    const description = document.getElementById("videoDesc").value;
-
-    if (!file || !title || !description) return alert("Tüm alanları doldurun.");
-
-    const path = `analiz/${Date.now()}-${file.name}`;
-    const { data, error } = await supabase.storage.from("analizler").upload(path, file);
-    if (error) return alert("Video yükleme hatası: " + error.message);
-
-    const videoUrl = `${supabase.storage.from("analizler").getPublicUrl(path).data.publicUrl}`;
-
-    await addDoc(collection(db, "analizler"), {
-      title,
-      description,
-      videoUrl,
-      videoPath: path,
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      timestamp: new Date()
-    });
-
-    alert("Video başarıyla yüklendi!");
-    location.reload();
-  });
+  const userSnap = await getDoc(doc(db, "users", uid));
+  if (userSnap.exists()) {
+    currentUsername = userSnap.data().username || "Kullanıcı";
+  }
 });
 
-// Ek olarak: loadVideos, deleteVideo, editVideo, handleComments gibi fonksiyonları da sayfada kullanacaksan aşağıda devam edebilirim.
+// Yükleme
+document.getElementById("uploadBtn").addEventListener("click", async () => {
+  const file = document.getElementById("videoFile").files[0];
+  const title = document.getElementById("videoTitle").value;
+  const description = document.getElementById("videoDesc").value;
+  if (!file || !title || !description) return alert("Tüm alanlar dolmalı");
+
+  const path = `analizler/${Date.now()}-${file.name}`;
+  const { data, error } = await supabase.storage.from("analizler").upload(path, file);
+  if (error) return alert("Yükleme hatası: " + error.message);
+
+  const videoUrl = `${supabase.storage.from("analizler").getPublicUrl(path).data.publicUrl}`;
+  await addDoc(collection(db, "analizler"), {
+    title,
+    description,
+    videoUrl,
+    videoPath: path,
+    likes: 0,
+    dislikes: 0,
+    comments: [],
+    timestamp: new Date()
+  });
+  alert("Video yüklendi!");
+  location.reload();
+});
+
+const container = document.getElementById("videosContainer");
+loadVideos();
+
+async function loadVideos() {
+  const snapshot = await getDocs(collection(db, "analizler"));
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+
+    const div = document.createElement("div");
+    div.classList.add("video-card");
+
+    const comments = data.comments || [];
+
+    div.innerHTML = `
+      <h3>${data.title}</h3>
+      <p>${data.description}</p>
+      <video controls src="${data.videoUrl}"></video>
+      <div class="video-footer">
+        <div>
+          <button class="like" data-id="${id}">👍 ${data.likes || 0}</button>
+          <button class="dislike" data-id="${id}">👎 ${data.dislikes || 0}</button>
+        </div>
+        <div>
+          <button class="edit-button" onclick="editVideo('${id}')">Düzenle</button>
+          <button class="delete-button" onclick="deleteVideo('${id}', '${data.videoPath || ""}')">Sil</button>
+        </div>
+      </div>
+      <div class="comment-section">
+        <input id="input-${id}" placeholder="Yorumunuzu yazın...">
+        <button onclick="comment('${id}')">Yorum Yap</button>
+        <div id="comments-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button onclick="deleteComment('${id}', ${i})">❌</button>
+            </div>`).join("")}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.querySelectorAll(".like").forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      const ref = doc(db, "analizler", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      await updateDoc(ref, { likes: (data.likes || 0) + 1 });
+      location.reload();
+    };
+  });
+
+  document.querySelectorAll(".dislike").forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.id;
+      const ref = doc(db, "analizler", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      await updateDoc(ref, { dislikes: (data.dislikes || 0) + 1 });
+      location.reload();
+    };
+  });
+}
+
+window.comment = async (id) => {
+  const input = document.getElementById(`input-${id}`);
+  const text = input.value.trim();
+  if (!text) return;
+  const ref = doc(db, "analizler", id);
+  await updateDoc(ref, {
+    comments: arrayUnion({ text, username: currentUsername, timestamp: new Date().toISOString() })
+  });
+  input.value = "";
+  location.reload();
+};
+
+window.deleteComment = async (id, index) => {
+  const ref = doc(db, "analizler", id);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const newComments = (data.comments || []).filter((_, i) => i !== index);
+  await updateDoc(ref, { comments: newComments });
+  location.reload();
+};
+
+window.editVideo = async (id) => {
+  const ref = doc(db, "analizler", id);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+  const newTitle = prompt("Yeni başlık:", data.title);
+  const newDesc = prompt("Yeni açıklama:", data.description);
+  if (newTitle && newDesc) {
+    await updateDoc(ref, { title: newTitle, description: newDesc });
+    alert("Güncellendi.");
+    location.reload();
+  }
+};
+
+window.deleteVideo = async (id, path) => {
+  if (!confirm("Silmek istediğine emin misin?")) return;
+  await deleteDoc(doc(db, "analizler", id));
+  if (path) await supabase.storage.from("analizler").remove([path]);
+  location.reload();
+};
 </script>
-
-<div class="upload-section">
-  <h2>Analiz Videosu Ekle</h2>
-  <input type="file" id="videoFile" accept="video/*" /><br>
-  <input type="text" id="videoTitle" placeholder="Başlık" /><br>
-  <textarea id="videoDesc" placeholder="Açıklama" rows="4"></textarea><br>
-  <button id="uploadBtn">Yükle</button>
-</div>
-
-<style>
-.upload-section {
-  background: #fff;
-  color: #333;
-  max-width: 700px;
-  margin: 40px auto;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  text-align: center;
-}
-.upload-section input,
-.upload-section textarea {
-  width: 90%;
-  padding: 10px;
-  margin: 10px 0;
-  font-size: 16px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-.upload-section button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px 24px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.upload-section button:hover {
-  background-color: #388e3c;
-}
-</style>
 
 </body>
 </html>
