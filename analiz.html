@@ -2,10 +2,10 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analizler | Economentor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Economentor | Analizler</title>
   <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
     body {
       margin: 0;
@@ -13,14 +13,14 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: url('image2.png') no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
+      color: white;
     }
 
     header {
       background-color: rgba(0, 0, 0, 0.8);
       padding: 20px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
     header h1 {
@@ -30,199 +30,245 @@
     }
 
     nav {
-      display: flex;
-      justify-content: center;
       background-color: rgba(0, 0, 0, 0.85);
-      padding: 15px 0;
+      padding: 12px;
+      text-align: center;
     }
 
     nav a {
-      text-decoration: none;
       color: white;
+      text-decoration: none;
+      margin: 0 15px;
       font-weight: bold;
       font-size: 16px;
-      margin: 0 10px;
-      padding: 10px 20px;
-      transition: background 0.3s ease;
     }
 
     nav a:hover {
-      background-color: #4CAF50;
-      border-radius: 5px;
+      color: #4CAF50;
     }
 
     .container {
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
-    }
-
-    .video-post {
-      background-color: rgba(0, 0, 0, 0.85);
-      width: 90%;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
-    }
-
-    .video-post video {
-      width: 100%;
-      height: auto;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: rgba(0,0,0,0.7);
       border-radius: 10px;
     }
 
-    .video-post h2 {
-      margin-top: 20px;
-      font-size: 26px;
+    .video-card {
+      background-color: #111;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .video-card h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
       color: #66ccff;
     }
 
-    .video-post p {
-      margin-top: 10px;
-      font-size: 18px;
-      line-height: 1.6;
+    video {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .video-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       color: #ccc;
     }
 
-    .post-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-
-    .post-footer button {
-      background-color: #4CAF50;
-      color: white;
+    .video-footer button {
+      padding: 8px 14px;
+      font-size: 15px;
       border: none;
-      padding: 10px 18px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: 0.3s;
     }
 
-    .post-footer button:hover {
-      background-color: #45a049;
+    .like { background-color: #f39c12; color: white; }
+    .dislike { background-color: #e74c3c; color: white; }
+    .like:hover { background-color: #e67e22; }
+    .dislike:hover { background-color: #c0392b; }
+
+    .comment-section {
+      margin-top: 20px;
     }
 
-    .dislike-button {
-      background-color: #e74c3c;
+    .comment-section input {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 10px;
     }
 
-    .dislike-button:hover {
-      background-color: #c0392b;
-    }
-
-    .edit-button {
-      background-color: #f39c12;
-    }
-
-    .edit-button:hover {
-      background-color: #e67e22;
-    }
-
-    .comments {
-      margin-top: 25px;
+    .comment-section button {
+      background-color: #3498db;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
     }
 
     .comment {
-      background-color: #222;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      color: white;
+      background-color: #333;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .comment button {
-      background-color: #e74c3c;
-      border: none;
       color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .comment button:hover {
-      background-color: #c0392b;
     }
   </style>
 </head>
 <body>
+
   <header>
-    <h1>ANALİZLER</h1>
+    <h1>ECONOMENTOR | Analizler</h1>
   </header>
+
   <nav>
-    <a href="adminpanel.html">Yönetici Paneline Dön</a>
     <a href="anasayfa.html">Anasayfa</a>
+    <a href="adminpanel.html">Yönetici Paneli</a>
   </nav>
 
   <div class="container" id="videoContainer">
-    <!-- Videolar buraya gelecek -->
+    <p style="text-align:center;">Yükleniyor...</p>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, updateDoc, doc, arrayUnion, getDoc, deleteDoc
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  getDoc,
+  setDoc,
+  arrayUnion,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const supabase = createClient(
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+);
 
-    async function loadVideos() {
-      const videoContainer = document.getElementById("videoContainer");
-      const snapshot = await getDocs(collection(db, "analizler"));
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const postId = docSnap.id;
-        const postDiv = document.createElement("div");
-        postDiv.classList.add("video-post");
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
 
-        const commentsHtml = (data.comments || []).map((c, i) => `
+  const uid = user.uid;
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
+
+  const videoContainer = document.getElementById("videoContainer");
+  videoContainer.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "analizler"));
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+
+    const card = document.createElement("div");
+    card.classList.add("video-card");
+
+    const comments = data.comments || [];
+
+    card.innerHTML = `
+      <h2>${data.title}</h2>
+      <video controls src="${data.videoUrl}"></video>
+      <div class="video-footer">
+        <div>
+          <button class="like" data-id="${id}">👍 ${data.likes || 0}</button>
+          <button class="dislike" data-id="${id}">👎 ${data.dislikes || 0}</button>
+        </div>
+        <div>💬 ${comments.length}</div>
+      </div>
+      <div class="comment-section">
+        <input placeholder="Yorumunuzu yazın..." id="input-${id}" />
+        <button data-id="${id}" class="commentBtn">Yorum Yap</button>
+        <div id="comments-${id}">${comments.map(c => `
           <div class="comment">
-            <span><strong>${c.username}</strong>: ${c.text}</span>
-            <button onclick="deleteComment('${postId}', ${i})">❌</button>
+            <span><b>${c.username}</b>: ${c.text}</span>
           </div>
-        `).join("");
+        `).join("")}</div>
+      </div>
+    `;
 
-        postDiv.innerHTML = `
-          <video controls>
-            <source src="${data.videoUrl}" type="video/mp4">
-            Tarayıcınız video etiketini desteklemiyor.
-          </video>
-          <h2>${data.title}</h2>
-          <p>${data.description}</p>
-          <div class="post-footer">
-            <span>👍 ${data.likes || 0}</span>
-            <span>👎 ${data.dislikes || 0}</span>
-            <span>💬 ${(data.comments || []).length}</span>
-          </div>
-          <div class="comments">
-            ${commentsHtml || '<p>Yorum yok.</p>'}
-          </div>
-        `;
+    videoContainer.appendChild(card);
+  });
 
-        videoContainer.appendChild(postDiv);
+  document.querySelectorAll(".like").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const ref = doc(db, "analizler", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      await updateDoc(ref, { likes: (data.likes || 0) + 1 });
+      location.reload();
+    });
+  });
+
+  document.querySelectorAll(".dislike").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const ref = doc(db, "analizler", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      await updateDoc(ref, { dislikes: (data.dislikes || 0) + 1 });
+      location.reload();
+    });
+  });
+
+  document.querySelectorAll(".commentBtn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const input = document.getElementById("input-" + id);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const comment = {
+        username,
+        text,
+        timestamp: new Date().toISOString()
+      };
+
+      const ref = doc(db, "analizler", id);
+      await updateDoc(ref, {
+        comments: arrayUnion(comment)
       });
-    }
 
-    loadVideos();
-  </script>
+      input.value = "";
+      location.reload();
+    });
+  });
+});
+</script>
+
 </body>
 </html>
