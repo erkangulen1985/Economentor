@@ -199,18 +199,37 @@ onAuthStateChanged(auth, async (user) => {
 
   document.getElementById("changeEmailBtn").addEventListener("click", async () => {
     const newEmail = document.getElementById("newEmail").value.trim();
-
-    if (!newEmail) {
+    
+    // E-posta doğrulama
+    if (!newEmail || !newEmail.includes('@') || !newEmail.includes('.')) {
       alert("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
 
-    // Yeni e-posta adresine doğrulama e-postası gönder
+    // Mevcut şifreyi alıyoruz
+    const password = prompt("Mevcut şifrenizi girin");
+    if (!password) {
+      alert("Şifre gereklidir.");
+      return;
+    }
+
+    const credential = EmailAuthProvider.credential(user.email, password);
+
     try {
-      await sendEmailVerification(user);  // E-posta doğrulama e-postası gönder
-      alert("Yeni e-posta adresinize doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
+      // Kullanıcıyı tekrar doğrulama işlemi
+      await reauthenticateWithCredential(user, credential);
+
+      // Yeni e-posta adresine doğrulama e-postası gönder
+      await updateEmail(user, newEmail);  // E-posta adresini güncelle
+      alert("Yeni e-posta adresiniz için doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
     } catch (error) {
-      alert("E-posta gönderme hatası: " + error.message);
+      if (error.code === "auth/requires-recent-login") {
+        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+      } else if (error.code === "auth/operation-not-allowed") {
+        alert("Firebase ayarlarında E-posta Değişikliği işlemi etkinleştirilmemiş.");
+      } else {
+        alert("E-posta güncelleme hatası: " + error.message);
+      }
     }
   });
 });
