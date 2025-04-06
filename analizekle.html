@@ -247,7 +247,7 @@ onAuthStateChanged(auth, async (user) => {
     });
 
     alert("Video başarıyla yüklendi!");
-    loadVideos(); // sadece yenilemek istersen
+    loadVideos();
   });
 
   async function loadVideos() {
@@ -292,70 +292,60 @@ onAuthStateChanged(auth, async (user) => {
       `;
 
       container.appendChild(div);
-    });
 
-    // 🟢 Silme işlemi
-    document.querySelectorAll(".delete-button").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.dataset.id;
-        const path = btn.dataset.path;
-        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-        if (!confirmed) return;
-
-        await supabase.storage.from("analizler").remove([path]);
-        await deleteDoc(doc(db, "analizler", id));
-        document.getElementById(`video-${id}`)?.remove();
-      });
-    });
-
-    // 🟢 Düzenleme işlemi
-    document.querySelectorAll(".edit-button").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.dataset.id;
+      // 🎯 Düzenle butonu
+      div.querySelector(".edit-button").addEventListener("click", async () => {
         const ref = doc(db, "analizler", id);
         const snap = await getDoc(ref);
         const data = snap.data();
-
         const newTitle = prompt("Yeni başlık:", data.title);
         const newDesc = prompt("Yeni açıklama:", data.description);
         if (!newTitle || !newDesc) return;
-
         await updateDoc(ref, { title: newTitle, description: newDesc });
-
-        const card = document.getElementById(`video-${id}`);
-        card.querySelector("h3").textContent = newTitle;
-        card.querySelector("p").textContent = newDesc;
+        div.querySelector("h3").textContent = newTitle;
+        div.querySelector("p").textContent = newDesc;
       });
-    });
 
-    // 🟢 Yorum silme
-    document.querySelectorAll(".delete-comment").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.dataset.id;
-        const index = parseInt(btn.dataset.index);
-        const ref = doc(db, "analizler", id);
-        const snap = await getDoc(ref);
-        const data = snap.data();
-        const updated = (data.comments || []).filter((_, i) => i !== index);
-        await updateDoc(ref, { comments: updated });
+      // 🎯 Sil butonu
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
 
-        const container = document.getElementById(`comments-${id}`);
-        container.innerHTML = updated.map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b>: ${c.text}</span>
-            <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-          </div>
-        `).join("");
+      // 🎯 Yorum silme
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
 
-        // yeniden listener bağla
-        loadVideos(); // alternatif: yukarıdaki map kısmını yeniden bağlamak
+          const commentsDiv = div.querySelector(`#comments-${id}`);
+          commentsDiv.innerHTML = updated.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("");
+
+          // yeniden bağla
+          loadVideos();
+        });
       });
     });
   }
 
   loadVideos();
 
-  // 🔎 Arama
   document.getElementById("searchInput").addEventListener("input", async (e) => {
     const keyword = e.target.value.toLowerCase();
     const snapshot = await getDocs(collection(db, "analizler"));
@@ -390,7 +380,6 @@ onAuthStateChanged(auth, async (user) => {
   });
 });
 </script>
-
 
 </body>
 </html>
