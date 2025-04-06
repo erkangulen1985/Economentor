@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil | Economentor</title>
+  <link rel="icon" href="image1.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url("ChatGPT Image Apr 4, 2025, 05_32_46 PM.png") no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .profile-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 40px;
+      width: 90%;
+      max-width: 500px;
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #eee;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .danger {
+      background-color: #e74c3c;
+    }
+
+    .danger:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h2>Profil Bilgileri</h2>
+    <label>Ad Soyad</label>
+    <input type="text" id="fullName" placeholder="Ad Soyad" />
+
+    <label>E-posta</label>
+    <input type="email" id="email" placeholder="E-posta" disabled />
+
+    <label>Kullanıcı Adı</label>
+    <input type="text" id="username" placeholder="Kullanıcı Adı" />
+
+    <label>Doğum Tarihi</label>
+    <input type="date" id="dob" />
+
+    <label>Yeni Şifre (değiştirmek için doldur)</label>
+    <input type="password" id="newPassword" placeholder="Yeni Şifre" />
+
+    <button id="saveBtn">Kaydet</button>
+    <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
+
+  const uid = user.uid;
+  const userDoc = await getDoc(doc(db, "users", uid));
+  if (userDoc.exists()) {
+    const data = userDoc.data();
+    document.getElementById("fullName").value = data.fullName || "";
+    document.getElementById("username").value = data.username || "";
+    document.getElementById("dob").value = data.dob || "";
+    document.getElementById("email").value = user.email || "";
+  }
+
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+    const fullName = document.getElementById("fullName").value.trim();
+    const username = document.getElementById("username").value.trim();
+    const dob = document.getElementById("dob").value;
+    const newPassword = document.getElementById("newPassword").value;
+
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        fullName,
+        username,
+        dob
+      });
+
+      if (newPassword) {
+        await updatePassword(user, newPassword);
+        alert("Şifre güncellendi.");
+      }
+
+      alert("Bilgiler başarıyla güncellendi.");
+    } catch (err) {
+      alert("Hata: " + err.message);
+    }
+  });
+
+  document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
+    if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
+
+    try {
+      await deleteDoc(doc(db, "users", uid));
+      await deleteUser(user);
+      alert("Hesabınız silindi.");
+      location.href = "index.html";
+    } catch (err) {
+      alert("Silme işlemi başarısız: " + err.message);
+    }
+  });
+});
+</script>
+</body>
+</html>
