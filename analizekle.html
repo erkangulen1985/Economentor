@@ -207,12 +207,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// ✅ Türkçe karakterleri ve özel karakterleri temizleyen fonksiyon
 function sanitizeFilename(filename) {
   return filename
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri sil
-    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterleri bırak
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9_.-]/g, "");
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -249,10 +248,8 @@ onAuthStateChanged(auth, async (user) => {
     });
 
     alert("Video başarıyla yüklendi!");
-    location.reload();
+    loadVideos();
   });
-
-  loadVideos();
 
   async function loadVideos() {
     const container = document.getElementById("videosContainer");
@@ -271,60 +268,25 @@ onAuthStateChanged(auth, async (user) => {
         <h3>${data.title}</h3>
         <video controls src="${data.videoUrl}"></video>
         <p>${data.description}</p>
-
         <div class="video-footer">
-          <div>
-            <button class="like" onclick="likeVideo('${id}')">👍 ${data.likes || 0}</button>
-            <button class="dislike" onclick="dislikeVideo('${id}')">👎 ${data.dislikes || 0}</button>
-          </div>
+          <div>👍 ${data.likes || 0} 👎 ${data.dislikes || 0}</div>
           <div>
             <button class="edit-button" onclick="editVideo('${id}')">Düzenle</button>
             <button class="delete-button" onclick="deleteVideo('${id}', '${data.videoPath}')">Sil</button>
           </div>
         </div>
-
         <div class="comment-section">
-          <input id="comment-${id}" placeholder="Yorum yaz...">
-          <button onclick="commentVideo('${id}', '${username}')">Ekle</button>
-          <div>
-            ${comments.map((c, i) => `
-              <div class="comment">
-                <span><b>${c.username}</b>: ${c.text}</span>
-                <button onclick="deleteComment('${id}', ${i})">❌</button>
-              </div>`).join("")}
-          </div>
+          <div>${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button onclick="deleteComment('${id}', ${i})">❌</button>
+            </div>
+          `).join("")}</div>
         </div>
       `;
 
       container.appendChild(div);
     });
-  }
-
-  window.likeVideo = async function(id) {
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const likes = (snap.data().likes || 0) + 1;
-    await updateDoc(ref, { likes });
-    loadVideos();
-  }
-
-  window.dislikeVideo = async function(id) {
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const dislikes = (snap.data().dislikes || 0) + 1;
-    await updateDoc(ref, { dislikes });
-    loadVideos();
-  }
-
-  window.commentVideo = async function(id, username) {
-    const input = document.getElementById("comment-" + id);
-    const text = input.value.trim();
-    if (!text) return;
-    await updateDoc(doc(db, "analizler", id), {
-      comments: arrayUnion({ username, text, timestamp: new Date().toISOString() })
-    });
-    input.value = "";
-    loadVideos();
   }
 
   window.deleteComment = async function(id, index) {
@@ -383,6 +345,8 @@ onAuthStateChanged(auth, async (user) => {
       }
     });
   });
+
+  loadVideos();
 });
 </script>
 
