@@ -221,11 +221,19 @@
       const snap = await getDoc(ref);
       const data = snap.data();
 
+      // Yeni başlık ve açıklamayı almak
       const newTitle = prompt("Yeni başlık:", data.title);
       const newDesc = prompt("Yeni açıklama:", data.description);
 
+      // Eğitim maddelerini düzenlemek
+      let newBullets = [...data.bullets];
+      const bulletText = prompt("Maddeyi düzenleyin:", newBullets.join(', '));
+      if (bulletText) {
+        newBullets = bulletText.split(',').map(item => item.trim());
+      }
+
       if (newTitle && newDesc) {
-        await updateDoc(ref, { title: newTitle, description: newDesc });
+        await updateDoc(ref, { title: newTitle, description: newDesc, bullets: newBullets });
         loadTrainings();
       }
     };
