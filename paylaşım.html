@@ -212,6 +212,10 @@
       <button id="uploadButton">Paylaş</button>
     </div>
 
+    </div>
+    <input type="text" id="searchInput" placeholder="Paylaşım başlığı ya da açıklama ara..." style="width: 80%; padding: 10px; margin: 20px auto; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; display: block;" /> 
+    </div>
+  
     <div class="history-section" id="postsContainer">
       <h2>Paylaşılan Resimler</h2>
     </div>
@@ -221,106 +225,157 @@
     <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.firebasestorage.app",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.firebasestorage.app",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
+};
 
-    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const supabase = createClient(supabaseUrl, supabaseKey);
+document.getElementById("uploadButton").addEventListener("click", uploadPost);
+document.getElementById("searchInput")?.addEventListener("input", filterPosts);
 
-    async function uploadPost() {
-      const imageFile = document.getElementById("imageUpload").files[0];
-      const title = document.getElementById("imageTitle").value;
-      const description = document.getElementById("imageDescription").value;
+async function uploadPost() {
+  const imageFile = document.getElementById("imageUpload").files[0];
+  const title = document.getElementById("imageTitle").value;
+  const description = document.getElementById("imageDescription").value;
 
-      if (!imageFile || !title || !description) {
-        alert("Lütfen tüm alanları doldurun!");
-        return;
-      }
+  if (!imageFile || !title || !description) {
+    alert("Lütfen tüm alanları doldurun!");
+    return;
+  }
 
-      const { data, error } = await supabase.storage
-        .from('anasayfa-paylasimlari')
-        .upload('images/' + imageFile.name, imageFile);
+  const { data, error } = await supabase.storage
+    .from('anasayfa-paylasimlari')
+    .upload('images/' + imageFile.name, imageFile);
 
-      if (error) {
-        console.error("Resim yüklenirken hata oluştu: ", error);
-        alert("Resim yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
-        return;
-      }
+  if (error) {
+    alert("Resim yüklenemedi.");
+    return;
+  }
 
-      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/${data.path}`;
-      
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        description: description,
-        imageUrl: imageUrl,
-        likes: 0,
-        comments: 0,
-        timestamp: new Date(),
-      });
+  const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${data.path}`;
+  await addDoc(collection(db, "posts"), {
+    title,
+    description,
+    imageUrl,
+    likes: 0,
+    dislikes: 0,
+    comments: [],
+    timestamp: new Date()
+  });
 
-      alert("Paylaşım başarıyla yapıldı!");
-      loadPosts();
-    }
+  alert("Paylaşım yapıldı.");
+  loadPosts();
+}
 
-    async function loadPosts() {
-      const postsRef = collection(db, "posts");
-      const querySnapshot = await getDocs(postsRef);
-      const postsContainer = document.getElementById('postsContainer');
-      postsContainer.innerHTML = ''; 
+let allPosts = [];
 
-      if (querySnapshot.empty) {
-        postsContainer.innerHTML = `<p>Henüz hiçbir paylaşım yapılmamış.</p>`;
-        return;
-      }
+async function loadPosts() {
+  const postsRef = collection(db, "posts");
+  const querySnapshot = await getDocs(postsRef);
+  const postsContainer = document.getElementById('postsContainer');
+  postsContainer.innerHTML = '';
 
-      querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-          <img src="${post.imageUrl}" alt="Resim">
-          <h3>${post.title}</h3>
-          <p>${post.description}</p>
-          <div class="post-footer">
-            <button onclick="deletePost('${doc.id}')">Sil</button>
-            <button class="edit-button" onclick="editPost('${doc.id}')">Düzenle</button>
+  allPosts = []; // filtreleme için temizle
+
+  querySnapshot.forEach((docSnap) => {
+    const post = docSnap.data();
+    allPosts.push({ id: docSnap.id, ...post });
+  });
+
+  renderPosts(allPosts);
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = "";
+
+  posts.forEach(post => {
+    const postElement = document.createElement("div");
+    postElement.classList.add("post");
+
+    const commentsHtml = (post.comments || [])
+      .map((c, i) => `
+        <div class="comment">
+          <div>
+            <strong>${c.username}</strong><br>${c.text}
           </div>
-        `;
-        postsContainer.appendChild(postElement);
-      });
-    }
+          <button onclick="deleteComment('${post.id}', ${i})">❌</button>
+        </div>
+      `).join("");
 
-    async function deletePost(postId) {
-      const postRef = doc(db, "posts", postId);
-      await deleteDoc(postRef);
-      loadPosts();
-    }
+    postElement.innerHTML = `
+      <img src="${post.imageUrl}" alt="Resim">
+      <h3>${post.title}</h3>
+      <p>${post.description}</p>
+      <div class="post-footer">
+        <span>👍 ${post.likes || 0}</span>
+        <span>👎 ${post.dislikes || 0}</span>
+        <span>💬 ${(post.comments || []).length}</span>
+      </div>
+      <div class="post-footer">
+        <button onclick="deletePost('${post.id}')">Sil</button>
+        <button class="edit-button" onclick="editPost('${post.id}')">Düzenle</button>
+      </div>
+      <div class="comment-section">
+        <h4>Yorumlar</h4>
+        ${commentsHtml || "<p>Henüz yorum yok.</p>"}
+      </div>
+    `;
+    container.appendChild(postElement);
+  });
+}
 
-    async function editPost(postId) {
-      alert("Düzenleme işlemi burada yapılacak!");
-    }
-
-    document.getElementById("uploadButton").addEventListener("click", uploadPost);
+async function deletePost(postId) {
+  if (confirm("Bu paylaşımı silmek istediğinize emin misiniz?")) {
+    await deleteDoc(doc(db, "posts", postId));
     loadPosts();
-  </script>
+  }
+}
+
+function editPost(postId) {
+  alert("Düzenleme alanı burada oluşturulacak.");
+}
+
+// Admin yorum silsin
+window.deleteComment = async (postId, commentIndex) => {
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  if (!postSnap.exists()) return;
+
+  const post = postSnap.data();
+  const updatedComments = (post.comments || []).filter((_, i) => i !== commentIndex);
+
+  await updateDoc(postRef, { comments: updatedComments });
+  loadPosts();
+};
+
+// Canlı arama çubuğu
+function filterPosts(e) {
+  const keyword = e.target.value.toLowerCase();
+  const filtered = allPosts.filter(p =>
+    p.title.toLowerCase().includes(keyword) || p.description.toLowerCase().includes(keyword)
+  );
+  renderPosts(filtered);
+}
+
+loadPosts();
+</script>
 
 </body>
 </html>
