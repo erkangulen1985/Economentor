@@ -39,12 +39,14 @@
       padding: 15px 0;
     }
 
-nav {
-  display: flex;
-  justify-content: center;
-  padding: 15px 0;
-  transform: translateX(-12px); /* Gözle ölçüp ayarlayabilirsin */
-}
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px;
+      transition: background 0.3s ease;
+    }
 
     nav a:hover {
       background-color: #4CAF50;
@@ -199,8 +201,8 @@ nav {
   </header>
 
   <nav>
-    <a href="adminpanel.html">Yönetici Paneline Dön</a>
     <a href="eğitimekle.html">Eğitimler</a>
+    <a href="adminpanel.html">Yönetici Paneline Dön</a>  
     <a href="analiz.html">Analiz</a>
   </nav>
 
