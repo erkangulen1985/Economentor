@@ -265,7 +265,7 @@
         return;
       }
 
-      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/images/${data.path}`;
+      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/${data.path}`;
       
       await addDoc(collection(db, "posts"), {
         title: title,
