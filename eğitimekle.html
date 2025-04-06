@@ -177,6 +177,13 @@
       }
     };
 
+    document.getElementById("bulletText").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addBullet();
+      }
+    });
+
     function renderBullets() {
       const container = document.getElementById("bullets");
       container.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
