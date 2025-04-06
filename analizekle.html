@@ -221,23 +221,32 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!file || !title || !desc) return alert("Tüm alanları doldurun.");
 
-    const path = `analiz/${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("analizler").upload(path, file);
-    if (error) return alert("Video yükleme hatası: " + error.message);
+const filePath = `analiz/${Date.now()}-${videoFile.name}`;
 
-    const { data } = supabase.storage.from("analizler").getPublicUrl(path);
-    const videoUrl = data.publicUrl;
+const { data, error } = await supabase.storage
+  .from("analizler")
+  .upload(filePath, videoFile);
 
-    await addDoc(collection(db, "analizler"), {
-      title,
-      description: desc,
-      videoUrl,
-      videoPath: path,
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      timestamp: new Date()
-    });
+if (error) {
+  console.error("Yükleme hatası:", error.message);
+  return;
+}
+
+const { data: { publicUrl } } = supabase
+  .storage
+  .from("analizler")
+  .getPublicUrl(filePath);
+
+await addDoc(collection(db, "analizler"), {
+  title,
+  description,
+  videoUrl,
+  videoPath: path,
+  likes: 0,
+  dislikes: 0,
+  comments: [],
+  timestamp: new Date()
+});
 
     alert("Video yüklendi!");
     location.reload();
