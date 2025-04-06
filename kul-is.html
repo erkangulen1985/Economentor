@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Paneli | Finans Yönetimi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.js"></script> <!-- Çalışacak versiyon -->
   <link rel="icon" href="image1.png">
   <style>
     /* Genel Stil Ayarları */
@@ -183,154 +184,75 @@
     </div>
   </div>
 
-<script type="module">
-  // Firebase importları
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  
-  // Chart.js importları
-  import { 
-    Chart, 
-    CategoryScale, 
-    LinearScale, 
-    LineElement, 
-    PointElement, 
-    Title, 
-    Tooltip, 
-    Legend 
-  } from 'https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.esm.min.js'; 
+  <script type="module">
+    // Firebase importları
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Gerekli Chart.js bileşenlerini kaydetme
-  Chart.register(
-    CategoryScale, 
-    LinearScale, 
-    LineElement, 
-    PointElement, 
-    Title, 
-    Tooltip, 
-    Legend
-  );
+    // Firebase yapılandırması
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-  };
+    // Firebase'i başlatma
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    // Grafik verilerini yükleme fonksiyonu
+    async function loadData() {
+      try {
+        const dataSnapshot = await getDocs(collection(db, "posts")); // Firebase'den veri çekiyoruz (örneğin 'posts' koleksiyonu)
+        
+        // Grafik için etiketler ve veriler
+        const labels = [];
+        const likesData = [];
 
-  // Grafik verilerini yükle
-  async function loadCharts() {
-    try {
-      const userQ = query(collection(db, "users"), orderBy("timestamp"));
-      const userSnapshot = await getDocs(userQ);
+        dataSnapshot.forEach(doc => {
+          const data = doc.data();
+          labels.push(data.date); // Tarih bilgisi veya istediğiniz başka bir veriyi kullanabilirsiniz
+          likesData.push(data.likes); // Beğeni sayısı gibi bir veri kullanabilirsiniz
+        });
 
-      const userLabels = [];
-      const userCounts = [];
-      const likeCounts = [];
-      const dislikeCounts = [];
-      const commentCounts = [];
-
-      const userDateMap = {};
-
-      userSnapshot.forEach(doc => {
-        const ts = doc.data().timestamp;
-        if (!ts) return;
-        const date = new Date(ts.seconds * 1000).toLocaleDateString();
-        userDateMap[date] = (userDateMap[date] || 0) + 1;
-      });
-
-      for (const [date, count] of Object.entries(userDateMap)) {
-        userLabels.push(date);
-        userCounts.push(count);
+        // Grafiği oluşturma
+        createChart(labels, likesData);
+      } catch (error) {
+        console.error("Veri çekme hatası: ", error);
       }
-
-      const analizSnapshot = await getDocs(collection(db, "analizler"));
-      const fotoSnapshot = await getDocs(collection(db, "posts"));
-
-      analizSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
-
-      fotoSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
-
-      // Kullanıcı artışı grafiği
-      new Chart(document.getElementById("userGrowthChart"), {
-        type: 'line',
-        data: {
-          labels: userLabels,
-          datasets: [{
-            label: 'Kullanıcı Artışı',
-            data: userCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Beğeni sayısı grafiği
-      new Chart(document.getElementById("contentLikesChart"), {
-        type: 'line',
-        data: {
-          labels: likeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğeniler',
-            data: likeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Beğenmeme sayısı grafiği
-      new Chart(document.getElementById("contentDislikesChart"), {
-        type: 'line',
-        data: {
-          labels: dislikeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğenmeme',
-            data: dislikeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Yorum sayısı grafiği
-      new Chart(document.getElementById("contentCommentsChart"), {
-        type: 'line',
-        data: {
-          labels: commentCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Yorumlar',
-            data: commentCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-    } catch (error) {
-      console.error("Grafikler yüklenemedi: ", error);
     }
-  }
 
-  loadCharts();
-</script>
+    // Grafiği oluşturma fonksiyonu
+    function createChart(labels, data) {
+      const ctx = document.getElementById('userGrowthChart').getContext('2d');
+      const myChart = new Chart(ctx, {
+        type: 'line', // Grafik tipi
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Beğeni Sayısı',
+            data: data,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
 
+    // Verileri yükleyip grafiği oluştur
+    loadData();
+  </script>
 </body>
 </html>
