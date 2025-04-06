@@ -184,33 +184,36 @@
   </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { 
-    Chart, 
-    CategoryScale, 
-    LinearScale, 
-    LineElement, 
-    PointElement, 
-    Title, 
-    Tooltip, 
-    Legend 
-  } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js'; 
+// Firebase importları
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getFirestore, collection, getDocs, doc, 
+  deleteDoc, onSnapshot, query, orderBy 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  // Register all necessary components for chart.js
-  Chart.register(
-    CategoryScale, 
-    LinearScale, 
-    LineElement, 
-    PointElement, 
-    Title, 
-    Tooltip, 
-    Legend
-  );
+// Chart.js importları
+import { 
+  Chart, 
+  CategoryScale, 
+  LinearScale, 
+  LineElement, 
+  PointElement, 
+  Title, 
+  Tooltip, 
+  Legend 
+} from 'https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.esm.min.js';
+
+// Chart.js bileşenlerini kaydetme
+Chart.register(
+  CategoryScale, 
+  LinearScale, 
+  LineElement, 
+  PointElement, 
+  Title, 
+  Tooltip, 
+  Legend
+);
 
   const firebaseConfig = {
     apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
