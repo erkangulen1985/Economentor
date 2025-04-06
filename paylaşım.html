@@ -257,14 +257,36 @@
   const db = getFirestore(app);
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  window.deletePost = async function(postId) {
-    const confirmed = confirm("Bu paylaşımı silmek istediğine emin misin?");
-    if (!confirmed) return;
+window.deletePost = async function(postId) {
+  const confirmed = confirm("Bu paylaşımı silmek istediğine emin misin?");
+  if (!confirmed) return;
 
-    await deleteDoc(doc(db, "posts", postId));
-    alert("Paylaşım silindi.");
-    loadPosts();
-  };
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  if (!postSnap.exists()) return alert("Post bulunamadı.");
+
+  const postData = postSnap.data();
+  const imageUrl = postData.imageUrl;
+
+  // 🔍 Dosya adını URL'den ayıkla
+  const imagePath = imageUrl.split("/storage/v1/object/public/anasayfa-paylasimlari/")[1];
+
+  // 🗑️ Supabase'den resmi sil
+  const { error } = await supabase.storage
+    .from('anasayfa-paylasimlari')
+    .remove([`images/${imagePath}`]);
+
+  if (error) {
+    console.warn("Resim silinemedi, ama post silinecek:", error.message);
+  }
+
+  // 🔥 Firestore'dan post'u sil
+  await deleteDoc(postRef);
+
+  alert("Paylaşım silindi.");
+  loadPosts();
+};
+
 
   window.editPost = async function(postId) {
     const postRef = doc(db, "posts", postId);
