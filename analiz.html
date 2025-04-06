@@ -29,23 +29,22 @@
       letter-spacing: 2px;
     }
 
-    nav {
-      background-color: rgba(0, 0, 0, 0.85);
-      padding: 12px;
-      text-align: center;
-    }
+nav {
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 12px;
+  display: flex;
+  justify-content: center; /* ✅ Ortala */
+}
 
 nav a {
+  background-color: rgba(255, 255, 255, 0.1); /* ✅ Kutu efekti */
   color: white;
   text-decoration: none;
-  margin: 0 15px;
+  padding: 10px 20px;
   font-weight: bold;
   font-size: 16px;
-  display: inline-block; /* ✅ Buton sadece içeriği kadar genişlikte olur */
-  padding: 10px 16px;
   border-radius: 6px;
   transition: 0.3s ease;
-  background-color: transparent;
 }
 
 nav a:hover {
