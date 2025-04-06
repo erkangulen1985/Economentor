@@ -260,6 +260,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function sanitizeFilename(filename) {
+  return filename
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
+    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
+}
+  
 // ✅ Post yükleme
 document.getElementById("uploadButton").addEventListener("click", uploadPost);
 
@@ -273,7 +280,8 @@ async function uploadPost() {
     return;
   }
 
-  const filePath = 'images/' + Date.now() + '-' + imageFile.name;
+  const safeFileName = sanitizeFilename(imageFile.name);
+  const filePath = 'images/' + Date.now() + '-' + safeFileName;
   const { data, error } = await supabase
     .storage
     .from('anasayfa-paylasimlari')
