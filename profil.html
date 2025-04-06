@@ -194,41 +194,42 @@ onAuthStateChanged(auth, async (user) => {
   });
 
   // E-posta değiştir
-  document.getElementById("changeEmailBtn").addEventListener("click", async () => {
-    const newEmail = document.getElementById("newEmail").value.trim();
+document.getElementById("changeEmailBtn").addEventListener("click", async () => {
+  const newEmail = document.getElementById("newEmail").value.trim();
+  
+  if (!newEmail) {
+    alert("Lütfen geçerli bir e-posta girin.");
+    return;
+  }
+
+  const user = auth.currentUser;
+
+  // Kullanıcıyı tekrar doğrulama işlemi
+  const password = prompt("Mevcut şifrenizi girin");
+  
+  if (!password) {
+    alert("Şifre gereklidir.");
+    return;
+  }
+
+  const credential = EmailAuthProvider.credential(user.email, password);
+
+  try {
+    // Kullanıcıyı reauthenticate et
+    await reauthenticateWithCredential(user, credential);
     
-    if (!newEmail) {
-      alert("Lütfen geçerli bir e-posta girin.");
-      return;
+    // Yeni e-posta adresine doğrulama e-postası gönder
+    await user.updateEmail(newEmail);
+    await user.sendEmailVerification();
+    alert("Yeni e-posta adresiniz için doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
+  } catch (error) {
+    if (error.code === "auth/requires-recent-login") {
+      alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+    } else {
+      alert("E-posta güncelleme hatası: " + error.message);
     }
-
-    const user = auth.currentUser;
-
-    // Kullanıcıyı tekrar doğrulama işlemi
-    const password = prompt("Mevcut şifrenizi girin");
-    
-    if (!password) {
-      alert("Şifre gereklidir.");
-      return;
-    }
-
-    const credential = EmailAuthProvider.credential(user.email, password);
-
-    try {
-      // Kullanıcıyı reauthenticate et
-      await reauthenticateWithCredential(user, credential);
-      
-      // Yeni e-posta adresini güncelle
-      await updateEmail(user, newEmail);
-      alert("E-posta adresiniz başarıyla güncellendi!");
-    } catch (error) {
-      if (error.code === "auth/requires-recent-login") {
-        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
-      } else {
-        alert("E-posta güncelleme hatası: " + error.message);
-      }
-    }
-  });
+  }
+});
 
   // Hesap sil
   document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
