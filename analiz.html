@@ -3,154 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Economentor | Analizler</title>
+  <title>Analiz Ekle | Economentor</title>
   <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* Stil tanımlamaları */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('image2.png') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-    }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f1f1f1;
+  color: #333;
+}
 
     header {
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: #4CAF50;
+      color: white;
       padding: 20px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-      letter-spacing: 2px;
+      font-size: 28px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     nav {
       display: flex;
-      justify-content: center;
-      background-color: transparent;
-      padding: 20px 0 10px;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 15px 0;
     }
 
     nav a {
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
       text-decoration: none;
+      color: white;
       font-weight: bold;
       font-size: 16px;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 10px;
       transition: background 0.3s ease;
     }
 
     nav a:hover {
       background-color: #4CAF50;
-      color: white;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: rgba(0,0,0,0.7);
-      border-radius: 10px;
-    }
+.container {
+  flex: 1;
+  width: 90%;
+  max-width: 1000px;
+  margin: 30px auto;
+}
 
+    .upload-section,
     .video-card {
-      background-color: #111;
-      border-radius: 10px;
-      margin-bottom: 40px;
+      background-color: #fff;
       padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin-bottom: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .video-card h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #66ccff;
+    .upload-section input,
+    .upload-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .upload-section button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .upload-section button:hover {
+      background-color: #388e3c;
     }
 
     video {
       width: 100%;
       border-radius: 10px;
-      margin-bottom: 15px;
+      margin: 15px 0;
     }
 
     .video-footer {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      color: #ccc;
+      margin-top: 10px;
+    }
+
+    .video-footer span {
+      font-size: 16px;
+      color: #555;
     }
 
     .video-footer button {
-      padding: 8px 14px;
+      padding: 6px 12px;
       font-size: 15px;
+      border-radius: 5px;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
-      transition: 0.3s;
+      margin-left: 8px;
     }
 
     .like { background-color: #f39c12; color: white; }
     .dislike { background-color: #e74c3c; color: white; }
-    .like:hover { background-color: #e67e22; }
-    .dislike:hover { background-color: #c0392b; }
+    .edit-button { background-color: #3498db; color: white; }
+    .delete-button { background-color: #9b59b6; color: white; }
 
     .comment-section {
       margin-top: 20px;
-    }
-
-    .comment-section input {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      border-radius: 5px;
-      border: none;
-      margin-bottom: 10px;
-    }
-
-    .comment-section button {
-      background-color: #3498db;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
     }
 
     .comment {
-      background-color: #333;
+      background-color: #eee;
+      padding: 10px;
       margin-top: 10px;
-      padding: 8px;
-      border-radius: 5px;
+      border-radius: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: white;
     }
 
-    .comment-time {
-      font-size: 12px;
-      color: #bbb;
-    }
+    .comment span { font-size: 15px; }
 
-    .toggle-comments {
-      background-color: #555;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .delete-comment {
+    .comment button {
       background-color: #e74c3c;
       border: none;
       padding: 6px 10px;
@@ -158,30 +144,53 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+    input[type="text"].search {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 30px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #333;
+      color: white;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>ECONOMENTOR | Analizler</h1>
-  </header>
+  <header>Economentor | Analiz Ekle</header>
 
   <nav>
-    <a href="anasayfa.html">Anasayfa</a>
+    <a href="adminpanel.html">Admin Panel</a>
+    <a href="analiz.html">Analizler Sayfası</a>
   </nav>
 
-  <div class="container" id="videoContainer">
-    <p style="text-align:center;">Yükleniyor...</p>
+  <div class="container">
+    <div class="upload-section">
+      <h2>Yeni Video Ekle</h2>
+      <input type="file" id="videoFile" accept="video/*">
+      <input type="text" id="videoTitle" placeholder="Başlık">
+      <textarea id="videoDesc" rows="3" placeholder="Açıklama"></textarea>
+      <button id="uploadBtn">Videoyu Yükle</button>
+    </div>
+
+    <input type="text" class="search" id="searchInput" placeholder="Başlık ya da açıklama ara...">
+
+    <div id="videosContainer"></div>
   </div>
+
+  <div class="footer">© 2025 Economentor. Tüm Hakları Saklıdır.</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore, collection, getDocs, doc,
-  updateDoc, getDoc, arrayUnion, deleteDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const firebaseConfig = {
@@ -199,212 +208,338 @@ const supabase = createClient(
 );
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+const timestamp = new Date(data.timestamp.seconds * 1000); // Firestore timestamp'ını JavaScript Date objesine çevir
+const formattedDate = timestamp.toLocaleString('tr-TR'); // Türkçe formatta tarih saat gösterimi
+
+function sanitizeFilename(filename) {
+  return filename
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_.-]/g, "");
+}
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    return location.href = "index.html";  // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
-  }
+  if (!user) return location.href = "index.html";
 
-  uid = user.uid;  // Giriş yapan kullanıcının UID'sini al
-
+  const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
-  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";  // Kullanıcı adını al, yoksa "Kullanıcı" kullan
+  const username = userDoc.exists() ? userDoc.data().username : "Admin";
 
-  const container = document.getElementById("videoContainer");
-  container.innerHTML = "";  // Videoların yükleneceği konteyneri temizle
+  document.getElementById("uploadBtn").addEventListener("click", async () => {
+    const file = document.getElementById("videoFile").files[0];
+    const title = document.getElementById("videoTitle").value;
+    const description = document.getElementById("videoDesc").value;
 
-  const snapshot = await getDocs(collection(db, "analizler"));  // Firestore'dan analiz verilerini al
-  snapshot.forEach(async (docSnap) => {
-    const data = docSnap.data();  // Her analiz verisini al
-    const id = docSnap.id;  // Verinin ID'sini al
-    const comments = data.comments || [];  // Yorumları al
+    if (!file || !title || !description) return alert("Tüm alanları doldurun.");
 
-    const likeRef = doc(db, "analizler", id, "likes", uid);  // Kullanıcının beğenisini kontrol et
-    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);  // Kullanıcının beğenmeme durumunu kontrol et
-    const [likeSnap, dislikeSnap] = await Promise.all([
-      getDoc(likeRef),
-      getDoc(dislikeRef)
-    ]);
+    const safeFileName = sanitizeFilename(file.name);
+    const filePath = `analiz/${Date.now()}-${safeFileName}`;
+    const { error } = await supabase.storage.from("analizler").upload(filePath, file);
+    if (error) return alert("Video yükleme hatası: " + error.message);
 
-    // Video kartı oluştur
-    const card = document.createElement("div");
-    card.classList.add("video-card");
-    card.innerHTML = `
-      <h2>${data.title}</h2>
-      <video controls src="${data.videoUrl}"></video>
-      <div class="video-footer">
-        <div>
-          <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
-          <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
-        </div>
-        <div>
-          <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
-        </div>
-      </div>
-      <div class="comment-section" id="comments-${id}" style="display:none;">
-        <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
-        <button class="commentBtn" data-id="${id}">Yorum Yap</button>
-        <div class="commentList" id="commentList-${id}">
-          ${comments.map((c, i) => `
-  <div class="comment">
-    <span>
-      <b>${c.username}</b> 
-      (${new Date(data.timestamp.seconds * 1000).toLocaleString()}): 
-      ${c.text}
-    </span>
-    ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-  </div>
-      `).join("")}
-        </div>
-      </div>
-      <div class="video-uploaded-time">
-        <p>Paylaşıldı: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-});
+    const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
 
-// Beğeni
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("like-btn")) {
-    const id = e.target.dataset.id;
-    const ref = doc(db, "analizler", id);
-    const likeRef = doc(db, "analizler", id, "likes", uid);
-    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-    const snap = await getDoc(ref);
-    let likeCount = snap.data().likes || 0;
-    let dislikeCount = snap.data().dislikes || 0;
-    const likeExists = (await getDoc(likeRef)).exists();
-
-    if (likeExists) {
-      await deleteDoc(likeRef);
-      await updateDoc(ref, { likes: likeCount - 1 });
-      e.target.style.backgroundColor = "#f39c12";
-      e.target.querySelector(".like-count").innerText = likeCount - 1;
-    } else {
-      await setDoc(likeRef, { uid });
-      await updateDoc(ref, { likes: likeCount + 1 });
-      e.target.style.backgroundColor = "#27ae60";
-      e.target.querySelector(".like-count").innerText = likeCount + 1;
-
-      // Eğer dislike varsa iptal et
-      const disSnap = await getDoc(dislikeRef);
-      if (disSnap.exists()) {
-        await deleteDoc(dislikeRef);
-        await updateDoc(ref, { dislikes: dislikeCount - 1 });
-        const disBtn = document.querySelector(`.dislike-btn[data-id="${id}"]`);
-        if (disBtn) {
-          disBtn.style.backgroundColor = "#e74c3c";
-          disBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
-        }
-      }
-    }
-  }
-});
-
-// Beğenmeme
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("dislike-btn")) {
-    const id = e.target.dataset.id;
-    const ref = doc(db, "analizler", id);
-    const likeRef = doc(db, "analizler", id, "likes", uid);
-    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-    const snap = await getDoc(ref);
-    let likeCount = snap.data().likes || 0;
-    let dislikeCount = snap.data().dislikes || 0;
-    const disExists = (await getDoc(dislikeRef)).exists();
-
-    if (disExists) {
-      await deleteDoc(dislikeRef);
-      await updateDoc(ref, { dislikes: dislikeCount - 1 });
-      e.target.style.backgroundColor = "#e74c3c";
-      e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;
-    } else {
-      await setDoc(dislikeRef, { uid });
-      await updateDoc(ref, { dislikes: dislikeCount + 1 });
-      e.target.style.backgroundColor = "#c0392b";
-      e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;
-
-      // Eğer like varsa iptal et
-      const likeSnap = await getDoc(likeRef);
-      if (likeSnap.exists()) {
-        await deleteDoc(likeRef);
-        await updateDoc(ref, { likes: likeCount - 1 });
-        const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);
-        if (likeBtn) {
-          likeBtn.style.backgroundColor = "#f39c12";
-          likeBtn.querySelector(".like-count").innerText = likeCount - 1;
-        }
-      }
-    }
-  }
-});
-
-// Yorum yap
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("commentBtn")) {
-    const id = e.target.dataset.id;
-    const input = document.getElementById("input-" + id);
-    const text = input.value.trim();
-    if (!text) return;
-    const ref = doc(db, "analizler", id);
-    const comment = {
-      user: uid,
-      username,
-      text,
-      timestamp: new Date().toISOString()
-    };
-    await updateDoc(ref, {
-      comments: arrayUnion(comment)
+    await addDoc(collection(db, "analizler"), {
+      title,
+      description,
+      videoUrl: publicUrl,
+      videoPath: filePath,
+      likes: 0,
+      dislikes: 0,
+      comments: [],
+      timestamp: new Date()
     });
 
-    const list = document.getElementById("commentList-" + id);
-    const div = document.createElement("div");
-    div.classList.add("comment");
-    div.innerHTML = `
-      <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
-      <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
-    `;
-    list.appendChild(div);
-    input.value = "";
-  }
-});
+    alert("Video başarıyla yüklendi!");
+    loadVideos();
+  });
 
-// Yorum sil
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("delete-comment")) {
-    const id = e.target.dataset.id;
-    const index = parseInt(e.target.dataset.index);
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const comments = snap.data().comments || [];
-    comments.splice(index, 1);
-    await updateDoc(ref, { comments });
+  async function loadVideos() {
+    const container = document.getElementById("videosContainer");
+    container.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "analizler"));
 
-    // yorum listesini güncelle
-    const list = document.getElementById("commentList-" + id);
-    list.innerHTML = comments.map((c, i) => `
-      <div class="comment">
-        <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-        ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+snapshot.forEach(docSnap => {
+  const data = docSnap.data();
+  const id = docSnap.id;
+  const comments = data.comments || [];
+
+  const timestamp = new Date(data.timestamp.seconds * 1000); // Firestore timestamp'ını JavaScript Date objesine çevir
+  const formattedDate = timestamp.toLocaleString('tr-TR'); // Türkçe formatta tarih saat gösterimi
+
+  const div = document.createElement("div");
+  div.classList.add("video-card");
+  div.id = `video-${id}`;
+
+  div.innerHTML = `
+    <h3>${data.title}</h3>
+    <video controls src="${data.videoUrl}"></video>
+    <p>${data.description}</p>
+
+    <div class="video-footer">
+      <div>
+        <span>👍 ${data.likes || 0}</span>
+        <span>👎 ${data.dislikes || 0}</span>
+        <span>💬 ${comments.length}</span>
       </div>
-    `).join("");
-  }
-});
+      <div>
+        <button class="edit-button" data-id="${id}">Düzenle</button>
+        <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+      </div>
+    </div>
+    <p><strong>Paylaşılma Tarihi:</strong> ${formattedDate}</p> <!-- Paylaşım tarihi -->
+    <div class="comment-section" id="comments-${id}">
+      ${comments.map((c, i) => `
+        <div class="comment">
+          <span><b>${c.username}</b>: ${c.text}</span>
+          <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+        </div>
+      `).join("")}
+    </div>
+  `;
+      container.appendChild(div);
 
-// Yorum göster/gizle
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("toggle-comments")) {
-    const id = e.target.dataset.id;
-    const section = document.getElementById("comments-" + id);
-    section.style.display = section.style.display === "none" ? "block" : "none";
-    e.target.textContent = section.style.display === "block" ? "💬 Yorumları Gizle" : "💬 Yorumları Göster";
+      // 🎯 Düzenle butonu
+      div.querySelector(".edit-button").addEventListener("click", async () => {
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+        if (!newTitle || !newDesc) return;
+        await updateDoc(ref, { title: newTitle, description: newDesc });
+        div.querySelector("h3").textContent = newTitle;
+        div.querySelector("p").textContent = newDesc;
+      });
+
+      // 🎯 Sil butonu
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
+
+      // 🎯 Yorum silme
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+
+          const commentsDiv = div.querySelector(`#comments-${id}`);
+          commentsDiv.innerHTML = updated.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("");
+
+          // yeniden bağla
+          loadVideos();
+        });
+      });
+    });
   }
+
+  loadVideos();
+
+document.getElementById("searchInput").addEventListener("input", async (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const snapshot = await getDocs(collection(db, "analizler"));
+  const container = document.getElementById("videosContainer");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+    const comments = data.comments || [];
+
+    if (
+      data.title.toLowerCase().includes(keyword) ||
+      data.description.toLowerCase().includes(keyword)
+    ) {
+      const div = document.createElement("div");
+      div.classList.add("video-card");
+      div.id = `video-${id}`;
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <video controls src="${data.videoUrl}"></video>
+        <p>${data.description}</p>
+        <div class="video-footer">
+          <div>
+            <span>👍 ${data.likes || 0}</span>
+            <span>👎 ${data.dislikes || 0}</span>
+            <span>💬 ${comments.length}</span>
+          </div>
+          <div>
+            <button class="edit-button" data-id="${id}">Düzenle</button>
+            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+          </div>
+        </div>
+
+        <div class="comment-section" id="comments-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      // butonlar aramaya da eklensin
+      div.querySelector(".edit-button").addEventListener("click", async () => {
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+        if (!newTitle || !newDesc) return;
+        await updateDoc(ref, { title: newTitle, description: newDesc });
+        div.querySelector("h3").textContent = newTitle;
+        div.querySelector("p").textContent = newDesc;
+      });
+
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
+
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+
+          const commentsDiv = div.querySelector(`#comments-${id}`);
+          commentsDiv.innerHTML = updated.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("");
+        });
+      });
+    }
+  });
+});
+document.getElementById("searchInput").addEventListener("input", async (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const snapshot = await getDocs(collection(db, "analizler"));
+  const container = document.getElementById("videosContainer");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+    const comments = data.comments || [];
+
+    if (
+      data.title.toLowerCase().includes(keyword) ||
+      data.description.toLowerCase().includes(keyword)
+    ) {
+      const div = document.createElement("div");
+      div.classList.add("video-card");
+      div.id = `video-${id}`;
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <video controls src="${data.videoUrl}"></video>
+        <p>${data.description}</p>
+        <div class="video-footer">
+          <div>
+            <span>👍 ${data.likes || 0}</span>
+            <span>👎 ${data.dislikes || 0}</span>
+            <span>💬 ${comments.length}</span>
+          </div>
+          <div>
+            <button class="edit-button" data-id="${id}">Düzenle</button>
+            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+          </div>
+        </div>
+
+        <div class="comment-section" id="comments-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      // butonlar aramaya da eklensin
+      div.querySelector(".edit-button").addEventListener("click", async () => {
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+        if (!newTitle || !newDesc) return;
+        await updateDoc(ref, { title: newTitle, description: newDesc });
+        div.querySelector("h3").textContent = newTitle;
+        div.querySelector("p").textContent = newDesc;
+      });
+
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
+
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+
+          const commentsDiv = div.querySelector(`#comments-${id}`);
+          commentsDiv.innerHTML = updated.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("");
+        });
+      });
+    }
+  });
+});
 });
 </script>
-
 </body>
 </html>
