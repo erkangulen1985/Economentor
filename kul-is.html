@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Paneli | Finans Yönetimi</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.js"></script> <!-- Çalışacak versiyon -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.js"></script> <!-- Chart.js'in doğrudan yüklenmesi -->
   <link rel="icon" href="image1.png">
   <style>
     /* Genel Stil Ayarları */
@@ -75,31 +75,6 @@
       background-color: #34495e;
       color: #ecf0f1;
     }
-    /* Arama Çubuğu */
-    .search-bar {
-      margin-bottom: 20px;
-    }
-    .search-bar input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #bdc3c7;
-      border-radius: 5px;
-    }
-    /* Buton Stili */
-    .btn {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn-danger {
-      background-color: #e74c3c;
-      color: #fff;
-    }
-    .btn-danger:hover {
-      background-color: #c0392b;
-    }
     /* Grafik Alanı */
     .chart-container {
       position: relative;
@@ -144,27 +119,6 @@
         <p>Toplam Dilek/Şikayet Sayısı: <span id="totalFeedbacks">0</span></p>
       </div>
 
-      <!-- Kullanıcı Yönetimi -->
-      <div id="users" class="card">
-        <h3>Kullanıcı Yönetimi</h3>
-        <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Kullanıcı ara...">
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Kullanıcı Adı</th>
-              <th>İsim Soyisim</th>
-              <th>UID</th>
-              <th>İşlem</th>
-            </tr>
-          </thead>
-          <tbody id="userTableBody">
-            <!-- Kullanıcılar buraya yüklenecek -->
-          </tbody>
-        </table>
-      </div>
-
       <!-- İstatistikler -->
       <div id="statistics" class="card">
         <h3>İstatistikler</h3>
@@ -184,12 +138,8 @@
     </div>
   </div>
 
-  <script type="module">
+  <script>
     // Firebase importları
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Firebase yapılandırması
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
       authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -200,13 +150,13 @@
     };
 
     // Firebase'i başlatma
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     // Grafik verilerini yükleme fonksiyonu
     async function loadData() {
       try {
-        const dataSnapshot = await getDocs(collection(db, "posts")); // Firebase'den veri çekiyoruz (örneğin 'posts' koleksiyonu)
+        const dataSnapshot = await db.collection("posts").get(); // Firebase'den veri çekiyoruz (örneğin 'posts' koleksiyonu)
         
         // Grafik için etiketler ve veriler
         const labels = [];
