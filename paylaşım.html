@@ -310,12 +310,12 @@ async function uploadPost() {
   loadPosts();
 }
 
-// ✅ Postları yükle
+// ✅ Postları yükle ve yeniye göre sırala
 async function loadPosts() {
   const postsContainer = document.getElementById("postsContainer");
   postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
 
-  const snapshot = await getDocs(collection(db, "posts"));
+  const snapshot = await getDocs(query(collection(db, "posts"), orderBy("timestamp", "desc")));
   if (snapshot.empty) {
     postsContainer.innerHTML += "<p>Henüz paylaşım yok.</p>";
     return;
@@ -409,7 +409,7 @@ window.deleteComment = async function(postId, index) {
 // ✅ Arama
 document.getElementById("searchInput")?.addEventListener("input", async (e) => {
   const keyword = e.target.value.toLowerCase();
-  const snapshot = await getDocs(collection(db, "posts"));
+  const snapshot = await getDocs(query(collection(db, "posts"), orderBy("timestamp", "desc")));
   const postsContainer = document.getElementById("postsContainer");
   postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
 
