@@ -98,7 +98,9 @@
     <input type="date" id="dob" />
 
     <label>Yeni Şifre (değiştirmek için doldur)</label>
-    <input type="password" id="newPassword" placeholder="Yeni Şifre" />
+    <input type="password" id="newPassword" placeholder="Yeni Şifre">
+    <input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
+    <button id="changePasswordBtn">Şifreyi Değiştir</button>
 
     <button id="saveBtn">Kaydet</button>
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
@@ -106,7 +108,14 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, updatePassword, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  updatePassword,
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
   doc,
@@ -141,11 +150,11 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("email").value = user.email || "";
   }
 
+  // Bilgileri kaydet
   document.getElementById("saveBtn").addEventListener("click", async () => {
     const fullName = document.getElementById("fullName").value.trim();
     const username = document.getElementById("username").value.trim();
     const dob = document.getElementById("dob").value;
-    const newPassword = document.getElementById("newPassword").value;
 
     try {
       await updateDoc(doc(db, "users", uid), {
@@ -154,17 +163,13 @@ onAuthStateChanged(auth, async (user) => {
         dob
       });
 
-      if (newPassword) {
-        await updatePassword(user, newPassword);
-        alert("Şifre güncellendi.");
-      }
-
       alert("Bilgiler başarıyla güncellendi.");
     } catch (err) {
       alert("Hata: " + err.message);
     }
   });
 
+  // Hesap sil
   document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
     if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
 
@@ -174,7 +179,33 @@ onAuthStateChanged(auth, async (user) => {
       alert("Hesabınız silindi.");
       location.href = "index.html";
     } catch (err) {
-      alert("Silme işlemi başarısız: " + err.message);
+      if (err.code === "auth/requires-recent-login") {
+        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+      } else {
+        alert("Silme işlemi başarısız: " + err.message);
+      }
+    }
+  });
+
+  // Şifre değiştir
+  document.getElementById("changePasswordBtn").addEventListener("click", async () => {
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (newPassword !== confirmPassword) {
+      alert("Şifreler uyuşmuyor. Lütfen tekrar kontrol edin.");
+      return;
+    }
+
+    try {
+      await updatePassword(user, newPassword);
+      alert("Şifreniz başarıyla güncellendi!");
+    } catch (error) {
+      if (error.code === "auth/requires-recent-login") {
+        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+      } else {
+        alert("Şifre güncelleme hatası: " + error.message);
+      }
     }
   });
 });
