@@ -217,11 +217,10 @@ document.getElementById("changeEmailBtn").addEventListener("click", async () => 
   try {
     // Kullanıcıyı reauthenticate et
     await reauthenticateWithCredential(user, credential);
-    
-    // Eski e-posta adresine doğrulama e-postası gönder
-    await user.sendEmailVerification();
 
-    alert("Eski e-posta adresinize doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra yeni e-posta adresinizi güncelleyebilirsiniz.");
+    // Yeni e-posta adresine doğrulama e-postası gönder
+    await user.updateEmail(newEmail); // Yeni e-posta adresini güncelle
+    alert("Yeni e-posta adresiniz için doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
   } catch (error) {
     if (error.code === "auth/requires-recent-login") {
       alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
@@ -230,6 +229,7 @@ document.getElementById("changeEmailBtn").addEventListener("click", async () => 
     }
   }
 });
+
 
   // Hesap sil
   document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
