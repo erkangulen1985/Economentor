@@ -288,22 +288,29 @@
       });
     }
 
+    // Beğenme İşlemi
     async function likePost(postId) {
       const postRef = doc(db, "posts", postId);
-      await updateDoc(postRef, {
-        likes: arrayUnion(1)
-      });
+      const postDoc = await getDoc(postRef);
+      const postData = postDoc.data();
+      const newLikes = (postData.likes || 0) + 1;
+      await updateDoc(postRef, { likes: newLikes });
       alert("Beğenildi");
+      loadPosts(); // Güncel beğenilerle tekrar yükleyin
     }
 
+    // Beğenmeme İşlemi
     async function dislikePost(postId) {
       const postRef = doc(db, "posts", postId);
-      await updateDoc(postRef, {
-        likes: arrayUnion(-1)
-      });
+      const postDoc = await getDoc(postRef);
+      const postData = postDoc.data();
+      const newDislikes = (postData.dislikes || 0) + 1;
+      await updateDoc(postRef, { dislikes: newDislikes });
       alert("Beğenilmedi");
+      loadPosts(); // Güncel beğenmelerle tekrar yükleyin
     }
 
+    // Yorum Yapma İşlemi
     async function postComment(postId) {
       const commentInput = document.getElementById(`commentInput-${postId}`);
       const commentText = commentInput.value;
