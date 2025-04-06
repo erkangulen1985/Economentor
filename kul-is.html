@@ -1,208 +1,316 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Paneli | Finans Yönetimi</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.min.js"></script> <!-- Chart.js'in doğrudan yüklenmesi -->
-  <link rel="icon" href="image1.png">
-  <style>
-    /* Genel Stil Ayarları */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
-    }
-    .container {
-      display: flex;
-      min-height: 100vh;
-    }
-    /* Sidebar */
-    .sidebar {
-      width: 250px;
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .sidebar a {
-      color: #ecf0f1;
-      text-decoration: none;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-    .sidebar a:hover {
-      background-color: #34495e;
-    }
-    /* Ana İçerik */
-    .main-content {
-      flex: 1;
-      padding: 20px;
-      background-color: #ecf0f1;
-    }
-    .card {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    .card h3 {
-      margin-top: 0;
-    }
-    /* Tablo Stili */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    table, th, td {
-      border: 1px solid #bdc3c7;
-    }
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #34495e;
-      color: #ecf0f1;
-    }
-    /* Grafik Alanı */
-    .chart-container {
-      position: relative;
-      height: 400px;
-      width: 100%;
-    }
-    /* Geri Butonu */
-    .back-button {
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    .back-button:hover {
-      background-color: #2980b9;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı ve İstatistik Yönetimi</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <h2>Admin Paneli</h2>
-      <a href="#dashboard">Dashboard</a>
-      <a href="#users">Kullanıcı Yönetimi</a>
-      <a href="#statistics">İstatistikler</a>
+    <div class="container">
+        <header>
+            <h1>Kullanıcı ve İstatistik Yönetimi</h1>
+            <button class="back-btn" onclick="window.location.href='adminpanel.html'">Geri</button>
+        </header>
+
+        <section class="stats">
+            <div class="card">
+                <h2>Kullanıcı Sayısı</h2>
+                <p id="user-count">Yükleniyor...</p>
+            </div>
+            <div class="card">
+                <h2>Dilek ve Şikayet Sayısı</h2>
+                <p id="feedback-count">Yükleniyor...</p>
+            </div>
+            <div class="card">
+                <h2>Analiz Sayısı</h2>
+                <p id="analysis-count">Yükleniyor...</p>
+            </div>
+            <div class="card">
+                <h2>Post Sayısı</h2>
+                <p id="post-count">Yükleniyor...</p>
+            </div>
+        </section>
+
+        <section class="user-list">
+            <h2>Kullanıcı Bilgileri</h2>
+            <table id="user-table">
+                <thead>
+                    <tr>
+                        <th>Kullanıcı Adı</th>
+                        <th>Ad Soyad</th>
+                        <th>UID</th>
+                        <th>Aksiyonlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Kullanıcılar burada listelenecek -->
+                </tbody>
+            </table>
+        </section>
+
+        <section class="charts">
+            <h2>Son 10 Günün İstatistikleri</h2>
+            <div class="chart-container">
+                <canvas id="user-growth-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="likes-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="dislikes-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="comments-chart"></canvas>
+            </div>
+        </section>
     </div>
 
-    <!-- Ana İçerik -->
-    <div class="main-content">
-      <!-- Geri Butonu -->
-      <button class="back-button" onclick="window.location.href='adminpanel.html'">Geri Dön</button>
-
-      <!-- Dashboard -->
-      <div id="dashboard" class="card">
-        <h3>Genel Bakış</h3>
-        <p>Toplam Kullanıcı Sayısı: <span id="totalUsers">0</span></p>
-        <p>Toplam İçerik Sayısı: <span id="totalContents">0</span></p>
-        <p>Toplam Dilek/Şikayet Sayısı: <span id="totalFeedbacks">0</span></p>
-      </div>
-
-      <!-- İstatistikler -->
-      <div id="statistics" class="card">
-        <h3>İstatistikler</h3>
-        <div class="chart-container">
-          <canvas id="userGrowthChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="contentLikesChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="contentDislikesChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <canvas id="contentCommentsChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Firebase importları
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-    };
-
-    // Firebase'i başlatma
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // Grafik verilerini yükleme fonksiyonu
-    async function loadData() {
-      try {
-        const dataSnapshot = await db.collection("posts").get(); // Firebase'den veri çekiyoruz (örneğin 'posts' koleksiyonu)
-        
-        // Grafik için etiketler ve veriler
-        const labels = [];
-        const likesData = [];
-
-        dataSnapshot.forEach(doc => {
-          const data = doc.data();
-          labels.push(data.date); // Tarih bilgisi veya istediğiniz başka bir veriyi kullanabilirsiniz
-          likesData.push(data.likes); // Beğeni sayısı gibi bir veri kullanabilirsiniz
-        });
-
-        // Grafiği oluşturma
-        createChart(labels, likesData);
-      } catch (error) {
-        console.error("Veri çekme hatası: ", error);
-      }
-    }
-
-    // Grafiği oluşturma fonksiyonu
-    function createChart(labels, data) {
-      const ctx = document.getElementById('userGrowthChart').getContext('2d');
-      const myChart = new Chart(ctx, {
-        type: 'line', // Grafik tipi
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Beğeni Sayısı',
-            data: data,
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
-
-    // Verileri yükleyip grafiği oluştur
-    loadData();
-  </script>
+    <script src="firebase.js"></script>
+    <script src="adminpanel.js"></script>
 </body>
 </html>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #0052cc;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+header h1 {
+    font-size: 2rem;
+}
+
+.back-btn {
+    background-color: #ff4b5c;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.user-list {
+    margin-top: 40px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+table th, table td {
+    padding: 15px;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f6f8;
+    font-weight: bold;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+button.delete-btn {
+    background-color: #ff4b5c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chart-container {
+    margin-top: 40px;
+}
+
+canvas {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+// adminpanel.js
+
+// Firebase'i başlat
+const db = firebase.firestore();
+const usersRef = db.collection('users');
+const feedbackRef = db.collection('feedback');
+const postsRef = db.collection('posts');
+const analysesRef = db.collection('analyses');
+
+// Kullanıcı sayısı ve diğer verileri çekme
+async function fetchStats() {
+    const userCount = await usersRef.get();
+    const feedbackCount = await feedbackRef.get();
+    const postCount = await postsRef.get();
+    const analysisCount = await analysesRef.get();
+
+    document.getElementById('user-count').textContent = userCount.size;
+    document.getElementById('feedback-count').textContent = feedbackCount.size;
+    document.getElementById('post-count').textContent = postCount.size;
+    document.getElementById('analysis-count').textContent = analysisCount.size;
+}
+
+// Kullanıcıları listeleme ve silme
+async function fetchUsers() {
+    const usersSnapshot = await usersRef.get();
+    const tableBody = document.querySelector('#user-table tbody');
+
+    usersSnapshot.forEach(doc => {
+        const user = doc.data();
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.username}</td>
+            <td>${user.fullName}</td>
+            <td>${user.uid}</td>
+            <td><button class="delete-btn" onclick="deleteUser('${user.uid}')">Sil</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Kullanıcıyı silme fonksiyonu
+async function deleteUser(uid) {
+    await usersRef.doc(uid).delete();
+    fetchUsers(); // Kullanıcı listesi güncelleniyor
+}
+
+// Grafik verilerini çekme ve çizme
+async function fetchChartData() {
+    const chartData = {
+        userGrowth: [],
+        likes: [],
+        dislikes: [],
+        comments: [],
+    };
+
+    // Son 10 günün verilerini toplama (örnek veri çekme yöntemi)
+    // Bu veriler Firebase veya başka bir kaynaktan alınabilir
+    const currentDate = new Date();
+    for (let i = 0; i < 10; i++) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() - i);
+        chartData.userGrowth.push([date.toISOString(), Math.floor(Math.random() * 100)]); // Örnek veri
+        chartData.likes.push([date.toISOString(), Math.floor(Math.random() * 50)]);
+        chartData.dislikes.push([date.toISOString(), Math.floor(Math.random() * 50)]);
+        chartData.comments.push([date.toISOString(), Math.floor(Math.random() * 100)]);
+    }
+
+    renderCharts(chartData);
+}
+
+// Grafiklerin çizilmesi
+function renderCharts(data) {
+    const userGrowthChart = new Chart(document.getElementById('user-growth-chart'), {
+        type: 'line',
+        data: {
+            labels: data.userGrowth.map(item => item[0]),
+            datasets: [{
+                label: 'Kullanıcı Sayısı',
+                data: data.userGrowth.map(item => item[1]),
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false,
+            }]
+        }
+    });
+
+    const likesChart = new Chart(document.getElementById('likes-chart'), {
+        type: 'line',
+        data: {
+            labels: data.likes.map(item => item[0]),
+            datasets: [{
+                label: 'Beğeniler',
+                data: data.likes.map(item => item[1]),
+                borderColor: 'rgb(255, 99, 132)',
+                fill: false,
+            }]
+        }
+    });
+
+    const dislikesChart = new Chart(document.getElementById('dislikes-chart'), {
+        type: 'line',
+        data: {
+            labels: data.dislikes.map(item => item[0]),
+            datasets: [{
+                label: 'Beğenmemeler',
+                data: data.dislikes.map(item => item[1]),
+                borderColor: 'rgb(54, 162, 235)',
+                fill: false,
+            }]
+        }
+    });
+
+    const commentsChart = new Chart(document.getElementById('comments-chart'), {
+        type: 'line',
+        data: {
+            labels: data.comments.map(item => item[0]),
+            datasets: [{
+                label: 'Yorumlar',
+                data: data.comments.map(item => item[1]),
+                borderColor: 'rgb(153, 102, 255)',
+                fill: false,
+            }]
+        }
+    });
+}
+
+// Sayfa yüklendiğinde verileri çek
+document.addEventListener('DOMContentLoaded', () => {
+    fetchStats();
+    fetchUsers();
+    fetchChartData();
+});
