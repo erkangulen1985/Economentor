@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Economentor | Analizler</title>
+  <link rel="icon" href="image1.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+    }
+
+    header {
+      background-color: #4CAF50;
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header a {
+      position: absolute;
+      left: 20px;
+      top: 25px;
+      background-color: #fff;
+      color: #4CAF50;
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    header a:hover {
+      background-color: #e0e0e0;
+    }
+
+    #videoContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 40px;
+    }
+
+    .video-card {
+      background-color: #1e1e1e;
+      width: 90%;
+      max-width: 1200px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    .video-card video {
+      width: 100%;
+      max-height: 600px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .video-card p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #ddd;
+    }
+
+    .video-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .video-footer button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+    }
+
+    .like { background-color: #f39c12; }
+    .dislike { background-color: #e74c3c; }
+    .like:hover { background-color: #e67e22; }
+    .dislike:hover { background-color: #c0392b; }
+
+    .comment-section {
+      margin-top: 20px;
+      border-top: 1px solid #555;
+      padding-top: 15px;
+    }
+
+    .comment-section input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .comment-section button {
+      margin-top: 10px;
+      padding: 8px 14px;
+      background-color: #3498db;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .comment-section button:hover {
+      background-color: #2980b9;
+    }
+
+    .comment {
+      background-color: #2c2c2c;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .comment strong {
+      color: #66ccff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="anasayfa.html">← Anasayfa</a>
+    <h1>Analiz Videoları</h1>
+  </header>
+
+  <main id="videoContainer">
+    <!-- Videolar buraya yüklenecek -->
+  </main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  setDoc,
+  deleteDoc,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
+
+// Supabase config
+const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+const supabaseKey = "YOUR_SUPABASE_KEY_HERE"; // 🔐 BURAYA GERÇEK KEY’İNİ YAZ
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Giriş kontrolü
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Giriş yapmanız gerekiyor!");
+    window.location.href = "index.html";
+    return;
+  }
+  loadVideos(user);
+});
+
+async function loadVideos(user) {
+  const snapshot = await getDocs(collection(db, "analizler"));
+  const container = document.getElementById("videoContainer");
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+
+    const card = document.createElement("div");
+    card.className = "video-card";
+
+    const comments = (data.comments || []).map(c => `
+      <div class="comment"><strong>${c.username}:</strong> ${c.text}</div>
+    `).join("");
+
+    card.innerHTML = `
+      <video src="${data.videoUrl}" controls></video>
+      <p>${data.description || ""}</p>
+      <div class="video-footer">
+        <button class="like">👍 ${data.likes || 0}</button>
+        <button class="dislike">👎 ${data.dislikes || 0}</button>
+      </div>
+      <div class="comment-section">
+        <input type="text" placeholder="Yorumunuzu yazın" />
+        <button>Yorum Yap</button>
+        <div class="comments">${comments}</div>
+      </div>
+    `;
+
+    // Event: Beğen
+    card.querySelector(".like").addEventListener("click", async () => {
+      const ref = doc(db, "analizler", id);
+      await updateDoc(ref, { likes: (data.likes || 0) + 1 });
+      loadVideos(user);
+    });
+
+    // Event: Beğenme
+    card.querySelector(".dislike").addEventListener("click", async () => {
+      const ref = doc(db, "analizler", id);
+      await updateDoc(ref, { dislikes: (data.dislikes || 0) + 1 });
+      loadVideos(user);
+    });
+
+    // Event: Yorum yap
+    card.querySelector("button").addEventListener("click", async () => {
+      const input = card.querySelector("input");
+      const text = input.value.trim();
+      if (!text) return alert("Yorum boş olamaz.");
+
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const username = userSnap.exists() ? userSnap.data().username : "Anonim";
+
+      const comment = {
+        username,
+        user: user.uid,
+        text,
+        timestamp: new Date().toISOString()
+      };
+
+      await updateDoc(doc(db, "analizler", id), {
+        comments: arrayUnion(comment)
+      });
+
+      loadVideos(user);
+    });
+
+    container.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>
