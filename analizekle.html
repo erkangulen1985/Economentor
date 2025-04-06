@@ -207,6 +207,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// ✅ Türkçe karakterleri ve özel karakterleri temizleyen fonksiyon
+function sanitizeFilename(filename) {
+  return filename
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri sil
+    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterleri bırak
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
@@ -221,7 +229,9 @@ onAuthStateChanged(auth, async (user) => {
 
     if (!file || !title || !description) return alert("Tüm alanları doldurun.");
 
-    const filePath = `analiz/${Date.now()}-${file.name}`;
+    const safeFileName = sanitizeFilename(file.name);
+    const filePath = `analiz/${Date.now()}-${safeFileName}`;
+
     const { error } = await supabase.storage.from("analizler").upload(filePath, file);
     if (error) return alert("Video yükleme hatası: " + error.message);
 
