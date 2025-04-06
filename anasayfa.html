@@ -323,7 +323,7 @@
       await setDoc(userLikesRef, { userId: user.uid });
 
       alert("Beğenildi");
-      loadPosts();
+      loadPosts(); // Güncel beğenilerle tekrar yükleyin
     }
 
     // Beğenmeme İşlemi
@@ -335,14 +335,23 @@
       }
 
       const postRef = doc(db, "posts", postId);
+      const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid); // Kullanıcıya ait beğenmeme
+      const userDislikeDoc = await getDoc(userDislikesRef);
 
-      // Beğenmeme sayısını arttırıyoruz
+      if (userDislikeDoc.exists()) {
+        alert("Bu gönderiyi zaten beğenmediniz!");
+        return;
+      }
+
       await updateDoc(postRef, {
         dislikes: (post.dislikes || 0) + 1
       });
 
+      // Kullanıcıyı beğenmeme olarak kaydediyoruz
+      await setDoc(userDislikesRef, { userId: user.uid });
+
       alert("Beğenilmedi");
-      loadPosts();
+      loadPosts(); // Güncel beğenme ile tekrar yükleyin
     }
 
     // Yorum Yapma İşlemi
@@ -372,6 +381,5 @@
 
     loadPosts();
   </script>
-
 </body>
 </html>
