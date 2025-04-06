@@ -7,6 +7,7 @@
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
+    /* Stil tanımlamaları */
     body {
       margin: 0;
       padding: 0;
@@ -133,6 +134,30 @@
       align-items: center;
       color: white;
     }
+
+    .comment-time {
+      font-size: 12px;
+      color: #bbb;
+    }
+
+    .toggle-comments {
+      background-color: #555;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .delete-comment {
+      background-color: #e74c3c;
+      border: none;
+      padding: 6px 10px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -159,11 +184,9 @@ import {
   doc,
   updateDoc,
   getDoc,
-  setDoc,
   arrayUnion,
-  deleteDoc
+  arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -174,14 +197,14 @@ const firebaseConfig = {
   appId: "1:835370350520:web:d9bb275eb4b7502997814d"
 };
 
-const supabase = createClient(
-  "https://rvwsvhgihatxxhnbmouw.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
-);
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+}
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
@@ -197,11 +220,10 @@ onAuthStateChanged(auth, async (user) => {
   snapshot.forEach(docSnap => {
     const data = docSnap.data();
     const id = docSnap.id;
+    const comments = data.comments || [];
 
     const card = document.createElement("div");
     card.classList.add("video-card");
-
-    const comments = data.comments || [];
 
     card.innerHTML = `
       <h2>${data.title}</h2>
@@ -213,62 +235,68 @@ onAuthStateChanged(auth, async (user) => {
         </div>
         <div>💬 ${comments.length}</div>
       </div>
-      <div class="comment-section">
+      <button class="toggle-comments" data-id="${id}">Yorumları Göster</button>
+      <div class="comment-section" id="comments-${id}" style="display:none">
         <input placeholder="Yorumunuzu yazın..." id="input-${id}" />
         <button data-id="${id}" class="commentBtn">Yorum Yap</button>
-        <div id="comments-${id}">${comments.map(c => `
-          <div class="comment">
-            <span><b>${c.username}</b>: ${c.text}</span>
-          </div>
-        `).join("")}</div>
+        <div id="comment-list-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}<br><span class="comment-time">${formatTimestamp(c.timestamp)}</span></span>
+              ${c.username === username ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+            </div>
+          `).join("")}
+        </div>
       </div>
     `;
 
     videoContainer.appendChild(card);
-  });
 
-  document.querySelectorAll(".like").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
+    card.querySelector(".toggle-comments").addEventListener("click", () => {
+      const section = card.querySelector(`#comments-${id}`);
+      section.style.display = section.style.display === "none" ? "block" : "none";
+    });
+
+    card.querySelector(".like").addEventListener("click", async () => {
       const ref = doc(db, "analizler", id);
       const snap = await getDoc(ref);
-      const data = snap.data();
-      await updateDoc(ref, { likes: (data.likes || 0) + 1 });
-      location.reload();
+      const likes = snap.data().likedBy || [];
+      const updated = likes.includes(uid) ? likes.filter(u => u !== uid) : [...likes, uid];
+      const count = updated.length;
+      await updateDoc(ref, { likedBy: updated, likes: count });
+      card.querySelector(".like").innerHTML = `👍 ${count}`;
     });
-  });
 
-  document.querySelectorAll(".dislike").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
+    card.querySelector(".dislike").addEventListener("click", async () => {
       const ref = doc(db, "analizler", id);
       const snap = await getDoc(ref);
-      const data = snap.data();
-      await updateDoc(ref, { dislikes: (data.dislikes || 0) + 1 });
-      location.reload();
+      const dislikes = snap.data().dislikedBy || [];
+      const updated = dislikes.includes(uid) ? dislikes.filter(u => u !== uid) : [...dislikes, uid];
+      const count = updated.length;
+      await updateDoc(ref, { dislikedBy: updated, dislikes: count });
+      card.querySelector(".dislike").innerHTML = `👎 ${count}`;
     });
-  });
 
-  document.querySelectorAll(".commentBtn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.dataset.id;
-      const input = document.getElementById("input-" + id);
+    card.querySelector(".commentBtn").addEventListener("click", async () => {
+      const input = card.querySelector(`#input-${id}`);
       const text = input.value.trim();
       if (!text) return;
-
-      const comment = {
-        username,
-        text,
-        timestamp: new Date().toISOString()
-      };
-
+      const newComment = { username, text, timestamp: new Date().toISOString() };
       const ref = doc(db, "analizler", id);
-      await updateDoc(ref, {
-        comments: arrayUnion(comment)
-      });
-
+      await updateDoc(ref, { comments: arrayUnion(newComment) });
       input.value = "";
       location.reload();
+    });
+
+    card.querySelectorAll(".delete-comment").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const index = parseInt(btn.dataset.index);
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+        await updateDoc(ref, { comments: updated });
+        location.reload();
+      });
     });
   });
 });
