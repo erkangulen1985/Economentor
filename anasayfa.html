@@ -295,7 +295,7 @@
 
         likeButton.addEventListener("click", () => likePost(doc.id, post, postElement));
         dislikeButton.addEventListener("click", () => dislikePost(doc.id, post, postElement));
-        commentButton.addEventListener("click", () => postComment(doc.id, postElement));
+        commentButton.addEventListener("click", () => postComment(doc.id, post, postElement));
       });
     }
 
@@ -329,7 +329,7 @@
 
       // Sayfada sadece bu postu güncelle
       const likeCountElement = postElement.querySelector('.likes');
-      likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
+      likeCountElement.textContent = `Beğeniler: ${post.likes || 0}`;
     }
 
     // Beğenmeme İşlemi
@@ -362,11 +362,11 @@
 
       // Sayfada sadece bu postu güncelle
       const dislikeCountElement = postElement.querySelector('.dislikes');
-      dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
+      dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes || 0}`;
     }
 
     // Yorum Yapma İşlemi
-    async function postComment(postId, postElement) {
+    async function postComment(postId, post, postElement) {
       const commentInput = document.getElementById(`commentInput-${postId}`);
       const commentText = commentInput.value;
 
