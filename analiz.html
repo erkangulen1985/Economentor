@@ -225,39 +225,42 @@ onAuthStateChanged(auth, async (user) => {
       getDoc(dislikeRef)
     ]);
 
-    const card = document.createElement("div");
-    card.classList.add("video-card");
-    card.innerHTML = `
-      <h2>${data.title}</h2>
-      <video controls src="${data.videoUrl}"></video>
-      <div class="video-footer">
-        <div>
-          <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
-          <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
-        </div>
-        <div>
-          <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
-        </div>
-      </div>
-      <div class="comment-section" id="comments-${id}" style="display:none;">
-        <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
-        <button class="commentBtn" data-id="${id}">Yorum Yap</button>
-        <div class="commentList" id="commentList-${id}">
-          ${comments.map((c, i) => `
-<div class="comment">
-  <span>
-    <b>${c.username}</b> 
-    (${c.timestamp ? new Date(c.timestamp.seconds * 1000).toLocaleString() : "Tarih yok"}): 
-    ${c.text}
-  </span>
-  ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-</div>
-          `).join("")}
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
+const card = document.createElement("div");
+card.classList.add("video-card");
+card.innerHTML = `
+  <h2>${data.title}</h2>
+  <video controls src="${data.videoUrl}"></video>
+  <div class="video-footer">
+    <div>
+      <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
+      <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
+    </div>
+    <div>
+      <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
+    </div>
+  </div>
+  <div class="comment-section" id="comments-${id}" style="display:none;">
+    <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
+    <button class="commentBtn" data-id="${id}">Yorum Yap</button>
+    <div class="commentList" id="commentList-${id}">
+      ${comments.map((c, i) => `
+  <div class="comment">
+    <span>
+      <b>${c.username}</b> 
+      (${new Date(c.timestamp.seconds * 1000).toLocaleString()}): 
+      ${c.text}
+    </span>
+    ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+  </div>
+      `).join("")}
+    </div>
+  </div>
+  <div class="video-uploaded-time">
+    <p>Paylaşıldı: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
+  </div>
+`;
+
+container.appendChild(card);
 
   // Beğeni
   document.addEventListener("click", async (e) => {
