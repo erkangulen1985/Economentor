@@ -80,6 +80,19 @@
     .danger:hover {
       background-color: #c0392b;
     }
+    #homeBtn {
+      width: auto;
+      padding: 8px 16px;
+      background-color: #3498db;
+      font-weight: bold;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #homeBtn:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 <body>
@@ -141,7 +154,7 @@ const auth = getAuth(app);
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
-
+  
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
   if (userDoc.exists()) {
@@ -150,6 +163,9 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("username").value = data.username || "";
     document.getElementById("dob").value = data.dob || "";
     document.getElementById("email").value = user.email || "";
+    document.getElementById("homeBtn").addEventListener("click", () => {
+    window.location.href = "anasayfa.html";
+});
   }
 
   // Bilgileri kaydet
