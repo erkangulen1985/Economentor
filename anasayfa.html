@@ -258,6 +258,15 @@ onAuthStateChanged(auth, async (user) => {
     const data = docSnap.data();
     const username = data.username || "Kullanıcı";
     document.getElementById("userName").innerText = username;
+
+    // ✅ Eğer kullanıcı admin ise butonu göster
+    if (data.role === "admin") {
+      const adminLink = document.getElementById("adminPanelLink");
+      if (adminLink) {
+        adminLink.style.display = "inline-block";
+      }
+    }
+
   } else {
     alert("Kullanıcı bilgisi bulunamadı.");
     window.location.href = "index.html";
