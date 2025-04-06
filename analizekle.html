@@ -264,13 +264,14 @@ onAuthStateChanged(auth, async (user) => {
       const div = document.createElement("div");
       div.classList.add("video-card");
 
-      div.innerHTML = `
-        <h3>${data.title}</h3>
-        <video controls src="${data.videoUrl}"></video>
-        <p>${data.description}</p>
-        <div class="video-footer">
-          <div>👍 ${data.likes || 0} 👎 ${data.dislikes || 0}</div>
-          <div>
+div.innerHTML = `
+  <h3>${data.title}</h3>
+  <video controls src="${data.videoUrl}"></video>
+  <p>${data.description}</p>
+  <div class="video-footer">
+    <div>👍 ${data.likes || 0} 👎 ${data.dislikes || 0} 💬 ${comments.length}</div>
+  </div>
+`;
             <button class="edit-button" onclick="editVideo('${id}')">Düzenle</button>
             <button class="delete-button" onclick="deleteVideo('${id}', '${data.videoPath}')">Sil</button>
           </div>
