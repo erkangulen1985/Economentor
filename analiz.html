@@ -225,6 +225,30 @@ onAuthStateChanged(auth, async (user) => {
       getDoc(dislikeRef)
     ]);
 
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";  // Kullanıcı giriş yapmamışsa giriş sayfasına yönlendir
+
+  const uid = user.uid;  // Kullanıcının UID'sini buradan alıyoruz
+  const userDoc = await getDoc(doc(db, "users", uid));  // Kullanıcı verilerini al
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";  // Kullanıcı adını al, yoksa "Kullanıcı" kullan
+
+  const container = document.getElementById("videoContainer");
+  container.innerHTML = "";  // Videoların yükleneceği konteyneri temizle
+
+  const snapshot = await getDocs(collection(db, "analizler"));  // Firestore'dan analiz verilerini al
+  snapshot.forEach(async (docSnap) => {
+    const data = docSnap.data();  // Her analiz verisini al
+    const id = docSnap.id;  // Verinin ID'sini al
+    const comments = data.comments || [];  // Yorumları al
+
+    const likeRef = doc(db, "analizler", id, "likes", uid);  // Kullanıcının beğenisini kontrol et
+    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);  // Kullanıcının beğenmeme durumunu kontrol et
+    const [likeSnap, dislikeSnap] = await Promise.all([
+      getDoc(likeRef),
+      getDoc(dislikeRef)
+    ]);
+
+    // Video kartı oluştur
     const card = document.createElement("div");
     card.classList.add("video-card");
     card.innerHTML = `
@@ -260,8 +284,6 @@ onAuthStateChanged(auth, async (user) => {
       </div>
     `;
     container.appendChild(card);
-
-    // Like and Dislike logic continues here...
   });
 });
 
