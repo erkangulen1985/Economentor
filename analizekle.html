@@ -368,7 +368,6 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
       const div = document.createElement("div");
       div.classList.add("video-card");
       div.id = `video-${id}`;
-
       div.innerHTML = `
         <h3>${data.title}</h3>
         <video controls src="${data.videoUrl}"></video>
@@ -384,6 +383,7 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
             <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
           </div>
         </div>
+
         <div class="comment-section" id="comments-${id}">
           ${comments.map((c, i) => `
             <div class="comment">
@@ -396,7 +396,7 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
 
       container.appendChild(div);
 
-      // ✅ Düzenle butonu bağla
+      // butonlar aramaya da eklensin
       div.querySelector(".edit-button").addEventListener("click", async () => {
         const ref = doc(db, "analizler", id);
         const snap = await getDoc(ref);
@@ -409,7 +409,6 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
         div.querySelector("p").textContent = newDesc;
       });
 
-      // ✅ Sil butonu bağla
       div.querySelector(".delete-button").addEventListener("click", async () => {
         const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
         if (!confirmed) return;
@@ -423,7 +422,6 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
         div.remove();
       });
 
-      // ✅ Yorum silme butonlarını bağla
       div.querySelectorAll(".delete-comment").forEach(btn => {
         btn.addEventListener("click", async () => {
           const index = parseInt(btn.dataset.index);
@@ -439,31 +437,103 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
               <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
             </div>
           `).join("");
+        });
+      });
+    }
+  });
+});
+document.getElementById("searchInput").addEventListener("input", async (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const snapshot = await getDocs(collection(db, "analizler"));
+  const container = document.getElementById("videosContainer");
+  container.innerHTML = "";
 
-          // yorum silme sonrası yeniden bağlama
-          div.querySelectorAll(".delete-comment").forEach(btn => {
-            btn.addEventListener("click", async () => {
-              const index = parseInt(btn.dataset.index);
-              const ref = doc(db, "analizler", id);
-              const snap = await getDoc(ref);
-              const updated = (snap.data().comments || []).filter((_, i) => i !== index);
-              await updateDoc(ref, { comments: updated });
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+    const comments = data.comments || [];
 
-              const commentsDiv = div.querySelector(`#comments-${id}`);
-              commentsDiv.innerHTML = updated.map((c, i) => `
-                <div class="comment">
-                  <span><b>${c.username}</b>: ${c.text}</span>
-                  <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-                </div>
-              `).join("");
-            });
-          });
+    if (
+      data.title.toLowerCase().includes(keyword) ||
+      data.description.toLowerCase().includes(keyword)
+    ) {
+      const div = document.createElement("div");
+      div.classList.add("video-card");
+      div.id = `video-${id}`;
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <video controls src="${data.videoUrl}"></video>
+        <p>${data.description}</p>
+        <div class="video-footer">
+          <div>
+            <span>👍 ${data.likes || 0}</span>
+            <span>👎 ${data.dislikes || 0}</span>
+            <span>💬 ${comments.length}</span>
+          </div>
+          <div>
+            <button class="edit-button" data-id="${id}">Düzenle</button>
+            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+          </div>
+        </div>
+
+        <div class="comment-section" id="comments-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      // butonlar aramaya da eklensin
+      div.querySelector(".edit-button").addEventListener("click", async () => {
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+        if (!newTitle || !newDesc) return;
+        await updateDoc(ref, { title: newTitle, description: newDesc });
+        div.querySelector("h3").textContent = newTitle;
+        div.querySelector("p").textContent = newDesc;
+      });
+
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
+
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+
+          const commentsDiv = div.querySelector(`#comments-${id}`);
+          commentsDiv.innerHTML = updated.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("");
         });
       });
     }
   });
 });
 </script>
-
 </body>
 </html>
