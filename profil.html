@@ -193,7 +193,7 @@ onAuthStateChanged(auth, async (user) => {
     }
   });
 
-  // E-posta değiştir
+// E-posta değiştir
 document.getElementById("changeEmailBtn").addEventListener("click", async () => {
   const newEmail = document.getElementById("newEmail").value.trim();
   
@@ -218,9 +218,12 @@ document.getElementById("changeEmailBtn").addEventListener("click", async () => 
     // Kullanıcıyı reauthenticate et
     await reauthenticateWithCredential(user, credential);
     
+    // Yeni e-posta adresini güncelle
+    await updateEmail(user, newEmail);
+
     // Yeni e-posta adresine doğrulama e-postası gönder
-    await user.updateEmail(newEmail);
     await user.sendEmailVerification();
+    
     alert("Yeni e-posta adresiniz için doğrulama e-postası gönderildi. Lütfen doğruladıktan sonra tekrar deneyin.");
   } catch (error) {
     if (error.code === "auth/requires-recent-login") {
