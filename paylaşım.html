@@ -226,137 +226,196 @@
   </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    doc,
-    deleteDoc,
-    updateDoc,
-    getDoc
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  deleteDoc,
+  updateDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.firebasestorage.app",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-    measurementId: "G-FS3FMPYVPD"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.firebasestorage.app",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
+};
 
-  const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-window.deletePost = async function(postId) {
-  const confirmed = confirm("Bu paylaşımı silmek istediğine emin misin?");
-  if (!confirmed) return;
+// PAYLAŞIM YÜKLE
+document.getElementById("uploadButton").addEventListener("click", uploadPost);
 
-  const postRef = doc(db, "posts", postId);
-  const postSnap = await getDoc(postRef);
-  if (!postSnap.exists()) return alert("Post bulunamadı.");
+async function uploadPost() {
+  const imageFile = document.getElementById("imageUpload").files[0];
+  const title = document.getElementById("imageTitle").value;
+  const description = document.getElementById("imageDescription").value;
 
-  const postData = postSnap.data();
-  const imageUrl = postData.imageUrl;
-
-  // 🔍 Dosya adını URL'den ayıkla
-  const imagePath = imageUrl.split("/storage/v1/object/public/anasayfa-paylasimlari/")[1];
-
-  // 🗑️ Supabase'den resmi sil
-  const { error } = await supabase.storage
-    .from('anasayfa-paylasimlari')
-    .remove([`images/${imagePath}`]);
-
-  if (error) {
-    console.warn("Resim silinemedi, ama post silinecek:", error.message);
+  if (!imageFile || !title || !description) {
+    alert("Lütfen tüm alanları doldurun!");
+    return;
   }
 
-  // 🔥 Firestore'dan post'u sil
-  await deleteDoc(postRef);
+  const filePath = 'images/' + Date.now() + "-" + imageFile.name;
+  const { data, error } = await supabase.storage
+    .from('anasayfa-paylasimlari')
+    .upload(filePath, imageFile);
 
+  if (error) {
+    alert("Resim yüklenemedi.");
+    return;
+  }
+
+  const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
+  await addDoc(collection(db, "posts"), {
+    title,
+    description,
+    imageUrl,
+    imagePath: filePath, // 🔑 silme için ekledik
+    likes: 0,
+    dislikes: 0,
+    comments: [],
+    timestamp: new Date()
+  });
+
+  alert("Paylaşım yapıldı!");
+  loadPosts();
+}
+
+// POSTLARI YÜKLE
+async function loadPosts() {
+  const postsContainer = document.getElementById("postsContainer");
+  postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
+
+  const snapshot = await getDocs(collection(db, "posts"));
+  if (snapshot.empty) {
+    postsContainer.innerHTML += "<p>Henüz paylaşım yok.</p>";
+    return;
+  }
+
+  snapshot.forEach((docSnap) => {
+    const post = docSnap.data();
+    const postId = docSnap.id;
+
+    const postElement = document.createElement("div");
+    postElement.classList.add("post");
+    postElement.style.margin = "0 auto"; // ✅ Ortala
+
+    const comments = (post.comments || []).map((c, i) => `
+      <div class="comment">
+        <div><strong>${c.username}</strong><br>${c.text}</div>
+        <button onclick="deleteComment('${postId}', ${i})">❌</button>
+      </div>
+    `).join("");
+
+    postElement.innerHTML = `
+      <img src="${post.imageUrl}" alt="Resim">
+      <h3>${post.title}</h3>
+      <p>${post.description}</p>
+      <div class="post-footer">
+        <span>👍 ${post.likes || 0}</span>
+        <span>👎 ${post.dislikes || 0}</span>
+        <span>💬 ${(post.comments || []).length}</span>
+      </div>
+      <div class="post-footer">
+        <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
+        <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
+      </div>
+      <div class="comment-section">
+        <h4>Yorumlar</h4>
+        ${comments || "<p>Yorum yok.</p>"}
+      </div>
+    `;
+
+    postsContainer.appendChild(postElement);
+  });
+}
+
+// POST SİL (Resimle birlikte)
+window.deletePost = async function(postId, imagePath) {
+  const confirmed = confirm("Bu paylaşımı silmek istediğinize emin misiniz?");
+  if (!confirmed) return;
+
+  if (imagePath) {
+    const { error } = await supabase.storage.from('anasayfa-paylasimlari').remove([imagePath]);
+    if (error) console.warn("Resim silinemedi:", error.message);
+  }
+
+  await deleteDoc(doc(db, "posts", postId));
   alert("Paylaşım silindi.");
   loadPosts();
 };
 
+// POST DÜZENLE
+window.editPost = async function(postId) {
+  const postRef = doc(db, "posts", postId);
+  const snap = await getDoc(postRef);
+  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
 
-  window.editPost = async function(postId) {
-    const postRef = doc(db, "posts", postId);
-    const snap = await getDoc(postRef);
-    if (!snap.exists()) return alert("Paylaşım bulunamadı.");
+  const post = snap.data();
+  const newTitle = prompt("Yeni başlık:", post.title);
+  const newDesc = prompt("Yeni açıklama:", post.description);
 
-    const post = snap.data();
-    const newTitle = prompt("Yeni başlık:", post.title);
-    const newDesc = prompt("Yeni açıklama:", post.description);
-
-    if (newTitle && newDesc) {
-      await updateDoc(postRef, {
-        title: newTitle,
-        description: newDesc
-      });
-      alert("Paylaşım güncellendi.");
-      loadPosts();
-    }
-  };
-
-  async function uploadPost() {
-    const imageFile = document.getElementById("imageUpload").files[0];
-    const title = document.getElementById("imageTitle").value;
-    const description = document.getElementById("imageDescription").value;
-
-    if (!imageFile || !title || !description) {
-      alert("Lütfen tüm alanları doldurun!");
-      return;
-    }
-
-    const { data, error } = await supabase.storage
-      .from('anasayfa-paylasimlari')
-      .upload('images/' + Date.now() + "-" + imageFile.name, imageFile);
-
-    if (error) {
-      alert("Resim yüklenemedi.");
-      return;
-    }
-
-    const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${data.path}`;
-    await addDoc(collection(db, "posts"), {
-      title,
-      description,
-      imageUrl,
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      timestamp: new Date()
+  if (newTitle && newDesc) {
+    await updateDoc(postRef, {
+      title: newTitle,
+      description: newDesc
     });
-
-    alert("Paylaşım yapıldı!");
+    alert("Paylaşım güncellendi.");
     loadPosts();
   }
+};
 
-  async function loadPosts() {
-    const postsContainer = document.getElementById("postsContainer");
-    postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
+// YORUM SİL
+window.deleteComment = async function(postId, index) {
+  const postRef = doc(db, "posts", postId);
+  const snap = await getDoc(postRef);
+  if (!snap.exists()) return;
 
-    const snapshot = await getDocs(collection(db, "posts"));
-    if (snapshot.empty) {
-      postsContainer.innerHTML += "<p>Henüz paylaşım yok.</p>";
-      return;
-    }
+  const post = snap.data();
+  const updatedComments = post.comments.filter((_, i) => i !== index);
+  await updateDoc(postRef, { comments: updatedComments });
+  loadPosts();
+};
 
-    snapshot.forEach((docSnap) => {
-      const post = docSnap.data();
+// ARAMA
+document.getElementById("searchInput")?.addEventListener("input", async (e) => {
+  const keyword = e.target.value.toLowerCase();
+  const snapshot = await getDocs(collection(db, "posts"));
+  const postsContainer = document.getElementById("postsContainer");
+  postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
+
+  snapshot.forEach((docSnap) => {
+    const post = docSnap.data();
+    if (
+      post.title.toLowerCase().includes(keyword) ||
+      post.description.toLowerCase().includes(keyword)
+    ) {
       const postId = docSnap.id;
-
       const postElement = document.createElement("div");
       postElement.classList.add("post");
+      postElement.style.margin = "0 auto";
+
+      const comments = (post.comments || []).map((c, i) => `
+        <div class="comment">
+          <div><strong>${c.username}</strong><br>${c.text}</div>
+          <button onclick="deleteComment('${postId}', ${i})">❌</button>
+        </div>
+      `).join("");
 
       postElement.innerHTML = `
         <img src="${post.imageUrl}" alt="Resim">
@@ -368,17 +427,20 @@ window.deletePost = async function(postId) {
           <span>💬 ${(post.comments || []).length}</span>
         </div>
         <div class="post-footer">
-          <button onclick="deletePost('${postId}')">Sil</button>
+          <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
           <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
         </div>
+        <div class="comment-section">
+          <h4>Yorumlar</h4>
+          ${comments || "<p>Yorum yok.</p>"}
+        </div>
       `;
-
       postsContainer.appendChild(postElement);
-    });
-  }
+    }
+  });
+});
 
-  document.getElementById("uploadButton").addEventListener("click", uploadPost);
-  loadPosts();
+loadPosts();
 </script>
 
 </body>
