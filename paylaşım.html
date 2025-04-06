@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel | Economentor</title>
   <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
       margin: 0;
@@ -161,6 +162,33 @@
       width: 100%;
     }
 
+    .comment-section {
+      padding: 10px;
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    .comment {
+      background-color: #333;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .comment button {
+      background-color: #e74c3c;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .comment button:hover {
+      background-color: #c0392b;
+    }
   </style>
 </head>
 <body>
@@ -193,15 +221,12 @@
     <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
   </div>
 
-  <!-- JavaScript dosyasını type="module" olarak kullanıyoruz -->
   <script type="module">
-    // Modül içindeki import ifadeleri doğrudan burada kullanılabilir
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
-    // Firebase ve Supabase için yapılandırma ayarları
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
       authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -220,7 +245,6 @@
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Resim Yükle ve Paylaş
     async function uploadPost() {
       const imageFile = document.getElementById("imageUpload").files[0];
       const title = document.getElementById("imageTitle").value;
@@ -231,7 +255,6 @@
         return;
       }
 
-      // Supabase'e Resim Yükleme
       const { data, error } = await supabase.storage
         .from('anasayfa-paylasimlari')
         .upload('images/' + imageFile.name, imageFile);
@@ -242,26 +265,26 @@
         return;
       }
 
-      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/${data.path}`;
+      const imageUrl = `https://rvwsvhgihatxxhnbmouw.supabase.co/storage/v1/object/public/anasayfa-paylasimlari/images/${data.path}`;
       
-      // Firestore'a Kaydetme
       await addDoc(collection(db, "posts"), {
         title: title,
         description: description,
         imageUrl: imageUrl,
+        likes: 0,
+        comments: 0,
         timestamp: new Date(),
       });
 
       alert("Paylaşım başarıyla yapıldı!");
-      loadPosts();  // Paylaşımları yenileyerek göster
+      loadPosts();
     }
 
-    // Paylaşımları Yükle
     async function loadPosts() {
       const postsRef = collection(db, "posts");
       const querySnapshot = await getDocs(postsRef);
       const postsContainer = document.getElementById('postsContainer');
-      postsContainer.innerHTML = '';  // Mevcut paylaşımları temizle
+      postsContainer.innerHTML = ''; 
 
       if (querySnapshot.empty) {
         postsContainer.innerHTML = `<p>Henüz hiçbir paylaşım yapılmamış.</p>`;
@@ -287,31 +310,16 @@
 
     async function deletePost(postId) {
       const postRef = doc(db, "posts", postId);
-      const postSnapshot = await getDoc(postRef);
-      const postData = postSnapshot.data();
-      
-      // Supabase'ten Resmi Sil
-      const { error } = await supabase.storage
-        .from('songs')
-        .remove([`images/${postData.imageUrl.split('/').pop()}`]);
-
-      if (error) {
-        console.error("Resim silinirken hata oluştu:", error);
-      }
-
-      // Firestore'dan Sil
       await deleteDoc(postRef);
-      loadPosts(); // Sayfayı güncelle
+      loadPosts();
     }
 
     async function editPost(postId) {
       alert("Düzenleme işlemi burada yapılacak!");
     }
 
-    loadPosts();  // Sayfa yüklendiğinde paylaşımları yükle
-
-    // Buton için event listener
     document.getElementById("uploadButton").addEventListener("click", uploadPost);
+    loadPosts();
   </script>
 
 </body>
