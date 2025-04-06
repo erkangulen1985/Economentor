@@ -184,36 +184,36 @@
   </div>
 
 <script type="module">
-// Firebase importları
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-  getFirestore, collection, getDocs, doc, 
-  deleteDoc, onSnapshot, query, orderBy 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  // Firebase importları
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getFirestore, collection, getDocs, doc, 
+    deleteDoc, onSnapshot, query, orderBy 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  
+  // Chart.js importları
+  import { 
+    Chart, 
+    CategoryScale, 
+    LinearScale, 
+    LineElement, 
+    PointElement, 
+    Title, 
+    Tooltip, 
+    Legend 
+  } from 'https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.esm.min.js'; 
 
-// Chart.js importları
-import { 
-  Chart, 
-  CategoryScale, 
-  LinearScale, 
-  LineElement, 
-  PointElement, 
-  Title, 
-  Tooltip, 
-  Legend 
-} from 'https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.esm.min.js';
-
-// Chart.js bileşenlerini kaydetme
-Chart.register(
-  CategoryScale, 
-  LinearScale, 
-  LineElement, 
-  PointElement, 
-  Title, 
-  Tooltip, 
-  Legend
-);
+  // Gerekli Chart.js bileşenlerini kaydetme
+  Chart.register(
+    CategoryScale, 
+    LinearScale, 
+    LineElement, 
+    PointElement, 
+    Title, 
+    Tooltip, 
+    Legend
+  );
 
   const firebaseConfig = {
     apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -228,87 +228,7 @@ Chart.register(
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  // Genel istatistikleri getir
-  async function loadStatistics() {
-    try {
-      const analizler = await getDocs(collection(db, "analizler"));
-      const fotolar = await getDocs(collection(db, "posts"));
-      const users = await getDocs(collection(db, "users"));
-      const feedbacks = await getDocs(collection(db, "feedback"));
-
-      document.getElementById("totalUsers").textContent = users.size;
-      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
-      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
-    } catch (error) {
-      console.error("Veri çekme hatası: ", error);
-    }
-  }
-
-  loadStatistics();
-
-  // Kullanıcıyı listele ve sil
-  async function loadUserList() {
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
-
-    try {
-      const users = await getDocs(collection(db, "users"));
-      users.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Kullanıcı verileri çekilemedi: ", error);
-    }
-  }
-
-  // Arama inputu
-  document.getElementById("searchInput").addEventListener("input", async (e) => {
-    const keyword = e.target.value.toLowerCase();
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = "";
-    const users = await getDocs(collection(db, "users"));
-    users.forEach(docSnap => {
-      const data = docSnap.data();
-      const username = (data.username || "").toLowerCase();
-      const fullName = (data.fullName || "").toLowerCase();
-      if (username.includes(keyword) || fullName.includes(keyword)) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      }
-    });
-  });
-
-  // Silme işlemi
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("deleteBtn")) {
-      const uid = e.target.dataset.uid;
-      if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
-
-      try {
-        await deleteDoc(doc(db, "users", uid));
-        alert("Kullanıcı başarıyla silindi.");
-        loadUserList();
-      } catch (err) {
-        alert("Silme hatası: " + err.message);
-      }
-    }
-  });
-
-  // Dinamik grafik yükleme fonksiyonu
+  // Grafik verilerini yükle
   async function loadCharts() {
     try {
       const userQ = query(collection(db, "users"), orderBy("timestamp"));
@@ -409,7 +329,6 @@ Chart.register(
     }
   }
 
-  loadUserList();
   loadCharts();
 </script>
 
