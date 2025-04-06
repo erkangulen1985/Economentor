@@ -213,7 +213,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, orderBy, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
     const firebaseConfig = {
@@ -272,7 +272,8 @@
             <button class="like-button">Beğen</button>
             <span class="likes">Beğeniler: ${post.likes || 0}</span>
             <button class="dislike-button">Beğenme</button>
-            <span class="comments">Yorumlar: ${post.comments || 0}</span>
+            <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
+            <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
           </div>
         `;
 
@@ -291,32 +292,57 @@
         const dislikeButton = postElement.querySelector(".dislike-button");
         const commentButton = postElement.querySelector(".comment-button");
 
-        likeButton.addEventListener("click", () => likePost(doc.id));
-        dislikeButton.addEventListener("click", () => dislikePost(doc.id));
+        likeButton.addEventListener("click", () => likePost(doc.id, post));
+        dislikeButton.addEventListener("click", () => dislikePost(doc.id, post));
         commentButton.addEventListener("click", () => postComment(doc.id));
       });
     }
 
     // Beğenme İşlemi
-    async function likePost(postId) {
+    async function likePost(postId, post) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Önce giriş yapmalısınız!");
+        return;
+      }
+
       const postRef = doc(db, "posts", postId);
-      const postDoc = await getDoc(postRef);
-      const postData = postDoc.data();
-      const newLikes = (postData.likes || 0) + 1;
-      await updateDoc(postRef, { likes: newLikes });
+      const userLikesRef = doc(db, "posts", postId, "likes", user.uid); // Kullanıcıya ait beğeniler
+      const userLikeDoc = await getDoc(userLikesRef);
+
+      if (userLikeDoc.exists()) {
+        alert("Bu gönderiyi zaten beğendiniz!");
+        return;
+      }
+
+      await updateDoc(postRef, {
+        likes: (post.likes || 0) + 1
+      });
+
+      // Kullanıcıyı beğeni olarak kaydediyoruz
+      await setDoc(userLikesRef, { userId: user.uid });
+
       alert("Beğenildi");
-      loadPosts(); // Güncel beğenilerle tekrar yükleyin
+      loadPosts();
     }
 
     // Beğenmeme İşlemi
-    async function dislikePost(postId) {
+    async function dislikePost(postId, post) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Önce giriş yapmalısınız!");
+        return;
+      }
+
       const postRef = doc(db, "posts", postId);
-      const postDoc = await getDoc(postRef);
-      const postData = postDoc.data();
-      const newDislikes = (postData.dislikes || 0) + 1;
-      await updateDoc(postRef, { dislikes: newDislikes });
+
+      // Beğenmeme sayısını arttırıyoruz
+      await updateDoc(postRef, {
+        dislikes: (post.dislikes || 0) + 1
+      });
+
       alert("Beğenilmedi");
-      loadPosts(); // Güncel beğenmelerle tekrar yükleyin
+      loadPosts();
     }
 
     // Yorum Yapma İşlemi
@@ -330,16 +356,18 @@
       }
 
       const postRef = doc(db, "posts", postId);
+      const user = auth.currentUser;
       await updateDoc(postRef, {
         comments: arrayUnion({
           text: commentText,
-          user: "Kullanıcı", // Burada kullanıcının ismini alabilirsiniz.
+          user: user.uid,
+          username: user.displayName || "Kullanıcı", // Kullanıcı adı
           timestamp: new Date().toISOString()
         })
       });
 
-      commentInput.value = ""; // Yorum yapıldıktan sonra input'u temizle
-      loadPosts(); // Yorumları yeniden yükle
+      commentInput.value = "";
+      loadPosts();
     }
 
     loadPosts();
