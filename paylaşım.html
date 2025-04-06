@@ -1,461 +1,280 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel | Economentor</title>
-  <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      color: #333;
-    }
-
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px 0;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-      letter-spacing: 2px;
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #333;
-      padding: 15px 0;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      padding: 10px;
-      transition: background 0.3s ease;
-    }
-
-    nav a:hover {
-      background-color: #4CAF50;
-    }
-
-    .content {
-      flex-grow: 1;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    .upload-section, .history-section {
-      width: 80%;
-      background-color: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-
-    .upload-section h2, .history-section h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 24px;
-      color: #333;
-    }
-
-    .upload-section input[type="file"] {
-      margin-bottom: 15px;
-    }
-
-    .upload-section input[type="text"], .upload-section textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    .upload-section button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-
-    .upload-section button:hover {
-      background-color: #45a049;
-    }
-
-    .history-section {
-      background-color: #f9f9f9;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .history-section .post {
-      background-color: #fff;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .history-section .post img {
-      width: 100%;
-      border-radius: 8px;
-    }
-
-    .post-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-    }
-
-    .post-footer button {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .post-footer button:hover {
-      background-color: #c0392b;
-    }
-
-    .post-footer .edit-button {
-      background-color: #f39c12;
-    }
-
-    .post-footer .edit-button:hover {
-      background-color: #e67e22;
-    }
-
-    .footer {
-      background-color: #333;
-      color: white;
-      padding: 10px;
-      text-align: center;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-    }
-
-    .comment-section {
-      padding: 10px;
-      margin-top: 10px;
-      border-top: 1px solid #ddd;
-    }
-
-    .comment {
-      background-color: #333;
-      padding: 8px;
-      margin-bottom: 8px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      color: white;
-    }
-
-    .comment button {
-      background-color: #e74c3c;
-      color: white;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .comment button:hover {
-      background-color: #c0392b;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economentor | Admin Paneli</title>
+    <link rel="icon" href="image1.png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+        }
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            height: 100%;
+            background-color: #0f0f0f;
+            padding-top: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .sidebar a {
+            display: block;
+            color: #ccc;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            height: 100vh;
+            background-color: #121212;
+            overflow-y: auto;
+        }
+        .title {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+        .content-container {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .logout-button {
+            background-color: red;
+        }
+        .logout-button:hover {
+            background-color: #ff4d4d;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none;
+        }
+        .button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .announcement {
+            background-color: #444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .announcement button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .feedback {
+            background-color: #444;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .feedback button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-
-  <header>
-    <h1>Economentor Admin Panel</h1>
-  </header>
-
-  <nav>
-    <a href="eğitimekle.html">Eğitimler</a>
-    <a href="adminpanel.html">Yönetici Paneline Dön</a>  
-    <a href="analizekle.html">Analiz</a>
-  </nav>
-
-  <div class="content">
-    <div class="upload-section">
-      <h2>Paylaşım Yap</h2>
-      <input type="file" id="imageUpload" accept="image/*">
-      <input type="text" id="imageTitle" placeholder="Başlık Girin">
-      <textarea id="imageDescription" placeholder="Açıklama Girin" rows="4"></textarea>
-      <button id="uploadButton">Paylaş</button>
+    <div class="sidebar">
+        <h2>Admin Paneli</h2>
+        <a href="kul-is.html">Kullanıcı ve İstatistik Yönetimi</a>
+        <a href="#" onclick="showContent('duyuru-admin')">Duyuru Düzenle</a>
+        <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
+        <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
+        <a href="paylaşım.html">Paylaşımlar</a>
+        <a href="mesaj.html">Mesajlar</a>
+        <a href="profil.html">Profil</a>
+        <a href="anasayfa.html">Anasayfa</a>
+        <a href="index.html" class="logout-button">Çıkış</a>
     </div>
 
+    <div class="main-content">
+        <div class="content-container">
+            <h2 class="title">Hoşgeldiniz, <span id="adminUsername">Yönetici</span>!</h2>
+            <div id="dynamicContent"></div>
+        </div>
     </div>
-    <input type="text" id="searchInput" placeholder="Paylaşım başlığı ya da açıklama ara..." style="width: 80%; padding: 10px; margin: 20px auto; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; display: block;" /> 
-    </div>
-  
-    <div class="history-section" id="postsContainer">
-      <h2>Paylaşılan Resimler</h2>
-    </div>
-  </div>
 
-  <div class="footer">
-    <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  deleteDoc,
-  updateDoc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+        const firebaseConfig = {
+            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+            authDomain: "economentor-8ddc4.firebaseapp.com",
+            projectId: "economentor-8ddc4",
+            storageBucket: "economentor-8ddc4.appspot.com",
+            messagingSenderId: "835370350520",
+            appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+        };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-  authDomain: "economentor-8ddc4.firebaseapp.com",
-  projectId: "economentor-8ddc4",
-  storageBucket: "economentor-8ddc4.firebasestorage.app",
-  messagingSenderId: "835370350520",
-  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-  measurementId: "G-FS3FMPYVPD"
-};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const supabase = createClient(supabaseUrl, supabaseKey);
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const username = userData.username || "Yönetici";
+            const role = userData.role || "user";
 
-function sanitizeFilename(filename) {
-  return filename
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
-    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
-}
-  
-// ✅ Post yükleme
-document.getElementById("uploadButton").addEventListener("click", uploadPost);
+            if (role !== "admin") {
+                alert("Bu sayfaya erişim izniniz yok!");
+                window.location.href = "anasayfa.html";
+                return;
+            }
 
-async function uploadPost() {
-  const imageFile = document.getElementById("imageUpload").files[0];
-  const title = document.getElementById("imageTitle").value;
-  const description = document.getElementById("imageDescription").value;
-
-  if (!imageFile || !title || !description) {
-    alert("Lütfen tüm alanları doldurun!");
-    return;
-  }
-
-  const safeFileName = sanitizeFilename(imageFile.name);
-  const filePath = 'images/' + Date.now() + '-' + safeFileName;
-  const { data, error } = await supabase
-    .storage
-    .from('anasayfa-paylasimlari')
-    .upload(filePath, imageFile);
-
-  if (error) {
-    console.error("Supabase yükleme hatası:", error.message);
-    alert("Resim yüklenemedi!");
-    return;
-  }
-
-  const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
-
-  await addDoc(collection(db, "posts"), {
-    title,
-    description,
-    imageUrl,
-    imagePath: filePath,
-    likes: 0,
-    dislikes: 0,
-    comments: [],
-    timestamp: new Date()
-  });
-
-  alert("Paylaşım yapıldı!");
-  loadPosts();
-}
-
-// ✅ Postları yükle
-async function loadPosts() {
-  const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
-
-  const snapshot = await getDocs(collection(db, "posts"));
-  if (snapshot.empty) {
-    postsContainer.innerHTML += "<p>Henüz paylaşım yok.</p>";
-    return;
-  }
-
-  snapshot.forEach((docSnap) => {
-    const post = docSnap.data();
-    const postId = docSnap.id;
-
-    const postElement = document.createElement("div");
-    postElement.classList.add("post");
-    postElement.style.margin = "0 auto";
-
-    const comments = (post.comments || []).map((c, i) => `
-      <div class="comment">
-        <div><strong>${c.username}</strong><br>${c.text}</div>
-        <button onclick="deleteComment('${postId}', ${i})">❌</button>
-      </div>
-    `).join("");
-
-    postElement.innerHTML = `
-      <img src="${post.imageUrl}" alt="Resim">
-      <h3>${post.title}</h3>
-      <p>${post.description}</p>
-      <div class="post-footer">
-        <span>👍 ${post.likes || 0}</span>
-        <span>👎 ${post.dislikes || 0}</span>
-        <span>💬 ${(post.comments || []).length}</span>
-      </div>
-      <div class="post-footer">
-        <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
-        <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
-      </div>
-      <div class="comment-section">
-        <h4>Yorumlar</h4>
-        ${comments || "<p>Yorum yok.</p>"}
-      </div>
-    `;
-
-    postsContainer.appendChild(postElement);
-  });
-}
-
-// ✅ Post sil (Supabase + Firestore)
-window.deletePost = async function(postId, imagePath) {
-  const confirmed = confirm("Bu paylaşımı silmek istediğinize emin misiniz?");
-  if (!confirmed) return;
-
-  if (imagePath) {
-    const { error } = await supabase.storage.from('anasayfa-paylasimlari').remove([imagePath]);
-    if (error) console.warn("Resim silinemedi:", error.message);
-  }
-
-  await deleteDoc(doc(db, "posts", postId));
-  alert("Paylaşım silindi.");
-  loadPosts();
-};
-
-// ✅ Post düzenle
-window.editPost = async function(postId) {
-  const postRef = doc(db, "posts", postId);
-  const snap = await getDoc(postRef);
-  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
-
-  const post = snap.data();
-  const newTitle = prompt("Yeni başlık:", post.title);
-  const newDesc = prompt("Yeni açıklama:", post.description);
-
-  if (newTitle && newDesc) {
-    await updateDoc(postRef, {
-      title: newTitle,
-      description: newDesc
-    });
-    alert("Paylaşım güncellendi.");
-    loadPosts();
-  }
-};
-
-// ✅ Yorum sil
-window.deleteComment = async function(postId, index) {
-  const postRef = doc(db, "posts", postId);
-  const snap = await getDoc(postRef);
-  if (!snap.exists()) return;
-
-  const post = snap.data();
-  const updatedComments = post.comments.filter((_, i) => i !== index);
-  await updateDoc(postRef, { comments: updatedComments });
-  loadPosts();
-};
-
-// ✅ Arama
-document.getElementById("searchInput")?.addEventListener("input", async (e) => {
-  const keyword = e.target.value.toLowerCase();
-  const snapshot = await getDocs(collection(db, "posts"));
-  const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
-
-  snapshot.forEach((docSnap) => {
-    const post = docSnap.data();
-    if (
-      post.title.toLowerCase().includes(keyword) ||
-      post.description.toLowerCase().includes(keyword)
-    ) {
-      const postId = docSnap.id;
-      const postElement = document.createElement("div");
-      postElement.classList.add("post");
-      postElement.style.margin = "0 auto";
-
-      const comments = (post.comments || []).map((c, i) => `
-        <div class="comment">
-          <div><strong>${c.username}</strong><br>${c.text}</div>
-          <button onclick="deleteComment('${postId}', ${i})">❌</button>
-        </div>
-      `).join("");
-
-      postElement.innerHTML = `
-        <img src="${post.imageUrl}" alt="Resim">
-        <h3>${post.title}</h3>
-        <p>${post.description}</p>
-        <div class="post-footer">
-          <span>👍 ${post.likes || 0}</span>
-          <span>👎 ${post.dislikes || 0}</span>
-          <span>💬 ${(post.comments || []).length}</span>
-        </div>
-        <div class="post-footer">
-          <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
-          <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
-        </div>
-        <div class="comment-section">
-          <h4>Yorumlar</h4>
-          ${comments || "<p>Yorum yok.</p>"}
-        </div>
-      `;
-      postsContainer.appendChild(postElement);
+            document.getElementById("adminUsername").innerText = username;
+        } else {
+            alert("Kullanıcı bilgisi alınamadı.");
+            window.location.href = "index.html";
+        }
+    } else {
+        // Giriş yapılmamışsa
+        alert("Lütfen giriş yapınız.");
+        window.location.href = "index.html";
     }
-  });
 });
 
-loadPosts();
-</script>
+        window.showContent = async function (section) {
+            const container = document.getElementById("dynamicContent");
+            container.innerHTML = "";
 
+            if (section === 'duyuru-admin') {
+                container.innerHTML = `
+                    <h3>Yeni Duyuru Ekle</h3>
+                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
+                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
+                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
+                    <div id="duyuruList"></div>
+                `;
+                loadDuyurular();
+            }
+
+            if (section === 'hakkinda-admin') {
+                const hakRef = doc(db, "site", "hakkinda");
+                const hakSnap = await getDoc(hakRef);
+                const mevcut = hakSnap.exists() ? hakSnap.data().text : "";
+                container.innerHTML = `
+                    <h3>Hakkında Düzenle</h3>
+                    <textarea id="hakText">${mevcut}</textarea>
+                    <button class="button" onclick="saveHakkinda()">Kaydet</button>
+                `;
+            }
+
+            if (section === 'dil-sik') {
+                container.innerHTML = `<h3>Dilek ve Şikayetler</h3><div id="feedbackList"></div>`;
+                const feedbackList = document.getElementById("feedbackList");
+                const snapshot = await getDocs(collection(db, "feedback"));
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement("div");
+                    div.className = "feedback";
+                    div.innerHTML = `
+                        <p><strong>Kullanıcı:</strong> ${data.username || 'Bilinmiyor'}</p>
+                        <p>${data.message}</p>
+                        <small>${data.timestamp?.toDate().toLocaleString("tr-TR") || "Tarih yok"}</small>
+                        <button onclick="deleteFeedback('${docSnap.id}')">Sil</button>
+                    `;
+                    feedbackList.appendChild(div);
+                });
+            }
+        }
+
+        window.saveDuyuru = async function () {
+            const text = document.getElementById("duyuruText").value.trim();
+            if (!text) return alert("Duyuru metni boş olamaz.");
+            await addDoc(collection(db, "announcements"), {
+                text,
+                createdAt: Timestamp.now()
+            });
+            document.getElementById("duyuruText").value = "";
+            loadDuyurular();
+        }
+
+        window.loadDuyurular = async function () {
+            const duyuruList = document.getElementById("duyuruList");
+            if (!duyuruList) return;
+            duyuruList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "announcements"));
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const div = document.createElement("div");
+                div.className = "announcement";
+                const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
+                div.innerHTML = `
+                    <p>${data.text}</p>
+                    <small>${tarih}</small>
+                    <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
+                `;
+                duyuruList.appendChild(div);
+            });
+        }
+
+        window.deleteDuyuru = async function (id) {
+            await deleteDoc(doc(db, "announcements", id));
+            loadDuyurular();
+        }
+
+        window.saveHakkinda = async function () {
+            const text = document.getElementById("hakText").value;
+            await setDoc(doc(db, "site", "hakkinda"), { text });
+            alert("Hakkında bilgisi kaydedildi.");
+        }
+
+        window.deleteFeedback = async function (id) {
+            await deleteDoc(doc(db, "feedback", id));
+            showContent('dil-sik');
+        }
+    </script>
 </body>
 </html>
