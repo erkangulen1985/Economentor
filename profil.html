@@ -118,6 +118,11 @@
     <input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
     <button id="changePasswordBtn">Şifreyi Değiştir</button>
 
+    <label>Yeni E-posta</label>
+    <input type="email" id="newEmail" placeholder="Yeni E-posta">
+
+    <button id="changeEmailBtn">E-posta Değiştir</button>
+
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
   </div>
 
@@ -129,7 +134,8 @@ import {
   updatePassword,
   deleteUser,
   EmailAuthProvider,
-  reauthenticateWithCredential
+  reauthenticateWithCredential,
+  updateEmail
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
@@ -184,6 +190,43 @@ onAuthStateChanged(auth, async (user) => {
       alert("Bilgiler başarıyla güncellendi.");
     } catch (err) {
       alert("Hata: " + err.message);
+    }
+  });
+
+  // E-posta değiştir
+  document.getElementById("changeEmailBtn").addEventListener("click", async () => {
+    const newEmail = document.getElementById("newEmail").value.trim();
+    
+    if (!newEmail) {
+      alert("Lütfen geçerli bir e-posta girin.");
+      return;
+    }
+
+    const user = auth.currentUser;
+
+    // Kullanıcıyı tekrar doğrulama işlemi
+    const password = prompt("Mevcut şifrenizi girin");
+    
+    if (!password) {
+      alert("Şifre gereklidir.");
+      return;
+    }
+
+    const credential = EmailAuthProvider.credential(user.email, password);
+
+    try {
+      // Kullanıcıyı reauthenticate et
+      await reauthenticateWithCredential(user, credential);
+      
+      // Yeni e-posta adresini güncelle
+      await updateEmail(user, newEmail);
+      alert("E-posta adresiniz başarıyla güncellendi!");
+    } catch (error) {
+      if (error.code === "auth/requires-recent-login") {
+        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+      } else {
+        alert("E-posta güncelleme hatası: " + error.message);
+      }
     }
   });
 
