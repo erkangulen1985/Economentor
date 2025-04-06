@@ -320,7 +320,7 @@
         alert("Beğeni iptal edildi");
         // Sayfada sadece bu postu güncelle
         const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${post.likes - 1}`;
+        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) - 1}`;
       } else {
         // Beğeniyi ekle
         await updateDoc(postRef, {
@@ -330,7 +330,7 @@
         alert("Beğenildi");
         // Sayfada sadece bu postu güncelle
         const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${post.likes + 1}`;
+        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
       }
     }
 
@@ -355,7 +355,7 @@
         alert("Beğenme iptal edildi");
         // Sayfada sadece bu postu güncelle
         const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes - 1}`;
+        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) - 1}`;
       } else {
         // Beğenmeyi ekle
         await updateDoc(postRef, {
@@ -365,7 +365,7 @@
         alert("Beğenilmedi");
         // Sayfada sadece bu postu güncelle
         const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${post.dislikes + 1}`;
+        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
       }
     }
 
