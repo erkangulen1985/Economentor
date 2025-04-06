@@ -183,20 +183,6 @@
 </head>
 <body>
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Economentor | Anasayfa</title>
-  <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    /* Your existing styles */
-  </style>
-</head>
-<body>
-
   <header>
     <h1>ECONOMENTOR</h1>
   </header>
@@ -326,9 +312,9 @@
       const userLikeDoc = await getDoc(userLikesRef);
 
       if (userLikeDoc.exists()) {
-        // Beğeniyi iptal et
+        // Beğeniyi iptal et, sadece 0.5 sayıda düşür
         await updateDoc(postRef, {
-          likes: (post.likes || 0) - 0.5 // Yarım sayıda azaltıyoruz
+          likes: (post.likes || 0) - 0.5
         });
         await deleteDoc(userLikesRef); // Kullanıcının beğenisini sil
         alert("Beğeni iptal edildi");
@@ -338,13 +324,13 @@
       } else {
         // Beğeniyi ekle
         await updateDoc(postRef, {
-          likes: (post.likes || 0) + 0.5 // Yarım sayıda artırıyoruz
+          likes: (post.likes || 0) + 1
         });
         await setDoc(userLikesRef, { userId: user.uid }); // Kullanıcıyı beğeni olarak kaydet
         alert("Beğenildi");
         // Sayfada sadece bu postu güncelle
         const likeCountElement = postElement.querySelector('.likes');
-        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 0.5}`;
+        likeCountElement.textContent = `Beğeniler: ${(post.likes || 0) + 1}`;
       }
     }
 
@@ -361,9 +347,9 @@
       const userDislikeDoc = await getDoc(userDislikesRef);
 
       if (userDislikeDoc.exists()) {
-        // Beğenmeyi iptal et
+        // Beğenmeyi iptal et, sadece 0.5 sayıda düşür
         await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) - 0.5 // Yarım sayıda azaltıyoruz
+          dislikes: (post.dislikes || 0) - 0.5
         });
         await deleteDoc(userDislikesRef); // Kullanıcının beğenmemesini sil
         alert("Beğenme iptal edildi");
@@ -373,13 +359,13 @@
       } else {
         // Beğenmeyi ekle
         await updateDoc(postRef, {
-          dislikes: (post.dislikes || 0) + 0.5 // Yarım sayıda artırıyoruz
+          dislikes: (post.dislikes || 0) + 1
         });
         await setDoc(userDislikesRef, { userId: user.uid }); // Kullanıcıyı beğenmeme olarak kaydet
         alert("Beğenilmedi");
         // Sayfada sadece bu postu güncelle
         const dislikeCountElement = postElement.querySelector('.dislikes');
-        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 0.5}`;
+        dislikeCountElement.textContent = `Beğenmeler: ${(post.dislikes || 0) + 1}`;
       }
     }
 
@@ -417,9 +403,5 @@
     loadPosts();
   </script>
 
-</body>
-</html>
-
-  
 </body>
 </html>
