@@ -212,10 +212,9 @@
       const users = await getDocs(collection(db, "users"));
       const feedbacks = await getDocs(collection(db, "feedback"));
 
-      document.getElementById("total-analiz").textContent = analizler.size;
-      document.getElementById("total-post").textContent = fotolar.size;
-      document.getElementById("total-user").textContent = users.size;
-      document.getElementById("total-feedback").textContent = feedbacks.size;
+      document.getElementById("totalUsers").textContent = users.size;
+      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
+      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     }
 
     loadStatistics();
