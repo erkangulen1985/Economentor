@@ -186,8 +186,21 @@
 
     function renderBullets() {
       const container = document.getElementById("bullets");
-      container.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
+      container.innerHTML = bullets.map((b, index) => `
+        <li>
+          ${b} <button onclick="editBullet(${index})">Düzenle</button>
+        </li>
+      `).join('');
     }
+
+    // Maddeyi düzenlemek
+    window.editBullet = (index) => {
+      const newBullet = prompt("Maddeyi düzenleyin:", bullets[index]);
+      if (newBullet !== null && newBullet.trim()) {
+        bullets[index] = newBullet;
+        renderBullets();
+      }
+    };
 
     window.saveTraining = async () => {
       const title = document.getElementById("title").value;
