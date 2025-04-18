@@ -238,6 +238,7 @@ async function loadStatistics() {
     let totalDislikes = 0;
     let totalComments = 0;
 
+    // ANALİZLER
     analizler.forEach(doc => {
       const data = doc.data();
       totalLikes += data.likes || 0;
@@ -245,18 +246,25 @@ async function loadStatistics() {
       totalComments += (data.comments || []).length;
     });
 
+    // POSTLAR
     for (const post of fotolar.docs) {
       const ref = post.ref;
 
       const likesSnap = await getDocs(collection(ref, "likes"));
       const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
-      const commentsSnap = await getDocs(collection(ref, "comments")).catch(() => ({ size: 0 }));
 
       totalLikes += likesSnap.size;
       totalDislikes += dislikesSnap.size || 0;
-      totalComments += commentsSnap.size || 0;
+
+      try {
+        const commentsSnap = await getDocs(collection(ref, "comments"));
+        totalComments += commentsSnap.size;
+      } catch (err) {
+        console.warn("Yorumlar alınamadı:", err);
+      }
     }
 
+    // Ekrana yazdır
     document.getElementById("totalLikes").textContent = totalLikes;
     document.getElementById("totalDislikes").textContent = totalDislikes;
     document.getElementById("totalComments").textContent = totalComments;
@@ -265,6 +273,7 @@ async function loadStatistics() {
     console.error("Veri çekme hatası: ", error);
   }
 }
+
 
   loadStatistics();
 
