@@ -352,189 +352,76 @@ async function loadStatistics() {
     }
   });
 
-async function loadCharts() {
+async function loadStatistics() {
   try {
-    const normalizeTimestamp = (ts) => {
-      if (!ts) return null;
-      if (ts instanceof Date) return ts;
-      if (typeof ts === "string") {
-        const parsed = Date.parse(ts);
-        return isNaN(parsed) ? null : new Date(parsed);
-      }
-      if (typeof ts === "object" && ts.seconds) return new Date(ts.seconds * 1000);
-      return null;
-    };
+    const analizler = await getDocs(collection(db, "analizler"));
+    const fotolar = await getDocs(collection(db, "posts"));
+    const users = await getDocs(collection(db, "users"));
+    const feedbacks = await getDocs(collection(db, "feedback"));
 
-    const safeValue = (val) => Math.max(0, val || 0);
-    const now = new Date();
-    const generateLastNDates = (n) => {
-      const dates = [];
-      for (let i = n - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(now.getDate() - i);
-        dates.push(d.toLocaleDateString("tr-TR"));
-      }
-      return dates;
-    };
+    document.getElementById("totalUsers").textContent = users.size;
+    document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
+    document.getElementById("totalFeedbacks").textContent = feedbacks.size;
 
-    const sortedDates = generateLastNDates(10);
-    const userDateMap = {}, likeDateMap = {}, dislikeDateMap = {}, commentDateMap = {};
+    let totalLikes = 0;
+    let totalDislikes = 0;
+    let totalComments = 0;
 
-    const [userSnapshot, analizSnapshot, postSnapshot] = await Promise.all([
-      getDocs(collection(db, "users")),
-      getDocs(collection(db, "analizler")),
-      getDocs(collection(db, "posts"))
-    ]);
-
-    // 👤 Kullanıcılar
-    userSnapshot.forEach(doc => {
-      const ts = normalizeTimestamp(doc.data().timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
-      if (sortedDates.includes(dateStr)) {
-        userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
-      }
-    });
-
-    // 📊 ANALİZLER
-    for (const analiz of analizSnapshot.docs) {
+    // ✅ ANALİZLER
+    for (const analiz of analizler.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
-      const analizTS = normalizeTimestamp(data.timestamp);
-      const dateStr = analizTS?.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
 
-      // ✅ Embedded yorumlar varsa say (analiz timestamp'ine göre)
-      const yorumSayisi = (data.comments || []).length;
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + yorumSayisi;
+      // Yorumlar (sadece embedded)
+      totalComments += (data.comments || []).length;
 
-      // ✅ Alt koleksiyonlardan beğeni/beğenmeme
       try {
+        // Beğeni ve beğenmeme (subcollection)
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes"))
+          getDocs(collection(ref, "dislikes")),
         ]);
-        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+        totalLikes += likesSnap.size;
+        totalDislikes += dislikesSnap.size;
       } catch (e) {
         console.warn("analiz alt koleksiyonları alınamadı:", e);
       }
     }
 
-    // 📊 POSTLAR
-    for (const post of postSnapshot.docs) {
+    // ✅ POSTLAR
+    for (const post of fotolar.docs) {
       const ref = post.ref;
       const data = post.data();
-      const postTS = normalizeTimestamp(data.timestamp);
-      const dateStr = postTS?.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
 
-      // ✅ Embedded yorumları say
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+      // Embedded yorumlar
+      totalComments += (data.comments || []).length;
 
       try {
+        // Beğeni, beğenmeme ve yorum (subcollections)
         const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
-          getDocs(collection(ref, "comments"))
+          getDocs(collection(ref, "comments")),
         ]);
 
-        likesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            likeDateMap[dStr] = (likeDateMap[dStr] || 0) + 1;
-          }
-        });
-
-        dislikesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            dislikeDateMap[dStr] = (dislikeDateMap[dStr] || 0) + 1;
-          }
-        });
-
-        commentsSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            commentDateMap[dStr] = (commentDateMap[dStr] || 0) + 1;
-          }
-        });
-
+        totalLikes += likesSnap.size;
+        totalDislikes += dislikesSnap.size;
+        totalComments += commentsSnap.size;
       } catch (e) {
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
     }
 
-    const getArray = (map) => sortedDates.map(date => map[date] || 0);
-    const baseOptions = {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }
-      }
-    };
+    // ✅ Sayıları DOM'a yerleştir
+    document.getElementById("totalLikes").textContent = totalLikes;
+    document.getElementById("totalDislikes").textContent = totalDislikes;
+    document.getElementById("totalComments").textContent = totalComments;
 
-    new Chart(document.getElementById("userGrowthChart"), {
-      type: 'line',
-      data: {
-        labels: sortedDates,
-        datasets: [{
-          label: 'Kullanıcı Artışı',
-          data: getArray(userDateMap),
-          borderColor: 'blue',
-          borderWidth: 2
-        }]
-      },
-      options: baseOptions
-    });
-
-    new Chart(document.getElementById("contentLikesChart"), {
-      type: 'line',
-      data: {
-        labels: sortedDates,
-        datasets: [{
-          label: 'Beğeniler',
-          data: getArray(likeDateMap),
-          borderColor: 'green',
-          borderWidth: 2
-        }]
-      },
-      options: baseOptions
-    });
-
-    new Chart(document.getElementById("contentDislikesChart"), {
-      type: 'line',
-      data: {
-        labels: sortedDates,
-        datasets: [{
-          label: 'Beğenmeme',
-          data: getArray(dislikeDateMap),
-          borderColor: 'red',
-          borderWidth: 2
-        }]
-      },
-      options: baseOptions
-    });
-
-    new Chart(document.getElementById("contentCommentsChart"), {
-      type: 'line',
-      data: {
-        labels: sortedDates,
-        datasets: [{
-          label: 'Yorumlar',
-          data: getArray(commentDateMap),
-          borderColor: 'orange',
-          borderWidth: 2
-        }]
-      },
-      options: baseOptions
-    });
-
-  } catch (err) {
-    console.error("Grafikler yüklenemedi:", err);
+  } catch (error) {
+    console.error("Veri çekme hatası: ", error);
   }
 }
+
 
 
   loadUserList();
