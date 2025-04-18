@@ -286,6 +286,7 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -298,7 +299,7 @@ const firebaseConfig = {
 };
 
 const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -420,7 +421,10 @@ async function likePost(postId, post, postElement) {
     postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount - 1}`;
   } else {
     await updateDoc(postRef, { likes: likeCount + 1 });
-    await setDoc(userLikesRef, { userId: user.uid });
+    await setDoc(userLikesRef, {
+  userId: user.uid,
+  timestamp: Timestamp.now()
+});
     postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount + 1}`;
   }
 }
@@ -441,7 +445,10 @@ async function dislikePost(postId, post, postElement) {
     postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount - 1}`;
   } else {
     await updateDoc(postRef, { dislikes: dislikeCount + 1 });
-    await setDoc(userDislikesRef, { userId: user.uid });
+    await setDoc(userDislikesRef, {
+  userId: user.uid,
+  timestamp: Timestamp.now()
+});
     postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount + 1}`;
   }
 }
