@@ -343,14 +343,11 @@ const formattedDate = new Date(postDate).toLocaleString("tr-TR");
 const postFooter = `
 <div class="video-footer">
   <div>
-    <button class="like-btn" data-id="${postDoc.id}" style="background-color: #f39c12;">
-      👍 <span class="like-count">${post.likes || 0}</span>
-    </button>
-    <button class="dislike-btn" data-id="${postDoc.id}" style="background-color: #e74c3c;">
-      👎 <span class="dislike-count">${post.dislikes || 0}</span>
-    </button>
+    <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
+    <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
   </div>
   <div>
+    <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
   </div>
   <div>
     <span class="post-date">🕒 ${formattedDate}</span>
