@@ -353,11 +353,7 @@ async function loadCharts() {
     };
 
     const safeValue = (val) => Math.max(0, val || 0);
-
     const now = new Date();
-    const cutoff = new Date();
-    cutoff.setDate(now.getDate() - 9);
-
     const generateLastNDates = (n) => {
       const dates = [];
       for (let i = n - 1; i >= 0; i--) {
@@ -369,81 +365,96 @@ async function loadCharts() {
     };
 
     const sortedDates = generateLastNDates(10);
-
-    const userSnapshot = await getDocs(query(collection(db, "users")));
-    const analizSnapshot = await getDocs(collection(db, "analizler"));
-    const postSnapshot = await getDocs(collection(db, "posts"));
-
     const userDateMap = {}, likeDateMap = {}, dislikeDateMap = {}, commentDateMap = {};
 
-    // 👤 Kullanıcılar
+    const [userSnapshot, analizSnapshot, postSnapshot] = await Promise.all([
+      getDocs(collection(db, "users")),
+      getDocs(collection(db, "analizler")),
+      getDocs(collection(db, "posts"))
+    ]);
+
+    // Kullanıcılar
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
-      if (!ts) return;
-      const dateStr = ts.toLocaleDateString("tr-TR");
+      const dateStr = ts?.toLocaleDateString("tr-TR");
       if (sortedDates.includes(dateStr)) {
         userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
       }
     });
 
-    // 📊 Analizler
-    analizSnapshot.forEach(doc => {
-      const data = doc.data();
+    // ANALİZLER
+    for (const analiz of analizSnapshot.docs) {
+      const ref = analiz.ref;
+      const data = analiz.data();
       const ts = normalizeTimestamp(data.timestamp);
-      if (!ts) return;
+      if (!ts) continue;
       const dateStr = ts.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) return;
+      if (!sortedDates.includes(dateStr)) continue;
 
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
+      // Embedded yorumlar
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
-    });
 
-    // 📊 Postlar
+      // Subcollection likes / dislikes
+      try {
+        const [likesSnap, dislikesSnap] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes"))
+        ]);
+        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+      } catch (e) {
+        console.warn("Analiz likes/dislikes okunamadı:", e);
+      }
+    }
+
+    // POSTLAR
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
-
-      const likes = await getDocs(collection(ref, "likes"));
-      likes.forEach(doc => {
-        const ts = normalizeTimestamp(doc.data().timestamp);
-        if (!ts) return;
-        const dateStr = ts.toLocaleDateString("tr-TR");
-        if (sortedDates.includes(dateStr)) {
-          likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + 1;
-        }
-      });
-
-      const dislikes = await getDocs(collection(ref, "dislikes"));
-      dislikes.forEach(doc => {
-        const ts = normalizeTimestamp(doc.data().timestamp);
-        if (!ts) return;
-        const dateStr = ts.toLocaleDateString("tr-TR");
-        if (sortedDates.includes(dateStr)) {
-          dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + 1;
-        }
-      });
-
-      const comments = await getDocs(collection(ref, "comments"));
-      comments.forEach(doc => {
-        const ts = normalizeTimestamp(doc.data().timestamp);
-        if (!ts) return;
-        const dateStr = ts.toLocaleDateString("tr-TR");
-        if (sortedDates.includes(dateStr)) {
-          commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + 1;
-        }
-      });
-
-      // ✅ Ayrıca embed comment varsa onu da say
       const data = post.data();
       const ts = normalizeTimestamp(data.timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
-      if (sortedDates.includes(dateStr)) {
-        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+      if (!sortedDates.includes(dateStr)) continue;
+
+      // Embedded yorumlar
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+
+      // Subcollections
+      try {
+        const [likes, dislikes, comments] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes")),
+          getDocs(collection(ref, "comments"))
+        ]);
+
+        likes.forEach(doc => {
+          const ts = normalizeTimestamp(doc.data().timestamp);
+          const dStr = ts?.toLocaleDateString("tr-TR");
+          if (sortedDates.includes(dStr)) {
+            likeDateMap[dStr] = (likeDateMap[dStr] || 0) + 1;
+          }
+        });
+
+        dislikes.forEach(doc => {
+          const ts = normalizeTimestamp(doc.data().timestamp);
+          const dStr = ts?.toLocaleDateString("tr-TR");
+          if (sortedDates.includes(dStr)) {
+            dislikeDateMap[dStr] = (dislikeDateMap[dStr] || 0) + 1;
+          }
+        });
+
+        comments.forEach(doc => {
+          const ts = normalizeTimestamp(doc.data().timestamp);
+          const dStr = ts?.toLocaleDateString("tr-TR");
+          if (sortedDates.includes(dStr)) {
+            commentDateMap[dStr] = (commentDateMap[dStr] || 0) + 1;
+          }
+        });
+      } catch (e) {
+        console.warn("Post likes/dislikes/comments okunamadı:", e);
       }
     }
 
     const getArray = (map) => sortedDates.map(date => map[date] || 0);
-
     const baseOptions = {
       responsive: true,
       scales: {
@@ -511,6 +522,7 @@ async function loadCharts() {
     console.error("Grafikler yüklenemedi:", err);
   }
 }
+
 
   loadUserList();
   loadCharts();
