@@ -300,105 +300,130 @@
   });
 
   // Dinamik grafik yükleme fonksiyonu
-  async function loadCharts() {
-    try {
-      const userQ = query(collection(db, "users"), orderBy("timestamp"));
-      const userSnapshot = await getDocs(userQ);
+async function loadCharts() {
+  try {
+    const userQ = query(collection(db, "users"), orderBy("timestamp"));
+    const userSnapshot = await getDocs(userQ);
 
-      const userLabels = [];
-      const userCounts = [];
-      const likeCounts = [];
-      const dislikeCounts = [];
-      const commentCounts = [];
+    const userDateMap = {};
+    userSnapshot.forEach(doc => {
+      const ts = doc.data().timestamp;
+      if (!ts) return;
+      const date = new Date(ts.seconds * 1000).toLocaleDateString();
+      userDateMap[date] = (userDateMap[date] || 0) + 1;
+    });
 
-      const userDateMap = {};
+    const userLabels = Object.keys(userDateMap).sort();
+    const userCounts = userLabels.map(date => userDateMap[date]);
 
-      userSnapshot.forEach(doc => {
-        const ts = doc.data().timestamp;
-        if (!ts) return;
-        const date = new Date(ts.seconds * 1000).toLocaleDateString();
-        userDateMap[date] = (userDateMap[date] || 0) + 1;
+    const analizSnapshot = await getDocs(collection(db, "analizler"));
+    const fotoSnapshot = await getDocs(collection(db, "posts"));
+
+    const likeDateMap = {};
+    const dislikeDateMap = {};
+    const commentDateMap = {};
+
+    const safeValue = (val) => Math.max(0, val || 0);
+
+    // ❗Sadece son 10 günü dahil etmek istersen:
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(now.getDate() - 10);
+
+    const addToMap = (map, dateStr, value) => {
+      map[dateStr] = (map[dateStr] || 0) + safeValue(value);
+    };
+
+    const processDocs = (snapshot) => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!data.timestamp) return;
+
+        const ts = new Date(data.timestamp.seconds * 1000);
+        if (ts < cutoff) return; // ✅ Son 10 gün filtresi
+
+        const dateStr = ts.toLocaleDateString();
+        addToMap(likeDateMap, dateStr, data.likes);
+        addToMap(dislikeDateMap, dateStr, data.dislikes);
+        addToMap(commentDateMap, dateStr, (data.comments || []).length);
       });
+    };
 
-      for (const [date, count] of Object.entries(userDateMap)) {
-        userLabels.push(date);
-        userCounts.push(count);
-      }
+    processDocs(analizSnapshot);
+    processDocs(fotoSnapshot);
 
-      const analizSnapshot = await getDocs(collection(db, "analizler"));
-      const fotoSnapshot = await getDocs(collection(db, "posts"));
+    const sortedLikeDates = Object.keys(likeDateMap).sort();
+    const sortedDislikeDates = Object.keys(dislikeDateMap).sort();
+    const sortedCommentDates = Object.keys(commentDateMap).sort();
 
-      analizSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
+    const likeData = sortedLikeDates.map(date => likeDateMap[date]);
+    const dislikeData = sortedDislikeDates.map(date => dislikeDateMap[date]);
+    const commentData = sortedCommentDates.map(date => commentDateMap[date]);
 
-      fotoSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
+    // 📊 Kullanıcı Artışı
+    new Chart(document.getElementById("userGrowthChart"), {
+      type: 'line',
+      data: {
+        labels: userLabels,
+        datasets: [{
+          label: 'Kullanıcı Artışı',
+          data: userCounts,
+          borderColor: 'blue',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true }
+    });
 
-      // Kullanıcı artışı grafiği
-      new Chart(document.getElementById("userGrowthChart"), {
-        type: 'line',
-        data: {
-          labels: userLabels,
-          datasets: [{
-            label: 'Kullanıcı Artışı',
-            data: userCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
+    // 📊 Beğeniler
+    new Chart(document.getElementById("contentLikesChart"), {
+      type: 'line',
+      data: {
+        labels: sortedLikeDates,
+        datasets: [{
+          label: 'Beğeniler',
+          data: likeData,
+          borderColor: 'green',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true }
+    });
 
-      // Beğeni sayısı grafiği
-      new Chart(document.getElementById("contentLikesChart"), {
-        type: 'line',
-        data: {
-          labels: likeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğeniler',
-            data: likeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
+    // 📊 Beğenmeme
+    new Chart(document.getElementById("contentDislikesChart"), {
+      type: 'line',
+      data: {
+        labels: sortedDislikeDates,
+        datasets: [{
+          label: 'Beğenmeme',
+          data: dislikeData,
+          borderColor: 'red',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true }
+    });
 
-      // Beğenmeme sayısı grafiği
-      new Chart(document.getElementById("contentDislikesChart"), {
-        type: 'line',
-        data: {
-          labels: dislikeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğenmeme',
-            data: dislikeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
+    // 📊 Yorumlar
+    new Chart(document.getElementById("contentCommentsChart"), {
+      type: 'line',
+      data: {
+        labels: sortedCommentDates,
+        datasets: [{
+          label: 'Yorumlar',
+          data: commentData,
+          borderColor: 'orange',
+          borderWidth: 2
+        }]
+      },
+      options: { responsive: true }
+    });
 
-      // Yorum sayısı grafiği
-      new Chart(document.getElementById("contentCommentsChart"), {
-        type: 'line',
-        data: {
-          labels: commentCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Yorumlar',
-            data: commentCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-    } catch (error) {
-      console.error("Grafikler yüklenemedi: ", error);
-    }
+  } catch (error) {
+    console.error("Grafikler yüklenemedi: ", error);
   }
+}
 
   loadUserList();
   loadCharts();
