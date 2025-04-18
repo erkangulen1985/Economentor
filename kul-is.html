@@ -402,54 +402,44 @@ async function loadCharts() {
     for (const analiz of analizSnapshot.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
-      const analizTS = normalizeTimestamp(data.timestamp);
-      const dateStr = analizTS?.toLocaleDateString("tr-TR");
+      const ts = normalizeTimestamp(data.timestamp);
+      const dateStr = ts?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorum
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+      // Embedded yorumlar (timestamp string olabilir)
+      const comments = data.comments || [];
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + comments.length;
 
-      // Subcollection like/dislike → analiz.timestamp baz alınarak
-      try {
-        const [likesSnap, dislikesSnap] = await Promise.all([
-          getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes"))
-        ]);
-
-        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
-      } catch (e) {
-        console.warn("analiz alt koleksiyonları alınamadı:", e);
-      }
+      // Alt koleksiyonlar
+      const [likesSnap, dislikesSnap] = await Promise.all([
+        getDocs(collection(ref, "likes")),
+        getDocs(collection(ref, "dislikes"))
+      ]);
+      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
     }
 
     // POSTLAR
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
       const data = post.data();
-      const postTS = normalizeTimestamp(data.timestamp);
-      const dateStr = postTS?.toLocaleDateString("tr-TR");
+      const ts = normalizeTimestamp(data.timestamp);
+      const dateStr = ts?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorum
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      try {
-        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
-          getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes")),
-          getDocs(collection(ref, "comments"))
-        ]);
+      const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
+        getDocs(collection(ref, "likes")),
+        getDocs(collection(ref, "dislikes")),
+        getDocs(collection(ref, "comments"))
+      ]);
 
-        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
-        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
-      } catch (e) {
-        console.warn("post alt koleksiyonları alınamadı:", e);
-      }
+      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
     }
 
-    // Birikimli array
     const getCumulativeArray = (map) => {
       let total = 0;
       return sortedDates.map(date => {
