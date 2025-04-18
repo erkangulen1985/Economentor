@@ -247,23 +247,27 @@ async function loadStatistics() {
     });
 
     // POSTLAR
-    for (const post of fotolar.docs) {
-      const ref = post.ref;
+for (const post of fotolar.docs) {
+  const ref = post.ref;
 
-      const likesSnap = await getDocs(collection(ref, "likes"));
-      const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
+  const likesSnap = await getDocs(collection(ref, "likes"));
+  const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
 
-      totalLikes += likesSnap.size;
-      totalDislikes += dislikesSnap.size || 0;
+  totalLikes += likesSnap.size;
+  totalDislikes += dislikesSnap.size || 0;
 
-      try {
-        const data = post.data();
-        totalComments += (data.comments || []).length;
-        totalComments += commentsSnap.docs.length; // ✅ Burada tamamlandı
-      } catch (err) {
-        console.warn("Yorumlar alınamadı:", err);
-      }
-    }
+  // 🔁 1. embedded comment alanı
+  const data = post.data();
+  totalComments += (data.comments || []).length;
+
+  // 🔁 2. eğer subcollection olarak varsa
+  try {
+    const commentsSnap = await getDocs(collection(ref, "comments"));
+    totalComments += commentsSnap.docs.length;
+  } catch (err) {
+    console.warn("Yorumlar alınamadı:", err);
+  }
+}
 
     // Sayıları güncelle
     document.getElementById("totalLikes").textContent = totalLikes;
