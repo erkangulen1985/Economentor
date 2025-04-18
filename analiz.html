@@ -183,6 +183,7 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -273,7 +274,10 @@ onAuthStateChanged(auth, async (user) => {
         e.target.style.backgroundColor = "#f39c12";
         e.target.querySelector(".like-count").innerText = likeCount - 1;
       } else {
-        await setDoc(likeRef, { uid });
+await setDoc(likeRef, {
+  uid,
+  timestamp: Timestamp.now()
+});
         await updateDoc(ref, { likes: likeCount + 1 });
         e.target.style.backgroundColor = "#27ae60";
         e.target.querySelector(".like-count").innerText = likeCount + 1;
@@ -311,7 +315,10 @@ onAuthStateChanged(auth, async (user) => {
         e.target.style.backgroundColor = "#e74c3c";
         e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;
       } else {
-        await setDoc(dislikeRef, { uid });
+await setDoc(dislikeRef, {
+  uid,
+  timestamp: Timestamp.now()
+});
         await updateDoc(ref, { dislikes: dislikeCount + 1 });
         e.target.style.backgroundColor = "#c0392b";
         e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;
