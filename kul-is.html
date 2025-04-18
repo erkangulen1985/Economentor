@@ -384,32 +384,30 @@ async function loadCharts() {
     });
 
     // 📊 ANALİZLER
-    for (const analiz of analizSnapshot.docs) {
-      const ref = analiz.ref;
-      const data = analiz.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
+for (const analiz of analizSnapshot.docs) {
+  const ref = analiz.ref;
+  const data = analiz.data();
+  const ts = normalizeTimestamp(data.timestamp);
+  const dateStr = ts?.toLocaleDateString("tr-TR");
+  if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+  // comment sadece embedded varsa say
+  commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      // Subcollections
-      try {
-        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
-          getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes")),
-          getDocs(collection(ref, "comments"))
-        ]);
-        likeDateMap[dateStr] += likesSnap.size;
-        dislikeDateMap[dateStr] += dislikesSnap.size;
-        commentDateMap[dateStr] += commentsSnap.size;
-      } catch (e) {
-        console.warn("analizler subcollection hatası", e);
-      }
-    }
+  // sadece subcollection'lardan say
+  try {
+    const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
+      getDocs(collection(ref, "likes")),
+      getDocs(collection(ref, "dislikes")),
+      getDocs(collection(ref, "comments"))
+    ]);
+    likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+    dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+    commentDateMap[dateStr] += commentsSnap.size;
+  } catch (e) {
+    console.warn("analizler subcollection hatası", e);
+  }
+}
 
     // 📊 POSTLAR
     for (const post of postSnapshot.docs) {
