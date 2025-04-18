@@ -155,6 +155,9 @@
         <p>Toplam Kullanıcı Sayısı: <span id="totalUsers">0</span></p>
         <p>Toplam İçerik Sayısı: <span id="totalContents">0</span></p>
         <p>Toplam Dilek/Şikayet Sayısı: <span id="totalFeedbacks">0</span></p>
+        <p>Toplam Beğeni Sayısı: <span id="totalLikes">0</span></p>
+        <p>Toplam Beğenmeme Sayısı: <span id="totalDislikes">0</span></p>
+        <p>Toplam Yorum Sayısı: <span id="totalComments">0</span></p>
       </div>
 
       <!-- Kullanıcı Yönetimi -->
@@ -219,21 +222,49 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  // Genel istatistikleri getir
-  async function loadStatistics() {
-    try {
-      const analizler = await getDocs(collection(db, "analizler"));
-      const fotolar = await getDocs(collection(db, "posts"));
-      const users = await getDocs(collection(db, "users"));
-      const feedbacks = await getDocs(collection(db, "feedback"));
+async function loadStatistics() {
+  try {
+    const analizler = await getDocs(collection(db, "analizler"));
+    const fotolar = await getDocs(collection(db, "posts"));
+    const users = await getDocs(collection(db, "users"));
+    const feedbacks = await getDocs(collection(db, "feedback"));
 
-      document.getElementById("totalUsers").textContent = users.size;
-      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
-      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
-    } catch (error) {
-      console.error("Veri çekme hatası: ", error);
+    document.getElementById("totalUsers").textContent = users.size;
+    document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
+    document.getElementById("totalFeedbacks").textContent = feedbacks.size;
+
+    // 🔢 Beğeni/Beğenmeme/Yorum Toplamları
+    let totalLikes = 0;
+    let totalDislikes = 0;
+    let totalComments = 0;
+
+    analizler.forEach(doc => {
+      const data = doc.data();
+      totalLikes += data.likes || 0;
+      totalDislikes += data.dislikes || 0;
+      totalComments += (data.comments || []).length;
+    });
+
+    for (const post of fotolar.docs) {
+      const ref = post.ref;
+
+      const likesSnap = await getDocs(collection(ref, "likes"));
+      const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
+      const commentsSnap = await getDocs(collection(ref, "comments")).catch(() => ({ size: 0 }));
+
+      totalLikes += likesSnap.size;
+      totalDislikes += dislikesSnap.size || 0;
+      totalComments += commentsSnap.size || 0;
     }
+
+    document.getElementById("totalLikes").textContent = totalLikes;
+    document.getElementById("totalDislikes").textContent = totalDislikes;
+    document.getElementById("totalComments").textContent = totalComments;
+
+  } catch (error) {
+    console.error("Veri çekme hatası: ", error);
   }
+}
 
   loadStatistics();
 
