@@ -369,8 +369,6 @@ async function loadCharts() {
       return null;
     };
 
-    const safeValue = (val) => Math.max(0, val || 0);
-
     const now = new Date();
     const generateLastNDates = (n) => {
       const dates = [];
@@ -408,10 +406,10 @@ async function loadCharts() {
       const dateStr = analizTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
+      // Embedded yorum
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      // Subcollection: likes & dislikes
+      // Subcollection like/dislike → analiz.timestamp baz alınarak
       try {
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
@@ -433,7 +431,7 @@ async function loadCharts() {
       const dateStr = postTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
+      // Embedded yorum
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
       try {
@@ -443,36 +441,15 @@ async function loadCharts() {
           getDocs(collection(ref, "comments"))
         ]);
 
-        likesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            likeDateMap[dStr] = (likeDateMap[dStr] || 0) + 1;
-          }
-        });
-
-        dislikesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            dislikeDateMap[dStr] = (dislikeDateMap[dStr] || 0) + 1;
-          }
-        });
-
-        commentsSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            commentDateMap[dStr] = (commentDateMap[dStr] || 0) + 1;
-          }
-        });
-
+        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
       } catch (e) {
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
     }
 
-    // 🔄 Toplamlara göre birikimli array
+    // Birikimli array
     const getCumulativeArray = (map) => {
       let total = 0;
       return sortedDates.map(date => {
@@ -548,6 +525,7 @@ async function loadCharts() {
     console.error("Grafikler yüklenemedi:", err);
   }
 }
+
 
   loadUserList();
   loadCharts();
