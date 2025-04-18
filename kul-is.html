@@ -387,21 +387,35 @@ async function loadCharts() {
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + safeValue((data.comments || []).length);
     });
 
-    // 📊 Postlar (likes subcollection timestamp ile)
+    // 📊 Postlar - likes, dislikes, comments
     for (const docSnap of postSnapshot.docs) {
       const ref = docSnap.ref;
 
+      // ✅ Likes
       const likesSnap = await getDocs(collection(ref, "likes"));
       likesSnap.forEach(likeDoc => {
-        const tsDate = normalizeTimestamp(likeDoc.data().timestamp);
+        const ts = likeDoc.data().timestamp;
+        const tsDate = normalizeTimestamp(ts);
         if (!tsDate || tsDate < cutoff) return;
         const dateStr = tsDate.toLocaleDateString("tr-TR");
         likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + 1;
       });
 
+      // ✅ Dislikes
+      const dislikesSnap = await getDocs(collection(ref, "dislikes"));
+      dislikesSnap.forEach(dislikeDoc => {
+        const ts = dislikeDoc.data().timestamp;
+        const tsDate = normalizeTimestamp(ts);
+        if (!tsDate || tsDate < cutoff) return;
+        const dateStr = tsDate.toLocaleDateString("tr-TR");
+        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + 1;
+      });
+
+      // ✅ Comments
       const commentsSnap = await getDocs(collection(ref, "comments"));
       commentsSnap.forEach(commentDoc => {
-        const tsDate = normalizeTimestamp(commentDoc.data().timestamp);
+        const ts = commentDoc.data().timestamp;
+        const tsDate = normalizeTimestamp(ts);
         if (!tsDate || tsDate < cutoff) return;
         const dateStr = tsDate.toLocaleDateString("tr-TR");
         commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + 1;
@@ -414,6 +428,7 @@ async function loadCharts() {
     const dislikeData = sortedDates.map(date => dislikeDateMap[date] || 0);
     const commentData = sortedDates.map(date => commentDateMap[date] || 0);
 
+    // 📈 Ortak grafik ayarları
     const baseOptions = {
       responsive: true,
       scales: {
