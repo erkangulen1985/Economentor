@@ -410,49 +410,41 @@ for (const analiz of analizSnapshot.docs) {
 }
 
     // 📊 POSTLAR
-    for (const post of postSnapshot.docs) {
-      const ref = post.ref;
-      const data = post.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
+for (const analiz of analizSnapshot.docs) {
+  const ref = analiz.ref;
+  const data = analiz.data();
+  const ts = normalizeTimestamp(data.timestamp);
 
-      // Embedde
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+  // 🔒 Zaman verisi eksikse işlem yapma
+  if (!ts) continue;
 
-      // Subcollections
-      try {
-        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
-          getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes")),
-          getDocs(collection(ref, "comments"))
-        ]);
-        likesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            likeDateMap[dStr] = (likeDateMap[dStr] || 0) + 1;
-          }
-        });
-        dislikesSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            dislikeDateMap[dStr] = (dislikeDateMap[dStr] || 0) + 1;
-          }
-        });
-        commentsSnap.forEach(doc => {
-          const ts = normalizeTimestamp(doc.data().timestamp);
-          const dStr = ts?.toLocaleDateString("tr-TR");
-          if (sortedDates.includes(dStr)) {
-            commentDateMap[dStr] = (commentDateMap[dStr] || 0) + 1;
-          }
-        });
-      } catch (e) {
-        console.warn("posts subcollection hatası", e);
-      }
-    }
+  const dateStr = ts.toLocaleDateString("tr-TR");
+  if (!sortedDates.includes(dateStr)) continue;
+
+  // ✅ Embedded yorum varsa say
+  commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+
+  // ❌ Embedded beğeni / beğenmeme sayma → sadece subcollection kullan
+  try {
+    const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
+      getDocs(collection(ref, "likes")),
+      getDocs(collection(ref, "dislikes")),
+      getDocs(collection(ref, "comments"))
+    ]);
+
+    // ✅ Beğeni say
+    likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+
+    // ✅ Beğenmeme say
+    dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+
+    // ✅ Alt koleksiyon yorumları da say
+    commentDateMap[dateStr] += commentsSnap.size;
+
+  } catch (e) {
+    console.warn("Analiz subcollection okuma hatası:", e);
+  }
+}
 
     const getArray = (map) => sortedDates.map(date => map[date] || 0);
     const baseOptions = {
