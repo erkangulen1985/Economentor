@@ -299,72 +299,92 @@
     }
   });
 
-  // Dinamik grafik yükleme fonksiyonu
 async function loadCharts() {
   try {
-    const userQ = query(collection(db, "users"), orderBy("timestamp"));
-    const userSnapshot = await getDocs(userQ);
+    const userSnapshot = await getDocs(query(collection(db, "users"), orderBy("timestamp")));
+    const analizSnapshot = await getDocs(collection(db, "analizler"));
+    const postSnapshot = await getDocs(collection(db, "posts"));
 
     const userDateMap = {};
-    userSnapshot.forEach(doc => {
-      const ts = doc.data().timestamp;
-      if (!ts) return;
-      const date = new Date(ts.seconds * 1000).toLocaleDateString();
-      userDateMap[date] = (userDateMap[date] || 0) + 1;
-    });
-
-    const userLabels = Object.keys(userDateMap).sort();
-    const userCounts = userLabels.map(date => userDateMap[date]);
-
-    const analizSnapshot = await getDocs(collection(db, "analizler"));
-    const fotoSnapshot = await getDocs(collection(db, "posts"));
-
     const likeDateMap = {};
     const dislikeDateMap = {};
     const commentDateMap = {};
 
-    const safeValue = (val) => Math.max(0, val || 0);
-
-    // ❗Sadece son 10 günü dahil etmek istersen:
     const now = new Date();
     const cutoff = new Date();
-    cutoff.setDate(now.getDate() - 10);
+    cutoff.setDate(now.getDate() - 10); // Son 10 günü filtrelemek için
 
-    const addToMap = (map, dateStr, value) => {
-      map[dateStr] = (map[dateStr] || 0) + safeValue(value);
+    const safeValue = (val) => Math.max(0, val || 0);
+
+    const dateStrFromTS = (ts) => {
+      const d = new Date(ts.seconds * 1000);
+      return d.toLocaleDateString();
     };
 
-    const processDocs = (snapshot) => {
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (!data.timestamp) return;
+    // 👤 Kullanıcı artışı
+    userSnapshot.forEach(doc => {
+      const ts = doc.data().timestamp;
+      if (!ts) return;
+      const tsDate = new Date(ts.seconds * 1000);
+      if (tsDate < cutoff) return;
 
-        const ts = new Date(data.timestamp.seconds * 1000);
-        if (ts < cutoff) return; // ✅ Son 10 gün filtresi
+      const dateStr = tsDate.toLocaleDateString();
+      userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
+    });
 
-        const dateStr = ts.toLocaleDateString();
-        addToMap(likeDateMap, dateStr, data.likes);
-        addToMap(dislikeDateMap, dateStr, data.dislikes);
-        addToMap(commentDateMap, dateStr, (data.comments || []).length);
-      });
-    };
+    // 🧠 Analiz verileri
+    analizSnapshot.forEach(doc => {
+      const data = doc.data();
+      const ts = data.timestamp;
+      if (!ts) return;
+      const tsDate = new Date(ts.seconds * 1000);
+      if (tsDate < cutoff) return;
 
-    processDocs(analizSnapshot);
-    processDocs(fotoSnapshot);
+      const dateStr = tsDate.toLocaleDateString();
+      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
+      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + safeValue((data.comments || []).length);
+    });
 
-    const sortedLikeDates = Object.keys(likeDateMap).sort();
-    const sortedDislikeDates = Object.keys(dislikeDateMap).sort();
-    const sortedCommentDates = Object.keys(commentDateMap).sort();
+    // 🎬 Post verileri (subcollection üzerinden like ve yorum say)
+    for (const docSnap of postSnapshot.docs) {
+      const ref = docSnap.ref;
+      const data = docSnap.data();
+      const ts = data.timestamp;
+      if (!ts) continue;
 
-    const likeData = sortedLikeDates.map(date => likeDateMap[date]);
-    const dislikeData = sortedDislikeDates.map(date => dislikeDateMap[date]);
-    const commentData = sortedCommentDates.map(date => commentDateMap[date]);
+      const tsDate = new Date(ts.seconds * 1000);
+      if (tsDate < cutoff) continue;
 
-    // 📊 Kullanıcı Artışı
+      const dateStr = tsDate.toLocaleDateString();
+
+      const likesSnap = await getDocs(collection(ref, "likes"));
+      const commentsSnap = await getDocs(collection(ref, "comments")); // varsa
+
+      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
+      // Dislikes posts içinde yok → sıfır kabul ediyoruz
+    }
+
+    // 📊 Verileri sırala ve hazırla
+    const allDates = new Set([
+      ...Object.keys(userDateMap),
+      ...Object.keys(likeDateMap),
+      ...Object.keys(dislikeDateMap),
+      ...Object.keys(commentDateMap),
+    ]);
+    const sortedDates = Array.from(allDates).sort((a, b) => new Date(a) - new Date(b));
+
+    const userCounts = sortedDates.map(date => userDateMap[date] || 0);
+    const likeData = sortedDates.map(date => likeDateMap[date] || 0);
+    const dislikeData = sortedDates.map(date => dislikeDateMap[date] || 0);
+    const commentData = sortedDates.map(date => commentDateMap[date] || 0);
+
+    // 📈 Kullanıcı Artışı
     new Chart(document.getElementById("userGrowthChart"), {
       type: 'line',
       data: {
-        labels: userLabels,
+        labels: sortedDates,
         datasets: [{
           label: 'Kullanıcı Artışı',
           data: userCounts,
@@ -375,11 +395,11 @@ async function loadCharts() {
       options: { responsive: true }
     });
 
-    // 📊 Beğeniler
+    // 👍 Beğeniler
     new Chart(document.getElementById("contentLikesChart"), {
       type: 'line',
       data: {
-        labels: sortedLikeDates,
+        labels: sortedDates,
         datasets: [{
           label: 'Beğeniler',
           data: likeData,
@@ -390,11 +410,11 @@ async function loadCharts() {
       options: { responsive: true }
     });
 
-    // 📊 Beğenmeme
+    // 👎 Beğenmeme
     new Chart(document.getElementById("contentDislikesChart"), {
       type: 'line',
       data: {
-        labels: sortedDislikeDates,
+        labels: sortedDates,
         datasets: [{
           label: 'Beğenmeme',
           data: dislikeData,
@@ -405,11 +425,11 @@ async function loadCharts() {
       options: { responsive: true }
     });
 
-    // 📊 Yorumlar
+    // 💬 Yorumlar
     new Chart(document.getElementById("contentCommentsChart"), {
       type: 'line',
       data: {
-        labels: sortedCommentDates,
+        labels: sortedDates,
         datasets: [{
           label: 'Yorumlar',
           data: commentData,
