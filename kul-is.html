@@ -358,40 +358,44 @@ async function loadStatistics() {
 
 async function loadCharts() {
   try {
-    // Genişletilmiş timestamp dönüştürücü
+    // 🔧 Geniş timestamp desteği: string, Firestore Timestamp, Date objesi
     const normalizeTimestamp = (ts) => {
       if (!ts) return null;
-      if (typeof ts.toDate === "function") return ts.toDate(); // Firestore Timestamp
-      if (ts instanceof Date) return ts;
       if (typeof ts === "string") {
         const parsed = Date.parse(ts);
         return isNaN(parsed) ? null : new Date(parsed);
       }
+      if (typeof ts.toDate === "function") return ts.toDate(); // Firestore Timestamp
+      if (ts instanceof Date) return ts;
       if (typeof ts === "object" && ts.seconds) return new Date(ts.seconds * 1000);
       return null;
     };
 
+    // 📅 Son 10 günün tr-TR formatlı tarihlerini oluştur
     const now = new Date();
     const generateLastNDates = (n) => {
       const dates = [];
       for (let i = n - 1; i >= 0; i--) {
         const d = new Date();
         d.setDate(now.getDate() - i);
-        dates.push(d.toLocaleDateString("tr-TR"));
+        dates.push(d.toLocaleDateString("tr-TR")); // örnek: "18.04.2025"
       }
       return dates;
     };
 
     const sortedDates = generateLastNDates(10);
+
+    // 📊 Boş tarih haritaları oluştur
     const userDateMap = {}, likeDateMap = {}, dislikeDateMap = {}, commentDateMap = {};
 
+    // 📥 Firestore'dan verileri topla
     const [userSnapshot, analizSnapshot, postSnapshot] = await Promise.all([
       getDocs(collection(db, "users")),
       getDocs(collection(db, "analizler")),
       getDocs(collection(db, "posts"))
     ]);
 
-    // ✅ KULLANICILAR
+    // 👤 Kullanıcılar
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -400,17 +404,19 @@ async function loadCharts() {
       }
     });
 
-    // ✅ ANALİZLER
+    // 📈 ANALİZLER
     for (const analiz of analizSnapshot.docs) {
       const data = analiz.data();
       const ref = analiz.ref;
       const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
+      if (!ts) continue;
+      const dateStr = ts.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
+      // 🔸 embedded comments
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
+      // 🔹 subcollection likes & dislikes
       try {
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
@@ -419,19 +425,20 @@ async function loadCharts() {
         likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
         dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
       } catch (e) {
-        console.warn("analiz alt koleksiyonları alınamadı:", e);
+        console.warn("Analiz alt koleksiyonları alınamadı:", e);
       }
     }
 
-    // ✅ POSTLAR
+    // 📸 POSTS
     for (const post of postSnapshot.docs) {
       const data = post.data();
       const ref = post.ref;
       const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
+      if (!ts) continue;
+      const dateStr = ts.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
+      // 🔸 embedded comments
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
       try {
@@ -444,11 +451,11 @@ async function loadCharts() {
         dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
         commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
       } catch (e) {
-        console.warn("post alt koleksiyonları alınamadı:", e);
+        console.warn("Post alt koleksiyonları alınamadı:", e);
       }
     }
 
-    // ✅ Kümülatif veri dönüştürücü
+    // 🔄 Tarihe göre kümülatif diziler oluştur
     const getCumulativeArray = (map) => {
       let total = 0;
       return sortedDates.map(date => {
@@ -464,7 +471,7 @@ async function loadCharts() {
       }
     };
 
-    // 🎯 GRAFİKLERİ OLUŞTUR
+    // 📊 Kullanıcı Artışı
     new Chart(document.getElementById("userGrowthChart"), {
       type: 'line',
       data: {
@@ -479,6 +486,7 @@ async function loadCharts() {
       options: baseOptions
     });
 
+    // 👍 Beğeni Grafiği
     new Chart(document.getElementById("contentLikesChart"), {
       type: 'line',
       data: {
@@ -493,6 +501,7 @@ async function loadCharts() {
       options: baseOptions
     });
 
+    // 👎 Beğenmeme Grafiği
     new Chart(document.getElementById("contentDislikesChart"), {
       type: 'line',
       data: {
@@ -507,6 +516,7 @@ async function loadCharts() {
       options: baseOptions
     });
 
+    // 💬 Yorum Grafiği
     new Chart(document.getElementById("contentCommentsChart"), {
       type: 'line',
       data: {
@@ -525,6 +535,7 @@ async function loadCharts() {
     console.error("Grafikler yüklenemedi:", err);
   }
 }
+
 
 
   loadUserList();
