@@ -430,9 +430,11 @@ async function loadCharts() {
         const ts = normalizeTimestamp(doc.data().timestamp);
         if (!ts) return;
         const dateStr = ts.toLocaleDateString("tr-TR");
-        if (sortedDates.includes(dateStr)) {
-          commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + 1;
-        }
+if (sortedDates.includes(dateStr)) {
+  likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
+  dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
+  commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0); // 🔧 düzeltildi
+}
       });
     }
 
