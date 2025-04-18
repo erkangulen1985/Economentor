@@ -257,7 +257,8 @@ async function loadStatistics() {
       totalDislikes += dislikesSnap.size || 0;
 
       try {
-        const commentsSnap = await getDocs(collection(ref, "comments"));
+        const data = post.data();
+        totalComments += (data.comments || []).length;
         totalComments += commentsSnap.docs.length; // ✅ Burada tamamlandı
       } catch (err) {
         console.warn("Yorumlar alınamadı:", err);
