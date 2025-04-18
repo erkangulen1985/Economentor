@@ -54,9 +54,11 @@
       padding: 20px;
       margin-bottom: 20px;
     }
-    .card h3 {
-      margin-top: 0;
-    }
+.card h3 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
     /* Tablo Stili */
     table {
       width: 100%;
@@ -101,11 +103,13 @@
   background-color: #c0392b;  /* Hover durumunda daha koyu kırmızı */
 }
     /* Grafik Alanı */
-    .chart-container {
-      position: relative;
-      height: 400px;
-      width: 100%;
-    }
+.chart-container {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto; /* Ortalamak için */
+  height: 500px; /* Daha büyük gösterim */
+}
     /* Geri Butonu */
     .back-button {
       padding: 10px 20px;
@@ -393,7 +397,7 @@ async function loadCharts() {
 
     // 👤 Kullanıcılar (oluşturulma tarihi)
     userSnapshot.forEach(doc => {
-      const ts = normalizeTimestamp(doc.data().timestamp);
+      const ts = normalizeTimestamp(doc.data().registrationDate);
       const dateStr = ts?.toLocaleDateString("tr-TR");
       if (sortedDates.includes(dateStr)) {
         userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
