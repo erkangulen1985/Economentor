@@ -351,13 +351,17 @@ const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp); // Fire
 const formattedDate = new Date(postDate).toLocaleString("tr-TR");
 
 const postFooter = `
-  <div class="post-footer">
-    <button class="like-button">Beğen</button>
-    <span class="likes">Beğeniler: ${post.likes || 0}</span>
-    <button class="dislike-button">Beğenme</button>
-    <span class="dislikes">Beğenmeler: ${post.dislikes || 0}</span>
-    <span class="comments">Yorumlar: ${post.comments ? post.comments.length : 0}</span>
-    <span class="post-date">🕒 ${formattedDate}</span>
+  <div class="video-footer">
+    <div>
+      <button class="like-btn" data-id="${postDoc.id}" style="background-color: #f39c12;">👍 <span class="like-count">${post.likes || 0}</span></button>
+      <button class="dislike-btn" data-id="${postDoc.id}" style="background-color: #e74c3c;">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
+    </div>
+    <div>
+      <button class="toggle-comments" data-id="${postDoc.id}">💬 Yorumları Göster</button>
+    </div>
+    <div>
+      <span class="post-date">🕒 ${formattedDate}</span>
+    </div>
   </div>
 `;
 
@@ -386,9 +390,11 @@ const postFooter = `
     renderComments(commentListElement, post.comments || [], currentUserId);
 
     const toggleButton = postElement.querySelector(".toggle-comments");
-    toggleButton.addEventListener("click", () => {
-      commentListElement.style.display = commentListElement.style.display === "none" ? "block" : "none";
-    });
+toggleButton.addEventListener("click", () => {
+  const isVisible = commentListElement.style.display === "block";
+  commentListElement.style.display = isVisible ? "none" : "block";
+  toggleButton.textContent = isVisible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
+});
 
     commentListElement.addEventListener("click", async (e) => {
       if (e.target.classList.contains("delete-comment")) {
@@ -408,48 +414,82 @@ const postFooter = `
 async function likePost(postId, post, postElement) {
   const user = auth.currentUser;
   if (!user) return alert("Önce giriş yapmalısınız!");
-  const postRef = doc(db, "posts", postId);
-  const userLikesRef = doc(db, "posts", postId, "likes", user.uid);
-  const userLikeDoc = await getDoc(userLikesRef);
-  const updatedPostSnap = await getDoc(postRef);
-  const updatedPost = updatedPostSnap.data();
-  let likeCount = updatedPost.likes || 0;
 
-  if (userLikeDoc.exists()) {
+  const postRef = doc(db, "posts", postId);
+  const likeRef = doc(db, "posts", postId, "likes", user.uid);
+  const dislikeRef = doc(db, "posts", postId, "dislikes", user.uid);
+
+  const snap = await getDoc(postRef);
+  let likeCount = snap.data().likes || 0;
+  let dislikeCount = snap.data().dislikes || 0;
+
+  const likeExists = (await getDoc(likeRef)).exists();
+
+  const likeBtn = postElement.querySelector(`.like-btn[data-id="${postId}"]`);
+  const dislikeBtn = postElement.querySelector(`.dislike-btn[data-id="${postId}"]`);
+
+  if (likeExists) {
+    await deleteDoc(likeRef);
     await updateDoc(postRef, { likes: likeCount - 1 });
-    await deleteDoc(userLikesRef);
-    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount - 1}`;
+    likeBtn.style.backgroundColor = "#f39c12";
+    likeBtn.querySelector(".like-count").innerText = likeCount - 1;
   } else {
+    await setDoc(likeRef, {
+      uid: user.uid,
+      timestamp: Timestamp.now()
+    });
     await updateDoc(postRef, { likes: likeCount + 1 });
-    await setDoc(userLikesRef, {
-  userId: user.uid,
-  timestamp: Timestamp.now()
-});
-    postElement.querySelector('.likes').textContent = `Beğeniler: ${likeCount + 1}`;
+    likeBtn.style.backgroundColor = "#27ae60";
+    likeBtn.querySelector(".like-count").innerText = likeCount + 1;
+
+    const disSnap = await getDoc(dislikeRef);
+    if (disSnap.exists()) {
+      await deleteDoc(dislikeRef);
+      await updateDoc(postRef, { dislikes: dislikeCount - 1 });
+      dislikeBtn.style.backgroundColor = "#e74c3c";
+      dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
+    }
   }
 }
 
 async function dislikePost(postId, post, postElement) {
   const user = auth.currentUser;
   if (!user) return alert("Önce giriş yapmalısınız!");
-  const postRef = doc(db, "posts", postId);
-  const userDislikesRef = doc(db, "posts", postId, "dislikes", user.uid);
-  const userDislikeDoc = await getDoc(userDislikesRef);
-  const updatedPostSnap = await getDoc(postRef);
-  const updatedPost = updatedPostSnap.data();
-  let dislikeCount = updatedPost.dislikes || 0;
 
-  if (userDislikeDoc.exists()) {
+  const postRef = doc(db, "posts", postId);
+  const likeRef = doc(db, "posts", postId, "likes", user.uid);
+  const dislikeRef = doc(db, "posts", postId, "dislikes", user.uid);
+
+  const snap = await getDoc(postRef);
+  let likeCount = snap.data().likes || 0;
+  let dislikeCount = snap.data().dislikes || 0;
+
+  const disExists = (await getDoc(dislikeRef)).exists();
+
+  const likeBtn = postElement.querySelector(`.like-btn[data-id="${postId}"]`);
+  const dislikeBtn = postElement.querySelector(`.dislike-btn[data-id="${postId}"]`);
+
+  if (disExists) {
+    await deleteDoc(dislikeRef);
     await updateDoc(postRef, { dislikes: dislikeCount - 1 });
-    await deleteDoc(userDislikesRef);
-    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount - 1}`;
+    dislikeBtn.style.backgroundColor = "#e74c3c";
+    dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
   } else {
+    await setDoc(dislikeRef, {
+      uid: user.uid,
+      timestamp: Timestamp.now()
+    });
     await updateDoc(postRef, { dislikes: dislikeCount + 1 });
-    await setDoc(userDislikesRef, {
-  userId: user.uid,
-  timestamp: Timestamp.now()
-});
-    postElement.querySelector('.dislikes').textContent = `Beğenmeler: ${dislikeCount + 1}`;
+    dislikeBtn.style.backgroundColor = "#c0392b";
+    dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount + 1;
+
+    const likeSnap = await getDoc(likeRef);
+    if (likeSnap.exists()) {
+      await deleteDoc(likeRef);
+      await updateDoc(postRef, { likes: likeCount - 1 });
+      likeBtn.style.backgroundColor = "#f39c12";
+      likeBtn.querySelector(".like-count").innerText = likeCount - 1;
+    }
   }
 }
 
@@ -493,19 +533,14 @@ function renderComments(commentListElement, commentsArray, currentUserId) {
     const commentDiv = document.createElement("div");
     commentDiv.classList.add("comment");
 
-    const commentText = `
-      <div>
-        <strong>${comment.username}</strong><br />
-        <span>${comment.text}</span>
-      </div>
+    const timestamp = new Date(comment.timestamp).toLocaleString("tr-TR");
+
+    const content = `
+      <span><b>${comment.username}</b> (${timestamp}): ${comment.text}</span>
+      ${comment.user === currentUserId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
     `;
 
-    let deleteButton = "";
-    if (comment.user === currentUserId) {
-      deleteButton = `<button data-index="${index}" class="delete-comment">❌</button>`;
-    }
-
-    commentDiv.innerHTML = commentText + deleteButton;
+    commentDiv.innerHTML = content;
     commentListElement.appendChild(commentDiv);
   });
 }
