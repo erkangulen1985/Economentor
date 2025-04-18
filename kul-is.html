@@ -358,8 +358,10 @@ async function loadStatistics() {
 
 async function loadCharts() {
   try {
+    // Genişletilmiş timestamp dönüştürücü
     const normalizeTimestamp = (ts) => {
       if (!ts) return null;
+      if (typeof ts.toDate === "function") return ts.toDate(); // Firestore Timestamp
       if (ts instanceof Date) return ts;
       if (typeof ts === "string") {
         const parsed = Date.parse(ts);
@@ -389,7 +391,7 @@ async function loadCharts() {
       getDocs(collection(db, "posts"))
     ]);
 
-    // Kullanıcılar
+    // ✅ KULLANICILAR
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -398,48 +400,55 @@ async function loadCharts() {
       }
     });
 
-    // ANALİZLER
+    // ✅ ANALİZLER
     for (const analiz of analizSnapshot.docs) {
-      const ref = analiz.ref;
       const data = analiz.data();
+      const ref = analiz.ref;
       const ts = normalizeTimestamp(data.timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar (timestamp string olabilir)
-      const comments = data.comments || [];
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + comments.length;
-
-      // Alt koleksiyonlar
-      const [likesSnap, dislikesSnap] = await Promise.all([
-        getDocs(collection(ref, "likes")),
-        getDocs(collection(ref, "dislikes"))
-      ]);
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
-    }
-
-    // POSTLAR
-    for (const post of postSnapshot.docs) {
-      const ref = post.ref;
-      const data = post.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
-
+      // Embedded yorumlar
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
-        getDocs(collection(ref, "likes")),
-        getDocs(collection(ref, "dislikes")),
-        getDocs(collection(ref, "comments"))
-      ]);
-
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
+      try {
+        const [likesSnap, dislikesSnap] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes"))
+        ]);
+        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+      } catch (e) {
+        console.warn("analiz alt koleksiyonları alınamadı:", e);
+      }
     }
 
+    // ✅ POSTLAR
+    for (const post of postSnapshot.docs) {
+      const data = post.data();
+      const ref = post.ref;
+      const ts = normalizeTimestamp(data.timestamp);
+      const dateStr = ts?.toLocaleDateString("tr-TR");
+      if (!sortedDates.includes(dateStr)) continue;
+
+      // Embedded yorumlar
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+
+      try {
+        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes")),
+          getDocs(collection(ref, "comments"))
+        ]);
+        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
+      } catch (e) {
+        console.warn("post alt koleksiyonları alınamadı:", e);
+      }
+    }
+
+    // ✅ Kümülatif veri dönüştürücü
     const getCumulativeArray = (map) => {
       let total = 0;
       return sortedDates.map(date => {
@@ -455,6 +464,7 @@ async function loadCharts() {
       }
     };
 
+    // 🎯 GRAFİKLERİ OLUŞTUR
     new Chart(document.getElementById("userGrowthChart"), {
       type: 'line',
       data: {
