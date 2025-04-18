@@ -358,7 +358,6 @@ async function loadCharts() {
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - 9);
 
-    // 📅 Son 10 gün
     const generateLastNDates = (n) => {
       const dates = [];
       for (let i = n - 1; i >= 0; i--) {
@@ -377,7 +376,7 @@ async function loadCharts() {
 
     const userDateMap = {}, likeDateMap = {}, dislikeDateMap = {}, commentDateMap = {};
 
-    // Kullanıcı artışı
+    // 👤 Kullanıcılar
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
       if (!ts) return;
@@ -387,21 +386,20 @@ async function loadCharts() {
       }
     });
 
-    // Analizler
+    // 📊 Analizler
     analizSnapshot.forEach(doc => {
       const data = doc.data();
       const ts = normalizeTimestamp(data.timestamp);
       if (!ts) return;
       const dateStr = ts.toLocaleDateString("tr-TR");
+      if (!sortedDates.includes(dateStr)) return;
 
-      if (sortedDates.includes(dateStr)) {
-        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
-        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
-        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
-      }
+      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
+      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
     });
 
-    // Postlar (subcollection)
+    // 📊 Postlar
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
 
@@ -430,12 +428,18 @@ async function loadCharts() {
         const ts = normalizeTimestamp(doc.data().timestamp);
         if (!ts) return;
         const dateStr = ts.toLocaleDateString("tr-TR");
-if (sortedDates.includes(dateStr)) {
-  likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
-  dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
-  commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0); // 🔧 düzeltildi
-}
+        if (sortedDates.includes(dateStr)) {
+          commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + 1;
+        }
       });
+
+      // ✅ Ayrıca embed comment varsa onu da say
+      const data = post.data();
+      const ts = normalizeTimestamp(data.timestamp);
+      const dateStr = ts?.toLocaleDateString("tr-TR");
+      if (sortedDates.includes(dateStr)) {
+        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+      }
     }
 
     const getArray = (map) => sortedDates.map(date => map[date] || 0);
