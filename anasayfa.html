@@ -400,7 +400,8 @@ if (toggleButton) {
         });
         post.comments = updatedComments;
         renderComments(commentListElement, updatedComments, currentUserId);
-        postElement.querySelector('.comments').textContent = `Yorumlar: ${updatedComments.length}`;
+        let yorumLabel = postElement.querySelector('.comments');
+        if (yorumLabel) yorumLabel.textContent = `💬 ${updatedComments.length} yorum`;
       }
     });
   });
@@ -522,6 +523,7 @@ async function postComment(postId, post, postElement) {
 function renderComments(commentListElement, commentsArray, currentUserId) {
   commentListElement.innerHTML = "";
 
+  // Yeni yorumlar en üstte olacak şekilde sıralama
   commentsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   commentsArray.forEach((comment, index) => {
@@ -530,12 +532,15 @@ function renderComments(commentListElement, commentsArray, currentUserId) {
 
     const timestamp = new Date(comment.timestamp).toLocaleString("tr-TR");
 
-    const content = `
-      <span><b>${comment.username}</b> (${timestamp}): ${comment.text}</span>
+    const innerHTML = `
+      <div>
+        <b>${comment.username}</b> <small>(${timestamp})</small><br/>
+        ${comment.text}
+      </div>
       ${comment.user === currentUserId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
     `;
 
-    commentDiv.innerHTML = content;
+    commentDiv.innerHTML = innerHTML;
     commentListElement.appendChild(commentDiv);
   });
 }
