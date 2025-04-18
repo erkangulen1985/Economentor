@@ -389,16 +389,23 @@ async function loadCharts() {
     });
 
     // 📊 Analizler
-    analizSnapshot.forEach(doc => {
-      const data = doc.data();
-      const tsDate = normalizeTimestamp(data.timestamp);
-      if (!tsDate || tsDate < cutoff) return;
-      const dateStr = tsDate.toLocaleDateString("tr-TR");
+analizSnapshot.forEach(doc => {
+  const data = doc.data();
+  const tsDate = normalizeTimestamp(data.timestamp);
+  if (!tsDate || tsDate < cutoff) return;
+  const dateStr = tsDate.toLocaleDateString("tr-TR");
 
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
-      dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + safeValue((data.comments || []).length);
-    });
+  // ❌ Beğeni / Beğenmeme sadece sayı olarak tutuluyor, tarih bilgisi yok
+  // likeDateMap[dateStr] += data.likes; gibi işlemler YAPILMIYOR
+
+  // ✅ Yorumları tarihine göre dağıtıyoruz
+  (data.comments || []).forEach(c => {
+    const ts = normalizeTimestamp(c.timestamp);
+    if (!ts || ts < cutoff) return;
+    const commentDate = ts.toLocaleDateString("tr-TR");
+    commentDateMap[commentDate] = (commentDateMap[commentDate] || 0) + 1;
+  });
+});
 
     // 📊 Postlar - likes, dislikes, comments
     for (const docSnap of postSnapshot.docs) {
