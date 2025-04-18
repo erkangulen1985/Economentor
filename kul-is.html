@@ -370,6 +370,7 @@ async function loadCharts() {
     };
 
     const safeValue = (val) => Math.max(0, val || 0);
+
     const now = new Date();
     const generateLastNDates = (n) => {
       const dates = [];
@@ -390,7 +391,7 @@ async function loadCharts() {
       getDocs(collection(db, "posts"))
     ]);
 
-    // 👤 Kullanıcılar
+    // Kullanıcılar
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -399,7 +400,7 @@ async function loadCharts() {
       }
     });
 
-    // 📊 ANALİZLER
+    // ANALİZLER
     for (const analiz of analizSnapshot.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
@@ -407,16 +408,16 @@ async function loadCharts() {
       const dateStr = analizTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // ✅ Embedded yorumlar varsa say (analiz timestamp'ine göre)
-      const yorumSayisi = (data.comments || []).length;
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + yorumSayisi;
+      // Embedded yorumlar
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      // ✅ Alt koleksiyonlardan beğeni/beğenmeme
+      // Subcollection: likes & dislikes
       try {
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes"))
         ]);
+
         likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
         dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
       } catch (e) {
@@ -424,7 +425,7 @@ async function loadCharts() {
       }
     }
 
-    // 📊 POSTLAR
+    // POSTLAR
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
       const data = post.data();
@@ -432,7 +433,7 @@ async function loadCharts() {
       const dateStr = postTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // ✅ Embedded yorumları say
+      // Embedded yorumlar
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
       try {
@@ -471,7 +472,15 @@ async function loadCharts() {
       }
     }
 
-    const getArray = (map) => sortedDates.map(date => map[date] || 0);
+    // 🔄 Toplamlara göre birikimli array
+    const getCumulativeArray = (map) => {
+      let total = 0;
+      return sortedDates.map(date => {
+        total += map[date] || 0;
+        return total;
+      });
+    };
+
     const baseOptions = {
       responsive: true,
       scales: {
@@ -485,7 +494,7 @@ async function loadCharts() {
         labels: sortedDates,
         datasets: [{
           label: 'Kullanıcı Artışı',
-          data: getArray(userDateMap),
+          data: getCumulativeArray(userDateMap),
           borderColor: 'blue',
           borderWidth: 2
         }]
@@ -498,8 +507,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Beğeniler',
-          data: getArray(likeDateMap),
+          label: 'Toplam Beğeni',
+          data: getCumulativeArray(likeDateMap),
           borderColor: 'green',
           borderWidth: 2
         }]
@@ -512,8 +521,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Beğenmeme',
-          data: getArray(dislikeDateMap),
+          label: 'Toplam Beğenmeme',
+          data: getCumulativeArray(dislikeDateMap),
           borderColor: 'red',
           borderWidth: 2
         }]
@@ -526,8 +535,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Yorumlar',
-          data: getArray(commentDateMap),
+          label: 'Toplam Yorum',
+          data: getCumulativeArray(commentDateMap),
           borderColor: 'orange',
           borderWidth: 2
         }]
@@ -539,7 +548,6 @@ async function loadCharts() {
     console.error("Grafikler yüklenemedi:", err);
   }
 }
-
 
   loadUserList();
   loadCharts();
