@@ -404,30 +404,42 @@ async function loadCharts() {
       }
     });
 
-    // 📈 ANALİZLER
-    for (const analiz of analizSnapshot.docs) {
-      const data = analiz.data();
-      const ref = analiz.ref;
-      const ts = normalizeTimestamp(data.timestamp);
-      if (!ts) continue;
-      const dateStr = ts.toLocaleDateString("tr-TR");
-      if (!sortedDates.includes(dateStr)) continue;
+// 📈 ANALİZLER
+for (const analiz of analizSnapshot.docs) {
+  const data = analiz.data();
+  const ref = analiz.ref;
 
-      // 🔸 embedded comments
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+  const rawTs = data.timestamp;
+  const ts = normalizeTimestamp(rawTs);
+  console.log("RAW TIMESTAMP (analiz):", rawTs);
+  console.log("Parsed date objesi:", ts);
 
-      // 🔹 subcollection likes & dislikes
-      try {
-        const [likesSnap, dislikesSnap] = await Promise.all([
-          getDocs(collection(ref, "likes")),
-          getDocs(collection(ref, "dislikes"))
-        ]);
-        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-        dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
-      } catch (e) {
-        console.warn("Analiz alt koleksiyonları alınamadı:", e);
-      }
-    }
+  if (!ts) {
+    console.warn("⛔ Timestamp dönüştürülemedi (analiz):", rawTs);
+    continue;
+  }
+
+  const dateStr = ts.toLocaleDateString("tr-TR");
+  console.log("✅ Analiz Tarihi (dateStr):", dateStr);
+  console.log("📅 Bu tarih sortedDates içinde mi?:", sortedDates.includes(dateStr));
+
+  if (!sortedDates.includes(dateStr)) continue;
+
+  // Embedded yorumlar
+  commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+
+  // Likes & dislikes subcollection
+  try {
+    const [likesSnap, dislikesSnap] = await Promise.all([
+      getDocs(collection(ref, "likes")),
+      getDocs(collection(ref, "dislikes"))
+    ]);
+    likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
+    dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
+  } catch (e) {
+    console.warn("📛 Alt koleksiyonlar alınamadı (analiz):", e);
+  }
+}
 
     // 📸 POSTS
     for (const post of postSnapshot.docs) {
