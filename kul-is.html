@@ -417,8 +417,7 @@ for (const analiz of analizSnapshot.docs) {
       const dateStr = ts?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
+      // Embedde
       dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
