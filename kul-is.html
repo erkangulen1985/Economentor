@@ -233,43 +233,52 @@ async function loadStatistics() {
     document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
 
-    // 🔢 Beğeni/Beğenmeme/Yorum Toplamları
     let totalLikes = 0;
     let totalDislikes = 0;
     let totalComments = 0;
 
-    // ANALİZLER
-    analizler.forEach(doc => {
-      const data = doc.data();
-      totalLikes += data.likes || 0;
-      totalDislikes += data.dislikes || 0;
+    // ✅ ANALİZLERDEN VERİ ÇEK
+    for (const analiz of analizler.docs) {
+      const ref = analiz.ref;
+      const data = analiz.data();
+
+      // Embedded yorum
       totalComments += (data.comments || []).length;
-    });
 
-    // POSTLAR
-for (const post of fotolar.docs) {
-  const ref = post.ref;
+      try {
+        const [likesSnap, dislikesSnap] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes"))
+        ]);
+        totalLikes += likesSnap.size;
+        totalDislikes += dislikesSnap.size;
+      } catch (err) {
+        console.warn("analiz alt koleksiyonları alınamadı:", err);
+      }
+    }
 
-  const likesSnap = await getDocs(collection(ref, "likes"));
-  const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
+    // ✅ POSTLARDAN VERİ ÇEK
+    for (const post of fotolar.docs) {
+      const ref = post.ref;
+      const data = post.data();
 
-  totalLikes += likesSnap.size;
-  totalDislikes += dislikesSnap.size || 0;
+      totalComments += (data.comments || []).length;
 
-  // 🔁 1. embedded comment alanı
-  const data = post.data();
-  totalComments += (data.comments || []).length;
+      try {
+        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
+          getDocs(collection(ref, "likes")),
+          getDocs(collection(ref, "dislikes")),
+          getDocs(collection(ref, "comments"))
+        ]);
+        totalLikes += likesSnap.size;
+        totalDislikes += dislikesSnap.size;
+        totalComments += commentsSnap.size;
+      } catch (err) {
+        console.warn("post alt koleksiyonları alınamadı:", err);
+      }
+    }
 
-  // 🔁 2. eğer subcollection olarak varsa
-  try {
-    const commentsSnap = await getDocs(collection(ref, "comments"));
-    totalComments += commentsSnap.docs.length;
-  } catch (err) {
-    console.warn("Yorumlar alınamadı:", err);
-  }
-}
-
-    // Sayıları güncelle
+    // 🔢 Sayıları tabloya yaz
     document.getElementById("totalLikes").textContent = totalLikes;
     document.getElementById("totalDislikes").textContent = totalDislikes;
     document.getElementById("totalComments").textContent = totalComments;
