@@ -356,7 +356,11 @@ async function loadCharts() {
   try {
     const normalizeTimestamp = (ts) => {
       if (!ts) return null;
-      if (typeof ts === "string") return new Date(ts);
+      if (ts instanceof Date) return ts;
+      if (typeof ts === "string") {
+        const parsed = Date.parse(ts);
+        return isNaN(parsed) ? null : new Date(parsed);
+      }
       if (typeof ts === "object" && ts.seconds) return new Date(ts.seconds * 1000);
       return null;
     };
@@ -382,7 +386,7 @@ async function loadCharts() {
       getDocs(collection(db, "posts"))
     ]);
 
-    // Kullanıcılar
+    // 👤 Kullanıcılar
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().timestamp);
       const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -391,19 +395,19 @@ async function loadCharts() {
       }
     });
 
-    // ANALİZLER
+    // 📊 ANALİZLER
     for (const analiz of analizSnapshot.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      if (!ts) continue;
-      const dateStr = ts.toLocaleDateString("tr-TR");
+      const analizTS = normalizeTimestamp(data.timestamp);
+      const dateStr = analizTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
+      // ✅ Embedded yorumlar varsa say (analiz timestamp'ine göre)
+      const yorumSayisi = (data.comments || []).length;
+      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + yorumSayisi;
 
-      // Subcollection likes / dislikes
+      // ✅ Alt koleksiyonlardan beğeni/beğenmeme
       try {
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
@@ -412,30 +416,29 @@ async function loadCharts() {
         likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
         dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + dislikesSnap.size;
       } catch (e) {
-        console.warn("Analiz likes/dislikes okunamadı:", e);
+        console.warn("analiz alt koleksiyonları alınamadı:", e);
       }
     }
 
-    // POSTLAR
+    // 📊 POSTLAR
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
       const data = post.data();
-      const ts = normalizeTimestamp(data.timestamp);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
+      const postTS = normalizeTimestamp(data.timestamp);
+      const dateStr = postTS?.toLocaleDateString("tr-TR");
       if (!sortedDates.includes(dateStr)) continue;
 
-      // Embedded yorumlar
+      // ✅ Embedded yorumları say
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + (data.comments?.length || 0);
 
-      // Subcollections
       try {
-        const [likes, dislikes, comments] = await Promise.all([
+        const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
           getDocs(collection(ref, "comments"))
         ]);
 
-        likes.forEach(doc => {
+        likesSnap.forEach(doc => {
           const ts = normalizeTimestamp(doc.data().timestamp);
           const dStr = ts?.toLocaleDateString("tr-TR");
           if (sortedDates.includes(dStr)) {
@@ -443,7 +446,7 @@ async function loadCharts() {
           }
         });
 
-        dislikes.forEach(doc => {
+        dislikesSnap.forEach(doc => {
           const ts = normalizeTimestamp(doc.data().timestamp);
           const dStr = ts?.toLocaleDateString("tr-TR");
           if (sortedDates.includes(dStr)) {
@@ -451,15 +454,16 @@ async function loadCharts() {
           }
         });
 
-        comments.forEach(doc => {
+        commentsSnap.forEach(doc => {
           const ts = normalizeTimestamp(doc.data().timestamp);
           const dStr = ts?.toLocaleDateString("tr-TR");
           if (sortedDates.includes(dStr)) {
             commentDateMap[dStr] = (commentDateMap[dStr] || 0) + 1;
           }
         });
+
       } catch (e) {
-        console.warn("Post likes/dislikes/comments okunamadı:", e);
+        console.warn("post alt koleksiyonları alınamadı:", e);
       }
     }
 
