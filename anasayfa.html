@@ -357,7 +357,7 @@ const postFooter = `
       <button class="dislike-btn" data-id="${postDoc.id}" style="background-color: #e74c3c;">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
     </div>
     <div>
-      <button class="toggle-comments" data-id="${postDoc.id}">💬 Yorumları Göster</button>
+     <button class="toggle-footer-comments" data-id="...">💬 Yorumları Göster</button>
     </div>
     <div>
       <span class="post-date">🕒 ${formattedDate}</span>
@@ -367,7 +367,7 @@ const postFooter = `
 
     const commentSection = `
       <div class="comments-section">
-        <button class="toggle-comments" style="margin-bottom: 10px;">🗨️ Yorumları Göster/Gizle</button>
+        <button class="toggle-panel-comments">🗨️ Yorumları Göster/Gizle</button>
         <div class="comment-list" style="display: none;"></div>
         <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
         <button class="comment-button">Yorum Yap</button>
@@ -389,7 +389,7 @@ const postFooter = `
     const currentUserId = auth.currentUser?.uid;
     renderComments(commentListElement, post.comments || [], currentUserId);
 
-    const toggleButton = postElement.querySelector(".toggle-comments");
+    const toggleButton = postElement.querySelector(".toggle-footer-comments");
 toggleButton.addEventListener("click", () => {
   const isVisible = commentListElement.style.display === "block";
   commentListElement.style.display = isVisible ? "none" : "block";
