@@ -301,7 +301,6 @@
 
 async function loadCharts() {
   try {
-    // ✅ Yardımcı fonksiyonlar
     const normalizeTimestamp = (ts) => {
       if (!ts) return null;
       if (typeof ts === "string") return new Date(ts);
@@ -314,6 +313,19 @@ async function loadCharts() {
     const now = new Date();
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - 10);
+
+    // 📅 Son 10 günü sabit üret
+    const generateLastNDates = (n) => {
+      const dates = [];
+      for (let i = n - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        dates.push(d.toLocaleDateString("tr-TR")); // Türkçe format
+      }
+      return dates;
+    };
+
+    const sortedDates = generateLastNDates(10);
 
     const userSnapshot = await getDocs(query(collection(db, "users"), orderBy("timestamp")));
     const analizSnapshot = await getDocs(collection(db, "analizler"));
@@ -328,7 +340,7 @@ async function loadCharts() {
     userSnapshot.forEach(doc => {
       const tsDate = normalizeTimestamp(doc.data().timestamp);
       if (!tsDate || tsDate < cutoff) return;
-      const dateStr = tsDate.toLocaleDateString();
+      const dateStr = tsDate.toLocaleDateString("tr-TR");
       userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
     });
 
@@ -337,44 +349,53 @@ async function loadCharts() {
       const data = doc.data();
       const tsDate = normalizeTimestamp(data.timestamp);
       if (!tsDate || tsDate < cutoff) return;
-      const dateStr = tsDate.toLocaleDateString();
+      const dateStr = tsDate.toLocaleDateString("tr-TR");
 
       likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
       dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
       commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + safeValue((data.comments || []).length);
     });
 
-    // 📊 Postlar (subcollection üzerinden)
+    // 📊 Postlar (likes subcollection timestamp ile)
     for (const docSnap of postSnapshot.docs) {
       const ref = docSnap.ref;
-      const data = docSnap.data();
-      const tsDate = normalizeTimestamp(data.timestamp);
-      if (!tsDate || tsDate < cutoff) continue;
-      const dateStr = tsDate.toLocaleDateString();
 
       const likesSnap = await getDocs(collection(ref, "likes"));
-      const commentsSnap = await getDocs(collection(ref, "comments")); // varsa
+      likesSnap.forEach(likeDoc => {
+        const tsDate = normalizeTimestamp(likeDoc.data().timestamp);
+        if (!tsDate || tsDate < cutoff) return;
+        const dateStr = tsDate.toLocaleDateString("tr-TR");
+        likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + 1;
+      });
 
-      likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + likesSnap.size;
-      commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + commentsSnap.size;
-      // Dislikes yoksa eklenmiyor
+      const commentsSnap = await getDocs(collection(ref, "comments"));
+      commentsSnap.forEach(commentDoc => {
+        const tsDate = normalizeTimestamp(commentDoc.data().timestamp);
+        if (!tsDate || tsDate < cutoff) return;
+        const dateStr = tsDate.toLocaleDateString("tr-TR");
+        commentDateMap[dateStr] = (commentDateMap[dateStr] || 0) + 1;
+      });
     }
 
-    // 📅 Tüm tarihleri topla ve sırala
-    const allDates = new Set([
-      ...Object.keys(userDateMap),
-      ...Object.keys(likeDateMap),
-      ...Object.keys(dislikeDateMap),
-      ...Object.keys(commentDateMap)
-    ]);
-    const sortedDates = Array.from(allDates).sort((a, b) => new Date(a) - new Date(b));
-
+    // 🎯 Harita → Dizi çevirimi
     const userCounts = sortedDates.map(date => userDateMap[date] || 0);
     const likeData = sortedDates.map(date => likeDateMap[date] || 0);
     const dislikeData = sortedDates.map(date => dislikeDateMap[date] || 0);
     const commentData = sortedDates.map(date => commentDateMap[date] || 0);
 
-    // 📈 Kullanıcı Artışı
+    const baseOptions = {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+            precision: 0
+          }
+        }
+      }
+    };
+
     new Chart(document.getElementById("userGrowthChart"), {
       type: 'line',
       data: {
@@ -386,10 +407,9 @@ async function loadCharts() {
           borderWidth: 2
         }]
       },
-      options: { responsive: true }
+      options: baseOptions
     });
 
-    // 👍 Beğeniler
     new Chart(document.getElementById("contentLikesChart"), {
       type: 'line',
       data: {
@@ -401,10 +421,9 @@ async function loadCharts() {
           borderWidth: 2
         }]
       },
-      options: { responsive: true }
+      options: baseOptions
     });
 
-    // 👎 Beğenmeme
     new Chart(document.getElementById("contentDislikesChart"), {
       type: 'line',
       data: {
@@ -416,10 +435,9 @@ async function loadCharts() {
           borderWidth: 2
         }]
       },
-      options: { responsive: true }
+      options: baseOptions
     });
 
-    // 💬 Yorumlar
     new Chart(document.getElementById("contentCommentsChart"), {
       type: 'line',
       data: {
@@ -431,7 +449,7 @@ async function loadCharts() {
           borderWidth: 2
         }]
       },
-      options: { responsive: true }
+      options: baseOptions
     });
 
   } catch (error) {
