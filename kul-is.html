@@ -385,7 +385,7 @@ async function loadCharts() {
       return dates;
     };
 
-    const sortedDates = generateLastNDates(30); // Son 30 günü baz al
+    const sortedDates = generateLastNDates(30);
 
     const userDateMap = {}, likeDateMap = {}, dislikeDateMap = {}, commentDateMap = {};
 
@@ -395,21 +395,22 @@ async function loadCharts() {
       getDocs(collection(db, "posts"))
     ]);
 
-    // 👤 Kullanıcılar (oluşturulma tarihi)
+    // 👤 KULLANICILAR (registrationDate üzerinden)
     userSnapshot.forEach(doc => {
       const ts = normalizeTimestamp(doc.data().registrationDate);
-      const dateStr = ts?.toLocaleDateString("tr-TR");
+      if (!ts) return;
+      const dateStr = ts.toLocaleDateString("tr-TR");
       if (sortedDates.includes(dateStr)) {
         userDateMap[dateStr] = (userDateMap[dateStr] || 0) + 1;
       }
     });
 
-    // 🧠 ANALİZLER
+    // 📈 ANALİZLER
     for (const analiz of analizSnapshot.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
 
-      // 🔸 Embedded yorumlar
+      // Embedded yorumlar
       (data.comments || []).forEach(comment => {
         const ts = normalizeTimestamp(comment.timestamp);
         const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -418,7 +419,7 @@ async function loadCharts() {
         }
       });
 
-      // 🔸 Likes
+      // Likes
       const likesSnap = await getDocs(collection(ref, "likes"));
       likesSnap.forEach(doc => {
         const ts = normalizeTimestamp(doc.data().timestamp);
@@ -428,7 +429,7 @@ async function loadCharts() {
         }
       });
 
-      // 🔸 Dislikes
+      // Dislikes
       const dislikesSnap = await getDocs(collection(ref, "dislikes"));
       dislikesSnap.forEach(doc => {
         const ts = normalizeTimestamp(doc.data().timestamp);
@@ -439,12 +440,12 @@ async function loadCharts() {
       });
     }
 
-    // 🖼️ POSTS
+    // 📸 POSTS
     for (const post of postSnapshot.docs) {
       const ref = post.ref;
       const data = post.data();
 
-      // 🔸 Embedded yorumlar
+      // Embedded yorumlar
       (data.comments || []).forEach(comment => {
         const ts = normalizeTimestamp(comment.timestamp);
         const dateStr = ts?.toLocaleDateString("tr-TR");
@@ -453,7 +454,7 @@ async function loadCharts() {
         }
       });
 
-      // 🔸 Yorum alt koleksiyonu
+      // Alt koleksiyon yorumlar
       const commentsSnap = await getDocs(collection(ref, "comments"));
       commentsSnap.forEach(doc => {
         const ts = normalizeTimestamp(doc.data().timestamp);
@@ -463,7 +464,7 @@ async function loadCharts() {
         }
       });
 
-      // 🔸 Likes
+      // Likes
       const likesSnap = await getDocs(collection(ref, "likes"));
       likesSnap.forEach(doc => {
         const ts = normalizeTimestamp(doc.data().timestamp);
@@ -473,7 +474,7 @@ async function loadCharts() {
         }
       });
 
-      // 🔸 Dislikes
+      // Dislikes
       const dislikesSnap = await getDocs(collection(ref, "dislikes"));
       dislikesSnap.forEach(doc => {
         const ts = normalizeTimestamp(doc.data().timestamp);
@@ -484,12 +485,9 @@ async function loadCharts() {
       });
     }
 
-    const getCumulativeArray = (map) => {
-      let total = 0;
-      return sortedDates.map(date => {
-        total += map[date] || 0;
-        return total;
-      });
+    // 🔄 Günlük artış verileri (toplam değil)
+    const getDailyArray = (map) => {
+      return sortedDates.map(date => map[date] || 0);
     };
 
     const baseOptions = {
@@ -505,8 +503,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Kullanıcı Artışı',
-          data: getCumulativeArray(userDateMap),
+          label: 'Günlük Kullanıcı Artışı',
+          data: getDailyArray(userDateMap),
           borderColor: 'blue',
           borderWidth: 2
         }]
@@ -519,8 +517,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Toplam Beğeni',
-          data: getCumulativeArray(likeDateMap),
+          label: 'Günlük Beğeni',
+          data: getDailyArray(likeDateMap),
           borderColor: 'green',
           borderWidth: 2
         }]
@@ -533,8 +531,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Toplam Beğenmeme',
-          data: getCumulativeArray(dislikeDateMap),
+          label: 'Günlük Beğenmeme',
+          data: getDailyArray(dislikeDateMap),
           borderColor: 'red',
           borderWidth: 2
         }]
@@ -547,8 +545,8 @@ async function loadCharts() {
       data: {
         labels: sortedDates,
         datasets: [{
-          label: 'Toplam Yorum',
-          data: getCumulativeArray(commentDateMap),
+          label: 'Günlük Yorum',
+          data: getDailyArray(commentDateMap),
           borderColor: 'orange',
           borderWidth: 2
         }]
