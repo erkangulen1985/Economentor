@@ -247,23 +247,31 @@ async function loadStatistics() {
     });
 
     // POSTLAR
-for (const post of fotolar.docs) {
-  const ref = post.ref;
+    for (const post of fotolar.docs) {
+      const ref = post.ref;
 
-  const likesSnap = await getDocs(collection(ref, "likes"));
-  const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
+      const likesSnap = await getDocs(collection(ref, "likes"));
+      const dislikesSnap = await getDocs(collection(ref, "dislikes")).catch(() => ({ size: 0 }));
 
-  totalLikes += likesSnap.size;
-  totalDislikes += dislikesSnap.size || 0;
+      totalLikes += likesSnap.size;
+      totalDislikes += dislikesSnap.size || 0;
 
-  try {
-    const commentsSnap = await getDocs(collection(ref, "comments"));
-    totalComments += commentsSnap.docs.length; // ✅ İşte burası düzeltildi
-  } catch (err) {
-    console.warn("Yorumlar alınamadı:", err);
+      try {
+        const commentsSnap = await getDocs(collection(ref, "comments"));
+        totalComments += commentsSnap.docs.length; // ✅ Burada tamamlandı
+      } catch (err) {
+        console.warn("Yorumlar alınamadı:", err);
+      }
+    }
+
+    // Sayıları güncelle
+    document.getElementById("totalLikes").textContent = totalLikes;
+    document.getElementById("totalDislikes").textContent = totalDislikes;
+    document.getElementById("totalComments").textContent = totalComments;
+
+  } catch (error) {
+    console.error("Veri çekme hatası: ", error);
   }
-}
-}
 }
   
   loadStatistics();
