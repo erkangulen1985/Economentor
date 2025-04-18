@@ -395,14 +395,23 @@ analizSnapshot.forEach(doc => {
   if (!tsDate || tsDate < cutoff) return;
   const dateStr = tsDate.toLocaleDateString("tr-TR");
 
-  // ❌ Beğeni / Beğenmeme sadece sayı olarak tutuluyor, tarih bilgisi yok
-  // likeDateMap[dateStr] += data.likes; gibi işlemler YAPILMIYOR
+  // Beğeni / Beğenmeme tarihleri tutulmadığı için grafik dışı
+  likeDateMap[dateStr] = (likeDateMap[dateStr] || 0) + safeValue(data.likes);
+  dislikeDateMap[dateStr] = (dislikeDateMap[dateStr] || 0) + safeValue(data.dislikes);
 
-  // ✅ Yorumları tarihine göre dağıtıyoruz
-  (data.comments || []).forEach(c => {
-    const ts = normalizeTimestamp(c.timestamp);
+  // ✅ ANALİZ YORUMLARINI GRAFİĞE YANSIT
+  const comments = data.comments || [];
+  comments.forEach(comment => {
+    let ts = comment.timestamp;
+
+    // Zamanı normalize et
+    if (typeof ts === 'string') ts = new Date(ts);
+    else if (typeof ts === 'object' && ts.seconds) ts = new Date(ts.seconds * 1000);
+    else ts = null;
+
     if (!ts || ts < cutoff) return;
     const commentDate = ts.toLocaleDateString("tr-TR");
+
     commentDateMap[commentDate] = (commentDateMap[commentDate] || 0) + 1;
   });
 });
