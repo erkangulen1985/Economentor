@@ -296,12 +296,12 @@ async function loadWelcomeMessage(username) {
   const docRef = doc(db, "homepageTexts", "welcomeText");
   const docSnap = await getDoc(docRef);
 
-  if (docSnap.exists()) {
-    const msg = docSnap.data().message;
-    document.getElementById("welcomeMessage").innerHTML = `
-      ${msg}, <span id="userName">${username}</span><br />
-      Economentor ile öğrenin, analiz edin ve gelişin.
-    `;
+if (docSnap.exists()) {
+  const msg = docSnap.data().message;
+  document.getElementById("welcomeMessage").innerHTML = `
+    HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
+  `;
+}
   } else {
     document.getElementById("welcomeMessage").innerHTML = `
       Hoş geldiniz, <span id="userName">${username}</span><br />
