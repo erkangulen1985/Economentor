@@ -229,6 +229,17 @@ onAuthStateChanged(auth, async (user) => {
                     feedbackList.appendChild(div);
                 });
             }
+            if (section === 'karsilama-yazisi') {
+              const ref = doc(db, "homepageTexts", "welcomeText");
+              const snap = await getDoc(ref);
+              const mevcut = snap.exists() ? snap.data().message : "";
+
+              container.innerHTML = `
+              <h3>Karşılama Yazısı Düzenle</h3>
+              <textarea id="welcomeTextArea">${mevcut}</textarea>
+              <button class="button" onclick="saveWelcomeText()">Kaydet</button>
+  `;
+}
         }
 
         window.saveDuyuru = async function () {
@@ -276,6 +287,17 @@ onAuthStateChanged(auth, async (user) => {
             await deleteDoc(doc(db, "feedback", id));
             showContent('dil-sik');
         }
+
+        window.saveWelcomeText = async function () {
+  const text = document.getElementById("welcomeTextArea").value.trim();
+  if (!text) return alert("Yazı boş olamaz.");
+
+  await setDoc(doc(db, "homepageTexts", "welcomeText"), {
+    message: text
+  });
+
+  alert("Karşılama yazısı başarıyla güncellendi.");
+};
     </script>
 </body>
 </html>
