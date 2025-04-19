@@ -127,7 +127,9 @@
 
     async function loadTrainings() {
       const list = document.getElementById("trainingList");
-      const snapshot = await getDocs(trainingRef);
+      import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      const q = query(trainingRef, orderBy("timestamp", "asc"));
+      const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
         list.innerHTML = '<p>Şu anda listelenecek eğitim bulunmamaktadır.</p>';
