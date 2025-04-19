@@ -234,11 +234,11 @@
       });
     }
 
-    async function deleteTraining(docId, btn) {
-      if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
-      await deleteDoc(doc(db, "trainings", docId));
-      btn.closest(".training").remove();
-    }
+window.deleteTraining = async function(docId, btn) {
+  if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
+  await deleteDoc(doc(db, "trainings", docId));
+  btn.closest(".training").remove();
+};
 
     window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("addBulletBtn").addEventListener("click", addBullet);
@@ -251,6 +251,45 @@
       document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
       loadTrainings();
     });
+
+    window.deleteTraining = async function(docId, btn) {
+  if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
+  await deleteDoc(doc(db, "trainings", docId));
+  btn.closest(".training").remove();
+};
+
+window.editTraining = async function(docId, btn) {
+  const trainingDiv = btn.closest(".training");
+  const title = trainingDiv.querySelector("h3").textContent;
+  const description = trainingDiv.querySelector("p").textContent;
+  const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent.trim());
+
+  // Formu doldur
+  document.getElementById("title").value = title;
+  document.getElementById("description").value = description;
+  const bulletsDiv = document.getElementById("bullets");
+  bulletsDiv.innerHTML = '';
+  const ul = document.createElement('ul');
+
+  bullets.forEach(b => {
+    const li = document.createElement('li');
+    li.textContent = b;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = "❌";
+    deleteBtn.className = "delete-bullet-btn";
+    deleteBtn.onclick = () => li.remove();
+
+    li.appendChild(deleteBtn);
+    ul.appendChild(li);
+  });
+
+  bulletsDiv.appendChild(ul);
+
+  // Eski eğitimi sil (yeniden kaydedilecek)
+  await deleteDoc(doc(db, "trainings", docId));
+  trainingDiv.remove();
+};
   </script>
 </body>
 </html>
