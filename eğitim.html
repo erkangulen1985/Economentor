@@ -3,158 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eğitim Ekle | Admin Panel</title>
+  <title>Economentor | Eğitimler</title>
   <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f1f1f1;
-      color: #333;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
     }
 
     header {
-      background-color: #4CAF50;
-      color: white;
+      background-color: rgba(0, 0, 0, 0.7);
       padding: 20px;
       text-align: center;
-      font-size: 28px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      font-size: 32px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
 
     nav {
       display: flex;
-      justify-content: space-around;
-      background-color: #333;
-      padding: 15px 0;
+      justify-content: center;
+      background-color: transparent;
+      padding: 20px 0 10px;
     }
 
     nav a {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
       text-decoration: none;
-      color: white;
       font-weight: bold;
-      padding: 10px;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 5px;
       transition: background 0.3s ease;
     }
 
     nav a:hover {
       background-color: #4CAF50;
+      color: white;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 30px auto;
-      background-color: white;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .bullet-input {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .bullet-input input {
-      flex: 1;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
     .training {
-      background-color: #f9f9f9;
-      padding: 15px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #4CAF50;
       border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
+    }
+
+    .training h3 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #66ccff;
+    }
+
+    .training p {
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .training ul {
       margin-top: 10px;
+      padding-left: 20px;
     }
 
-    .training-actions {
+    .training li {
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .contact-line {
+      font-style: italic;
       margin-top: 10px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .training-actions button {
-      background-color: #f39c12;
-    }
-
-    .training-actions button:last-child {
-      background-color: #e74c3c;
-    }
-
-    .training-actions button:hover {
-      opacity: 0.9;
-    }
-
-    .delete-bullet-btn {
-      margin-left: 10px;
-      background: none;
-      color: black;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <header>Eğitim Ekle</header>
-
+  <header>Economentor | Eğitimler</header>
   <nav>
-    <a href="adminpanel.html">Yönetici Paneli</a>
-    <a href="analizekle.html">Analiz</a>
+    <a href="anasayfa.html">Anasayfa</a>
   </nav>
 
-  <div class="container">
-    <h2>Yeni Eğitim Oluştur</h2>
-    <input type="text" id="title" placeholder="Eğitim Başlığı">
-    <textarea id="description" placeholder="Açıklama"></textarea>
-    <div id="bullets"></div>
-    <div class="bullet-input">
-      <input type="text" id="bulletText" placeholder="Madde ekle">
-      <button id="addBulletBtn">Ekle</button>
-    </div>
-    <button id="saveTrainingBtn">Kaydet</button>
+  <div class="container" id="trainingList">
+    <!-- Eğitimler buraya yüklenecek -->
   </div>
 
-  <div class="container">
-    <h2>Eklenen Eğitimler</h2>
-    <div id="trainingList"></div>
-  </div>
-
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc
+      getFirestore,
+      collection,
+      getDocs
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -168,89 +122,32 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const trainingRef = collection(db, "trainings");
 
-    async function addBullet() {
-      const bulletText = document.getElementById('bulletText').value.trim();
-      if (!bulletText) return;
+    async function loadTrainings() {
+      const list = document.getElementById("trainingList");
+      const snapshot = await getDocs(trainingRef);
 
-      const bulletsDiv = document.getElementById('bullets');
-      const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
-      if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
-
-      const li = document.createElement('li');
-      li.textContent = bulletText;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = "❌";
-      deleteBtn.className = "delete-bullet-btn";
-      deleteBtn.onclick = () => li.remove();
-
-      li.appendChild(deleteBtn);
-      ul.appendChild(li);
-
-      document.getElementById('bulletText').value = '';
-    }
-
-    async function saveTraining() {
-      const title = document.getElementById("title").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
-
-      if (!title || !description) {
-        alert("Lütfen başlık ve açıklama girin.");
+      if (snapshot.empty) {
+        list.innerHTML = '<p>Şu anda listelenecek eğitim bulunmamaktadır.</p>';
         return;
       }
 
-      try {
-        await addDoc(collection(db, "trainings"), {
-          title,
-          description,
-          bullets
-        });
-        alert("Eğitim başarıyla kaydedildi.");
-        location.reload();
-      } catch (err) {
-        alert("Hata: " + err.message);
-      }
-    }
-
-    async function loadTrainings() {
-      const trainingList = document.getElementById("trainingList");
-      const snapshot = await getDocs(collection(db, "trainings"));
       snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "training";
-        div.innerHTML = `
-          <h3>${data.title}</h3>
-          <p>${data.description}</p>
-          <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
-          <div class="training-actions">
-            <button onclick="alert('Düzenleme henüz eklenmedi')">Düzenle</button>
-            <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
-          </div>
+        const t = docSnap.data();
+        const el = document.createElement("div");
+        el.className = "training";
+        el.innerHTML = `
+          <h3>${t.title}</h3>
+          <p>${t.description}</p>
+          <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+          <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
         `;
-        trainingList.appendChild(div);
+        list.appendChild(el);
       });
     }
 
-    async function deleteTraining(docId, btn) {
-      if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
-      await deleteDoc(doc(db, "trainings", docId));
-      btn.closest(".training").remove();
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("addBulletBtn").addEventListener("click", addBullet);
-      document.getElementById("bulletText").addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          addBullet();
-        }
-      });
-      document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
-      loadTrainings();
-    });
+    loadTrainings();
   </script>
 </body>
 </html>
