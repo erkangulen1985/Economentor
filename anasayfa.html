@@ -371,6 +371,22 @@ const likeButton = postElement.querySelector(".like-btn");
 const dislikeButton = postElement.querySelector(".dislike-btn");
 const commentButton = postElement.querySelector(".comment-button");
 
+// Mevcut kullanıcı postu beğenmiş mi?
+const likeRef = doc(db, "posts", postDoc.id, "likes", auth.currentUser.uid);
+getDoc(likeRef).then((likeSnap) => {
+  if (likeSnap.exists()) {
+    likeButton.style.backgroundColor = "#27ae60"; // yeşil
+  }
+});
+
+// Mevcut kullanıcı postu beğenmemiş mi?
+const dislikeRef = doc(db, "posts", postDoc.id, "dislikes", auth.currentUser.uid);
+getDoc(dislikeRef).then((dislikeSnap) => {
+  if (dislikeSnap.exists()) {
+    dislikeButton.style.backgroundColor = "#c0392b"; // kırmızı
+  }
+});
+    
     likeButton.addEventListener("click", () => likePost(postDoc.id, post, postElement));
     dislikeButton.addEventListener("click", () => dislikePost(postDoc.id, post, postElement));
     commentButton.addEventListener("click", () => postComment(postDoc.id, post, postElement));
