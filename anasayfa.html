@@ -379,7 +379,7 @@ const commentButton = postElement.querySelector(".comment-button");
     const currentUserId = auth.currentUser?.uid;
     renderComments(commentListElement, post.comments || [], currentUserId);
 
-const toggleButton = postElement.querySelector(".toggle-footer-comments");
+const toggleButton = postElement.querySelector(".toggle-panel-comments");
 if (toggleButton) {
   toggleButton.addEventListener("click", () => {
     const isVisible = commentListElement.style.display === "block";
