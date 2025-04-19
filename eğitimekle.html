@@ -226,7 +226,7 @@
           <p>${data.description}</p>
           <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
           <div class="training-actions">
-            <button onclick="alert('Düzenleme henüz eklenmedi')">Düzenle</button>
+            <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
             <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
           </div>
         `;
