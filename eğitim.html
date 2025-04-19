@@ -104,55 +104,49 @@
     <!-- Eğitimler buraya yüklenecek -->
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-    };
+  const firebaseConfig = {
+    // ...
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const trainingRef = collection(db, "trainings");
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const trainingRef = collection(db, "trainings");
 
-    async function loadTrainings() {
-      const list = document.getElementById("trainingList");
-      import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-      const q = query(trainingRef, orderBy("timestamp", "asc"));
-      const snapshot = await getDocs(q);
+  async function loadTrainings() {
+    const list = document.getElementById("trainingList");
+    const q = query(trainingRef, orderBy("timestamp", "asc"));
+    const snapshot = await getDocs(q);
 
-      if (snapshot.empty) {
-        list.innerHTML = '<p>Şu anda listelenecek eğitim bulunmamaktadır.</p>';
-        return;
-      }
-
-      snapshot.forEach(docSnap => {
-        const t = docSnap.data();
-        const el = document.createElement("div");
-        el.className = "training";
-        el.innerHTML = `
-          <h3>${t.title}</h3>
-          <p>${t.description}</p>
-          <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
-          <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
-        `;
-        list.appendChild(el);
-      });
+    if (snapshot.empty) {
+      list.innerHTML = '<p>Şu anda listelenecek eğitim bulunmamaktadır.</p>';
+      return;
     }
 
-    loadTrainings();
-  </script>
+    snapshot.forEach(docSnap => {
+      const t = docSnap.data();
+      const el = document.createElement("div");
+      el.className = "training";
+      el.innerHTML = `
+        <h3>${t.title}</h3>
+        <p>${t.description}</p>
+        <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+        <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  loadTrainings();
+</script>
 </body>
 </html>
