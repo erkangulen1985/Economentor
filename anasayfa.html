@@ -297,9 +297,10 @@ async function loadWelcomeMessage(username) {
 
   if (docSnap.exists()) {
     const msg = docSnap.data().message; // İstersen kullanırsın
-    document.getElementById("welcomeMessage").innerHTML = `
-      HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
-    `;
+document.getElementById("welcomeMessage").innerHTML = `
+  HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
+  <span>${msg}</span>
+`;
   }
 }
 
