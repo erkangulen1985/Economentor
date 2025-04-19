@@ -302,13 +302,6 @@ if (docSnap.exists()) {
     HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
   `;
 }
-  } else {
-    document.getElementById("welcomeMessage").innerHTML = `
-      Hoş geldiniz, <span id="userName">${username}</span><br />
-      Economentor ile öğrenin, analiz edin ve gelişin.
-    `;
-  }
-}
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
