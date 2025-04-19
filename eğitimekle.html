@@ -140,13 +140,17 @@
       <input type="text" id="bulletText" placeholder="Madde ekle">
       <button onclick="addBullet()">Ekle</button>
     </div>
+    <div id="statBox" class="container"></div>
     <button onclick="saveTraining()">Kaydet</button>
   </div>
 
-  <div class="container">
-    <h2>Eklenen Eğitimler</h2>
-    <div id="trainingList"></div>
-  </div>
+<div class="container">
+  <h2>İstatistikler</h2>
+  <canvas id="userGrowthChart" height="100"></canvas>
+  <canvas id="contentLikesChart" height="100"></canvas>
+  <canvas id="contentDislikesChart" height="100"></canvas>
+  <canvas id="contentCommentsChart" height="100"></canvas>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 <script type="module">
@@ -179,6 +183,51 @@
     const currentDate = new Date();
     const diffInTime = currentDate - lastTimestamp;
     return Math.floor(diffInTime / (1000 * 3600 * 24)); // Gün cinsinden fark
+  }
+
+    function saveTraining() {
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.textContent);
+
+    if (!title || !description) {
+      alert("Lütfen başlık ve açıklama girin.");
+      return;
+    }
+
+    // Firebase'e kaydetmek istersen burada Firestore'a gönderme kodu olur
+
+    // Arayüze ekleme
+    const trainingList = document.getElementById("trainingList");
+    const div = document.createElement("div");
+    div.className = "training";
+    div.innerHTML = `
+      <h3>${title}</h3>
+      <p>${description}</p>
+      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    `;
+    trainingList.appendChild(div);
+
+    // Formu temizle
+    document.getElementById("title").value = '';
+    document.getElementById("description").value = '';
+    document.getElementById("bulletText").value = '';
+    document.getElementById("bullets").innerHTML = '';
+  }
+
+    function addBullet() {
+    const bulletText = document.getElementById('bulletText').value.trim();
+    if (!bulletText) return;
+
+    const bulletsDiv = document.getElementById('bullets');
+    const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
+    if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
+
+    const li = document.createElement('li');
+    li.textContent = bulletText;
+    ul.appendChild(li);
+
+    document.getElementById('bulletText').value = '';
   }
 
   // Grafik verisi ve kutu oluşturma fonksiyonu
