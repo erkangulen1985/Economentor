@@ -247,13 +247,9 @@ nav a:hover {
     <a href="index.html">Çıkış</a>
   </nav>
 
-  <div class="content">
-    <h2>
-      Finansal başarıya giden yolda ilk adımı attığınız için HOŞ GELDİNİZ,
-      <span id="userName">Kullanıcı</span><br />
-      Economentor ile öğrenin, analiz edin ve gelişin.
-    </h2>
-  </div>
+<div class="content">
+  <h2 id="welcomeMessage"></h2>
+</div>
 
   <div class="post-container" id="postsContainer">
     <!-- Paylaşımlar burada görüntülenecek -->
@@ -296,17 +292,19 @@ const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
   
-  async function loadWelcomeMessage() {
+async function loadWelcomeMessage(username) {
   const docRef = doc(db, "homepageTexts", "welcomeText");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     const msg = docSnap.data().message;
-    const userSpan = document.getElementById("userName");
-    const username = userSpan ? userSpan.textContent : "Kullanıcı";
-
-    document.querySelector(".content h2").innerHTML = `
+    document.getElementById("welcomeMessage").innerHTML = `
       ${msg}, <span id="userName">${username}</span><br />
+      Economentor ile öğrenin, analiz edin ve gelişin.
+    `;
+  } else {
+    document.getElementById("welcomeMessage").innerHTML = `
+      Hoş geldiniz, <span id="userName">${username}</span><br />
       Economentor ile öğrenin, analiz edin ve gelişin.
     `;
   }
@@ -324,7 +322,7 @@ onAuthStateChanged(auth, async (user) => {
   if (docSnap.exists()) {
     const data = docSnap.data();
     const username = data.username || "Kullanıcı";
-    document.getElementById("userName").innerText = username;
+    loadWelcomeMessage(username);
 
     // ✅ Eğer kullanıcı admin ise butonu göster
     if (data.role === "admin") {
