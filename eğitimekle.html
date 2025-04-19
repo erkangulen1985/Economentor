@@ -205,7 +205,8 @@
         await addDoc(collection(db, "trainings"), {
           title,
           description,
-          bullets
+          bullets,
+          timestamp: new Date()
         });
         alert("Eğitim başarıyla kaydedildi.");
         location.reload();
