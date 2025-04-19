@@ -322,7 +322,7 @@ onAuthStateChanged(auth, async (user) => {
   if (docSnap.exists()) {
     const data = docSnap.data();
     const username = data.username || "Kullanıcı";
-    loadWelcomeMessage(username);
+    document.getElementById("userName").innerText = username;
 
     // ✅ Eğer kullanıcı admin ise butonu göster
     if (data.role === "admin") {
