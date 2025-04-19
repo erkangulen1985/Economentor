@@ -224,7 +224,7 @@
         div.className = "training";
         div.innerHTML = `
           <h3>${data.title}</h3>
-          <p>${data.description}</p>
+          <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
           <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
           <div class="training-actions">
             <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
