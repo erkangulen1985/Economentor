@@ -151,6 +151,18 @@
 
     const li = document.createElement('li');
     li.textContent = bulletText;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = "❌";
+    deleteBtn.style.marginLeft = "10px";
+    deleteBtn.style.background = "red";
+    deleteBtn.style.color = "white";
+    deleteBtn.style.border = "none";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.style.borderRadius = "5px";
+    deleteBtn.addEventListener("click", () => li.remove());
+
+    li.appendChild(deleteBtn);
     ul.appendChild(li);
 
     document.getElementById('bulletText').value = '';
@@ -159,7 +171,7 @@
   function saveTraining() {
     const title = document.getElementById("title").value.trim();
     const description = document.getElementById("description").value.trim();
-    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.textContent);
+    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
 
     if (!title || !description) {
       alert("Lütfen başlık ve açıklama girin.");
@@ -195,20 +207,46 @@
     const trainingDiv = button.closest(".training");
     const title = trainingDiv.querySelector("h3").textContent;
     const description = trainingDiv.querySelector("p").textContent;
-    const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent);
+    const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent.replace("❌", "").trim());
 
     document.getElementById("title").value = title;
     document.getElementById("description").value = description;
     document.getElementById("bulletText").value = '';
-    document.getElementById("bullets").innerHTML = `
-      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
-    `;
+    const bulletsDiv = document.getElementById("bullets");
+    bulletsDiv.innerHTML = '';
+    const ul = document.createElement('ul');
+    bullets.forEach(b => {
+      const li = document.createElement('li');
+      li.textContent = b;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = "❌";
+      deleteBtn.style.marginLeft = "10px";
+      deleteBtn.style.background = "red";
+      deleteBtn.style.color = "white";
+      deleteBtn.style.border = "none";
+      deleteBtn.style.cursor = "pointer";
+      deleteBtn.style.borderRadius = "5px";
+      deleteBtn.addEventListener("click", () => li.remove());
+
+      li.appendChild(deleteBtn);
+      ul.appendChild(li);
+    });
+    bulletsDiv.appendChild(ul);
 
     trainingDiv.remove();
   }
 
   window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+
+    document.getElementById("bulletText").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addBullet();
+      }
+    });
+
     document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
   });
 </script>
