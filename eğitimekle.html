@@ -113,14 +113,15 @@
     .training-actions button:hover {
       opacity: 0.9;
     }
+
     .stat-box {
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  color: white;
-  font-size: 1.5rem;
-}
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: white;
+      font-size: 1.5rem;
+    }
   </style>
 </head>
 <body>
@@ -138,32 +139,42 @@
     <div id="bullets"></div>
     <div class="bullet-input">
       <input type="text" id="bulletText" placeholder="Madde ekle">
-      <button onclick="addBullet()">Ekle</button>
+      <button id="addBulletBtn">Ekle</button>
     </div>
-    <div id="statBox" class="container"></div>
-    <button onclick="saveTraining()">Kaydet</button>
+    <button id="saveTrainingBtn">Kaydet</button>
   </div>
 
-<div class="container">
-  <h2>İstatistikler</h2>
-  <canvas id="userGrowthChart" height="100"></canvas>
-  <canvas id="contentLikesChart" height="100"></canvas>
-  <canvas id="contentDislikesChart" height="100"></canvas>
-  <canvas id="contentCommentsChart" height="100"></canvas>
-</div>
+  <div id="statBox" class="container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+  <div class="container">
+    <h2>İstatistikler</h2>
+    <canvas id="userGrowthChart" height="100"></canvas>
+    <canvas id="contentLikesChart" height="100"></canvas>
+    <canvas id="contentDislikesChart" height="100"></canvas>
+    <canvas id="contentCommentsChart" height="100"></canvas>
+  </div>
+
+  <div class="container">
+    <h2>Eklenen Eğitimler</h2>
+    <div id="trainingList"></div>
+  </div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy 
+  import {
+    getFirestore, collection, getDocs, query, orderBy
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  // Chart.js controller kaydını yapıyoruz
-  import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js';
-  Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement);
+  import {
+    Chart, CategoryScale, LinearScale, BarElement,
+    Title, Tooltip, Legend, LineElement, LineController
+  } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js';
+
+  Chart.register(
+    CategoryScale, LinearScale, BarElement,
+    Title, Tooltip, Legend, LineElement, LineController
+  );
 
   const firebaseConfig = {
     apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -178,44 +189,7 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  // Son 10 günün artışını ya da azalışını hesapla
-  function getDayDifference(lastTimestamp) {
-    const currentDate = new Date();
-    const diffInTime = currentDate - lastTimestamp;
-    return Math.floor(diffInTime / (1000 * 3600 * 24)); // Gün cinsinden fark
-  }
-
-    function saveTraining() {
-    const title = document.getElementById("title").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.textContent);
-
-    if (!title || !description) {
-      alert("Lütfen başlık ve açıklama girin.");
-      return;
-    }
-
-    // Firebase'e kaydetmek istersen burada Firestore'a gönderme kodu olur
-
-    // Arayüze ekleme
-    const trainingList = document.getElementById("trainingList");
-    const div = document.createElement("div");
-    div.className = "training";
-    div.innerHTML = `
-      <h3>${title}</h3>
-      <p>${description}</p>
-      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
-    `;
-    trainingList.appendChild(div);
-
-    // Formu temizle
-    document.getElementById("title").value = '';
-    document.getElementById("description").value = '';
-    document.getElementById("bulletText").value = '';
-    document.getElementById("bullets").innerHTML = '';
-  }
-
-    function addBullet() {
+  function addBullet() {
     const bulletText = document.getElementById('bulletText').value.trim();
     if (!bulletText) return;
 
@@ -230,7 +204,32 @@
     document.getElementById('bulletText').value = '';
   }
 
-  // Grafik verisi ve kutu oluşturma fonksiyonu
+  function saveTraining() {
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.textContent);
+
+    if (!title || !description) {
+      alert("Lütfen başlık ve açıklama girin.");
+      return;
+    }
+
+    const trainingList = document.getElementById("trainingList");
+    const div = document.createElement("div");
+    div.className = "training";
+    div.innerHTML = `
+      <h3>${title}</h3>
+      <p>${description}</p>
+      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    `;
+    trainingList.appendChild(div);
+
+    document.getElementById("title").value = '';
+    document.getElementById("description").value = '';
+    document.getElementById("bulletText").value = '';
+    document.getElementById("bullets").innerHTML = '';
+  }
+
   async function loadCharts() {
     try {
       const userQ = query(collection(db, "users"), orderBy("timestamp"));
@@ -243,7 +242,7 @@
       const commentCounts = [];
 
       const userDateMap = {};
-      
+
       userSnapshot.forEach(doc => {
         const ts = doc.data().timestamp;
         if (!ts) return;
@@ -251,29 +250,27 @@
         userDateMap[date] = (userDateMap[date] || 0) + 1;
       });
 
-      // Son 10 günlük veriyi alıp, artış/azalış hesapla
-      function calculate10DayChange() {
-        const dates = Object.keys(userDateMap);
-        const last10Days = dates.slice(-10);
-        let change = userDateMap[last10Days[last10Days.length - 1]] - userDateMap[last10Days[0]];
-        
-        // Renk seçimi
-        if (change > 0) {
-          return { change, color: 'green' }; // Artış
-        } else if (change < 0) {
-          return { change, color: 'red' }; // Azalış
-        } else {
-          return { change, color: 'yellow' }; // Nötr
-        }
-      }
+      const dates = Object.keys(userDateMap);
+      dates.forEach(date => {
+        userLabels.push(date);
+        userCounts.push(userDateMap[date]);
+      });
+
+      const calculate10DayChange = () => {
+        const last10 = dates.slice(-10);
+        const change = userDateMap[last10[last10.length - 1]] - userDateMap[last10[0]];
+        return {
+          change,
+          color: change > 0 ? 'green' : change < 0 ? 'red' : 'yellow'
+        };
+      };
 
       const { change, color } = calculate10DayChange();
-
-      // Son 10 gün için renkli kutu oluştur
-      const statBox = document.getElementById('statBox');
-      statBox.innerHTML = `<div class="stat-box" style="background-color: ${color};">
-                            Son 10 Günlük Değişim: <strong>${change}</strong>
-                          </div>`;
+      document.getElementById('statBox').innerHTML = `
+        <div class="stat-box" style="background-color: ${color};">
+          Son 10 Günlük Değişim: <strong>${change}</strong>
+        </div>
+      `;
 
       const analizSnapshot = await getDocs(collection(db, "analizler"));
       const fotoSnapshot = await getDocs(collection(db, "posts"));
@@ -290,7 +287,6 @@
         commentCounts.push((doc.data().comments || []).length);
       });
 
-      // Kullanıcı artışı grafiği
       new Chart(document.getElementById("userGrowthChart"), {
         type: 'line',
         data: {
@@ -304,7 +300,6 @@
         options: { responsive: true }
       });
 
-      // Beğeni sayısı grafiği
       new Chart(document.getElementById("contentLikesChart"), {
         type: 'line',
         data: {
@@ -318,7 +313,6 @@
         options: { responsive: true }
       });
 
-      // Beğenmeme sayısı grafiği
       new Chart(document.getElementById("contentDislikesChart"), {
         type: 'line',
         data: {
@@ -332,7 +326,6 @@
         options: { responsive: true }
       });
 
-      // Yorum sayısı grafiği
       new Chart(document.getElementById("contentCommentsChart"), {
         type: 'line',
         data: {
@@ -350,11 +343,11 @@
     }
   }
 
-  // Sayfa yüklendiğinde grafik ve kullanıcı verilerini yükle
   window.addEventListener("DOMContentLoaded", () => {
     loadCharts();
+    document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+    document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
   });
 </script>
-
 </body>
 </html>
