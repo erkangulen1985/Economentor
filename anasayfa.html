@@ -295,6 +295,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+  
+  async function loadWelcomeMessage() {
+  const docRef = doc(db, "homepageTexts", "welcomeText");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const msg = docSnap.data().message;
+    const userSpan = document.getElementById("userName");
+    const username = userSpan ? userSpan.textContent : "Kullanıcı";
+
+    document.querySelector(".content h2").innerHTML = `
+      ${msg}, <span id="userName">${username}</span><br />
+      Economentor ile öğrenin, analiz edin ve gelişin.
+    `;
+  }
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
@@ -321,6 +338,7 @@ onAuthStateChanged(auth, async (user) => {
     alert("Kullanıcı bilgisi bulunamadı.");
     window.location.href = "index.html";
   }
+  loadWelcomeMessage();
 });
 
 async function loadPosts() {
