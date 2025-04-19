@@ -291,16 +291,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-  
 async function loadWelcomeMessage(username) {
   const docRef = doc(db, "homepageTexts", "welcomeText");
   const docSnap = await getDoc(docRef);
 
-if (docSnap.exists()) {
-  const msg = docSnap.data().message;
-  document.getElementById("welcomeMessage").innerHTML = `
-    HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
-  `;
+  if (docSnap.exists()) {
+    const msg = docSnap.data().message; // İstersen kullanırsın
+    document.getElementById("welcomeMessage").innerHTML = `
+      HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
+    `;
+  }
 }
 
 onAuthStateChanged(auth, async (user) => {
