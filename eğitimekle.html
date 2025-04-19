@@ -130,9 +130,9 @@
     <div id="bullets"></div>
     <div class="bullet-input">
       <input type="text" id="bulletText" placeholder="Madde ekle">
-      <button onclick="addBullet()">Ekle</button>
+      <button id="addBulletBtn">Ekle</button>
     </div>
-    <button onclick="saveTraining()">Kaydet</button>
+    <button id="saveTrainingBtn">Kaydet</button>
   </div>
 
   <div class="container">
@@ -140,218 +140,76 @@
     <div id="trainingList"></div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<script>
+  function addBullet() {
+    const bulletText = document.getElementById('bulletText').value.trim();
+    if (!bulletText) return;
 
-  // Chart.js controller kaydını yapıyoruz
-  import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement } from 'https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.esm.min.js';
-  Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement);
+    const bulletsDiv = document.getElementById('bullets');
+    const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
+    if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-  };
+    const li = document.createElement('li');
+    li.textContent = bulletText;
+    ul.appendChild(li);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-
-  // Genel istatistikleri getir
-  async function loadStatistics() {
-    try {
-      const analizler = await getDocs(collection(db, "analizler"));
-      const fotolar = await getDocs(collection(db, "posts"));
-      const users = await getDocs(collection(db, "users"));
-      const feedbacks = await getDocs(collection(db, "feedback"));
-
-      document.getElementById("totalUsers").textContent = users.size;
-      document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
-      document.getElementById("totalFeedbacks").textContent = feedbacks.size;
-    } catch (error) {
-      console.error("Veri çekme hatası: ", error);
-    }
+    document.getElementById('bulletText').value = '';
   }
 
-  loadStatistics();
+  function saveTraining() {
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.textContent);
 
-  // Kullanıcıyı listele ve sil
-  async function loadUserList() {
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
-
-    try {
-      const users = await getDocs(collection(db, "users"));
-      users.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Kullanıcı verileri çekilemedi: ", error);
+    if (!title || !description) {
+      alert("Lütfen başlık ve açıklama girin.");
+      return;
     }
+
+    const trainingList = document.getElementById("trainingList");
+    const div = document.createElement("div");
+    div.className = "training";
+    div.innerHTML = `
+      <h3>${title}</h3>
+      <p>${description}</p>
+      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+      <div class="training-actions">
+        <button onclick="editTraining(this)">Düzenle</button>
+        <button onclick="deleteTraining(this)">Sil</button>
+      </div>
+    `;
+    trainingList.appendChild(div);
+
+    document.getElementById("title").value = '';
+    document.getElementById("description").value = '';
+    document.getElementById("bulletText").value = '';
+    document.getElementById("bullets").innerHTML = '';
   }
 
-  // Arama inputu
-  document.getElementById("searchInput").addEventListener("input", async (e) => {
-    const keyword = e.target.value.toLowerCase();
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = "";
-    const users = await getDocs(collection(db, "users"));
-    users.forEach(docSnap => {
-      const data = docSnap.data();
-      const username = (data.username || "").toLowerCase();
-      const fullName = (data.fullName || "").toLowerCase();
-      if (username.includes(keyword) || fullName.includes(keyword)) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
-        userContainer.appendChild(row);
-      }
-    });
-  });
-
-  // Silme işlemi
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("deleteBtn")) {
-      const uid = e.target.dataset.uid;
-      if (!confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
-
-      try {
-        await deleteDoc(doc(db, "users", uid));
-        alert("Kullanıcı başarıyla silindi.");
-        loadUserList();
-      } catch (err) {
-        alert("Silme hatası: " + err.message);
-      }
-    }
-  });
-
-  // Dinamik grafik yükleme fonksiyonu
-  async function loadCharts() {
-    try {
-      const userQ = query(collection(db, "users"), orderBy("timestamp"));
-      const userSnapshot = await getDocs(userQ);
-
-      const userLabels = [];
-      const userCounts = [];
-      const likeCounts = [];
-      const dislikeCounts = [];
-      const commentCounts = [];
-
-      const userDateMap = {};
-
-      userSnapshot.forEach(doc => {
-        const ts = doc.data().timestamp;
-        if (!ts) return;
-        const date = new Date(ts.seconds * 1000).toLocaleDateString();
-        userDateMap[date] = (userDateMap[date] || 0) + 1;
-      });
-
-      for (const [date, count] of Object.entries(userDateMap)) {
-        userLabels.push(date);
-        userCounts.push(count);
-      }
-
-      const analizSnapshot = await getDocs(collection(db, "analizler"));
-      const fotoSnapshot = await getDocs(collection(db, "posts"));
-
-      analizSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
-
-      fotoSnapshot.forEach(doc => {
-        likeCounts.push(doc.data().likes || 0);
-        dislikeCounts.push(doc.data().dislikes || 0);
-        commentCounts.push((doc.data().comments || []).length);
-      });
-
-      // Kullanıcı artışı grafiği
-      new Chart(document.getElementById("userGrowthChart"), {
-        type: 'line',
-        data: {
-          labels: userLabels,
-          datasets: [{
-            label: 'Kullanıcı Artışı',
-            data: userCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Beğeni sayısı grafiği
-      new Chart(document.getElementById("contentLikesChart"), {
-        type: 'line',
-        data: {
-          labels: likeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğeniler',
-            data: likeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Beğenmeme sayısı grafiği
-      new Chart(document.getElementById("contentDislikesChart"), {
-        type: 'line',
-        data: {
-          labels: dislikeCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Beğenmeme',
-            data: dislikeCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-
-      // Yorum sayısı grafiği
-      new Chart(document.getElementById("contentCommentsChart"), {
-        type: 'line',
-        data: {
-          labels: commentCounts.map((_, i) => "İçerik " + (i + 1)),
-          datasets: [{
-            label: 'Yorumlar',
-            data: commentCounts,
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true }
-      });
-    } catch (error) {
-      console.error("Grafikler yüklenemedi: ", error);
-    }
+  function deleteTraining(button) {
+    const trainingDiv = button.closest(".training");
+    trainingDiv.remove();
   }
 
-  // Sayfa yüklendiğinde grafik ve kullanıcı verilerini yükle
+  function editTraining(button) {
+    const trainingDiv = button.closest(".training");
+    const title = trainingDiv.querySelector("h3").textContent;
+    const description = trainingDiv.querySelector("p").textContent;
+    const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent);
+
+    document.getElementById("title").value = title;
+    document.getElementById("description").value = description;
+    document.getElementById("bulletText").value = '';
+    document.getElementById("bullets").innerHTML = `
+      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    `;
+
+    trainingDiv.remove();
+  }
+
   window.addEventListener("DOMContentLoaded", () => {
-    loadUserList();
-    loadStatistics();
-    loadCharts();
+    document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+    document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
   });
 </script>
 
