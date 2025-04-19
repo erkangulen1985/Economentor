@@ -113,6 +113,16 @@
     .training-actions button:hover {
       opacity: 0.9;
     }
+
+    .delete-bullet-btn {
+      margin-left: 10px;
+      background: none;
+      color: black;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -140,116 +150,107 @@
     <div id="trainingList"></div>
   </div>
 
-<script>
-  function addBullet() {
-    const bulletText = document.getElementById('bulletText').value.trim();
-    if (!bulletText) return;
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const bulletsDiv = document.getElementById('bullets');
-    const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
-    if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-    const li = document.createElement('li');
-    li.textContent = bulletText;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = "❌";
-    deleteBtn.style.marginLeft = "10px";
-    deleteBtn.style.background = "red";
-    deleteBtn.style.color = "white";
-    deleteBtn.style.border = "none";
-    deleteBtn.style.cursor = "pointer";
-    deleteBtn.style.borderRadius = "5px";
-    deleteBtn.addEventListener("click", () => li.remove());
+    async function addBullet() {
+      const bulletText = document.getElementById('bulletText').value.trim();
+      if (!bulletText) return;
 
-    li.appendChild(deleteBtn);
-    ul.appendChild(li);
+      const bulletsDiv = document.getElementById('bullets');
+      const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
+      if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
 
-    document.getElementById('bulletText').value = '';
-  }
-
-  function saveTraining() {
-    const title = document.getElementById("title").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
-
-    if (!title || !description) {
-      alert("Lütfen başlık ve açıklama girin.");
-      return;
-    }
-
-    const trainingList = document.getElementById("trainingList");
-    const div = document.createElement("div");
-    div.className = "training";
-    div.innerHTML = `
-      <h3>${title}</h3>
-      <p>${description}</p>
-      <ul>${bullets.map(b => `<li>${b}</li>`).join('')}</ul>
-      <div class="training-actions">
-        <button onclick="editTraining(this)">Düzenle</button>
-        <button onclick="deleteTraining(this)">Sil</button>
-      </div>
-    `;
-    trainingList.appendChild(div);
-
-    document.getElementById("title").value = '';
-    document.getElementById("description").value = '';
-    document.getElementById("bulletText").value = '';
-    document.getElementById("bullets").innerHTML = '';
-  }
-
-  function deleteTraining(button) {
-    const trainingDiv = button.closest(".training");
-    trainingDiv.remove();
-  }
-
-  function editTraining(button) {
-    const trainingDiv = button.closest(".training");
-    const title = trainingDiv.querySelector("h3").textContent;
-    const description = trainingDiv.querySelector("p").textContent;
-    const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent.replace("❌", "").trim());
-
-    document.getElementById("title").value = title;
-    document.getElementById("description").value = description;
-    document.getElementById("bulletText").value = '';
-    const bulletsDiv = document.getElementById("bullets");
-    bulletsDiv.innerHTML = '';
-    const ul = document.createElement('ul');
-    bullets.forEach(b => {
       const li = document.createElement('li');
-      li.textContent = b;
+      li.textContent = bulletText;
 
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = "❌";
-      deleteBtn.style.marginLeft = "10px";
-      deleteBtn.style.background = "red";
-      deleteBtn.style.color = "white";
-      deleteBtn.style.border = "none";
-      deleteBtn.style.cursor = "pointer";
-      deleteBtn.style.borderRadius = "5px";
-      deleteBtn.addEventListener("click", () => li.remove());
+      deleteBtn.className = "delete-bullet-btn";
+      deleteBtn.onclick = () => li.remove();
 
       li.appendChild(deleteBtn);
       ul.appendChild(li);
-    });
-    bulletsDiv.appendChild(ul);
 
-    trainingDiv.remove();
-  }
+      document.getElementById('bulletText').value = '';
+    }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+    async function saveTraining() {
+      const title = document.getElementById("title").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
 
-    document.getElementById("bulletText").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addBullet();
+      if (!title || !description) {
+        alert("Lütfen başlık ve açıklama girin.");
+        return;
       }
+
+      try {
+        await addDoc(collection(db, "trainings"), {
+          title,
+          description,
+          bullets
+        });
+        alert("Eğitim başarıyla kaydedildi.");
+        location.reload();
+      } catch (err) {
+        alert("Hata: " + err.message);
+      }
+    }
+
+    async function loadTrainings() {
+      const trainingList = document.getElementById("trainingList");
+      const snapshot = await getDocs(collection(db, "trainings"));
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "training";
+        div.innerHTML = `
+          <h3>${data.title}</h3>
+          <p>${data.description}</p>
+          <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
+          <div class="training-actions">
+            <button onclick="alert('Düzenleme henüz eklenmedi')">Düzenle</button>
+            <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
+          </div>
+        `;
+        trainingList.appendChild(div);
+      });
+    }
+
+    async function deleteTraining(docId, btn) {
+      if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
+      await deleteDoc(doc(db, "trainings", docId));
+      btn.closest(".training").remove();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+      document.getElementById("bulletText").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addBullet();
+        }
+      });
+      document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
+      loadTrainings();
     });
-
-    document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
-  });
-</script>
-
+  </script>
 </body>
 </html>
