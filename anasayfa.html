@@ -417,6 +417,7 @@ async function loadPosts() {
 
 const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp); // Firestore Timestamp veya string olabilir
 const formattedDate = new Date(postDate).toLocaleString("tr-TR");
+const postTitle = `<h3 class="post-title">${post.title || "Başlıksız Paylaşım"}</h3>`;
 
 const postFooter = `
 <div class="video-footer">
@@ -444,12 +445,6 @@ const postFooter = `
 
     postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
     document.getElementById('postsContainer').appendChild(postElement);
-
-const postTitle = `<h3 class="post-title">${post.title || "Başlıksız Paylaşım"}</h3>`;
-const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
-const postDescription = `<p>${post.description}</p>`;
-const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
-const formattedDate = new Date(postDate).toLocaleString("tr-TR");
 
 const postFooter = `
 <div class="video-footer">
