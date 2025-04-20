@@ -166,14 +166,11 @@
   }
 
   .chat-list {
-    width: 100%;
-    max-width: none;
-    display: flex;
-    overflow-x: auto;
     flex-direction: row;
-    padding: 10px;
-    gap: 10px;
-    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+    overflow-y: hidden; /* 👈 Yatay scroll var, dikey olmasın */
+    height: auto;        /* 👈 Sabit yüksekliği kaldır */
+    padding: 10px;       /* 👈 Çok büyük padding yerine sade */
   }
 
     .mobile-search-wrapper {
@@ -189,7 +186,7 @@
   .chat-item {
     flex: 0 0 auto;
     min-width: 140px;
-    max-width: 200px;
+    max-width: 180px;
     scroll-snap-align: start;
   }
 
@@ -626,13 +623,15 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 window.goHome = () => location.href = "anasayfa.html";
 
 function filterChatList() {
-  const searchQuery = document.getElementById("searchBar").value.toLowerCase(); // Arama çubuğunun değerini al
-  const chatItems = document.querySelectorAll(".chat-item"); // Tüm chat öğelerini seç
+  const searchInput = window.innerWidth <= 768
+    ? document.getElementById("mobileSearchBar")
+    : document.getElementById("searchBar");
 
-  // Her bir chat öğesinde döngü
+  const searchQuery = searchInput.value.toLowerCase();
+  const chatItems = document.querySelectorAll(".chat-item");
+
   chatItems.forEach(item => {
-    const name = item.querySelector("strong").textContent.toLowerCase(); // Kullanıcı adını al
-    // Kullanıcı adı arama çubuğu değeri ile eşleşiyor mu?
+    const name = item.querySelector("strong").textContent.toLowerCase();
     item.style.display = name.includes(searchQuery) ? "block" : "none";
   });
 }
