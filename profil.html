@@ -123,6 +123,10 @@ input {
     <button id="changePasswordBtn">Şifreyi Değiştir</button>
 
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
+
+    <button id="infoBtn" style="margin-top: 20px; background-color: #555; color: #fff;">
+    Yatırım Bilgilendirme ve Kullanım Koşulları
+    </button>
   </div>
 
 <script type="module">
@@ -231,6 +235,11 @@ onAuthStateChanged(auth, async (user) => {
     }
   });
 });
+
+document.getElementById("infoBtn").addEventListener("click", () => {
+  window.location.href = "bilgilendirme.html";
+});
+  
 </script>
 </body>
 </html>
