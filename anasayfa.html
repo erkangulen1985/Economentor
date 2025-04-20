@@ -343,6 +343,7 @@ import {
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
   authDomain: "economentor-8ddc4.firebaseapp.com",
@@ -353,30 +354,34 @@ const firebaseConfig = {
   measurementId: "G-FS3FMPYVPD"
 };
 
-const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+// Supabase config
+const supabase = createClient(
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+);
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Karşılama mesajı
 async function loadWelcomeMessage(username) {
   const docRef = doc(db, "homepageTexts", "welcomeText");
   const docSnap = await getDoc(docRef);
-
   if (docSnap.exists()) {
-    const msg = docSnap.data().message; // İstersen kullanırsın
-document.getElementById("welcomeMessage").innerHTML = `
-  HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
-  <span>${msg}</span>
-`;
+    const msg = docSnap.data().message;
+    document.getElementById("welcomeMessage").innerHTML = `
+      HOŞ GELDİNİZ, <span id="userName">${username}</span><br />
+      <span>${msg}</span>
+    `;
   }
 }
 
+// Oturum kontrolü
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
-    window.location.href = "index.html";
+    location.href = "index.html";
     return;
   }
 
@@ -386,21 +391,16 @@ onAuthStateChanged(auth, async (user) => {
     const data = docSnap.data();
     const username = data.username || "Kullanıcı";
     loadWelcomeMessage(username);
-
-    // ✅ Eğer kullanıcı admin ise butonu göster
     if (data.role === "admin") {
-      const adminLink = document.getElementById("adminPanelLink");
-      if (adminLink) {
-        adminLink.style.display = "inline-block";
-      }
+      document.getElementById("adminPanelLink").style.display = "inline-block";
     }
-
   } else {
     alert("Kullanıcı bilgisi bulunamadı.");
-    window.location.href = "index.html";
+    location.href = "index.html";
   }
 });
 
+// Gönderileri yükle
 async function loadPosts() {
   const postsRef = collection(db, "posts");
   const q = query(postsRef, orderBy("timestamp", "desc"));
@@ -408,260 +408,182 @@ async function loadPosts() {
 
   querySnapshot.forEach((postDoc) => {
     const post = postDoc.data();
-    const postElement = document.createElement('div');
-    postElement.classList.add('post');
+    const postElement = document.createElement("div");
+    postElement.classList.add("post");
     postElement.id = `post-${postDoc.id}`;
 
+    const postTitle = post.title ? `<h3 class="post-title">${post.title}</h3>` : "";
     const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
-    const postDescription = `<p>${post.description}</p>`;
+    const postDescription = `<p>${post.description || ""}</p>`;
+    const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
+    const formattedDate = new Date(postDate).toLocaleString("tr-TR");
 
-const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp); // Firestore Timestamp veya string olabilir
-const formattedDate = new Date(postDate).toLocaleString("tr-TR");
-const postTitle = `<h3 class="post-title">${post.title || "Başlıksız Paylaşım"}</h3>`;
-
-const postFooter = `
-<div class="video-footer">
-  <div>
-    <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
-    <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
-  </div>
-  <div>
-    <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
-  </div>
-  <div>
-    <span class="post-date">🕒 ${formattedDate}</span>
-  </div>
-</div>
-`;
-
-    const commentSection = `
-<div class="comments-section">
-  <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
-  <div class="comment-list" style="display: none;"></div>
-  <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
-  <button class="comment-button">Yorum Yap</button>
-</div>
+    const postFooter = `
+      <div class="video-footer">
+        <div>
+          <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
+          <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
+        </div>
+        <div>
+          <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
+        </div>
+        <div>
+          <span class="post-date">🕒 ${formattedDate}</span>
+        </div>
+      </div>
     `;
 
-    postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
-    document.getElementById('postsContainer').appendChild(postElement);
+    const commentSection = `
+      <div class="comments-section">
+        <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
+        <div class="comment-list" style="display: none;"></div>
+        <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
+        <button class="comment-button">Yorum Yap</button>
+      </div>
+    `;
 
-const postFooter = `
-<div class="video-footer">
-  <div>
-    <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
-    <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
-  </div>
-  <div>
-    <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
-  </div>
-  <div>
-    <span class="post-date">🕒 ${formattedDate}</span>
-  </div>
-</div>
-`;
+    postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
+    document.getElementById("postsContainer").appendChild(postElement);
 
-const commentSection = `
-<div class="comments-section">
-  <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
-  <div class="comment-list" style="display: none;"></div>
-  <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
-  <button class="comment-button">Yorum Yap</button>
-</div>
-`;
+    const likeBtn = postElement.querySelector(".like-btn");
+    const dislikeBtn = postElement.querySelector(".dislike-btn");
+    const commentBtn = postElement.querySelector(".comment-button");
 
-postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
+    getDoc(doc(db, "posts", postDoc.id, "likes", auth.currentUser.uid)).then((snap) => {
+      if (snap.exists()) likeBtn.style.backgroundColor = "#27ae60";
+    });
 
+    getDoc(doc(db, "posts", postDoc.id, "dislikes", auth.currentUser.uid)).then((snap) => {
+      if (snap.exists()) dislikeBtn.style.backgroundColor = "#c0392b";
+    });
 
-const likeButton = postElement.querySelector(".like-btn");
-const dislikeButton = postElement.querySelector(".dislike-btn");
-const commentButton = postElement.querySelector(".comment-button");
+    likeBtn.addEventListener("click", () => likePost(postDoc.id, post, postElement));
+    dislikeBtn.addEventListener("click", () => dislikePost(postDoc.id, post, postElement));
+    commentBtn.addEventListener("click", () => postComment(postDoc.id, post, postElement));
 
-// Mevcut kullanıcı postu beğenmiş mi?
-const likeRef = doc(db, "posts", postDoc.id, "likes", auth.currentUser.uid);
-getDoc(likeRef).then((likeSnap) => {
-  if (likeSnap.exists()) {
-    likeButton.style.backgroundColor = "#27ae60"; // yeşil
-  }
-});
+    const commentList = postElement.querySelector(".comment-list");
+    renderComments(commentList, post.comments || [], auth.currentUser.uid);
 
-// Mevcut kullanıcı postu beğenmemiş mi?
-const dislikeRef = doc(db, "posts", postDoc.id, "dislikes", auth.currentUser.uid);
-getDoc(dislikeRef).then((dislikeSnap) => {
-  if (dislikeSnap.exists()) {
-    dislikeButton.style.backgroundColor = "#c0392b"; // kırmızı
-  }
-});
-    
-    likeButton.addEventListener("click", () => likePost(postDoc.id, post, postElement));
-    dislikeButton.addEventListener("click", () => dislikePost(postDoc.id, post, postElement));
-    commentButton.addEventListener("click", () => postComment(postDoc.id, post, postElement));
+    const toggleBtn = postElement.querySelector(".toggle-panel-comments");
+    toggleBtn.addEventListener("click", () => {
+      const visible = commentList.style.display === "block";
+      commentList.style.display = visible ? "none" : "block";
+      toggleBtn.textContent = visible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
+    });
 
-    const commentListElement = postElement.querySelector(".comment-list");
-    const currentUserId = auth.currentUser?.uid;
-    renderComments(commentListElement, post.comments || [], currentUserId);
-
-const toggleButton = postElement.querySelector(".toggle-panel-comments");
-if (toggleButton) {
-  toggleButton.addEventListener("click", () => {
-    const isVisible = commentListElement.style.display === "block";
-    commentListElement.style.display = isVisible ? "none" : "block";
-    toggleButton.textContent = isVisible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
-  });
-}
-
-    commentListElement.addEventListener("click", async (e) => {
+    commentList.addEventListener("click", async (e) => {
       if (e.target.classList.contains("delete-comment")) {
         const index = parseInt(e.target.dataset.index);
-        const updatedComments = (post.comments || []).filter((_, i) => i !== index);
-        await updateDoc(doc(db, "posts", postDoc.id), {
-          comments: updatedComments
-        });
-        post.comments = updatedComments;
-        renderComments(commentListElement, updatedComments, currentUserId);
-        let yorumLabel = postElement.querySelector('.comments');
-        if (yorumLabel) yorumLabel.textContent = `💬 ${updatedComments.length} yorum`;
+        const updated = (post.comments || []).filter((_, i) => i !== index);
+        await updateDoc(doc(db, "posts", postDoc.id), { comments: updated });
+        post.comments = updated;
+        renderComments(commentList, updated, auth.currentUser.uid);
+        const yorumEtiketi = postElement.querySelector('.comments');
+        if (yorumEtiketi) yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
       }
     });
   });
 }
 
-async function likePost(postId, post, postElement) {
+function renderComments(container, comments, userId) {
+  container.innerHTML = "";
+  comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  comments.forEach((comment, index) => {
+    const el = document.createElement("div");
+    el.className = "comment";
+    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
+    el.innerHTML = `
+      <div><b>${comment.username}</b> <small>(${dateStr})</small><br/>${comment.text}</div>
+      ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
+    `;
+    container.appendChild(el);
+  });
+}
+
+async function likePost(id, post, el) {
   const user = auth.currentUser;
-  if (!user) return alert("Önce giriş yapmalısınız!");
-
-  const postRef = doc(db, "posts", postId);
-  const likeRef = doc(db, "posts", postId, "likes", user.uid);
-  const dislikeRef = doc(db, "posts", postId, "dislikes", user.uid);
-
-  const snap = await getDoc(postRef);
-  let likeCount = snap.data().likes || 0;
-  let dislikeCount = snap.data().dislikes || 0;
-
-  const likeExists = (await getDoc(likeRef)).exists();
-
-  const likeBtn = postElement.querySelector(`.like-btn[data-id="${postId}"]`);
-  const dislikeBtn = postElement.querySelector(`.dislike-btn[data-id="${postId}"]`);
-
-  if (likeExists) {
+  if (!user) return alert("Giriş yapmalısınız.");
+  const ref = doc(db, "posts", id);
+  const likeRef = doc(db, "posts", id, "likes", user.uid);
+  const dislikeRef = doc(db, "posts", id, "dislikes", user.uid);
+  const snap = await getDoc(ref);
+  let likes = snap.data().likes || 0;
+  let dislikes = snap.data().dislikes || 0;
+  const likeSnap = await getDoc(likeRef);
+  const btn = el.querySelector(`.like-btn[data-id="${id}"]`);
+  const dBtn = el.querySelector(`.dislike-btn[data-id="${id}"]`);
+  if (likeSnap.exists()) {
     await deleteDoc(likeRef);
-    await updateDoc(postRef, { likes: likeCount - 1 });
-    likeBtn.style.backgroundColor = "#f39c12";
-    likeBtn.querySelector(".like-count").innerText = likeCount - 1;
+    await updateDoc(ref, { likes: likes - 1 });
+    btn.style.backgroundColor = "#f39c12";
+    btn.querySelector("span").textContent = likes - 1;
   } else {
-    await setDoc(likeRef, {
-      uid: user.uid,
-      timestamp: Timestamp.now()
-    });
-    await updateDoc(postRef, { likes: likeCount + 1 });
-    likeBtn.style.backgroundColor = "#27ae60";
-    likeBtn.querySelector(".like-count").innerText = likeCount + 1;
-
+    await setDoc(likeRef, { uid: user.uid, timestamp: Timestamp.now() });
+    await updateDoc(ref, { likes: likes + 1 });
+    btn.style.backgroundColor = "#27ae60";
+    btn.querySelector("span").textContent = likes + 1;
     const disSnap = await getDoc(dislikeRef);
     if (disSnap.exists()) {
       await deleteDoc(dislikeRef);
-      await updateDoc(postRef, { dislikes: dislikeCount - 1 });
-      dislikeBtn.style.backgroundColor = "#e74c3c";
-      dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
+      await updateDoc(ref, { dislikes: dislikes - 1 });
+      dBtn.style.backgroundColor = "#e74c3c";
+      dBtn.querySelector("span").textContent = dislikes - 1;
     }
   }
 }
 
-async function dislikePost(postId, post, postElement) {
+async function dislikePost(id, post, el) {
   const user = auth.currentUser;
-  if (!user) return alert("Önce giriş yapmalısınız!");
-
-  const postRef = doc(db, "posts", postId);
-  const likeRef = doc(db, "posts", postId, "likes", user.uid);
-  const dislikeRef = doc(db, "posts", postId, "dislikes", user.uid);
-
-  const snap = await getDoc(postRef);
-  let likeCount = snap.data().likes || 0;
-  let dislikeCount = snap.data().dislikes || 0;
-
-  const disExists = (await getDoc(dislikeRef)).exists();
-
-  const likeBtn = postElement.querySelector(`.like-btn[data-id="${postId}"]`);
-  const dislikeBtn = postElement.querySelector(`.dislike-btn[data-id="${postId}"]`);
-
-  if (disExists) {
+  if (!user) return alert("Giriş yapmalısınız.");
+  const ref = doc(db, "posts", id);
+  const likeRef = doc(db, "posts", id, "likes", user.uid);
+  const dislikeRef = doc(db, "posts", id, "dislikes", user.uid);
+  const snap = await getDoc(ref);
+  let likes = snap.data().likes || 0;
+  let dislikes = snap.data().dislikes || 0;
+  const disSnap = await getDoc(dislikeRef);
+  const btn = el.querySelector(`.dislike-btn[data-id="${id}"]`);
+  const lBtn = el.querySelector(`.like-btn[data-id="${id}"]`);
+  if (disSnap.exists()) {
     await deleteDoc(dislikeRef);
-    await updateDoc(postRef, { dislikes: dislikeCount - 1 });
-    dislikeBtn.style.backgroundColor = "#e74c3c";
-    dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
+    await updateDoc(ref, { dislikes: dislikes - 1 });
+    btn.style.backgroundColor = "#e74c3c";
+    btn.querySelector("span").textContent = dislikes - 1;
   } else {
-    await setDoc(dislikeRef, {
-      uid: user.uid,
-      timestamp: Timestamp.now()
-    });
-    await updateDoc(postRef, { dislikes: dislikeCount + 1 });
-    dislikeBtn.style.backgroundColor = "#c0392b";
-    dislikeBtn.querySelector(".dislike-count").innerText = dislikeCount + 1;
-
+    await setDoc(dislikeRef, { uid: user.uid, timestamp: Timestamp.now() });
+    await updateDoc(ref, { dislikes: dislikes + 1 });
+    btn.style.backgroundColor = "#c0392b";
+    btn.querySelector("span").textContent = dislikes + 1;
     const likeSnap = await getDoc(likeRef);
     if (likeSnap.exists()) {
       await deleteDoc(likeRef);
-      await updateDoc(postRef, { likes: likeCount - 1 });
-      likeBtn.style.backgroundColor = "#f39c12";
-      likeBtn.querySelector(".like-count").innerText = likeCount - 1;
+      await updateDoc(ref, { likes: likes - 1 });
+      lBtn.style.backgroundColor = "#f39c12";
+      lBtn.querySelector("span").textContent = likes - 1;
     }
   }
 }
 
-async function postComment(postId, post, postElement) {
-  const commentInput = document.getElementById(`commentInput-${postId}`);
-  const commentText = commentInput.value.trim();
-  if (commentText === "") return alert("Yorum boş olamaz.");
-  const postRef = doc(db, "posts", postId);
+async function postComment(id, post, el) {
+  const input = document.getElementById(`commentInput-${id}`);
+  const text = input.value.trim();
+  if (!text) return alert("Yorum boş olamaz.");
+  const ref = doc(db, "posts", id);
   const user = auth.currentUser;
-
   const userSnap = await getDoc(doc(db, "users", user.uid));
-  const userData = userSnap.exists() ? userSnap.data() : {};
-  const username = userData.username || "Kullanıcı";
-
+  const username = userSnap.exists() ? userSnap.data().username : "Kullanıcı";
   const newComment = {
-    text: commentText,
+    text,
     user: user.uid,
-    username: username,
+    username,
     timestamp: new Date().toISOString()
   };
-
-  await updateDoc(postRef, {
-    comments: arrayUnion(newComment)
-  });
-
-  commentInput.value = "";
-
+  await updateDoc(ref, { comments: arrayUnion(newComment) });
+  input.value = "";
   const updatedComments = [...(post.comments || []), newComment];
   post.comments = updatedComments;
-
-  postElement.querySelector('.comments').textContent = `Yorumlar: ${updatedComments.length}`;
-  renderComments(postElement.querySelector(".comment-list"), updatedComments, user.uid);
-}
-
-function renderComments(commentListElement, commentsArray, currentUserId) {
-  commentListElement.innerHTML = "";
-
-  // Yeni yorumlar en üstte olacak şekilde sıralama
-  commentsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  commentsArray.forEach((comment, index) => {
-    const commentDiv = document.createElement("div");
-    commentDiv.classList.add("comment");
-
-    const timestamp = new Date(comment.timestamp).toLocaleString("tr-TR");
-
-    const innerHTML = `
-      <div>
-        <b>${comment.username}</b> <small>(${timestamp})</small><br/>
-        ${comment.text}
-      </div>
-      ${comment.user === currentUserId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
-    `;
-
-    commentDiv.innerHTML = innerHTML;
-    commentListElement.appendChild(commentDiv);
-  });
+  el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
+  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid);
 }
 
 loadPosts();
