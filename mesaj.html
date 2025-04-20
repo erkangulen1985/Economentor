@@ -153,19 +153,43 @@
       font-weight: bold;
       cursor: pointer;
     }
+/* Arama çubuğu sadece mobilde görünsün */
+.mobile-search-wrapper {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .mobile-search-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-search-bar {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
   .container {
     flex-direction: column;
   }
 
   .chat-list {
     width: 100%;
-    max-width: none;
     display: flex;
-    overflow-x: auto;
     flex-direction: row;
-    padding: 10px;
+    overflow-x: auto;
     gap: 10px;
+    padding: 10px;
     scroll-snap-type: x mandatory;
   }
 
@@ -175,60 +199,12 @@
     max-width: 200px;
     scroll-snap-align: start;
   }
-
-  .chat-list {
-    width: 100%;
-    max-width: none;
-    display: flex;
-    overflow-x: auto;
-    flex-direction: row;
-    padding: 10px;
-    gap: 10px;
-    scroll-snap-type: x mandatory;
-    height: auto;
-    padding-top: 60px;
-    box-sizing: border-box;
-  }
-
-  .chat-item {
-    flex: 0 0 auto;
-    min-width: 140px;
-    max-width: 200px;
-    scroll-snap-align: start;
-  }
-
-.search-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  border: 1px solid #888;
-  border-radius: 6px;
-  color: white;
-  backdrop-filter: blur(4px);
-}
 
   .chat-window {
+    flex: 1;
     padding: 15px;
   }
-
-  .send-box {
-    flex-direction: column;
-  }
-
-  .send-box input[type="text"],
-  .send-box button.send-btn {
-    width: 100%;
-  }
-
-  .send-box button.send-btn {
-    margin-top: 8px;
-  }
 }
-  }
   </style>
 </head>
 <body>
@@ -238,6 +214,9 @@
       <button class="lang-btn" onclick="goHome()" id="homeBtn">Ana Sayfa</button>
     </div>
   </header>
+  <div class="mobile-search-wrapper">
+  <input type="text" class="mobile-search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
+  </div>
   <div class="container">
     <div class="chat-list" id="chatList">
       <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
