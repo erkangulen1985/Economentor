@@ -185,13 +185,36 @@ nav a:hover {
   border-top: 1px solid #666;
 }
 
-.comments-section input[type="text"] {
+/* ✅ Yeni yorum formu düzeni (masaüstü görünüm bozulmaz) */
+.comment-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
   width: 100%;
+  margin-top: 15px;
+}
+
+.comment-form input[type="text"] {
+  flex: 1;
   padding: 12px;
   font-size: 16px;
-  margin-top: 15px;
   border-radius: 6px;
   border: none;
+}
+
+.comment-form .comment-button {
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.comment-form .comment-button:hover {
+  background-color: #2980b9;
 }
 
 .comment {
@@ -227,12 +250,12 @@ nav a:hover {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* 📱 Sadece mobilde yorum kutusu alt alta geçsin */
 @media (max-width: 768px) {
   .comment-form {
-    display: flex;
     flex-direction: column;
-    gap: 10px;
-    width: 100%;
+    align-items: stretch;
   }
 
   .comment-form input[type="text"],
