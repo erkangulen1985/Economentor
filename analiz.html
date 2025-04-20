@@ -214,7 +214,8 @@ onAuthStateChanged(auth, async (user) => {
   container.innerHTML = "";
 
   const snapshot = await getDocs(collection(db, "analizler"));
-  snapshot.forEach(async (docSnap) => {
+  const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp.seconds - a.data().timestamp.seconds);
+  sortedDocs.forEach(async (docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
     const comments = data.comments || [];
