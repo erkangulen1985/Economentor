@@ -7,6 +7,14 @@
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -17,7 +25,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
 header {
@@ -29,7 +36,7 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 36px;
+  font-size: clamp(24px, 6vw, 36px);
   letter-spacing: 2px;
 }
 
@@ -73,7 +80,7 @@ nav a:hover {
 }
 
 .content h2 {
-  font-size: 32px;
+  font-size: clamp(20px, 5vw, 32px);
   line-height: 1.5;
   color: #fff;
 }
@@ -115,7 +122,8 @@ nav a:hover {
 
 .post img {
   width: 100%;
-  height: 950px;
+  height: auto;
+  max-height: 950px;
   object-fit: cover;
   border-radius: 16px;
   display: block;
@@ -123,7 +131,7 @@ nav a:hover {
 }
 
 .post p {
-  font-size: 24px;
+  font-size: clamp(16px, 4vw, 24px);
   line-height: 2;
   margin-top: 30px;
   color: #eee;
@@ -136,6 +144,8 @@ nav a:hover {
   align-items: center;
   margin-top: 20px;
   font-size: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .like-btn, .dislike-btn, .comment-button, .toggle-comments {
@@ -145,6 +155,7 @@ nav a:hover {
   border-radius: 6px;
   cursor: pointer;
   margin: 5px;
+  flex-shrink: 0;
 }
 
 .like-btn {
@@ -226,6 +237,44 @@ nav a:hover {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .post img {
+    max-height: 300px;
+  }
+
+  .video-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .comment-button,
+  .toggle-comments,
+  .like-btn,
+  .dislike-btn {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .post p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .post {
+    padding: 20px;
+  }
+
+  nav a {
+    font-size: 14px;
+    padding: 10px;
+  }
 }
 </style>
 </head>
