@@ -196,13 +196,35 @@ nav a:hover {
   border-top: 1px solid #666;
 }
 
-.comments-section input[type="text"] {
+/* ✅ Yeni hizalama düzeni */
+.comment-form {
+  display: flex;
   width: 100%;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.comment-form input[type="text"] {
+  flex: 1;
   padding: 12px;
   font-size: 16px;
-  margin-top: 15px;
   border-radius: 6px;
   border: none;
+}
+
+.comment-form .comment-button {
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.comment-form .comment-button:hover {
+  background-color: #2980b9;
 }
 
 .comment {
@@ -274,6 +296,15 @@ nav a:hover {
   nav a {
     font-size: 14px;
     padding: 10px;
+  }
+
+  .comment-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .comment-form .comment-button {
+    width: 100%;
   }
 }
 </style>
