@@ -234,6 +234,13 @@ nav a:hover {
   background-color: #c0392b;
 }
 
+.post-title {
+  font-size: clamp(20px, 4vw, 28px);  
+  color: #66ccff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -437,6 +444,39 @@ const postFooter = `
 
     postElement.innerHTML = postImage + postDescription + postFooter + commentSection;
     document.getElementById('postsContainer').appendChild(postElement);
+
+const postTitle = `<h3 class="post-title">${post.title || "Başlıksız Paylaşım"}</h3>`;
+const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
+const postDescription = `<p>${post.description}</p>`;
+const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
+const formattedDate = new Date(postDate).toLocaleString("tr-TR");
+
+const postFooter = `
+<div class="video-footer">
+  <div>
+    <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
+    <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
+  </div>
+  <div>
+    <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
+  </div>
+  <div>
+    <span class="post-date">🕒 ${formattedDate}</span>
+  </div>
+</div>
+`;
+
+const commentSection = `
+<div class="comments-section">
+  <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
+  <div class="comment-list" style="display: none;"></div>
+  <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
+  <button class="comment-button">Yorum Yap</button>
+</div>
+`;
+
+postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
+
 
 const likeButton = postElement.querySelector(".like-btn");
 const dislikeButton = postElement.querySelector(".dislike-btn");
