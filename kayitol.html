@@ -6,13 +6,10 @@
   <title>Economentor | Kayıt Ol</title>
   <link rel="icon" type="image/png" href="image1.png" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background-color: #001f3d;
       color: #fff;
       font-family: Arial, sans-serif;
@@ -24,53 +21,34 @@
     }
 
     .background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       pointer-events: none;
       z-index: -1;
-      background-image: url('image2.png');
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
+      background: url('image2.png') center/cover no-repeat fixed;
     }
 
     .container {
       background: rgba(0, 0, 0, 0.7);
       padding: 30px;
       border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
+      width: 100%; max-width: 400px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
-    h2 {
-      margin-bottom: 20px;
-      font-size: 26px;
-    }
+    h2 { margin-bottom: 20px; font-size: 26px; }
 
     input, button {
       width: 100%;
-      max-width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: none;
+      padding: 12px; margin: 10px 0;
+      border-radius: 6px; border: none;
       font-size: 16px;
     }
 
-    input {
-      background: #2a2a2a;
-      color: white;
-    }
+    input { background: #2a2a2a; color: white; }
 
     button {
       background: linear-gradient(to right, #6a11cb, #2575fc);
-      color: white;
-      font-weight: bold;
+      color: white; font-weight: bold;
       cursor: pointer;
     }
 
@@ -105,34 +83,56 @@
       display: block;
     }
 
-    .link:hover {
-      text-decoration: underline;
+    .link:hover { text-decoration: underline; }
+
+    /* Modal */
+    #warningModal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
     }
 
+    #warningModal .modal-content {
+      background: white; color: black;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    #warningModal h3 {
+      margin-top: 0;
+    }
+
+    #warningModal .modal-buttons {
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    #warningModal button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      margin-left: 10px;
+    }
+
+    #cancelModalBtn { background: #ccc; color: #000; }
+    #acceptModalBtn { background: #007bff; color: #fff; }
+
     @media (max-width: 480px) {
-      body {
-        flex-direction: column;
-        justify-content: flex-start;
-        padding: 40px 10px;
-      }
-
-      .container {
-        padding: 20px;
-        margin: 0 auto;
-      }
-
-      h2 {
-        font-size: 22px;
-      }
-
-      input, button {
-        padding: 10px;
-        font-size: 15px;
-      }
-
-      label {
-        font-size: 0.85em;
-      }
+      body { flex-direction: column; justify-content: flex-start; padding: 40px 10px; }
+      .container { padding: 20px; }
+      h2 { font-size: 22px; }
+      input, button { padding: 10px; font-size: 15px; }
+      label { font-size: 0.85em; }
     }
   </style>
 </head>
@@ -162,6 +162,21 @@
     </form>
   </div>
 
+  <!-- Modal -->
+  <div id="warningModal">
+    <div class="modal-content">
+      <h3>Yatırım Bilgilendirme ve Kullanım Koşulları</h3>
+      <p>Bu sitede yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Yatırım danışmanlığı hizmeti, kişilerin risk ve getiri tercihleri dikkate alınarak yalnızca yetkili kurumlar tarafından sunulmaktadır...</p>
+      <p>Burada yer alan yorum ve tavsiyeler objektif olarak grafikler veya KAP haberlerine bağlı kişisel görüşlere dayanmakta olup, herhangi bir yatırım aracının alım-satım önerisi ya da getiri vaadi olarak yorumlanmamalıdır...</p>
+      <p>Bu görüşler mali durumunuz ile risk ve getiri tercihlerinize uygun olmayabilir. Bu nedenle, sadece burada yer alan bilgilere dayanarak yatırım kararı verilmesi beklentilerinize uygun sonuçlar doğurmayabilir...</p>
+      <p>Sitemizde yer alan içeriğin tamamı veya herhangi bir kısmı yalnızca sahipleri tarafından veya sahiplerinin yazılı izni ile kullanılabilir. İçerik üzerinde izinsiz değişiklik yapmak, kopyalamak, kiralamak, ödünç vermek, iletmek ve yayınlamak yasaktır.</p>
+      <div class="modal-buttons">
+        <button id="cancelModalBtn">İptal</button>
+        <button id="acceptModalBtn">Onaylıyorum</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -181,9 +196,33 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const form = document.getElementById("registerForm");
+    const modal = document.getElementById("warningModal");
+    const acceptBtn = document.getElementById("acceptModalBtn");
+    const cancelBtn = document.getElementById("cancelModalBtn");
+    let formSubmitted = false;
 
+    form.addEventListener("submit", (e) => {
+      if (!formSubmitted) {
+        e.preventDefault();
+        modal.style.display = "flex";
+      }
+    });
+
+    acceptBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+      formSubmitted = true;
+      form.requestSubmit();
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      if (!formSubmitted) return;
+
+      e.preventDefault();
       const errorBox = document.getElementById("errorMsg");
       const successBox = document.getElementById("successMsg");
       errorBox.innerText = "";
@@ -206,13 +245,12 @@
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        const registrationDate = Timestamp.fromDate(new Date());
         await setDoc(doc(db, "users", user.uid), {
           fullName,
           dob,
           username,
           email,
-          registrationDate,
+          registrationDate: Timestamp.fromDate(new Date()),
           role: "user"
         });
 
@@ -224,7 +262,6 @@
         }, 2000);
 
       } catch (error) {
-        console.error("Hata:", error.code, error.message);
         let message = "Bilinmeyen hata!";
         if (error.code === 'auth/email-already-in-use') {
           message = "Bu e-posta adresi zaten kullanımda.";
