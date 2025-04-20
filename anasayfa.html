@@ -196,12 +196,13 @@ nav a:hover {
   border-top: 1px solid #666;
 }
 
-/* ✅ Yeni hizalama düzeni */
+/* ✅ Masaüstünde yatay, mobilde dikey hizalama */
 .comment-form {
   display: flex;
   width: 100%;
   gap: 10px;
   margin-top: 15px;
+  align-items: center;
 }
 
 .comment-form input[type="text"] {
@@ -261,6 +262,7 @@ nav a:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* 🔽 Sadece mobilde alt alta geçme */
 @media (max-width: 768px) {
   .post img {
     max-height: 300px;
@@ -300,7 +302,7 @@ nav a:hover {
 
   .comment-form {
     flex-direction: column;
-    gap: 10px;
+    align-items: stretch;
   }
 
   .comment-form .comment-button {
