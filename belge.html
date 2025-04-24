@@ -186,27 +186,28 @@ document.addEventListener("DOMContentLoaded", () => {
     for (const docSnap of sortedDocs) {
       const data = docSnap.data();
 
-      // Check if filePath exists
+      // filePath kontrolü
       if (!data.filePath) {
-        console.error("Missing filePath for document:", data.title);
+        console.error("filePath eksik:", data.title);  // Dosya yolu eksikse hata ver
         continue;
       }
 
       // Supabase üzerinden public URL al
-      console.log("Fetching file for path:", data.filePath);  // Log file path to debug
+      console.log("Dosya için path alınıyor:", data.filePath);  // Dosya yolunu kontrol et
       const { publicURL, error } = supabase
         .storage
-        .from('documents') // Check your Supabase bucket name here
-        .getPublicUrl(data.filePath); // Ensure filePath is correct
+        .from('documents') // Supabase bucket adınızı buraya yazın
+        .getPublicUrl(data.filePath); // Firestore'dan alınan dosya yolunu kullanın
 
       if (error) {
         console.error("Supabase dosya alma hatası:", error.message);
         continue;
       }
 
-      // Log the public URL to check if it's valid
+      // publicURL'yi kontrol et
       console.log("Public URL:", publicURL);
 
+      // URL alındıysa, belgeyi sayfada göster
       const belgeDiv = document.createElement("div");
       belgeDiv.classList.add("document");
       belgeDiv.innerHTML = `
