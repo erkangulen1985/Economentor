@@ -315,7 +315,7 @@ async function uploadPost() {
 // ✅ Postları yükle ve yeniye göre sırala
 async function loadPosts() {
   const postsContainer = document.getElementById("postsContainer");
-  postsContainer.innerHTML = "<h2>Paylaşılan Resimler</h2>";
+  postsContainer.innerHTML = "<h2>Paylaşılan Postlar</h2>";
 
   const snapshot = await getDocs(query(collection(db, "posts"), orderBy("timestamp", "desc")));
   if (snapshot.empty) {
