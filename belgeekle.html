@@ -154,7 +154,7 @@
     }
 
     .post-footer button {
-      background-color: #e74c3c;
+      background-color: #3498db; /* Mavi renk */
       color: white;
       padding: 8px 16px;
       border: none;
@@ -164,15 +164,7 @@
     }
 
     .post-footer button:hover {
-      background-color: #c0392b;
-    }
-
-    .post-footer .edit-button {
-      background-color: #f39c12;
-    }
-
-    .post-footer .edit-button:hover {
-      background-color: #e67e22;
+      background-color: #2980b9; /* Koyu mavi */
     }
 
     .footer {
@@ -202,7 +194,7 @@
     }
 
     .comment button {
-      background-color: #e74c3c;
+      background-color: #3498db; /* Mavi renk */
       color: white;
       padding: 6px 12px;
       border: none;
@@ -211,7 +203,16 @@
     }
 
     .comment button:hover {
-      background-color: #c0392b;
+      background-color: #2980b9; /* Koyu mavi */
+    }
+
+    /* Tarih ve saat alanı stilini iyileştirelim */
+    .datetime-local {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -235,7 +236,7 @@
       <input type="file" id="fileUpload" accept="image/*">
       <input type="text" id="fileTitle" placeholder="Başlık Girin">
       <textarea id="fileDescription" placeholder="Açıklama Girin" rows="4"></textarea>
-      <input type="datetime-local" id="uploadDate" placeholder="Tarih ve Saat Seçin">
+      <input type="datetime-local" id="uploadDate" class="datetime-local" placeholder="Tarih ve Saat Seçin">
       <button id="uploadButton">Paylaş</button>
     </div>
 
