@@ -144,10 +144,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore, collection, getDocs, doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const firebaseConfig = {
@@ -159,6 +156,7 @@ const firebaseConfig = {
   appId: "1:835370350520:web:d9bb275eb4b7502997814d"
 };
 
+// Supabase yapılandırması
 const supabase = createClient(
   "https://rvwsvhgihatxxhnbmouw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
@@ -168,57 +166,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Wait for the DOM to fully load before executing the script
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return location.href = "index.html";
 
-    const uid = user.uid;
-    const userDoc = await getDoc(doc(db, "users", uid));
-    const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
-
     const container = document.getElementById("documentContainer");
     container.innerHTML = "";
 
-    // Get documents sorted by uploadDate
     const snapshot = await getDocs(collection(db, "documents"));
     const sortedDocs = snapshot.docs.sort((a, b) => {
-      return b.data().uploadDate.seconds - a.data().uploadDate.seconds;
+      return b.data().uploadDate?.seconds - a.data().uploadDate?.seconds;
     });
 
-    // Display message if no documents found
     if (sortedDocs.length === 0) {
       container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
       return;
     }
 
-// Loop through documents and display them
-for (const docSnap of sortedDocs) {
-  const data = docSnap.data();
-  const id = docSnap.id;
+    for (const docSnap of sortedDocs) {
+      const data = docSnap.data();
 
-  // Get file URL from Supabase storage
-  const { publicURL, error } = await supabase
-    .storage
-    .from('documents') // Your storage bucket name
-    .getPublicUrl(data.filePath); // Use file path from Firestore
+      // Supabase üzerinden public URL al
+      const { publicURL, error } = supabase
+        .storage
+        .from('documents')
+        .getPublicUrl(data.filePath);
 
-  if (error) {
-    console.error("Supabase dosya alma hatası:", error.message);
-    continue;
-  }
-      
-  // Create a new document element and display it
-  const docElement = document.createElement("div");
-  docElement.classList.add("document");
-  docElement.innerHTML = `
-    <h2>${data.title}</h2>
-    <img src="${publicURL}" alt="Belge Görseli">
-    <p class="description">${data.description || "Açıklama yok."}</p>
-    <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-  `;
-  container.appendChild(docElement);
-}
+      if (error) {
+        console.error("Supabase dosya alma hatası:", error.message);
+        continue;
+      }
+
+      const belgeDiv = document.createElement("div");
+      belgeDiv.classList.add("document");
+      belgeDiv.innerHTML = `
+        <h2>${data.title}</h2>
+        <img src="${publicURL}" alt="Belge Görseli">
+        <p class="description">${data.description || "Açıklama yok."}</p>
+        <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+      `;
+      container.appendChild(belgeDiv);
+    }
   });
 });
 </script>
