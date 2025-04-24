@@ -369,19 +369,30 @@ async function loadDocuments() {
   });
 }
 
-// ✅ Belgeyi sil (Supabase + Firestore)
 window.deleteDocument = async function(docId, filePath) {
   const confirmed = confirm("Bu belgeyi silmek istediğinize emin misiniz?");
   if (!confirmed) return;
 
-  if (filePath) {
-    const { error } = await supabase.storage.from('documents').remove([filePath]);
-    if (error) console.warn("Belge dosyası silinemedi:", error.message);
+  // Dosya yolunu logla
+  console.log("Silme işlemi için dosya yolu:", filePath);
+
+  // Supabase'ten dosyayı sil
+  const { error: fileDeleteError } = await supabase.storage.from('documents').remove([filePath]);
+  if (fileDeleteError) {
+    console.error("Supabase'ten dosya silme hatası:", fileDeleteError.message);
+    alert("Dosya silinemedi!");
+    return;
+  } else {
+    console.log("Dosya Supabase'ten silindi");
   }
 
+  // Firestore'dan belgeyi sil
+  console.log("Firestore'dan silinecek belge ID'si:", docId);
   await deleteDoc(doc(db, "documents", docId));
+  console.log("Belge Firestore'dan silindi");
+
   alert("Belge silindi.");
-  loadDocuments();
+  loadDocuments(); // Belgeleri yeniden yükle
 };
 
 loadDocuments();
