@@ -195,34 +195,37 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-      // Supabase üzerinden public URL al
-      const { publicURL, error } = supabase
-        .storage
-        .from('documents') // Supabase bucket adınızı buraya yazın
-        .getPublicUrl(data.filePath); // Firestore'dan alınan dosya yolunu kullanın
+// Dosya yolunu doğru şekilde alıp almadığını kontrol edelim
+console.log("Dosya Yolu:", data.filePath);
 
-      if (error) {
-        console.error("Supabase dosya alma hatası:", error.message);
-        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya göster
-        continue;
-      }
+const { publicURL, error } = supabase
+  .storage
+  .from('documents') // Supabase bucket adınızın doğru olduğundan emin olun
+  .getPublicUrl(data.filePath); // Firestore'dan alınan dosya yolunu kullanın
 
-      console.log("Public URL:", publicURL); // publicURL doğru şekilde dönecek mi bakalım
+if (error) {
+  console.error("Supabase dosya alma hatası:", error.message);
+  container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya göster
+  return;
+}
 
-      if (publicURL) {
-        const belgeDiv = document.createElement("div");
-        belgeDiv.classList.add("document");
-        belgeDiv.innerHTML = `
-          <h2>${data.title}</h2>
-          <img src="${publicURL}" alt="Belge Görseli">
-          <p class="description">${data.description || "Açıklama yok."}</p>
-          <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-        `;
-        container.appendChild(belgeDiv);
-      } else {
-        console.error("Public URL alırken bir hata oluştu");
-        container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
-      }
+console.log("Public URL:", publicURL); // publicURL doğru şekilde dönecek mi bakalım
+
+if (publicURL) {
+  const belgeDiv = document.createElement("div");
+  belgeDiv.classList.add("document");
+  belgeDiv.innerHTML = `
+    <h2>${data.title}</h2>
+    <img src="${publicURL}" alt="Belge Görseli">
+    <p class="description">${data.description || "Açıklama yok."}</p>
+    <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+  `;
+  container.appendChild(belgeDiv);
+} else {
+  console.error("Public URL alırken bir hata oluştu");
+  container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
+}
+
     }
   });
 });
