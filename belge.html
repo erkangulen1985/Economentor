@@ -195,39 +195,38 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-// Dosya yolunu doğru şekilde alıp almadığını kontrol edelim
-console.log("Dosya Yolu:", data.filePath);  // Dosya yolunun doğru olup olmadığını kontrol edelim
+      // Dosya yolunu doğru şekilde alıp almadığını kontrol edelim
+      console.log("Dosya Yolu:", data.filePath);  // Dosya yolunun doğru olup olmadığını kontrol edelim
 
-const filePathWithFolder = 'documents/documents/' + data.filePath.split('/')[1]; // Dosya yolunu uygun şekilde güncelle
+      const filePathWithFolder = 'documents/documents/' + data.filePath.split('/')[1]; // Dosya yolunu uygun şekilde güncelle
 
-const { publicURL, error } = supabase
-  .storage
-  .from('documents')  // Supabase bucket adınızın doğru olduğundan emin olun
-  .getPublicUrl(filePathWithFolder); // Güncellenmiş dosya yolunu kullanın
+      const { publicURL, error } = supabase
+        .storage
+        .from('documents')  // Supabase bucket adınızın doğru olduğundan emin olun
+        .getPublicUrl(filePathWithFolder); // Güncellenmiş dosya yolunu kullanın
 
-if (error) {
-  console.error("Supabase dosya alma hatası:", error.message);  // Hata mesajını detaylı bir şekilde kontrol edelim
-  container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya göster
-  return;
-}
+      if (error) {
+        console.error("Supabase dosya alma hatası:", error.message);  // Hata mesajını detaylı bir şekilde kontrol edelim
+        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya göster
+        return;
+      }
 
-console.log("Public URL:", publicURL); // publicURL doğru şekilde dönecek mi bakalım
+      console.log("Public URL:", publicURL); // publicURL doğru şekilde dönecek mi bakalım
 
-if (publicURL) {
-  const belgeDiv = document.createElement("div");
-  belgeDiv.classList.add("document");
-  belgeDiv.innerHTML = `
-    <h2>${data.title}</h2>
-    <img src="${publicURL}" alt="Belge Görseli">
-    <p class="description">${data.description || "Açıklama yok."}</p>
-    <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-  `;
-  container.appendChild(belgeDiv);
-} else {
-  console.error("Public URL alırken bir hata oluştu");
-  container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
-}
-
+      if (publicURL) {
+        const belgeDiv = document.createElement("div");
+        belgeDiv.classList.add("document");
+        belgeDiv.innerHTML = `
+          <h2>${data.title}</h2>
+          <img src="${publicURL}" alt="Belge Görseli">
+          <p class="description">${data.description || "Açıklama yok."}</p>
+          <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+        `;
+        container.appendChild(belgeDiv);
+      } else {
+        console.error("Public URL alırken bir hata oluştu");
+        container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
+      }
     }
   });
 });
