@@ -185,6 +185,12 @@ onAuthStateChanged(auth, async (user) => {
     return b.data().uploadDate.seconds - a.data().uploadDate.seconds;
   });
 
+  // Eğer belge yoksa, "Henüz belge yok" mesajı gösterelim
+  if (sortedDocs.length === 0) {
+    container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
+    return;
+  }
+
   sortedDocs.forEach(async (docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
@@ -200,6 +206,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
+    // Belgeleri sayfada görüntülüyoruz
     const document = document.createElement("div");
     document.classList.add("document");
     document.innerHTML = `
