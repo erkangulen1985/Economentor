@@ -196,6 +196,7 @@ onAuthStateChanged(auth, async (user) => {
     const id = docSnap.id;
 
     // Supabase'ten dosya URL'sini alıyoruz
+    console.log("filePath:", data.filePath); // Dosya yolunu kontrol et
     const { publicURL, error } = supabase
       .storage
       .from('documents') // Storage bucket adınız
@@ -205,6 +206,8 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Supabase dosya alma hatası:", error.message);
       return;
     }
+
+    console.log("publicURL:", publicURL); // publicURL'yi kontrol et
 
     // Belgeleri sayfada görüntülüyoruz
     const document = document.createElement("div");
@@ -219,6 +222,9 @@ onAuthStateChanged(auth, async (user) => {
   });
 });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
