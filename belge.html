@@ -208,18 +208,33 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Create a new document element and display it
-      const document = document.createElement("div");
-      document.classList.add("document");
-      document.innerHTML = `
-        <h2>${data.title}</h2>
-        <img src="${publicURL}" alt="Belge Görseli">
-        <p class="description">${data.description || "Açıklama yok."}</p>
-        <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-      `;
-      container.appendChild(document);
-    });
-  });
+// Loop through documents and display them
+for (const docSnap of sortedDocs) {
+  const data = docSnap.data();
+  const id = docSnap.id;
+
+  // Get file URL from Supabase storage
+  const { publicURL, error } = await supabase
+    .storage
+    .from('documents') // Your storage bucket name
+    .getPublicUrl(data.filePath); // Use file path from Firestore
+
+  if (error) {
+    console.error("Supabase dosya alma hatası:", error.message);
+    continue;
+  }
+      
+  // Create a new document element and display it
+  const document = document.createElement("div");
+  document.classList.add("document");
+  document.innerHTML = `
+    <h2>${data.title}</h2>
+    <img src="${publicURL}" alt="Belge Görseli">
+    <p class="description">${data.description || "Açıklama yok."}</p>
+    <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+  `;
+  container.appendChild(document);
+}
 });
 </script>
 
