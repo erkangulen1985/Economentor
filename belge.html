@@ -1,1 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Economentor | Belgeler</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* Stil tanımlamaları */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
 
+    header {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: 2px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: transparent;
+      padding: 20px 0 10px;
+    }
+
+    nav a {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: rgba(0,0,0,0.7);
+      border-radius: 10px;
+    }
+
+    .document {
+      background-color: #111;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .document h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #66ccff;
+    }
+
+    .document img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .document-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ccc;
+    }
+
+    .comment-section {
+      margin-top: 20px;
+    }
+
+    .comment-section input {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 10px;
+    }
+
+    .comment-section button {
+      background-color: #3498db;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .comment {
+      background-color: #333;
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .comment-time {
+      font-size: 12px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>ECONOMENTOR | Belgeler</h1>
+  </header>
+
+  <nav>
+    <a href="anasayfa.html">Anasayfa</a>
+  </nav>
+
+  <div class="container" id="documentContainer">
+    <p style="text-align:center;">Yükleniyor...</p>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, doc,
+  updateDoc, getDoc, arrayUnion, deleteDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
+
+  const uid = user.uid;
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
+
+  const container = document.getElementById("documentContainer");
+  container.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "documents"));
+  const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp.seconds - a.data().timestamp.seconds);
+
+  sortedDocs.forEach(async (docSnap) => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+
+    const document = document.createElement("div");
+    document.classList.add("document");
+    document.innerHTML = `
+      <h2>${data.title}</h2>
+      <img src="${data.fileUrl}" alt="Belge Görseli">
+      <p class="description">${data.description || "Açıklama yok."}</p>
+      <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
+    `;
+    container.appendChild(document);
+  });
+});
+</script>
+
+</body>
+</html>
