@@ -158,9 +158,9 @@
       <button id="uploadButton">Paylaş</button>
     </div>
 
-    <div class="history-section" id="postsContainer">
-      <h2>Eski Paylaşımlar</h2>
-      <div id="postsList"></div>
+    <div class="history-section" id="documentsContainer">
+      <h2>Belgelerim</h2>
+      <div id="documentsList"></div>
     </div>
   </div>
 
@@ -243,14 +243,14 @@ async function uploadDocument() {
   loadDocuments();
 }
 
-// ✅ Eski paylaşımları yükle
+// ✅ Belgeleri yükle
 async function loadDocuments() {
-  const postsContainer = document.getElementById("postsList");
-  postsContainer.innerHTML = "";
+  const documentsContainer = document.getElementById("documentsList");
+  documentsContainer.innerHTML = "";
 
   const snapshot = await getDocs(query(collection(db, "documents"), orderBy("timestamp", "desc")));
   if (snapshot.empty) {
-    postsContainer.innerHTML = "<p>Henüz belge paylaşılmadı.</p>";
+    documentsContainer.innerHTML = "<p>Henüz belge paylaşılmadı.</p>";
     return;
   }
 
@@ -258,9 +258,9 @@ async function loadDocuments() {
     const docData = docSnap.data();
     const docId = docSnap.id;
 
-    const postElement = document.createElement("div");
-    postElement.classList.add("post");
-    postElement.innerHTML = `
+    const documentElement = document.createElement("div");
+    documentElement.classList.add("post");
+    documentElement.innerHTML = `
       <h3>${docData.title}</h3>
       <p>${docData.description}</p>
       <a href="${docData.fileUrl}" target="_blank">Belgeyi Görüntüle</a>
@@ -268,11 +268,11 @@ async function loadDocuments() {
       <button onclick="deleteDocument('${docId}', '${docData.filePath}')">Sil</button>
     `;
 
-    postsContainer.appendChild(postElement);
+    documentsContainer.appendChild(documentElement);
   });
 }
 
-// ✅ Eski belgeyi sil (Supabase + Firestore)
+// ✅ Belgeyi sil (Supabase + Firestore)
 window.deleteDocument = async function(docId, filePath) {
   const confirmed = confirm("Bu belgeyi silmek istediğinize emin misiniz?");
   if (!confirmed) return;
