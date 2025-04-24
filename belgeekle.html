@@ -153,8 +153,9 @@
       align-items: center;
     }
 
+    /* Sil butonunu kırmızı ve estetik hale getirelim */
     .post-footer button {
-      background-color: #3498db; /* Mavi renk */
+      background-color: #e74c3c; /* Kırmızı */
       color: white;
       padding: 8px 16px;
       border: none;
@@ -164,7 +165,7 @@
     }
 
     .post-footer button:hover {
-      background-color: #2980b9; /* Koyu mavi */
+      background-color: #c0392b; /* Koyu kırmızı */
     }
 
     .footer {
@@ -194,7 +195,7 @@
     }
 
     .comment button {
-      background-color: #3498db; /* Mavi renk */
+      background-color: #e74c3c; /* Kırmızı */
       color: white;
       padding: 6px 12px;
       border: none;
@@ -203,7 +204,7 @@
     }
 
     .comment button:hover {
-      background-color: #2980b9; /* Koyu mavi */
+      background-color: #c0392b; /* Koyu kırmızı */
     }
 
     /* Tarih ve saat alanı stilini iyileştirelim */
@@ -346,7 +347,7 @@ async function loadDocuments() {
       <img src="${docData.fileUrl}" alt="Belge Görseli">
       <h3>${docData.title}</h3>
       <p>${docData.description}</p>
-      <p><strong>Tarih: </strong>${docData.uploadDate}</p>
+      <p><strong>Tarih: </strong>${new Date(docData.uploadDate).toLocaleString()}</p>
       <button onclick="deleteDocument('${docId}', '${docData.filePath}')">Sil</button>
     `;
 
