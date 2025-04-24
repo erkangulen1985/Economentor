@@ -187,14 +187,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = docSnap.data();
 
       // filePath kontrolü
+      console.log("Dosya Yolu:", data.filePath); // Dosya yolunun doğru alınıp alınmadığını kontrol et
+
       if (!data.filePath) {
-        console.error("filePath eksik:", data.title);  // Dosya yolu eksikse hata ver
-        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`;  // Kullanıcıya hata mesajı ver
+        console.error("filePath eksik:", data.title); // Dosya yolu eksikse hata ver
+        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`; // Kullanıcıya hata mesajı göster
         continue;
       }
 
       // Supabase üzerinden public URL al
-      console.log("Dosya için path alınıyor:", data.filePath);  // Dosya yolunu kontrol et
       const { publicURL, error } = supabase
         .storage
         .from('documents') // Supabase bucket adınızı buraya yazın
@@ -206,21 +207,25 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-      console.log("Public URL:", publicURL);
+      console.log("Public URL:", publicURL); // publicURL doğru şekilde dönecek mi bakalım
 
-      const belgeDiv = document.createElement("div");
-      belgeDiv.classList.add("document");
-      belgeDiv.innerHTML = `
-        <h2>${data.title}</h2>
-        <img src="${publicURL}" alt="Belge Görseli">
-        <p class="description">${data.description || "Açıklama yok."}</p>
-        <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-      `;
-      container.appendChild(belgeDiv);
+      if (publicURL) {
+        const belgeDiv = document.createElement("div");
+        belgeDiv.classList.add("document");
+        belgeDiv.innerHTML = `
+          <h2>${data.title}</h2>
+          <img src="${publicURL}" alt="Belge Görseli">
+          <p class="description">${data.description || "Açıklama yok."}</p>
+          <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+        `;
+        container.appendChild(belgeDiv);
+      } else {
+        console.error("Public URL alırken bir hata oluştu");
+        container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
+      }
     }
   });
 });
-
 </script>
 
 </body>
