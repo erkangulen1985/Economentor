@@ -146,8 +146,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore, collection, getDocs, doc,
-  updateDoc, getDoc, arrayUnion, deleteDoc,
-  setDoc
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -169,56 +168,57 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "index.html";
+// Wait for the DOM to fully load before executing the script
+document.addEventListener("DOMContentLoaded", () => {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return location.href = "index.html";
 
-  const uid = user.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
-  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
+    const uid = user.uid;
+    const userDoc = await getDoc(doc(db, "users", uid));
+    const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
 
-  const container = document.getElementById("documentContainer");
-  container.innerHTML = "";
+    const container = document.getElementById("documentContainer");
+    container.innerHTML = "";
 
-  // Belgeleri `uploadDate` alanına göre sıralıyoruz
-  const snapshot = await getDocs(collection(db, "documents"));
-  const sortedDocs = snapshot.docs.sort((a, b) => {
-    return b.data().uploadDate.seconds - a.data().uploadDate.seconds;
-  });
+    // Get documents sorted by uploadDate
+    const snapshot = await getDocs(collection(db, "documents"));
+    const sortedDocs = snapshot.docs.sort((a, b) => {
+      return b.data().uploadDate.seconds - a.data().uploadDate.seconds;
+    });
 
-  // Eğer belge yoksa, "Henüz belge yok" mesajı gösterelim
-  if (sortedDocs.length === 0) {
-    container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
-    return;
-  }
-
-  sortedDocs.forEach(async (docSnap) => {
-    const data = docSnap.data();
-    const id = docSnap.id;
-
-    // Supabase'ten dosya URL'sini alıyoruz
-    console.log("filePath:", data.filePath); // Dosya yolunu kontrol et
-    const { publicURL, error } = supabase
-      .storage
-      .from('documents') // Storage bucket adınız
-      .getPublicUrl(data.filePath); // Firestore'da saklanan dosya yolunu kullanın
-
-    if (error) {
-      console.error("Supabase dosya alma hatası:", error.message);
+    // Display message if no documents found
+    if (sortedDocs.length === 0) {
+      container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
       return;
     }
 
-    console.log("publicURL:", publicURL); // publicURL'yi kontrol et
+    // Loop through documents and display them
+    sortedDocs.forEach(async (docSnap) => {
+      const data = docSnap.data();
+      const id = docSnap.id;
 
-    // Belgeleri sayfada görüntülüyoruz
-    const document = document.createElement("div");
-    document.classList.add("document");
-    document.innerHTML = `
-      <h2>${data.title}</h2>
-      <img src="${publicURL}" alt="Belge Görseli">
-      <p class="description">${data.description || "Açıklama yok."}</p>
-      <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
-    `;
-    container.appendChild(document);
+      // Get file URL from Supabase storage
+      const { publicURL, error } = supabase
+        .storage
+        .from('documents') // Your storage bucket name
+        .getPublicUrl(data.filePath); // Use file path from Firestore
+
+      if (error) {
+        console.error("Supabase dosya alma hatası:", error.message);
+        return;
+      }
+
+      // Create a new document element and display it
+      const document = document.createElement("div");
+      document.classList.add("document");
+      document.innerHTML = `
+        <h2>${data.title}</h2>
+        <img src="${publicURL}" alt="Belge Görseli">
+        <p class="description">${data.description || "Açıklama yok."}</p>
+        <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+      `;
+      container.appendChild(document);
+    });
   });
 });
 </script>
