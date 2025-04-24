@@ -189,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // filePath kontrolü
       if (!data.filePath) {
         console.error("filePath eksik:", data.title);  // Dosya yolu eksikse hata ver
+        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`;  // Kullanıcıya hata mesajı ver
         continue;
       }
 
@@ -201,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (error) {
         console.error("Supabase dosya alma hatası:", error.message);
+        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya göster
         continue;
       }
 
@@ -218,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 </script>
 
 </body>
