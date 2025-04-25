@@ -195,12 +195,15 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-      const filePathWithFolder = 'documents/documents/' + data.filePath.split('/')[1]; // Dosya yolunu güncelliyoruz.
+      // Dosya yolunu doğru şekilde alıp almadığını kontrol edelim
+      console.log("Dosya Yolu:", data.filePath);  // Dosya yolunun doğru olup olmadığını kontrol edelim
+
+      const filePathWithFolder = 'documents/documents/' + data.filePath.split('/')[1]; // Dosya yolunu uygun şekilde güncelle
 
       // Supabase'ten dosyanın public URL'sini alıyoruz.
       const { publicURL, error } = supabase
         .storage
-        .from('documents') // Supabase'teki bucket adınız
+        .from('documents')  // Supabase'teki bucket adınız
         .getPublicUrl(filePathWithFolder); // Dosyanın public URL'sini alıyoruz.
 
       if (error) {
@@ -223,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         container.appendChild(belgeDiv); // Belgeyi sayfaya ekliyoruz
       } else {
-        console.error("Public URL alırken bir hata oluştu"); // Eğer URL alınamazsa hata gösteriyoruz.
+        console.error("Public URL alırken bir hata oluştu"); // URL alınamıyorsa hata mesajı veriyoruz.
         container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
       }
     }
