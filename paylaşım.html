@@ -279,31 +279,38 @@ async function uploadPost() {
   const title = document.getElementById("imageTitle").value;
   const description = document.getElementById("imageDescription").value;
 
-  if (!imageFile || !title || !description) {
-    alert("Lütfen tüm alanları doldurun!");
+  if (!title || !description) {
+    alert("Lütfen başlık ve açıklama girin!");
     return;
   }
 
-  const safeFileName = sanitizeFilename(imageFile.name);
-  const filePath = 'images/' + Date.now() + '-' + safeFileName;
-  const { data, error } = await supabase
-    .storage
-    .from('anasayfa-paylasimlari')
-    .upload(filePath, imageFile);
+  let imageUrl = ''; // Resim URL'si varsayılan olarak boş olacak
 
-  if (error) {
-    console.error("Supabase yükleme hatası:", error.message);
-    alert("Resim yüklenemedi!");
-    return;
+  if (imageFile) {
+    // Eğer resim varsa, güvenli dosya adı oluşturulacak ve Supabase'e yükleme yapılacak
+    const safeFileName = sanitizeFilename(imageFile.name);
+    const filePath = 'images/' + Date.now() + '-' + safeFileName;
+    const { data, error } = await supabase
+      .storage
+      .from('anasayfa-paylasimlari')
+      .upload(filePath, imageFile);
+
+    if (error) {
+      console.error("Supabase yükleme hatası:", error.message);
+      alert("Resim yüklenemedi!");
+      return;
+    }
+
+    // Resim yükleme başarılı ise, URL'si alınacak
+    imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
   }
 
-  const imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
-
+  // Firestore'a yeni paylaşım verisini ekleme
   await addDoc(collection(db, "posts"), {
     title,
     description,
-    imageUrl,
-    imagePath: filePath,
+    imageUrl,  // Eğer resim yüklenmişse, URL'si buraya eklenir
+    imagePath: imageFile ? 'images/' + Date.now() + '-' + safeFileName : '',
     likes: 0,
     dislikes: 0,
     comments: [],
