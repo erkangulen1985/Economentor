@@ -411,7 +411,7 @@ async function loadPosts() {
     postElement.id = `post-${postDoc.id}`;
 
     const postTitle = post.title ? `<h3 class="post-title">${post.title}</h3>` : "";
-    const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
+    const postImage = post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : "";
     const postDescription = `<p>${post.description || ""}</p>`;
     const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
     const formattedDate = new Date(postDate).toLocaleString("tr-TR");
@@ -439,8 +439,6 @@ async function loadPosts() {
         <button class="comment-button">Yorum Yap</button>
       </div>
     `;
-   
-    const postImage = post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : "";
 
     postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
     document.getElementById("postsContainer").appendChild(postElement);
