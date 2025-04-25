@@ -206,8 +206,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .from('documents')  // Supabase'teki bucket adınız
         .getPublicUrl(filePathWithFolder); // Dosyanın public URL'sini alıyoruz.
 
+      // Eğer hata varsa, hata mesajını ekrana yazdıralım
       if (error) {
-        console.error("Supabase dosya alma hatası:", error.message); // Hata mesajını alıyoruz.
+        console.error("Supabase dosya alma hatası:", error.message); // Hata mesajını daha detaylı şekilde kontrol ediyoruz.
         container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya gösteriyoruz.
         return;
       }
@@ -232,6 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+  
 </script>
 
 </body>
