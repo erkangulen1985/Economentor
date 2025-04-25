@@ -398,38 +398,57 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Gönderileri yükle
 async function loadPosts() {
-  const postsRef = collection(db, "posts");
-  const q = query(postsRef, orderBy("timestamp", "desc"));
-  const querySnapshot = await getDocs(q);
+  const postsContainer = document.getElementById("postsContainer");
+  postsContainer.innerHTML = "<h2>Paylaşılan Postlar</h2>";
 
-  querySnapshot.forEach((postDoc) => {
-    const post = postDoc.data();
+  const snapshot = await getDocs(query(collection(db, "posts"), orderBy("timestamp", "desc")));
+  if (snapshot.empty) {
+    postsContainer.innerHTML += "<p>Henüz paylaşım yok.</p>";
+    return;
+  }
+
+  snapshot.forEach((docSnap) => {
+    const post = docSnap.data();
+    const postId = docSnap.id;
+
     const postElement = document.createElement("div");
     postElement.classList.add("post");
-    postElement.id = `post-${postDoc.id}`;
+    postElement.style.margin = "0 auto";
 
-    const postTitle = post.title ? `<h3 class="post-title">${post.title}</h3>` : "";
-    const postImage = `<img src="${post.imageUrl}" alt="Resim">`;
-    const postDescription = `<p>${post.description || ""}</p>`;
-    const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
-    const formattedDate = new Date(postDate).toLocaleString("tr-TR");
+    const comments = (post.comments || []).map((c, i) => `
+      <div class="comment">
+        <div><strong>${c.username}</strong><br>${c.text}</div>
+        <button onclick="deleteComment('${postId}', ${i})">❌</button>
+      </div>
+    `).join("");
 
-    const postFooter = `
-      <div class="video-footer">
-        <div>
-          <button class="like-btn" data-id="${postDoc.id}">👍 <span class="like-count">${post.likes || 0}</span></button>
-          <button class="dislike-btn" data-id="${postDoc.id}">👎 <span class="dislike-count">${post.dislikes || 0}</span></button>
-        </div>
-        <div>
-          <span class="comments">💬 ${post.comments?.length || 0} yorum</span>
-        </div>
-        <div>
-          <span class="post-date">🕒 ${formattedDate}</span>
-        </div>
+    // Resim varsa, sadece o zaman görünsün
+    const imageSection = post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : '';
+    
+    // Resim etiketi ve ilgili etiketler için koşul ekleyerek görünürlük sağlama
+    postElement.innerHTML = `
+      ${imageSection}  <!-- Sadece resim varsa bu alan görünecek -->
+      <h3>${post.title}</h3>
+      <p>${post.description}</p>
+      <div class="post-footer">
+        <span>👍 ${post.likes || 0}</span>
+        <span>👎 ${post.dislikes || 0}</span>
+        <span>💬 ${(post.comments || []).length}</span>
+      </div>
+      <div class="post-footer">
+        <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
+        <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
+      </div>
+      <div class="comment-section">
+        <h4>Yorumlar</h4>
+        ${comments || "<p>Yorum yok.</p>"}
       </div>
     `;
+
+    postsContainer.appendChild(postElement);
+  });
+}
 
     const commentSection = `
       <div class="comments-section">
