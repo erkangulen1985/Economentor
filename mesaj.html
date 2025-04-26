@@ -639,6 +639,13 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("searchBar").addEventListener("input", filterChatList);
   document.getElementById("mobileSearchBar").addEventListener("input", filterChatList);
 });
+
+  document.getElementById("messageInput").addEventListener("keydown", function(event) {
+  if (event.key === "Enter" && !event.shiftKey) { // Sadece Enter (Shift+Enter değil)
+    event.preventDefault(); // Enter'ın satır atlamasını engelle
+    document.getElementById("sendBtn").click();  // Gönder butonuna tıkla
+  }
+});
 </script>
 </body>
 </html>
