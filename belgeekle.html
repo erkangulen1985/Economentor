@@ -303,8 +303,8 @@ async function uploadDocument() {
   const description = document.getElementById("fileDescription").value;
   const uploadDate = document.getElementById("uploadDate").value;
 
-  if (!file || !title || !description || !uploadDate) {
-    alert("Lütfen tüm alanları doldurun!");
+  if (!file || !title || !uploadDate) { // açıklama kaldırıldı
+    alert("Lütfen dosya, başlık ve tarihi doldurun!");
     return;
   }
 
@@ -326,7 +326,7 @@ async function uploadDocument() {
 
   await addDoc(collection(db, "documents"), {
     title,
-    description,
+    description: description || "", // boş bırakılırsa boş string kayıt olur
     fileUrl,
     filePath,
     uploadDate,
