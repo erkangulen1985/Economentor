@@ -133,8 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const snapshot = await getDocs(collection(db, "documents"));
     const sortedDocs = snapshot.docs.sort((a, b) => {
-      return (b.data().uploadDate?.seconds || 0) - (a.data().uploadDate?.seconds || 0);
-    });
+  const dateA = a.data().uploadDate ? new Date(a.data().uploadDate) : new Date(0);
+  const dateB = b.data().uploadDate ? new Date(b.data().uploadDate) : new Date(0);
+  return dateB - dateA;
+});
+
 
     if (sortedDocs.length === 0) {
       container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
