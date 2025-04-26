@@ -78,6 +78,7 @@
       width: 100%;
       border-radius: 10px;
       margin-bottom: 15px;
+      display: block;
     }
 
     .description {
@@ -149,12 +150,10 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-      const filePathWithFolder = data.filePath.replace(/^documents\//, '');
-
-      const { data: publicUrlData, error } = await supabase
+      const { data: publicUrlData, error } = supabase
         .storage
         .from('documents')
-        .getPublicUrl(filePathWithFolder);
+        .getPublicUrl(data.filePath); // Replace yok! Direkt kullanıyoruz.
 
       const publicURL = publicUrlData?.publicUrl;
 
