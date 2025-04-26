@@ -80,49 +80,8 @@
       margin-bottom: 15px;
     }
 
-    .document-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #ccc;
-    }
-
-    .comment-section {
-      margin-top: 20px;
-    }
-
-    .comment-section input {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      border-radius: 5px;
-      border: none;
+    .description {
       margin-bottom: 10px;
-    }
-
-    .comment-section button {
-      background-color: #3498db;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
-    }
-
-    .comment {
-      background-color: #333;
-      margin-top: 10px;
-      padding: 8px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
-
-    .comment-time {
-      font-size: 12px;
-      color: #bbb;
     }
   </style>
 </head>
@@ -143,7 +102,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const firebaseConfig = {
@@ -155,7 +114,6 @@ const firebaseConfig = {
   appId: "1:835370350520:web:d9bb275eb4b7502997814d"
 };
 
-// Supabase yapılandırması
 const supabase = createClient(
   "https://rvwsvhgihatxxhnbmouw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
@@ -167,7 +125,7 @@ const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return location.href = "index.html"; 
+    if (!user) return location.href = "index.html";
 
     const container = document.getElementById("documentContainer");
     container.innerHTML = "";
@@ -211,9 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
         belgeDiv.classList.add("document");
         belgeDiv.innerHTML = `
           <h2>${data.title}</h2>
-          <img src="${publicURL}" alt="Belge Görseli">
+          <img src="${publicURL}">
           <p class="description">${data.description || "Açıklama yok."}</p>
-          <p>Yüklenme Tarihi: ${new Date(data.uploadDate?.seconds * 1000 || Date.now()).toLocaleString()}</p>
+          <p>Belge Alınma Tarihi: ${data.uploadDate?.seconds ? new Date(data.uploadDate.seconds * 1000).toLocaleDateString('tr-TR') : "Tarih bulunamadı"}</p>
         `;
         container.appendChild(belgeDiv);
       } else {
@@ -223,8 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
-  
 </script>
 
 </body>
