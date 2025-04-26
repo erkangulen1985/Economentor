@@ -163,20 +163,22 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (publicURL) {
-        const belgeDiv = document.createElement("div");
-        belgeDiv.classList.add("document");
-        belgeDiv.innerHTML = `
-          <h2>${data.title}</h2>
-          <img src="${publicURL}">
-          <p class="description">${data.description || "Açıklama yok."}</p>
-          <p>Belge Alınma Tarihi: ${data.uploadDate?.seconds ? new Date(data.uploadDate.seconds * 1000).toLocaleDateString('tr-TR') : "Tarih bulunamadı"}</p>
-        `;
-        container.appendChild(belgeDiv);
-      } else {
-        console.error("Public URL alınamadı");
-        container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
-      }
+if (publicURL) {
+  const belgeDiv = document.createElement("div");
+  belgeDiv.classList.add("document");
+
+  const belgeAlinmaTarihi = data.uploadDate 
+    ? new Date(data.uploadDate).toLocaleDateString('tr-TR') 
+    : "Tarih bulunamadı";
+
+  belgeDiv.innerHTML = `
+    <h2>${data.title}</h2>
+    <img src="${publicURL}">
+    <p class="description">${data.description || "Açıklama yok."}</p>
+    <p>Belge Alınma Tarihi: ${belgeAlinmaTarihi}</p>
+  `;
+  container.appendChild(belgeDiv);
+}
     }
   });
 });
