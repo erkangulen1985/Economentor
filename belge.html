@@ -167,72 +167,63 @@ const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return location.href = "index.html"; // Eğer kullanıcı giriş yapmadıysa, çıkış sayfasına yönlendirilir.
+    if (!user) return location.href = "index.html"; 
 
     const container = document.getElementById("documentContainer");
-    container.innerHTML = ""; // Sayfa yüklendikten sonra içerik temizleniyor.
+    container.innerHTML = "";
 
-    // Firestore'dan belgeler çekiliyor
     const snapshot = await getDocs(collection(db, "documents"));
     const sortedDocs = snapshot.docs.sort((a, b) => {
-      return b.data().uploadDate?.seconds - a.data().uploadDate?.seconds;
+      return (b.data().uploadDate?.seconds || 0) - (a.data().uploadDate?.seconds || 0);
     });
 
     if (sortedDocs.length === 0) {
-      container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>"; // Eğer hiçbir belge yoksa, kullanıcıya mesaj gösterilir.
+      container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
       return;
     }
 
     for (const docSnap of sortedDocs) {
       const data = docSnap.data();
 
-      // Dosya yolunun kontrolü
-      console.log("Dosya Yolu:", data.filePath); // Dosya yolunun doğru alınıp alınmadığını kontrol ediyoruz.
-
       if (!data.filePath) {
-        console.error("filePath eksik:", data.title); // Dosya yolu eksikse hata mesajı veriyoruz.
-        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`; // Hata mesajını kullanıcıya gösteriyoruz.
+        console.error("filePath eksik:", data.title);
+        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`;
         continue;
       }
 
-      // Dosya yolunu doğru şekilde alıp almadığını kontrol edelim
-      console.log("Dosya Yolu:", data.filePath);  // Dosya yolunun doğru olup olmadığını kontrol edelim
+      const filePathWithFolder = data.filePath.replace(/^documents\//, '');
 
-      const filePathWithFolder = 'documents/documents/' + data.filePath.split('/')[1]; // Dosya yolunu uygun şekilde güncelle
-
-      // Supabase'ten dosyanın public URL'sini alıyoruz.
-      const { publicURL, error } = supabase
+      const { data: publicUrlData, error } = await supabase
         .storage
-        .from('documents')  // Supabase'teki bucket adınız
-        .getPublicUrl(filePathWithFolder); // Dosyanın public URL'sini alıyoruz.
+        .from('documents')
+        .getPublicUrl(filePathWithFolder);
 
-      // Eğer hata varsa, hata mesajını ekrana yazdıralım
+      const publicURL = publicUrlData?.publicUrl;
+
       if (error) {
-        console.error("Supabase dosya alma hatası:", error.message); // Hata mesajını daha detaylı şekilde kontrol ediyoruz.
-        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`; // Hata mesajını kullanıcıya gösteriyoruz.
+        console.error("Supabase dosya alma hatası:", error.message);
+        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`;
         return;
       }
 
-      console.log("Public URL:", publicURL); // Public URL başarıyla alındıysa burada kontrol ediyoruz.
-
-      // Dosya URL'si alındığında, belgeyi sayfada gösteriyoruz
       if (publicURL) {
         const belgeDiv = document.createElement("div");
-        belgeDiv.classList.add("documents");
+        belgeDiv.classList.add("document");
         belgeDiv.innerHTML = `
           <h2>${data.title}</h2>
-          <img src="${publicURL}" alt="Belge Görseli"> <!-- Dosya URL'si ile görsel gösterimi yapıyoruz -->
+          <img src="${publicURL}" alt="Belge Görseli">
           <p class="description">${data.description || "Açıklama yok."}</p>
-          <p>Yüklenme Tarihi: ${new Date(data.uploadDate.seconds * 1000).toLocaleString()}</p>
+          <p>Yüklenme Tarihi: ${new Date(data.uploadDate?.seconds * 1000 || Date.now()).toLocaleString()}</p>
         `;
-        container.appendChild(belgeDiv); // Belgeyi sayfaya ekliyoruz
+        container.appendChild(belgeDiv);
       } else {
-        console.error("Public URL alırken bir hata oluştu"); // URL alınamıyorsa hata mesajı veriyoruz.
+        console.error("Public URL alınamadı");
         container.innerHTML += "<p>Dosya yüklenemedi. Lütfen tekrar deneyin.</p>";
       }
     }
   });
 });
+
   
 </script>
 
