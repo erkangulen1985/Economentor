@@ -95,14 +95,15 @@
             text-decoration: underline;
         }
 
-        html, body {
+html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    overflow-x: hidden; /* sadece sağ-sol kaymayı engelle */
+    overflow-x: hidden; /* sağ-sol kayma engelli */
+    overflow-y: auto;   /* yukarı-aşağı kaymaya izin ver */
     max-width: 100%;
-    touch-action: pan-y; /* sadece dikey kaymaya izin ver */
-} 
+    touch-action: pan-y; /* sadece dikey hareketlere izin ver */
+}
     </style>
 </head>
 <body>
@@ -246,6 +247,17 @@ window.addEventListener('load', () => {
   }
 });
 
+let lastScrollTop = 0;
+window.addEventListener('scroll', function() {
+  const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+  if (currentScroll > lastScrollTop) {
+    // Kullanıcı aşağı kayıyor ➔ Scroll'ı sıfırla
+    window.scrollTo(0, 0);
+  }
+
+  lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+}, false);
     </script>
 
 </body>
