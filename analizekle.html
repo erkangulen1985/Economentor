@@ -227,7 +227,6 @@ onAuthStateChanged(auth, async (user) => {
   const userDoc = await getDoc(doc(db, "users", uid));
   currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
 
-  // Buton Eventleri
   document.getElementById("userShareBtn").addEventListener("click", async () => {
     await uploadVideo("all");
   });
@@ -276,7 +275,6 @@ onAuthStateChanged(auth, async (user) => {
       const id = docSnap.id;
       const comments = data.comments || [];
 
-      // Role göre filtreleme
       if (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) {
         const div = document.createElement("div");
         div.classList.add("video-card");
@@ -309,20 +307,36 @@ onAuthStateChanged(auth, async (user) => {
 
         container.appendChild(div);
 
-        // Edit
+        // Düzenle
         div.querySelector(".edit-button").addEventListener("click", async () => {
           const ref = doc(db, "analizler", id);
           const snap = await getDoc(ref);
           const data = snap.data();
+
           const newTitle = prompt("Yeni başlık:", data.title);
           const newDesc = prompt("Yeni açıklama:", data.description);
-          if (!newTitle || !newDesc) return;
-          await updateDoc(ref, { title: newTitle, description: newDesc });
-          div.querySelector("h3").textContent = newTitle;
-          div.querySelector("p").textContent = newDesc;
+
+          let newVisibility = data.visibility;
+          const visibilityChoice = prompt("Görünürlük seçin:\n1 = User (user/vip/admin görür)\n2 = VIP (vip/admin görür)", data.visibility === "all" ? "1" : "2");
+          if (visibilityChoice === "1") {
+            newVisibility = "all";
+          } else if (visibilityChoice === "2") {
+            newVisibility = "vip";
+          }
+
+          if (!newTitle || !newDesc || !newVisibility) return;
+
+          await updateDoc(ref, { 
+            title: newTitle,
+            description: newDesc,
+            visibility: newVisibility
+          });
+
+          alert("Güncellendi! Sayfa yenileniyor...");
+          loadVideos();
         });
 
-        // Delete
+        // Sil
         div.querySelector(".delete-button").addEventListener("click", async () => {
           const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
           if (!confirmed) return;
@@ -336,7 +350,7 @@ onAuthStateChanged(auth, async (user) => {
           div.remove();
         });
 
-        // Comment Delete
+        // Yorum Sil
         div.querySelectorAll(".delete-comment").forEach(btn => {
           btn.addEventListener("click", async () => {
             const index = parseInt(btn.dataset.index);
@@ -344,14 +358,13 @@ onAuthStateChanged(auth, async (user) => {
             const snap = await getDoc(ref);
             const updated = (snap.data().comments || []).filter((_, i) => i !== index);
             await updateDoc(ref, { comments: updated });
-            loadVideos(); // yorumlar anında güncellensin diye
+            loadVideos();
           });
         });
       }
     });
   }
 
-  // İlk yükleme
   loadVideos();
 
   // Arama
