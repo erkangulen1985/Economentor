@@ -238,7 +238,7 @@ document.getElementById('installButton').addEventListener('click', async () => {
       document.getElementById('installPrompt').style.display = 'none';
     }, 500);
   } else {
-    alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp 'Ana Ekrana Ekle' seçeneğini kullanarak yükleyebilirsiniz.");
+    alert("iPhone kullanıyorsanız: Paylaş simgesine tıklayıp 'Ana Ekrana Ekle' seçeneğini kullanarak yükleyebilirsiniz.");
     document.getElementById('installPrompt').style.top = '-150px';
     setTimeout(() => {
       document.getElementById('installPrompt').style.display = 'none';
@@ -247,8 +247,8 @@ document.getElementById('installButton').addEventListener('click', async () => {
 });
 
 // Eğer beforeinstallprompt yoksa (örneğin iPhone gibi) yine de kutuyu manuel gösterelim
-window.addEventListener('load', () => {
-  if (!deferredPrompt) {
+document.addEventListener('DOMContentLoaded', () => {
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
     setTimeout(() => {
       showInstallPrompt();
     }, 1000);
