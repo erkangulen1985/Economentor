@@ -191,14 +191,20 @@
             }
         });
 
-let deferredPrompt;
+let deferredPrompt = null;
+
+// Sayfa her yenilendiğinde kutu hep çıkacak
+function showInstallPrompt() {
+  document.getElementById('installPrompt').style.display = 'block';
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('installPrompt').style.display = 'block';
+  showInstallPrompt();
 });
 
+// Yükle butonuna tıklanınca
 document.getElementById('installButton').addEventListener('click', async () => {
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -206,12 +212,24 @@ document.getElementById('installButton').addEventListener('click', async () => {
     if (outcome === 'accepted') {
       console.log('Kullanıcı uygulamayı yüklemeyi kabul etti.');
     } else {
-      console.log('Kullanıcı uygulamayı yüklemeyi reddetti.');
+      console.log('Kullanıcı uygulamayı reddetti.');
     }
     deferredPrompt = null;
+    // Eğer yüklediyse bile, kutuyu her zaman saklayıp tekrar gösterebiliriz
     document.getElementById('installPrompt').style.display = 'none';
   } else {
     alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp "Uygulamayı yükle" seçeneğini kullanarak yükleyebilirsiniz.');
+    document.getElementById('installPrompt').style.display = 'none';
+  }
+});
+
+// Eğer kullanıcı başka tarayıcıdaysa ve beforeinstallprompt event yoksa,
+// yine de kutuyu gösterelim (özellikle iPhone için).
+window.addEventListener('load', () => {
+  if (!deferredPrompt) {
+    setTimeout(() => {
+      showInstallPrompt();
+    }, 1000); // sayfa açıldıktan 1 saniye sonra kutuyu göster
   }
 });
 
