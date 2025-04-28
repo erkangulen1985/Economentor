@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+de<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -209,16 +209,38 @@ onAuthStateChanged(auth, async (user) => {
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
   const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
+  const currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
 
   const container = document.getElementById("videoContainer");
   container.innerHTML = "";
 
+  // 🔥 Eğer kullanıcı 'user' rolünde ise VIP uyarısı göster
+  if (currentUserRole === "user") {
+    const warning = document.createElement("div");
+    warning.style.backgroundColor = "rgba(255,0,0,0.7)";
+    warning.style.color = "white";
+    warning.style.padding = "15px";
+    warning.style.marginBottom = "20px";
+    warning.style.borderRadius = "8px";
+    warning.style.textAlign = "center";
+    warning.innerHTML = "Henüz VIP değilsiniz. Lütfen VIP videolar için temel düzey finans eğitimi dersleri alınız.";
+    container.appendChild(warning);
+  }
+
   const snapshot = await getDocs(collection(db, "analizler"));
   const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp.seconds - a.data().timestamp.seconds);
+
   sortedDocs.forEach(async (docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
     const comments = data.comments || [];
+
+    const videoVisibility = data.visibility || "all"; // eğer visibility eksikse default "all"
+
+    // 🔥 Filtre: Eğer user rolündeyse, sadece "all" videoları göster
+    if (videoVisibility === "vip" && currentUserRole === "user") {
+      return; // user, vip içeriği göremesin
+    }
 
     const likeRef = doc(db, "analizler", id, "likes", uid);
     const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
@@ -229,39 +251,44 @@ onAuthStateChanged(auth, async (user) => {
 
     const card = document.createElement("div");
     card.classList.add("video-card");
-card.innerHTML = `
-  <h2>${data.title}</h2>
-  <video controls src="${data.videoUrl}"></video>
-  <p class="description">${data.description || "Açıklama yok."}</p>
-  <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-  <div class="video-footer">
-    <div>
-      <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
-      <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
-    </div>
-    <div>
-      <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
-    </div>
-  </div>
-  <div class="comment-section" id="comments-${id}" style="display:none;">
-    <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
-    <button class="commentBtn" data-id="${id}">Yorum Yap</button>
-    <div class="commentList" id="commentList-${id}">
-      ${comments
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-          </div>
-        `).join("")}
-    </div>
-  </div>
-`;
+
+    card.innerHTML = `
+      <h2>${data.title}</h2>
+      <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
+        Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
+      </p>
+      <video controls src="${data.videoUrl}"></video>
+      <p class="description">${data.description || "Açıklama yok."}</p>
+      <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
+      <div class="video-footer">
+        <div>
+          <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
+          <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
+        </div>
+        <div>
+          <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
+        </div>
+      </div>
+      <div class="comment-section" id="comments-${id}" style="display:none;">
+        <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
+        <button class="commentBtn" data-id="${id}">Yorum Yap</button>
+        <div class="commentList" id="commentList-${id}">
+          ${comments
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .map((c, i) => `
+              <div class="comment">
+                <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+                ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+              </div>
+            `).join("")}
+        </div>
+      </div>
+    `;
+
     container.appendChild(card);
   });
 
-  // Beğeni
+    // Beğeni
   document.addEventListener("click", async (e) => {
     if (e.target.classList.contains("like-btn")) {
       const id = e.target.dataset.id;
@@ -279,15 +306,15 @@ card.innerHTML = `
         e.target.style.backgroundColor = "#f39c12";
         e.target.querySelector(".like-count").innerText = likeCount - 1;
       } else {
-await setDoc(likeRef, {
-  uid,
-  timestamp: Timestamp.now()
-});
+        await setDoc(likeRef, {
+          uid,
+          timestamp: Timestamp.now()
+        });
         await updateDoc(ref, { likes: likeCount + 1 });
         e.target.style.backgroundColor = "#27ae60";
         e.target.querySelector(".like-count").innerText = likeCount + 1;
 
-        // Eğer dislike varsa iptal et
+        // Eğer dislike varsa onu iptal et
         const disSnap = await getDoc(dislikeRef);
         if (disSnap.exists()) {
           await deleteDoc(dislikeRef);
@@ -320,10 +347,10 @@ await setDoc(likeRef, {
         e.target.style.backgroundColor = "#e74c3c";
         e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;
       } else {
-await setDoc(dislikeRef, {
-  uid,
-  timestamp: Timestamp.now()
-});
+        await setDoc(dislikeRef, {
+          uid,
+          timestamp: Timestamp.now()
+        });
         await updateDoc(ref, { dislikes: dislikeCount + 1 });
         e.target.style.backgroundColor = "#c0392b";
         e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;
@@ -331,7 +358,7 @@ await setDoc(dislikeRef, {
         // Eğer like varsa iptal et
         const likeSnap = await getDoc(likeRef);
         if (likeSnap.exists()) {
-          await deleteDoc(likeRef);
+          await deleteDoc(likeSnap.ref);
           await updateDoc(ref, { likes: likeCount - 1 });
           const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);
           if (likeBtn) {
@@ -384,20 +411,19 @@ await setDoc(dislikeRef, {
       comments.splice(index, 1);
       await updateDoc(ref, { comments });
 
-      // yorum listesini güncelle
       const list = document.getElementById("commentList-" + id);
-list.innerHTML = comments
-  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-  .map((c, i) => `
-    <div class="comment">
-      <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-      ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-    </div>
-  `).join("");
+      list.innerHTML = comments
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .map((c, i) => `
+          <div class="comment">
+            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+          </div>
+        `).join("");
     }
   });
 
-  // Yorum göster/gizle
+  // Yorumları göster/gizle
   document.addEventListener("click", (e) => {
     if (e.target.classList.contains("toggle-comments")) {
       const id = e.target.dataset.id;
