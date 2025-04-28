@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Economentor | Giriş</title>
     <link rel="icon" href="image1.png">
+    
+    <!-- PWA manifest bağlantısı -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#001f3d">
+
     <style>
         body {  
             margin: 0;
@@ -96,7 +101,6 @@
     <div class="container">
         <h1 id="title">ECONOMENTOR</h1>
         
-        <!-- Form alanı ekledik -->
         <form id="loginForm">
             <div id="errorMsg"></div>
             
@@ -115,6 +119,15 @@
         <a href="kullaniciadi.html" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
         <a href="kayitol.html" class="link" id="signup">Kayıt Ol</a>
     </div>
+
+    <!-- PWA Service Worker kayıt kodu -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((reg) => console.log('Service Worker başarıyla kaydedildi.', reg))
+          .catch((err) => console.error('Service Worker kaydedilirken hata oluştu.', err));
+      }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -135,7 +148,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Giriş işlemi
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const errorBox = document.getElementById("errorMsg");
@@ -144,28 +156,24 @@
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value;
 
-            // Kullanıcı adı ile Firestore'dan e-posta adresini al
             const q = query(collection(db, "users"), where("username", "==", username));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                const userData = querySnapshot.docs[0].data(); // İlk belgeyi al
-                const email = userData.email; // Kullanıcının e-posta adresini al
-                const role = userData.role || "user"; // Kullanıcı rolü (admin veya user)
+                const userData = querySnapshot.docs[0].data();
+                const email = userData.email;
+                const role = userData.role || "user";
 
-                // E-posta ve şifre ile giriş yap
                 signInWithEmailAndPassword(auth, email, password)
                     .then((userCredential) => {
                         const user = userCredential.user;
                         console.log("Giriş başarılı: ", user);
 
-                        // Admin kontrolü
                         if (role === "admin") {
-                            window.location.href = "adminpanel.html"; // Admin paneline yönlendir
+                            window.location.href = "adminpanel.html";
                         } else {
-                            window.location.href = "duyuru.html"; // Diğer kullanıcılar duyuru sayfasına yönlendirilir
+                            window.location.href = "duyuru.html";
                         }
-
                     })
                     .catch((error) => {
                         console.error("Hata: ", error.message);
