@@ -129,6 +129,12 @@
       }
     </script>
 
+    <div id="installPrompt" style="display:none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: #001f3d; color: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000;">
+      <p style="margin-bottom: 10px;">Economentor'u uygulama olarak yüklemek ister misiniz?</p>
+      <button id="installButton" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Yükle</button>
+    </div>
+
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -184,6 +190,30 @@
                 errorBox.innerText = "Kullanıcı adı bulunamadı!";
             }
         });
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installPrompt').style.display = 'block';
+});
+
+document.getElementById('installButton').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('Kullanıcı yüklemeyi kabul etti.');
+    } else {
+      console.log('Kullanıcı yüklemeyi reddetti.');
+    }
+    deferredPrompt = null;
+    document.getElementById('installPrompt').style.display = 'none';
+  } else {
+    alert('iPhone kullanıyorsanız: Paylaş simgesine basın ➔ Ana Ekrana Ekle seçin.');
+  }
+});
 
     </script>
 
