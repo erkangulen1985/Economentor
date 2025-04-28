@@ -178,8 +178,12 @@ html, body {
       <input type="text" id="videoTitle" placeholder="Başlık">
       <textarea id="videoDesc" rows="3" placeholder="Açıklama"></textarea>
       <button id="uploadBtn">Videoyu Yükle</button>
-    </div>
-
+      <div style="margin-top: 10px;">
+      <button id="userShareBtn">User İçin Paylaş</button>
+      <button id="vipShareBtn">VIP İçin Paylaş</button>
+      </div>
+      </div>
+    
     <input type="text" class="search" id="searchInput" placeholder="Başlık ya da açıklama ara...">
 
     <div id="videosContainer"></div>
@@ -189,7 +193,7 @@ html, body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -212,20 +216,28 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 function sanitizeFilename(filename) {
-  return filename
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_.-]/g, "");
+  return filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_.-]/g, "");
 }
+
+let currentUserRole = "user";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
-  const username = userDoc.exists() ? userDoc.data().username : "Admin";
+  currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
 
-  document.getElementById("uploadBtn").addEventListener("click", async () => {
+  // Buton Eventleri
+  document.getElementById("userShareBtn").addEventListener("click", async () => {
+    await uploadVideo("all");
+  });
+
+  document.getElementById("vipShareBtn").addEventListener("click", async () => {
+    await uploadVideo("vip");
+  });
+
+  async function uploadVideo(visibility) {
     const file = document.getElementById("videoFile").files[0];
     const title = document.getElementById("videoTitle").value;
     const description = document.getElementById("videoDesc").value;
@@ -247,12 +259,13 @@ onAuthStateChanged(auth, async (user) => {
       likes: 0,
       dislikes: 0,
       comments: [],
-      timestamp: new Date()
+      timestamp: new Date(),
+      visibility: visibility
     });
 
     alert("Video başarıyla yüklendi!");
     loadVideos();
-  });
+  }
 
   async function loadVideos() {
     const container = document.getElementById("videosContainer");
@@ -264,284 +277,131 @@ onAuthStateChanged(auth, async (user) => {
       const id = docSnap.id;
       const comments = data.comments || [];
 
-      const div = document.createElement("div");
-      div.classList.add("video-card");
-      div.id = `video-${id}`;
+      // Role göre filtreleme
+      if (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) {
+        const div = document.createElement("div");
+        div.classList.add("video-card");
+        div.id = `video-${id}`;
 
-      div.innerHTML = `
-        <h3>${data.title}</h3>
-        <video controls src="${data.videoUrl}"></video>
-        <p>${data.description}</p>
-
-        <div class="video-footer">
-          <div>
-            <span>👍 ${data.likes || 0}</span>
-            <span>👎 ${data.dislikes || 0}</span>
-            <span>💬 ${comments.length}</span>
-          </div>
-          <div>
-            <button class="edit-button" data-id="${id}">Düzenle</button>
-            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-          </div>
-        </div>
-
-        <div class="comment-section" id="comments-${id}">
-          ${comments.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+        div.innerHTML = `
+          <h3>${data.title}</h3>
+          <video controls src="${data.videoUrl}"></video>
+          <p>${data.description}</p>
+          <div class="video-footer">
+            <div>
+              <span>👍 ${data.likes || 0}</span>
+              <span>👎 ${data.dislikes || 0}</span>
+              <span>💬 ${comments.length}</span>
             </div>
-          `).join("")}
-        </div>
-      `;
+            <div>
+              <button class="edit-button" data-id="${id}">Düzenle</button>
+              <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+            </div>
+          </div>
+          <div class="comment-section" id="comments-${id}">
+            ${comments.map((c, i) => `
+              <div class="comment">
+                <span><b>${c.username}</b>: ${c.text}</span>
+                <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+              </div>
+            `).join("")}
+          </div>
+        `;
 
-      container.appendChild(div);
+        container.appendChild(div);
 
-      // 🎯 Düzenle butonu
-div.querySelector(".edit-button").addEventListener("click", async () => {
-  const ref = doc(db, "analizler", id);
-  const snap = await getDoc(ref);
-  const data = snap.data();
-  const newTitle = prompt("Yeni başlık:", data.title);
-  const newDesc = prompt("Yeni açıklama:", data.description);
-  if (!newTitle || !newDesc) return;
-
-  await updateDoc(ref, { title: newTitle, description: newDesc });
-
-  // DOM'u güncelle
-  div.querySelector("h3").textContent = newTitle;
-  div.querySelector("p").textContent = newDesc;
-});
-
-      // 🎯 Sil butonu
-div.querySelector(".delete-button").addEventListener("click", async () => {
-  const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-  if (!confirmed) return;
-
-  const path = div.querySelector(".delete-button").dataset.path;
-
-  const { error } = await supabase.storage.from("analizler").remove([path]);
-  if (error) {
-    alert("Supabase videosu silinemedi: " + error.message);
-    return;
-  }
-
-  await deleteDoc(doc(db, "analizler", id));
-
-  // DOM'dan videoyu sil
-  div.remove();
-});
-
-      // 🎯 Yorum silme
-      div.querySelectorAll(".delete-comment").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const index = parseInt(btn.dataset.index);
+        // Edit
+        div.querySelector(".edit-button").addEventListener("click", async () => {
           const ref = doc(db, "analizler", id);
           const snap = await getDoc(ref);
-          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
-          await updateDoc(ref, { comments: updated });
-
-          const commentsDiv = div.querySelector(`#comments-${id}`);
-          commentsDiv.innerHTML = updated.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-            </div>
-          `).join("");
-
-          // yeniden bağla
-          loadVideos();
+          const data = snap.data();
+          const newTitle = prompt("Yeni başlık:", data.title);
+          const newDesc = prompt("Yeni açıklama:", data.description);
+          if (!newTitle || !newDesc) return;
+          await updateDoc(ref, { title: newTitle, description: newDesc });
+          div.querySelector("h3").textContent = newTitle;
+          div.querySelector("p").textContent = newDesc;
         });
-      });
+
+        // Delete
+        div.querySelector(".delete-button").addEventListener("click", async () => {
+          const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+          if (!confirmed) return;
+          const path = div.querySelector(".delete-button").dataset.path;
+          const { error } = await supabase.storage.from("analizler").remove([path]);
+          if (error) {
+            alert("Supabase videosu silinemedi: " + error.message);
+            return;
+          }
+          await deleteDoc(doc(db, "analizler", id));
+          div.remove();
+        });
+
+        // Comment Delete
+        div.querySelectorAll(".delete-comment").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const index = parseInt(btn.dataset.index);
+            const ref = doc(db, "analizler", id);
+            const snap = await getDoc(ref);
+            const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+            await updateDoc(ref, { comments: updated });
+            loadVideos(); // yorumlar anında güncellensin diye
+          });
+        });
+      }
     });
   }
 
+  // İlk yükleme
   loadVideos();
 
-document.getElementById("searchInput").addEventListener("input", async (e) => {
-  const keyword = e.target.value.toLowerCase();
-  const snapshot = await getDocs(collection(db, "analizler"));
-  const container = document.getElementById("videosContainer");
-  container.innerHTML = "";
+  // Arama
+  document.getElementById("searchInput").addEventListener("input", async (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const snapshot = await getDocs(collection(db, "analizler"));
+    const container = document.getElementById("videosContainer");
+    container.innerHTML = "";
 
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const id = docSnap.id;
-    const comments = data.comments || [];
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const id = docSnap.id;
+      const comments = data.comments || [];
 
-    if (
-      data.title.toLowerCase().includes(keyword) ||
-      data.description.toLowerCase().includes(keyword)
-    ) {
-      const div = document.createElement("div");
-      div.classList.add("video-card");
-      div.id = `video-${id}`;
-      div.innerHTML = `
-        <h3>${data.title}</h3>
-        <video controls src="${data.videoUrl}"></video>
-        <p>${data.description}</p>
-        <div class="video-footer">
-          <div>
-            <span>👍 ${data.likes || 0}</span>
-            <span>👎 ${data.dislikes || 0}</span>
-            <span>💬 ${comments.length}</span>
-          </div>
-          <div>
-            <button class="edit-button" data-id="${id}">Düzenle</button>
-            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-          </div>
-        </div>
-
-        <div class="comment-section" id="comments-${id}">
-          ${comments.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+      if (
+        (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) &&
+        (data.title.toLowerCase().includes(keyword) || data.description.toLowerCase().includes(keyword))
+      ) {
+        const div = document.createElement("div");
+        div.classList.add("video-card");
+        div.id = `video-${id}`;
+        div.innerHTML = `
+          <h3>${data.title}</h3>
+          <video controls src="${data.videoUrl}"></video>
+          <p>${data.description}</p>
+          <div class="video-footer">
+            <div>
+              <span>👍 ${data.likes || 0}</span>
+              <span>👎 ${data.dislikes || 0}</span>
+              <span>💬 ${comments.length}</span>
             </div>
-          `).join("")}
-        </div>
-      `;
-
-      container.appendChild(div);
-
-      // butonlar aramaya da eklensin
-      div.querySelector(".edit-button").addEventListener("click", async () => {
-        const ref = doc(db, "analizler", id);
-        const snap = await getDoc(ref);
-        const data = snap.data();
-        const newTitle = prompt("Yeni başlık:", data.title);
-        const newDesc = prompt("Yeni açıklama:", data.description);
-        if (!newTitle || !newDesc) return;
-        await updateDoc(ref, { title: newTitle, description: newDesc });
-        div.querySelector("h3").textContent = newTitle;
-        div.querySelector("p").textContent = newDesc;
-      });
-
-      div.querySelector(".delete-button").addEventListener("click", async () => {
-        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-        if (!confirmed) return;
-        const path = div.querySelector(".delete-button").dataset.path;
-        const { error } = await supabase.storage.from("analizler").remove([path]);
-        if (error) {
-          alert("Supabase videosu silinemedi: " + error.message);
-          return;
-        }
-        await deleteDoc(doc(db, "analizler", id));
-        div.remove();
-      });
-
-      div.querySelectorAll(".delete-comment").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const index = parseInt(btn.dataset.index);
-          const ref = doc(db, "analizler", id);
-          const snap = await getDoc(ref);
-          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
-          await updateDoc(ref, { comments: updated });
-
-          const commentsDiv = div.querySelector(`#comments-${id}`);
-          commentsDiv.innerHTML = updated.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            <div>
+              <button class="edit-button" data-id="${id}">Düzenle</button>
+              <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
             </div>
-          `).join("");
-        });
-      });
-    }
+          </div>
+          <div class="comment-section" id="comments-${id}">
+            ${comments.map((c, i) => `
+              <div class="comment">
+                <span><b>${c.username}</b>: ${c.text}</span>
+                <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    });
   });
-});
-document.getElementById("searchInput").addEventListener("input", async (e) => {
-  const keyword = e.target.value.toLowerCase();
-  const snapshot = await getDocs(collection(db, "analizler"));
-  const container = document.getElementById("videosContainer");
-  container.innerHTML = "";
-
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const id = docSnap.id;
-    const comments = data.comments || [];
-
-    if (
-      data.title.toLowerCase().includes(keyword) ||
-      data.description.toLowerCase().includes(keyword)
-    ) {
-      const div = document.createElement("div");
-      div.classList.add("video-card");
-      div.id = `video-${id}`;
-      div.innerHTML = `
-        <h3>${data.title}</h3>
-        <video controls src="${data.videoUrl}"></video>
-        <p>${data.description}</p>
-        <div class="video-footer">
-          <div>
-            <span>👍 ${data.likes || 0}</span>
-            <span>👎 ${data.dislikes || 0}</span>
-            <span>💬 ${comments.length}</span>
-          </div>
-          <div>
-            <button class="edit-button" data-id="${id}">Düzenle</button>
-            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-          </div>
-        </div>
-
-        <div class="comment-section" id="comments-${id}">
-          ${comments.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-            </div>
-          `).join("")}
-        </div>
-      `;
-
-      container.appendChild(div);
-
-      // butonlar aramaya da eklensin
-      div.querySelector(".edit-button").addEventListener("click", async () => {
-        const ref = doc(db, "analizler", id);
-        const snap = await getDoc(ref);
-        const data = snap.data();
-        const newTitle = prompt("Yeni başlık:", data.title);
-        const newDesc = prompt("Yeni açıklama:", data.description);
-        if (!newTitle || !newDesc) return;
-        await updateDoc(ref, { title: newTitle, description: newDesc });
-        div.querySelector("h3").textContent = newTitle;
-        div.querySelector("p").textContent = newDesc;
-      });
-
-      div.querySelector(".delete-button").addEventListener("click", async () => {
-        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-        if (!confirmed) return;
-        const path = div.querySelector(".delete-button").dataset.path;
-        const { error } = await supabase.storage.from("analizler").remove([path]);
-        if (error) {
-          alert("Supabase videosu silinemedi: " + error.message);
-          return;
-        }
-        await deleteDoc(doc(db, "analizler", id));
-        div.remove();
-      });
-
-      div.querySelectorAll(".delete-comment").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const index = parseInt(btn.dataset.index);
-          const ref = doc(db, "analizler", id);
-          const snap = await getDoc(ref);
-          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
-          await updateDoc(ref, { comments: updated });
-
-          const commentsDiv = div.querySelector(`#comments-${id}`);
-          commentsDiv.innerHTML = updated.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-            </div>
-          `).join("");
-        });
-      });
-    }
-  });
-});
 });
 </script>
 </body>
