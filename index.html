@@ -140,9 +140,12 @@ html, body {
     </script>
 
 <div id="installPrompt" style="display:none; position:fixed; top:-150px; left:0; right:0; background:#001f3d; color:white; padding:15px; text-align:center; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:9999; transition: top 0.5s ease;">
-  <img src="image1.png" alt="Economentor" style="width:40px; height:40px; vertical-align:middle; margin-right:10px;">
-  <span id="installText" style="font-size:16px;"></span><br><br>
-  <button id="installButton" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:5px; font-size:15px; cursor:pointer;">Tamam</button>
+  <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <img src="image1.png" alt="Economentor" style="width:40px; height:40px;">
+    <span style="font-size:18px; font-weight:bold;">Economentor</span>
+  </div>
+  <p style="margin-top:10px;">Uygulamayı yüklemek ister misiniz?</p>
+  <button id="installButton" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:5px; font-size:15px; cursor:pointer;">Yükle</button>
 </div>
 
     <script type="module">
@@ -203,20 +206,21 @@ html, body {
 
 let deferredPrompt = null;
 
-// Sayfa her yenilendiğinde kutu hep çıkacak
-function showInstallPrompt() {
-  const prompt = document.getElementById('installPrompt');
-  prompt.style.display = 'block';
-  setTimeout(() => {
-    prompt.style.top = '0'; // Yukarıdan aşağı kaydır
-  }, 100); // 0.1 saniye sonra kaydır
-}
-
+// Kullanıcı siteye gelince beforeinstallprompt olayı yakalanıyor
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   showInstallPrompt();
 });
+
+// Yükleme kutusunu göster
+function showInstallPrompt() {
+  const prompt = document.getElementById('installPrompt');
+  prompt.style.display = 'block';
+  setTimeout(() => {
+    prompt.style.top = '0';
+  }, 100);
+}
 
 // Yükle butonuna tıklanınca
 document.getElementById('installButton').addEventListener('click', async () => {
@@ -229,21 +233,25 @@ document.getElementById('installButton').addEventListener('click', async () => {
       console.log('Kullanıcı uygulamayı reddetti.');
     }
     deferredPrompt = null;
-    // Eğer yüklediyse bile, kutuyu her zaman saklayıp tekrar gösterebiliriz
-    document.getElementById('installPrompt').style.display = 'none';
+    document.getElementById('installPrompt').style.top = '-150px';
+    setTimeout(() => {
+      document.getElementById('installPrompt').style.display = 'none';
+    }, 500);
   } else {
-    alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp "Uygulamayı yükle" seçeneğini kullanarak yükleyebilirsiniz.');
-    document.getElementById('installPrompt').style.display = 'none';
+    alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp 'Ana Ekrana Ekle' seçeneğini kullanarak yükleyebilirsiniz.");
+    document.getElementById('installPrompt').style.top = '-150px';
+    setTimeout(() => {
+      document.getElementById('installPrompt').style.display = 'none';
+    }, 500);
   }
 });
 
-// Eğer kullanıcı başka tarayıcıdaysa ve beforeinstallprompt event yoksa,
-// yine de kutuyu gösterelim (özellikle iPhone için).
+// Eğer beforeinstallprompt yoksa (örneğin iPhone gibi) yine de kutuyu manuel gösterelim
 window.addEventListener('load', () => {
   if (!deferredPrompt) {
     setTimeout(() => {
       showInstallPrompt();
-    }, 1000); // sayfa açıldıktan 1 saniye sonra kutuyu göster
+    }, 1000);
   }
 });
 
