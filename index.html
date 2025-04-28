@@ -204,14 +204,14 @@ document.getElementById('installButton').addEventListener('click', async () => {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      console.log('Kullanıcı yüklemeyi kabul etti.');
+      console.log('Kullanıcı uygulamayı yüklemeyi kabul etti.');
     } else {
-      console.log('Kullanıcı yüklemeyi reddetti.');
+      console.log('Kullanıcı uygulamayı yüklemeyi reddetti.');
     }
     deferredPrompt = null;
     document.getElementById('installPrompt').style.display = 'none';
   } else {
-    alert('iPhone kullanıyorsanız: Paylaş simgesine basın ➔ Ana Ekrana Ekle seçin.');
+    alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp "Uygulamayı yükle" seçeneğini kullanarak yükleyebilirsiniz.');
   }
 });
 
