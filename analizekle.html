@@ -280,10 +280,13 @@ onAuthStateChanged(auth, async (user) => {
         div.classList.add("video-card");
         div.id = `video-${id}`;
 
-        div.innerHTML = `
-          <h3>${data.title}</h3>
-          <video controls src="${data.videoUrl}"></video>
-          <p>${data.description}</p>
+div.innerHTML = `
+  <h3>${data.title}</h3>
+  <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
+    Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
+  </p>
+  <video controls src="${data.videoUrl}"></video>
+  <p>${data.description}</p>
           <div class="video-footer">
             <div>
               <span>👍 ${data.likes || 0}</span>
