@@ -163,6 +163,9 @@
         <p>Toplam Beğeni Sayısı: <span id="totalLikes">0</span></p>
         <p>Toplam Beğenmeme Sayısı: <span id="totalDislikes">0</span></p>
         <p>Toplam Yorum Sayısı: <span id="totalComments">0</span></p>
+        <p>Admin Kullanıcı Sayısı: <span id="totalAdmins">0</span></p>
+        <p>VIP Kullanıcı Sayısı: <span id="totalVIPs">0</span></p>
+        <p>Normal Kullanıcı Sayısı: <span id="totalNormalUsers">0</span></p>
       </div>
 
       <!-- Kullanıcı Yönetimi -->
@@ -244,16 +247,30 @@ async function loadStatistics() {
     let totalDislikes = 0;
     let totalComments = 0;
 
+    // 👥 Role göre sayaçlar
+    let adminCount = 0;
+    let vipCount = 0;
+    let userCount = 0;
+
+    users.forEach(userDoc => {
+      const role = (userDoc.data().role || "user").toLowerCase();
+      if (role === "admin") adminCount++;
+      else if (role === "vip") vipCount++;
+      else userCount++;
+    });
+
+    // 👥 Sayıları Dashboard'a ekle
+    document.getElementById("totalAdmins").textContent = adminCount;
+    document.getElementById("totalVIPs").textContent = vipCount;
+    document.getElementById("totalNormalUsers").textContent = userCount;
+
     // ✅ ANALİZLER
     for (const analiz of analizler.docs) {
       const ref = analiz.ref;
       const data = analiz.data();
-
-      // Yorumlar (sadece embedded)
       totalComments += (data.comments || []).length;
 
       try {
-        // Beğeni ve beğenmeme (subcollection)
         const [likesSnap, dislikesSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
@@ -269,12 +286,9 @@ async function loadStatistics() {
     for (const post of fotolar.docs) {
       const ref = post.ref;
       const data = post.data();
-
-      // Embedded yorumlar
       totalComments += (data.comments || []).length;
 
       try {
-        // Beğeni, beğenmeme ve yorum (subcollections)
         const [likesSnap, dislikesSnap, commentsSnap] = await Promise.all([
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
@@ -289,7 +303,6 @@ async function loadStatistics() {
       }
     }
 
-    // ✅ Sayıları DOM'a yerleştir
     document.getElementById("totalLikes").textContent = totalLikes;
     document.getElementById("totalDislikes").textContent = totalDislikes;
     document.getElementById("totalComments").textContent = totalComments;
