@@ -94,13 +94,6 @@
         .link:hover {
             text-decoration: underline;
         }
-        html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden;
-    max-width: 100%;
-}
     </style>
 </head>
 <body>
@@ -136,10 +129,10 @@
       }
     </script>
 
-<div id="installPrompt" style="display:none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: #001f3d; color: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000;">
-  <p id="installText" style="margin-bottom: 10px;"></p>
-  <button id="installButton" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Tamam</button>
-</div>
+    <div id="installPrompt" style="display:none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: #001f3d; color: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000;">
+      <p style="margin-bottom: 10px;">Economentor'u uygulama olarak yüklemek ister misiniz?</p>
+      <button id="installButton" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Yükle</button>
+    </div>
 
 
     <script type="module">
@@ -200,42 +193,44 @@
 
 let deferredPrompt = null;
 
-function isIos() {
-  return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-}
-
-function isAndroid() {
-  return /android/.test(window.navigator.userAgent.toLowerCase());
-}
-
-function isInStandaloneMode() {
-  return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
-}
-
-// Yükleme kutusunu göster
+// Sayfa her yenilendiğinde kutu hep çıkacak
 function showInstallPrompt() {
-  const installText = document.getElementById('installText');
-  if (isAndroid()) {
-    installText.innerHTML = "📲 Bu uygulamayı yüklemek için sağ üstteki 3 noktaya dokunun ve <b>'Ana Ekrana Ekle'</b> seçeneğini seçin.";
-  } else if (isIos()) {
-    installText.innerHTML = "📲 Bu uygulamayı yüklemek için alttaki paylaş (↑) simgesine tıklayın ve <b>'Ana Ekrana Ekle'</b> seçeneğini seçin.";
-  } else {
-    installText.innerHTML = "📲 Bu uygulamayı yüklemek için tarayıcı menüsünden <b>'Ana Ekrana Ekle'</b> seçeneğini seçin.";
-  }
   document.getElementById('installPrompt').style.display = 'block';
 }
 
-// Sayfa yüklendiğinde çalışacak
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallPrompt();
+});
+
+// Yükle butonuna tıklanınca
+document.getElementById('installButton').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('Kullanıcı uygulamayı yüklemeyi kabul etti.');
+    } else {
+      console.log('Kullanıcı uygulamayı reddetti.');
+    }
+    deferredPrompt = null;
+    // Eğer yüklediyse bile, kutuyu her zaman saklayıp tekrar gösterebiliriz
+    document.getElementById('installPrompt').style.display = 'none';
+  } else {
+    alert('iPhone kullanıyorsanız: Paylaş simgesine tıklayıp "Uygulamayı yükle" seçeneğini kullanarak yükleyebilirsiniz.');
+    document.getElementById('installPrompt').style.display = 'none';
+  }
+});
+
+// Eğer kullanıcı başka tarayıcıdaysa ve beforeinstallprompt event yoksa,
+// yine de kutuyu gösterelim (özellikle iPhone için).
 window.addEventListener('load', () => {
-  if (!isInStandaloneMode()) {
+  if (!deferredPrompt) {
     setTimeout(() => {
       showInstallPrompt();
     }, 1000); // sayfa açıldıktan 1 saniye sonra kutuyu göster
   }
-});
-
-document.getElementById('installButton').addEventListener('click', () => {
-  document.getElementById('installPrompt').style.display = 'none';
 });
 
     </script>
