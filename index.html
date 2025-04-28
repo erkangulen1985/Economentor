@@ -206,11 +206,14 @@ html, body {
 
 let deferredPrompt = null;
 
+function isInStandaloneMode() {
+  return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
+}
+        
 // Kullanıcı siteye gelince beforeinstallprompt olayı yakalanıyor
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  showInstallPrompt();
 });
 
 // Yükleme kutusunu göster
@@ -248,10 +251,16 @@ document.getElementById('installButton').addEventListener('click', async () => {
 
 // Eğer beforeinstallprompt yoksa (örneğin iPhone gibi) yine de kutuyu manuel gösterelim
 document.addEventListener('DOMContentLoaded', () => {
-  if (!window.matchMedia('(display-mode: standalone)').matches) {
-    setTimeout(() => {
+  if (!isInStandaloneMode()) {
+    if (deferredPrompt) {
+      // Android kullanıcıları için beforeinstallprompt geldi mi kontrol
       showInstallPrompt();
-    }, 1000);
+    } else {
+      // iPhone kullanıcıları için (beforeinstallprompt yok zaten)
+      setTimeout(() => {
+        showInstallPrompt();
+      }, 1000);
+    }
   }
 });
 
