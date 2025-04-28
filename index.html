@@ -204,7 +204,11 @@ let deferredPrompt = null;
 
 // Sayfa her yenilendiğinde kutu hep çıkacak
 function showInstallPrompt() {
-  document.getElementById('installPrompt').style.display = 'block';
+  const prompt = document.getElementById('installPrompt');
+  prompt.style.display = 'block';
+  setTimeout(() => {
+    prompt.style.top = '0'; // Yukarıdan aşağı kaydır
+  }, 100); // 0.1 saniye sonra kaydır
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
