@@ -97,6 +97,9 @@ h1 {
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -110,7 +113,9 @@ h1 {
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+    const auth = getAuth();
+    const messaging = getMessaging(app);
+    
     const announcementList = document.getElementById("announcementList");
 
     async function loadAnnouncements() {
@@ -137,6 +142,33 @@ h1 {
       });
     }
 
+    function saveTokenToFirestore(uid, token) {
+    const userRef = doc(db, "users", uid);
+    return setDoc(userRef, { fcmToken: token }, { merge: true });
+  }
+
+     onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const currentToken = await getToken(messaging, {
+          vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+        });
+
+        if (currentToken) {
+          console.log('Token alındı:', currentToken);
+          await saveTokenToFirestore(user.uid, currentToken);
+          console.log('Token Firestore\'a kaydedildi.');
+        } else {
+          console.log('Token alınamadı veya kullanıcı izin vermedi.');
+        }
+      } catch (err) {
+        console.error('Token alma hatası:', err);
+      }
+    } else {
+      console.log("Henüz giriş yapılmamış.");
+    }
+  });
+    
     loadAnnouncements();
   </script>
 
