@@ -611,10 +611,23 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       timestamp: Date.now(),
       seenBy: []
     };
-    await addDoc(msgCol, msg);
-    await updateDoc(doc(db, "users", selectedFriendId), {
-      inboxHasNew: true
-    });
+await addDoc(msgCol, msg);
+
+// 🔥 Mesaj atınca hedef kişinin fcmToken'ını çekelim:
+const friendDoc = await getDoc(doc(db, "users", selectedFriendId));
+if (friendDoc.exists()) {
+  const friendData = friendDoc.data();
+  const fcmToken = friendData.fcmToken;
+
+  if (fcmToken) {
+    await sendPushNotification(fcmToken, currentUser.displayName || "Yeni Mesaj", text);
+  }
+}
+
+// Kırmızı bildirim için yine inboxHasNew işaretle
+await updateDoc(doc(db, "users", selectedFriendId), {
+  inboxHasNew: true
+});
   }
 
   input.value = "";
@@ -646,6 +659,27 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("sendBtn").click();  // Gönder butonuna tıkla
   }
 });
+
+  async function sendPushNotification(token, title, body) {
+  const payload = {
+    to: token,
+    notification: {
+      title: title,
+      body: body,
+      click_action: "https://economentor.netlify.app/mesajlar.html",
+      icon: "/image1.png"
+    }
+  };
+
+  await fetch("https://fcm.googleapis.com/fcm/send", {
+    method: "POST",
+    headers: {
+      "Authorization": "key=BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+}
 </script>
 </body>
 </html>
