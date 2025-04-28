@@ -1,0 +1,21 @@
+{
+  "name": "Economentor",
+  "short_name": "Economentor",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#001f3d",
+  "theme_color": "#001f3d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "image1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "image1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
