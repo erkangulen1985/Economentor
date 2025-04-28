@@ -660,26 +660,18 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-  async function sendPushNotification(token, title, body) {
-  const payload = {
-    to: token,
-    notification: {
-      title: title,
-      body: body,
-      click_action: "https://economentor.netlify.app/mesajlar.html",
-      icon: "/image1.png"
-    }
-  };
+async function sendPushNotification(token, title, body) {
+  const payload = { token, title, body };
 
-  await fetch("https://fcm.googleapis.com/fcm/send", {
+  await fetch("https://us-central1-economentor-8ddc4.cloudfunctions.net/sendNotification", {
     method: "POST",
     headers: {
-      "Authorization": "key=BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",
       "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
   });
 }
+  
 </script>
 </body>
 </html>
