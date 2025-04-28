@@ -117,12 +117,18 @@
             padding: 5px 10px;
             cursor: pointer;
         }
-        @media (max-width: 768px) {
+.menu-toggle {
+    display: none; /* Masaüstünde görünmesin */
+}
+
+/* Mobil için */
+@media (max-width: 768px) {
     .sidebar {
         width: 200px;
         position: fixed;
         height: 100%;
-        transform: translateX(-200px);
+        background-color: #0f0f0f;
+        transform: translateX(-200px); /* Başlangıçta gizli */
         transition: transform 0.3s ease;
         z-index: 1000;
     }
@@ -139,14 +145,14 @@
     .menu-toggle {
         display: block;
         position: fixed;
-        top: 20px;
-        left: 20px;
+        top: 15px;
+        left: 15px;
         background-color: #4CAF50;
         border: none;
         color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-size: 18px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 22px;
         cursor: pointer;
         z-index: 1001;
     }
@@ -168,7 +174,7 @@
         <a href="index.html" class="logout-button">Çıkış</a>
     </div>
 
-    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menü</button>
+    <button class="menu-toggle" aria-label="Menüyü Aç/Kapat">☰</button>
     
     <div class="main-content">
         <div class="content-container">
@@ -336,7 +342,15 @@ onAuthStateChanged(auth, async (user) => {
 };
 
 function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+
+    const mainContent = document.querySelector('.main-content');
+    if (sidebar.classList.contains('open')) {
+        mainContent.style.marginLeft = '200px'; // Sidebar açıkken ana içerik kayacak
+    } else {
+        mainContent.style.marginLeft = '0'; // Sidebar kapalıyken içerik genişleyecek
+    }
 }
     </script>
 </body>
