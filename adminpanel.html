@@ -341,15 +341,15 @@ onAuthStateChanged(auth, async (user) => {
   alert("Karşılama yazısı başarıyla güncellendi.");
 };
 
-function toggleSidebar() {
+window.toggleSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 
     const mainContent = document.querySelector('.main-content');
     if (sidebar.classList.contains('open')) {
-        mainContent.style.marginLeft = '200px'; // Sidebar açıkken ana içerik kayacak
+        mainContent.style.marginLeft = '200px'; // Sidebar açıkken
     } else {
-        mainContent.style.marginLeft = '0'; // Sidebar kapalıyken içerik genişleyecek
+        mainContent.style.marginLeft = '0'; // Sidebar kapalıyken
     }
 }
     </script>
