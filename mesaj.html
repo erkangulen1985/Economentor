@@ -611,23 +611,10 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       timestamp: Date.now(),
       seenBy: []
     };
-await addDoc(msgCol, msg);
-
-// 🔥 Mesaj atınca hedef kişinin fcmToken'ını çekelim:
-const friendDoc = await getDoc(doc(db, "users", selectedFriendId));
-if (friendDoc.exists()) {
-  const friendData = friendDoc.data();
-  const fcmToken = friendData.fcmToken;
-
-  if (fcmToken) {
-    await sendPushNotification(fcmToken, currentUser.displayName || "Yeni Mesaj", text);
-  }
-}
-
-// Kırmızı bildirim için yine inboxHasNew işaretle
-await updateDoc(doc(db, "users", selectedFriendId), {
-  inboxHasNew: true
-});
+    await addDoc(msgCol, msg);
+    await updateDoc(doc(db, "users", selectedFriendId), {
+      inboxHasNew: true
+    });
   }
 
   input.value = "";
@@ -659,19 +646,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("sendBtn").click();  // Gönder butonuna tıkla
   }
 });
-
-async function sendPushNotification(token, title, body) {
-  const payload = { token, title, body };
-
-  await fetch("https://us-central1-economentor-8ddc4.cloudfunctions.net/sendNotification", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-}
-  
 </script>
 </body>
 </html>
