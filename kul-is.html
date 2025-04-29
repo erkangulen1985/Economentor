@@ -180,6 +180,7 @@
               <th>Kullanıcı Adı</th>
               <th>İsim Soyisim</th>
               <th>UID</th>
+              <th>Yetki</th>
               <th>İşlem</th>
             </tr>
           </thead>
@@ -213,7 +214,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy 
+    deleteDoc, onSnapshot, query, orderBy, updateDoc 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -324,12 +325,19 @@ async function loadStatistics() {
       users.forEach(docSnap => {
         const data = docSnap.data();
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
+row.innerHTML = `
+  <td>${data.username || "-"}</td>
+  <td>${data.fullName || "-"}</td>
+  <td>${docSnap.id}</td>
+  <td>
+    <select class="roleSelect" data-uid="${docSnap.id}">
+      <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
+      <option value="vip" ${data.role === "vip" ? "selected" : ""}>VIP</option>
+      <option value="user" ${!data.role || data.role === "user" ? "selected" : ""}>Normal</option>
+    </select>
+  </td>
+  <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
+`;
         userContainer.appendChild(row);
       });
     } catch (error) {
@@ -574,6 +582,22 @@ async function loadCharts() {
     console.error("Grafikler yüklenemedi:", err);
   }
 }
+
+  document.addEventListener("change", async (e) => {
+  if (e.target.classList.contains("roleSelect")) {
+    const uid = e.target.dataset.uid;
+    const newRole = e.target.value;
+
+    try {
+      const userRef = doc(db, "users", uid);
+      await updateDoc(userRef, { role: newRole });
+      alert("Rol başarıyla güncellendi.");
+    } catch (error) {
+      console.error("Rol güncellenirken hata:", error);
+      alert("Rol güncellenemedi: " + error.message);
+    }
+  }
+});
 
   loadUserList();
   loadCharts();
