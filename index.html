@@ -162,11 +162,15 @@
     });
 
     // ✅ Service Worker Kaydı
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('✅ SW yüklendi:', reg))
-        .catch(err => console.error('❌ SW hatası:', err));
-    }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(reg => {
+      console.log("📲 firebase-messaging-sw.js başarıyla kaydedildi.");
+    })
+    .catch(err => {
+      console.error("❌ Servis Worker hatası:", err);
+    });
+}
 
     // ✅ PWA Yükleme Kutusu
     let deferredPrompt = null;
