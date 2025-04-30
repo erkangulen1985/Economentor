@@ -319,6 +319,7 @@ nav a:hover {
 
 <div class="content">
   <h2 id="welcomeMessage"></h2>
+  <div id="roleBadge" style="margin-top: 10px;"></div>
 </div>
 
   <div class="post-container" id="postsContainer">
@@ -375,7 +376,6 @@ async function loadWelcomeMessage(username) {
   }
 }
 
-// Oturum kontrolü
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.");
@@ -385,17 +385,49 @@ onAuthStateChanged(auth, async (user) => {
 
   const userRef = doc(db, "users", user.uid);
   const docSnap = await getDoc(userRef);
+
   if (docSnap.exists()) {
     const data = docSnap.data();
     const username = data.username || "Kullanıcı";
     loadWelcomeMessage(username);
+
+    // Admin panel linki görünür olsun
     if (data.role === "admin") {
       document.getElementById("adminPanelLink").style.display = "inline-block";
     }
-  }
-    const role = data.role || "user"; // rol boşsa varsayılan olarak 'user'
-    document.getElementById("userRole").textContent = `Hesap Türü: ${role.toUpperCase()}`;
-   else {
+
+const role = data.role || "user";
+const badgeContainer = document.getElementById("roleBadge");
+
+let badgeColor = "#ccc";
+let badgeText = "👤 USER";
+
+if (role === "admin") {
+  badgeColor = "gold";
+  badgeText = "👑 ADMIN";
+} else if (role === "vip") {
+  badgeColor = "#66ccff";
+  badgeText = "🌟 VIP";
+}
+
+badgeContainer.innerHTML = `
+  <span style="
+    background-color: ${badgeColor};
+    color: black;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 15px;
+    display: inline-block;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+  ">
+    ${badgeText}
+  </span>
+`;
+
+  } else {
     alert("Kullanıcı bilgisi bulunamadı.");
     location.href = "index.html";
   }
