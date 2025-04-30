@@ -275,48 +275,64 @@ document.getElementById("uploadButton").addEventListener("click", uploadPost);
 
 async function uploadPost() {
   const imageFile = document.getElementById("imageUpload").files[0];
-  const title = document.getElementById("imageTitle").value;
-  const description = document.getElementById("imageDescription").value;
+  const title = document.getElementById("imageTitle").value.trim();
+  const description = document.getElementById("imageDescription").value.trim();
 
   if (!title || !description) {
     alert("Lütfen başlık ve açıklama girin!");
     return;
   }
 
-  let imageUrl = ''; // Resim URL'si varsayılan olarak boş olacak
+  let imageUrl = '';
+  let imagePath = '';
 
   if (imageFile) {
-  const safeFileName = sanitizeFilename(imageFile.name);
-  const timestamp = Date.now(); // TEK BİR ZAMAN DAMGASI KULLAN
-  const filePath = 'images/' + timestamp + '-' + safeFileName;
+    try {
+      const safeFileName = sanitizeFilename(imageFile.name);
+      const timestamp = Date.now();
+      imagePath = 'images/' + timestamp + '-' + safeFileName;
 
-  const { data, error } = await supabase
-    .storage
-    .from('anasayfa-paylasimlari')
-    .upload(filePath, imageFile);
+      const { error } = await supabase
+        .storage
+        .from('anasayfa-paylasimlari')
+        .upload(imagePath, imageFile);
 
-  if (error) {
-    console.error("Supabase yükleme hatası:", error.message);
-    alert("Resim yüklenemedi!");
-    return;
+      if (error) {
+        console.error("Supabase yükleme hatası:", error.message);
+        alert("Resim yüklenemedi!");
+        return;
+      }
+
+      imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${imagePath}`;
+    } catch (err) {
+      console.error("Yükleme sırasında hata oluştu:", err);
+      alert("Resim yüklenemedi.");
+      return;
+    }
   }
 
-  imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
+  try {
+    await addDoc(collection(db, "posts"), {
+      title,
+      description,
+      imageUrl,
+      imagePath,
+      likes: 0,
+      dislikes: 0,
+      comments: [],
+      timestamp: new Date()
+    });
 
-  // Firestore'a eklemeden önce imagePath'ı doğru belirle
-  await addDoc(collection(db, "posts"), {
-    title,
-    description,
-    imageUrl,
-    imagePath: filePath,
-    likes: 0,
-    dislikes: 0,
-    comments: [],
-    timestamp: new Date()
-  });
+    alert("Paylaşım yapıldı!");
+    document.getElementById("imageUpload").value = "";
+    document.getElementById("imageTitle").value = "";
+    document.getElementById("imageDescription").value = "";
 
-  alert("Paylaşım yapıldı!");
-  loadPosts();
+    loadPosts(); // her durumda çağrılır
+  } catch (err) {
+    console.error("Post kaydedilemedi:", err);
+    alert("Post kaydedilirken bir hata oluştu.");
+  }
 }
 
 // ✅ Postları yükle ve yeniye göre sırala
