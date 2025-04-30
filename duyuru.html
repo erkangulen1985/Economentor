@@ -153,27 +153,30 @@ h1 {
     return setDoc(userRef, { fcmToken: token }, { merge: true });
   }
 
-     onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-        const currentToken = await getToken(messaging, {
-          vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-        });
+let currentUser = null;
 
-        if (currentToken) {
-          console.log('Token alındı:', currentToken);
-          await saveTokenToFirestore(user.uid, currentToken);
-          console.log('Token Firestore\'a kaydedildi.');
-        } else {
-          console.log('Token alınamadı veya kullanıcı izin vermedi.');
-        }
-      } catch (err) {
-        console.error('Token alma hatası:', err);
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (user) {
+    try {
+      const currentToken = await getToken(messaging, {
+        vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+      });
+
+      if (currentToken) {
+        console.log('Token alındı:', currentToken);
+        await saveTokenToFirestore(user.uid, currentToken);
+        console.log('Token Firestore\'a kaydedildi.');
+      } else {
+        console.log('Token alınamadı veya kullanıcı izin vermedi.');
       }
-    } else {
-      console.log("Henüz giriş yapılmamış.");
+    } catch (err) {
+      console.error('Token alma hatası:', err);
     }
-  });
+  } else {
+    console.log("Henüz giriş yapılmamış.");
+  }
+});
 
     document.addEventListener('DOMContentLoaded', () => {
   const promptDiv = document.getElementById('notificationPrompt');
@@ -213,19 +216,18 @@ h1 {
   });
 });
 
-    document.addEventListener("visibilitychange", async () => {
+document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "visible" && Notification.permission === "granted") {
     try {
-      const currentToken = await getToken(messaging, {
+      const token = await getToken(messaging, {
         vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
       });
 
-      if (currentToken) {
-        const user = auth.currentUser;
-        if (user) {
-          await saveTokenToFirestore(user.uid, currentToken);
-          console.log("🔥 Token sonradan alındı ve kaydedildi:", currentToken);
-        }
+      if (token && currentUser) {
+        await saveTokenToFirestore(currentUser.uid, token);
+        console.log("🔥 Token sonradan alındı ve kaydedildi:", token);
+      } else {
+        console.warn("Kullanıcı yok veya token alınamadı.");
       }
     } catch (err) {
       console.error("Sonradan token alma hatası:", err);
