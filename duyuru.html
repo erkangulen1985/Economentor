@@ -219,11 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-    function saveTokenToFirestore(uid, token) {
-  const userRef = doc(db, "users", uid);
-  return setDoc(userRef, { fcmToken: token }, { merge: true });
-}
-
     
     loadAnnouncements();
   </script>
