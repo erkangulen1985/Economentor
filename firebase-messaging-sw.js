@@ -1,48 +1,39 @@
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
-
-// Firebase config — seninle aynı olmalı
-firebase.initializeApp({
-  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-  authDomain: "economentor-8ddc4.firebaseapp.com",
-  projectId: "economentor-8ddc4",
-  messagingSenderId: "835370350520",
-  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-});
-
-// 🔔 Bildirim servisini başlat
-const messaging = firebase.messaging();
-
-// 🔕 Arka planda mesaj geldiğinde gösterilecek yapı
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Arka planda mesaj alındı:', payload);
-
-  const notificationTitle = payload.notification?.title || "Yeni Bildirim";
-  const notificationOptions = {
-    body: payload.notification?.body || "Bir mesajınız var",
-    icon: "/image1.png", // simge (opsiyonel)
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {
+    notification: {
+      title: "Yeni Bildirim",
+      body: "Mesajınız var!",
+      icon: "/image1.png"
+    },
     data: {
-      url: payload.data?.url || "https://economentor.netlify.app" // tıklanınca gidilecek adres
+      url: "https://economentor.netlify.app/mesajlar.html"
     }
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  event.waitUntil(
+    self.registration.showNotification(data.notification.title, {
+      body: data.notification.body,
+      icon: data.notification.icon || '/image1.png',
+      data: {
+        url: data.data?.url
+      }
+    })
+  );
 });
 
-// 👆 Bildirime tıklanırsa PWA'yı aç
 self.addEventListener('notificationclick', function(event) {
-  const targetUrl = event.notification?.data?.url || '/';
+  const urlToOpen = event.notification?.data?.url || '/';
   event.notification.close();
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(function(clientList) {
-      for (const client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (let client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
+        return clients.openWindow(urlToOpen);
       }
     })
   );
