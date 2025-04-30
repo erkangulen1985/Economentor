@@ -190,7 +190,7 @@ h1 {
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        const currentToken = await getToken(messaging, { vapidKey: 'BURAYA_VAPID_KEYİNİ_KOY' });
+        const currentToken = await getToken(messaging, { vapidKey: 'BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s' });
         if (currentToken) {
           console.log('Token alındı:', currentToken);
           const user = auth.currentUser;
