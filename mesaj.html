@@ -596,6 +596,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
   const editId = input.dataset.editing;
   if (!text || !selectedFriendId || !currentUser) return;
 
+  input.value = "";  // ⬅️ Mesaj kutusunu hemen temizle
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
@@ -604,38 +605,35 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
-} else {
-  const msg = {
-    sender: currentUser.uid,
-    text,
-    timestamp: Date.now(),
-    seenBy: []
-  };
-  await addDoc(msgCol, msg);
-  await updateDoc(doc(db, "users", selectedFriendId), {
-    inboxHasNew: true
-  });
+  } else {
+    const msg = {
+      sender: currentUser.uid,
+      text,
+      timestamp: Date.now(),
+      seenBy: []
+    };
+    await addDoc(msgCol, msg);
+    await updateDoc(doc(db, "users", selectedFriendId), {
+      inboxHasNew: true
+    });
 
-  // 🔔 BİLDİRİM GÖNDER: Replit sunucuna istek at
-  try {
-await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    uid: selectedFriendId,
-    title: "📩 Yeni mesaj!",
-    body: text
-  })
-});
-
-  } catch (err) {
-    console.error("Bildirim gönderme hatası:", err);
+    // 🔔 Push bildirim gönder
+    try {
+      await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: selectedFriendId,
+          title: "📩 Yeni mesaj!",
+          body: text
+        })
+      });
+    } catch (err) {
+      console.error("Bildirim gönderme hatası:", err);
+    }
   }
-}
-
-  input.value = "";
 });
 
 window.goHome = () => location.href = "anasayfa.html";
