@@ -618,17 +618,18 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 
   // 🔔 BİLDİRİM GÖNDER: Replit sunucuna istek at
   try {
-    await fetch("https://fcm-server.erkan.repl.co/sendToUid", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        uid: selectedFriendId,
-        title: "Yeni mesaj!",
-        body: text
-      })
-    });
+await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    uid: selectedFriendId,
+    title: "📩 Yeni mesaj!",
+    body: text
+  })
+});
+
   } catch (err) {
     console.error("Bildirim gönderme hatası:", err);
   }
