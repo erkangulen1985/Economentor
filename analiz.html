@@ -269,6 +269,7 @@ onAuthStateChanged(auth, async (user) => {
           <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
         </div>
       </div>
+      <p style="margin-top:10px; font-size:14px; color:#bbb;">Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>
       <div class="comment-section" id="comments-${id}" style="display:none;">
         <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
         <button class="commentBtn" data-id="${id}">Yorum Yap</button>
@@ -397,6 +398,8 @@ onAuthStateChanged(auth, async (user) => {
       `;
       list.insertBefore(div, list.firstChild);
       input.value = "";
+      const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+      if (countEl) countEl.textContent = list.children.length;
     }
   });
 
@@ -420,6 +423,8 @@ onAuthStateChanged(auth, async (user) => {
             ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
           </div>
         `).join("");
+      const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+      if (countEl) countEl.textContent = comments.length;
     }
   });
 
