@@ -328,6 +328,8 @@ async function uploadPost() {
     document.getElementById("imageTitle").value = "";
     document.getElementById("imageDescription").value = "";
 
+    await sendNotificationToAllUsersExceptAdmin(title, description);
+    
     loadPosts(); // her durumda çağrılır
   } catch (err) {
     console.error("Post kaydedilemedi:", err);
