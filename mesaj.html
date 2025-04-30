@@ -665,6 +665,12 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("sendBtn").click();  // Gönder butonuna tıkla
   }
 });
+
+    if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then(reg => console.log("✅ firebase-messaging-sw.js yüklendi:", reg))
+      .catch(err => console.error("❌ SW kaydedilemedi:", err));
+  }
 </script>
 </body>
 </html>
