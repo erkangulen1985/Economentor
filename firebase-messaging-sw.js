@@ -22,6 +22,7 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('notificationclick', function(event) {
+  console.log("📲 Bildirime tıklandı!"); // BU SATIR ÖNEMLİ
   const urlToOpen = event.notification?.data?.url || '/';
   event.notification.close();
 
