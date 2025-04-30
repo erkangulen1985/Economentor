@@ -392,7 +392,10 @@ onAuthStateChanged(auth, async (user) => {
     if (data.role === "admin") {
       document.getElementById("adminPanelLink").style.display = "inline-block";
     }
-  } else {
+  }
+    const role = data.role || "user"; // rol boşsa varsayılan olarak 'user'
+    document.getElementById("userRole").textContent = `Hesap Türü: ${role.toUpperCase()}`;
+   else {
     alert("Kullanıcı bilgisi bulunamadı.");
     location.href = "index.html";
   }
