@@ -263,7 +263,34 @@ onAuthStateChanged(auth, async (user) => {
 
     alert("Video başarıyla yüklendi!");
     loadVideos();
+
+    // 🔔 Bildirim gönder
+const usersSnap = await getDocs(collection(db, "users"));
+for (const docSnap of usersSnap.docs) {
+  const user = docSnap.data();
+  const uid = docSnap.id;
+
+  if (user.fcmToken && user.role !== "admin") {
+    const shouldNotify = (visibility === "vip" && user.role === "vip") ||
+                         (visibility === "all" && (user.role === "vip" || user.role === "user"));
+
+    if (shouldNotify) {
+      await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: uid,
+          title: "🎥 Yeni Analiz Videosu!",
+          body: `${title} eklendi.`,
+          url: "https://economentor.netlify.app/analiz.html"
+        })
+      });
+    }
   }
+}
+}
 
   async function loadVideos() {
     const container = document.getElementById("videosContainer");
