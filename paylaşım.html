@@ -483,9 +483,10 @@ document.getElementById("searchInput")?.addEventListener("input", async (e) => {
   try {
     const snapshot = await getDocs(collection(db, "users"));
 
-    snapshot.forEach(async (docSnap) => {
-      const user = docSnap.data();
-      const uid = docSnap.id;
+const usersSnap = await getDocs(collection(db, "users"));
+for (const docSnap of usersSnap.docs) {
+  const user = docSnap.data();
+  const uid = docSnap.id;
 
       if (user.role !== "admin" && user.fcmToken) {
         await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
