@@ -178,17 +178,18 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener('DOMContentLoaded', () => {
   const promptDiv = document.getElementById('notificationPrompt');
 
-  // Bildirim izni zaten verilmediyse veya daha önce reddedildiyse
+  // Bildirim izni yoksa veya reddedildiyse mesajı göster
   if (Notification.permission === 'default' || Notification.permission === 'denied') {
     setTimeout(() => {
       promptDiv.style.display = 'block';
-    }, 1500); // 1.5 saniye sonra göster
+    }, 2000);
   }
 
   document.getElementById('allowNotifications').addEventListener('click', async () => {
     promptDiv.style.display = 'none';
+
     if (Notification.permission === 'denied') {
-      alert("⚠️ Bildirim izni tarayıcınızda daha önce reddedilmiş. Ayarlar > Site Ayarları > Bildirimler kısmından manuel olarak açmanız gerekir.");
+      alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
       return;
     }
 
@@ -205,10 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       } else {
-        console.log('❌ Kullanıcı izin vermedi.');
+        console.log('Kullanıcı izin vermedi.');
       }
     } catch (err) {
-      console.error('❌ Bildirim izni istenirken hata oluştu:', err);
+      console.error('Bildirim izni istenirken hata oluştu:', err);
     }
   });
 
@@ -217,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🔕 Kullanıcı bildirim almak istemedi.');
   });
 });
-
 
     function saveTokenToFirestore(uid, token) {
   const userRef = doc(db, "users", uid);
