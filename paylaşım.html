@@ -488,23 +488,19 @@ for (const docSnap of usersSnap.docs) {
   const user = docSnap.data();
   const uid = docSnap.id;
 
-      if (user.role !== "admin" && user.fcmToken) {
-        await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            uid: uid,
-            title: "📢 Yeni Post Yayınlandı!",
-            body: `${title} - ${body}`,
-            url: "https://economentor.netlify.app/"
-          })
-        });
-      }
+  if (user.role !== "admin" && user.fcmToken) {
+    await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        uid: uid,
+        title: "📢 Yeni Post Yayınlandı!",
+        body: `${title} - ${description}`,
+        url: "https://economentor.netlify.app/"
+      })
     });
-  } catch (err) {
-    console.error("Bildirim gönderilemedi:", err);
   }
 }
 
