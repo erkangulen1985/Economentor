@@ -264,7 +264,7 @@ onAuthStateChanged(auth, async (user) => {
     alert("Video başarıyla yüklendi!");
     loadVideos();
 
-    // 🔔 Bildirim gönder
+// 🔔 Bildirim gönder
 const usersSnap = await getDocs(collection(db, "users"));
 for (const docSnap of usersSnap.docs) {
   const user = docSnap.data();
