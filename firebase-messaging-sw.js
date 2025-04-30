@@ -6,7 +6,7 @@ self.addEventListener('push', (event) => {
       icon: "/image1.png"
     },
     data: {
-      url: "https://economentor.netlify.app/mesajlar.html"
+      url: "https://economentor.netlify.app/mesaj.html"
     }
   };
 
