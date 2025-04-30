@@ -287,6 +287,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const messaging = getMessaging(app);
 
 let currentUser = null;
 let selectedFriendId = null;
@@ -619,17 +620,18 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 
     // 🔔 Push bildirim gönder
     try {
-      await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          uid: selectedFriendId,
-          title: "📩 Yeni mesaj!",
-          body: text
-        })
-      });
+await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    uid: selectedFriendId,
+    title: "📩 Yeni mesaj!",
+    body: text,
+    url: "https://economentor.netlify.app/mesajlar.html"  // bu alan önemli!
+  })
+});
     } catch (err) {
       console.error("Bildirim gönderme hatası:", err);
     }
