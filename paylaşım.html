@@ -287,30 +287,29 @@ async function uploadPost() {
   let imageUrl = ''; // Resim URL'si varsayılan olarak boş olacak
 
   if (imageFile) {
-    // Eğer resim varsa, güvenli dosya adı oluşturulacak ve Supabase'e yükleme yapılacak
-    const safeFileName = sanitizeFilename(imageFile.name);
-    const filePath = 'images/' + Date.now() + '-' + safeFileName;
-    const { data, error } = await supabase
-      .storage
-      .from('anasayfa-paylasimlari')
-      .upload(filePath, imageFile);
+  const safeFileName = sanitizeFilename(imageFile.name);
+  const timestamp = Date.now(); // TEK BİR ZAMAN DAMGASI KULLAN
+  const filePath = 'images/' + timestamp + '-' + safeFileName;
 
-    if (error) {
-      console.error("Supabase yükleme hatası:", error.message);
-      alert("Resim yüklenemedi!");
-      return;
-    }
+  const { data, error } = await supabase
+    .storage
+    .from('anasayfa-paylasimlari')
+    .upload(filePath, imageFile);
 
-    // Resim yükleme başarılı ise, URL'si alınacak
-    imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
+  if (error) {
+    console.error("Supabase yükleme hatası:", error.message);
+    alert("Resim yüklenemedi!");
+    return;
   }
 
-  // Firestore'a yeni paylaşım verisini ekleme
+  imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${filePath}`;
+
+  // Firestore'a eklemeden önce imagePath'ı doğru belirle
   await addDoc(collection(db, "posts"), {
     title,
     description,
-    imageUrl,  // Eğer resim yüklenmişse, URL'si buraya eklenir
-    imagePath: imageFile ? 'images/' + Date.now() + '-' + safeFileName : '',
+    imageUrl,
+    imagePath: filePath,
     likes: 0,
     dislikes: 0,
     comments: [],
