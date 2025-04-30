@@ -604,18 +604,35 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
-  } else {
-    const msg = {
-      sender: currentUser.uid,
-      text,
-      timestamp: Date.now(),
-      seenBy: []
-    };
-    await addDoc(msgCol, msg);
-    await updateDoc(doc(db, "users", selectedFriendId), {
-      inboxHasNew: true
+} else {
+  const msg = {
+    sender: currentUser.uid,
+    text,
+    timestamp: Date.now(),
+    seenBy: []
+  };
+  await addDoc(msgCol, msg);
+  await updateDoc(doc(db, "users", selectedFriendId), {
+    inboxHasNew: true
+  });
+
+  // 🔔 BİLDİRİM GÖNDER: Replit sunucuna istek at
+  try {
+    await fetch("https://fcm-server.erkan.repl.co/sendToUid", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        uid: selectedFriendId,
+        title: "Yeni mesaj!",
+        body: text
+      })
     });
+  } catch (err) {
+    console.error("Bildirim gönderme hatası:", err);
   }
+}
 
   input.value = "";
 });
