@@ -178,15 +178,28 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-    document.addEventListener('DOMContentLoaded', () => {
-  const promptDiv = document.getElementById('notificationPrompt');
-  
-  // Kullanıcı daha önce izin verip vermediğini kontrol edebilirsin
-  if (Notification.permission === 'default') {
-    setTimeout(() => {
-      promptDiv.style.display = 'block';
-    }, 2000); // 2 saniye sonra göster
+// Her sayfa yüklemesinde token çekmeyi dene
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+    });
+
+    if (token) {
+      const user = auth.currentUser;
+      if (user) {
+        await saveTokenToFirestore(user.uid, token);
+        console.log("✅ Token her girişte çekildi ve kaydedildi:", token);
+      } else {
+        console.warn("⚠️ Giriş yapılmamış, token alınsa bile kaydedilemedi.");
+      }
+    } else {
+      console.log("ℹ️ Token alınamadı, muhtemelen izin verilmemiş.");
+    }
+  } catch (err) {
+    console.error("❌ Token alma denemesi sırasında hata:", err);
   }
+});
   
   document.getElementById('allowNotifications').addEventListener('click', async () => {
     promptDiv.style.display = 'none';
