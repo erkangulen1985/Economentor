@@ -1,281 +1,193 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economentor | Giriş</title>
-    <link rel="icon" href="image1.png">
-    
-    <!-- PWA manifest bağlantısı -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#001f3d">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Economentor | Giriş</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#001f3d" />
 
-    <style>
-        body {  
-            margin: 0;
-            padding: 0;
-            background-color: #001f3d;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        .background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: -1;
-            background-image: url('image2.png');
-            background-position: center;
-            background-size: cover;
-        }
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #001f3d;
+      color: white;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+    }
 
-        .container {
-            position: relative;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 30px;
-            background-color: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            width: 350px;
-            text-align: center;
-        }
+    .background {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('image2.png') no-repeat center center;
+      background-size: cover;
+      z-index: -1;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-            font-size: 26px;
-        }
+    .container {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      width: 350px;
+    }
 
-        .input-container {
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-        }
+    input, button {
+      width: 80%;
+      padding: 12px;
+      margin: 10px auto;
+      display: block;
+      font-size: 16px;
+      border-radius: 6px;
+    }
 
-        input {
-            width: 80%;
-            padding: 12px;
-            margin: 8px;
-            border-radius: 5px;
-            border: none;
-            background-color: #fff;
-            color: #333;
-            font-size: 15px;
-        }
+    input {
+      border: none;
+      background: #fff;
+      color: #333;
+    }
 
-        button {
-            width: 80%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #45a049;
-        }
+    .link {
+      display: block;
+      margin-top: 10px;
+      color: white;
+      font-size: 14px;
+      text-decoration: none;
+    }
 
-        .link {
-            color: #fff;
-            text-decoration: none;
-            margin-top: 18px;
-            display: block;
-            font-size: 15px;
-        }
+    .link:hover {
+      text-decoration: underline;
+    }
 
-        .link:hover {
-            text-decoration: underline;
-        }
+    #installPrompt {
+      display: none;
+      position: fixed;
+      top: -200px;
+      left: 0;
+      right: 0;
+      background: #001f3d;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      z-index: 9999;
+      transition: top 0.5s ease;
+    }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden; /* sağ-sol kayma engelli */
-    overflow-y: auto;   /* yukarı-aşağı kaymaya izin ver */
-    max-width: 100%;
-    touch-action: pan-y; /* sadece dikey hareketlere izin ver */
-}
-    </style>
+    #installPrompt button {
+      margin-top: 10px;
+      background: #4CAF50;
+    }
+  </style>
 </head>
 <body>
-    <div class="background"></div>
-    <div class="container">
-        <h1 id="title">ECONOMENTOR</h1>
-        
-        <form id="loginForm">
-            <div id="errorMsg"></div>
-            
-            <div class="input-container">
-                <input type="text" id="username" placeholder="Kullanıcı Adı" required>
-            </div>
-            
-            <div class="input-container">
-                <input type="password" id="password" placeholder="Şifre" required>
-            </div>
-            
-            <button type="submit" id="loginBtn">Giriş Yap</button>
-        </form>
-        
-        <a href="şifremiunuttum.html" class="link" id="forgotPassword">Şifremi Unuttum</a>
-        <a href="kullaniciadi.html" class="link" id="forgotUsername">Kullanıcı Adımı Unuttum</a>
-        <a href="kayitol.html" class="link" id="signup">Kayıt Ol</a>
-    </div>
+  <div class="background"></div>
 
-    <!-- PWA Service Worker kayıt kodu -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then((reg) => console.log('Service Worker başarıyla kaydedildi.', reg))
-          .catch((err) => console.error('Service Worker kaydedilirken hata oluştu.', err));
-      }
-    </script>
-
-<div id="installPrompt" style="display:none; position:fixed; top:-150px; left:0; right:0; background:#001f3d; color:white; padding:15px; text-align:center; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:9999; transition: top 0.5s ease;">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-    <img src="image1.png" alt="Economentor" style="width:40px; height:40px;">
-    <span style="font-size:18px; font-weight:bold;">Economentor</span>
+  <div class="container">
+    <h1>ECONOMENTOR</h1>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Kullanıcı Adı" required />
+      <input type="password" id="password" placeholder="Şifre" required />
+      <button type="submit">Giriş Yap</button>
+      <div id="errorMsg" style="color: red;"></div>
+    </form>
+    <a class="link" href="şifremiunuttum.html">Şifremi Unuttum</a>
+    <a class="link" href="kullaniciadi.html">Kullanıcı Adımı Unuttum</a>
+    <a class="link" href="kayitol.html">Kayıt Ol</a>
   </div>
-  <p style="margin-top:10px;">Uygulamayı yüklemek ister misiniz?</p>
-  <button id="installButton" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:5px; font-size:15px; cursor:pointer;">Yükle</button>
-</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <div id="installPrompt">
+    <p>Uygulamayı ana ekrana eklemek ister misiniz?</p>
+    <button id="installButton">Yükle</button>
+  </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-            authDomain: "economentor-8ddc4.firebaseapp.com",
-            projectId: "economentor-8ddc4",
-            storageBucket: "economentor-8ddc4.firebasestorage.app",
-            messagingSenderId: "835370350520",
-            appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-            measurementId: "G-FS3FMPYVPD"
-        };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+    };
 
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const errorBox = document.getElementById("errorMsg");
-            errorBox.innerText = "";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value;
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const errorBox = document.getElementById("errorMsg");
 
-            const q = query(collection(db, "users"), where("username", "==", username));
-            const querySnapshot = await getDocs(q);
+      try {
+        const q = query(collection(db, "users"), where("username", "==", username));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          errorBox.textContent = "Kullanıcı adı bulunamadı.";
+          return;
+        }
 
-            if (!querySnapshot.empty) {
-                const userData = querySnapshot.docs[0].data();
-                const email = userData.email;
-                const role = userData.role || "user";
+        const userDoc = snap.docs[0];
+        const email = userDoc.data().email;
+        const role = userDoc.data().role || "user";
 
-                signInWithEmailAndPassword(auth, email, password)
-                    .then((userCredential) => {
-                        const user = userCredential.user;
-                        console.log("Giriş başarılı: ", user);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (role === "admin") {
+          location.href = "adminpanel.html";
+        } else {
+          location.href = "duyuru.html";
+        }
+      } catch (err) {
+        console.error(err);
+        errorBox.textContent = "Kullanıcı adı veya şifre hatalı!";
+      }
+    });
 
-                        if (role === "admin") {
-                            window.location.href = "adminpanel.html";
-                        } else {
-                            window.location.href = "duyuru.html";
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Hata: ", error.message);
-                        errorBox.innerText = "Kullanıcı adı veya şifre hatalı!";
-                    });
-
-            } else {
-                errorBox.innerText = "Kullanıcı adı bulunamadı!";
-            }
-        });
-
-let deferredPrompt = null;
-
-function isInStandaloneMode() {
-  return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
-}
-        
-// Kullanıcı siteye gelince beforeinstallprompt olayı yakalanıyor
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-// Yükleme kutusunu göster
-function showInstallPrompt() {
-  const prompt = document.getElementById('installPrompt');
-  prompt.style.display = 'block';
-  setTimeout(() => {
-    prompt.style.top = '0';
-  }, 100);
-}
-
-// Yükle butonuna tıklanınca
-document.getElementById('installButton').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('Kullanıcı uygulamayı yüklemeyi kabul etti.');
-    } else {
-      console.log('Kullanıcı uygulamayı reddetti.');
+    // ✅ Service Worker Kaydı
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ SW yüklendi:', reg))
+        .catch(err => console.error('❌ SW hatası:', err));
     }
-    deferredPrompt = null;
-    document.getElementById('installPrompt').style.top = '-150px';
-    setTimeout(() => {
-      document.getElementById('installPrompt').style.display = 'none';
-    }, 500);
-  } else {
-    alert("Eğer \"ANDROID\" kullanıyorsanız uygulamanız zaten yüklenmiş, eğer \"IOS\" kullanıyorsanız: Paylaş simgesine tıklayıp 'Ana Ekrana Ekle' seçeneğini kullanarak yükleyebilirsiniz.");
-    document.getElementById('installPrompt').style.top = '-150px';
-    setTimeout(() => {
-      document.getElementById('installPrompt').style.display = 'none';
-    }, 500);
-  }
-});
 
-// Eğer beforeinstallprompt yoksa (örneğin iPhone gibi) yine de kutuyu manuel gösterelim
-document.addEventListener('DOMContentLoaded', () => {
-  if (!isInStandaloneMode()) {
-    if (deferredPrompt) {
-      // Android kullanıcıları için beforeinstallprompt geldi mi kontrol
-      showInstallPrompt();
-    } else {
-      // iPhone kullanıcıları için (beforeinstallprompt yok zaten)
+    // ✅ PWA Yükleme Kutusu
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("installPrompt").style.display = "block";
       setTimeout(() => {
-        showInstallPrompt();
-      }, 1000);
-    }
-  }
-});
+        document.getElementById("installPrompt").style.top = "0";
+      }, 300);
+    });
 
-let lastScrollTop = 0;
-window.addEventListener('scroll', function() {
-  const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-  if (currentScroll > lastScrollTop) {
-    // Kullanıcı aşağı kayıyor ➔ Scroll'ı sıfırla
-    window.scrollTo(0, 0);
-  }
-
-  lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-}, false);
-    </script>
-
+    document.getElementById("installButton").addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log("Yükleme sonucu:", result.outcome);
+        deferredPrompt = null;
+        document.getElementById("installPrompt").style.top = "-200px";
+      }
+    });
+  </script>
 </body>
 </html>
