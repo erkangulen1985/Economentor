@@ -100,120 +100,122 @@ h1 {
   </div>
   
   <!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, orderBy, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-    measurementId: "G-FS3FMPYVPD"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+      measurementId: "G-FS3FMPYVPD"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth();
-  const messaging = getMessaging(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+    const messaging = getMessaging(app);
+    
+    const announcementList = document.getElementById("announcementList");
 
-  const announcementList = document.getElementById("announcementList");
+    async function loadAnnouncements() {
+      const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
 
-  async function loadAnnouncements() {
-    const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        announcementList.innerHTML = "<p>Henüz duyuru bulunmamaktadır.</p>";
+        return;
+      }
 
-    if (querySnapshot.empty) {
-      announcementList.innerHTML = "<p>Henüz duyuru bulunmamaktadır.</p>";
-      return;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "announcement";
+
+        const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
+        div.innerHTML = `
+          <p>${data.text}</p>
+          <div class="date">${date}</div>
+        `;
+
+        announcementList.appendChild(div);
+      });
     }
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "announcement";
-      const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
-      div.innerHTML = `<p>${data.text}</p><div class="date">${date}</div>`;
-      announcementList.appendChild(div);
-    });
+    function saveTokenToFirestore(uid, token) {
+    const userRef = doc(db, "users", uid);
+    return setDoc(userRef, { fcmToken: token }, { merge: true });
   }
 
-  function saveTokenToFirestore(uid, token) {
-    return setDoc(doc(db, "users", uid), { fcmToken: token }, { merge: true });
-  }
-
-  let currentUser = null;
-
-  onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
+     onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
-        const token = await getToken(messaging, {
+        const currentToken = await getToken(messaging, {
           vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
         });
-        if (token) {
-          await saveTokenToFirestore(user.uid, token);
-          console.log("🔒 Token kayıt edildi:", token);
+
+        if (currentToken) {
+          console.log('Token alındı:', currentToken);
+          await saveTokenToFirestore(user.uid, currentToken);
+          console.log('Token Firestore\'a kaydedildi.');
+        } else {
+          console.log('Token alınamadı veya kullanıcı izin vermedi.');
         }
       } catch (err) {
-        console.error("Token alma hatası:", err);
+        console.error('Token alma hatası:', err);
       }
+    } else {
+      console.log("Henüz giriş yapılmamış.");
     }
   });
 
-  // Token'ı her yüklemede dene
-  document.addEventListener("DOMContentLoaded", async () => {
-    const token = await getToken(messaging, {
-      vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-    });
-    if (token && auth.currentUser) {
-      await saveTokenToFirestore(auth.currentUser.uid, token);
-    }
-  });
-
-  // Kullanıcı sonradan izin verirse token al
-  document.addEventListener("visibilitychange", async () => {
-    if (document.visibilityState === "visible" && Notification.permission === "granted") {
-      const token = await getToken(messaging, {
-        vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-      });
-      if (token && currentUser) {
-        await saveTokenToFirestore(currentUser.uid, token);
-      }
-    }
-  });
-
-  // Bildirim kutusu
-  document.addEventListener("DOMContentLoaded", () => {
-    const promptDiv = document.getElementById("notificationPrompt");
-    if (Notification.permission === "default") {
-      setTimeout(() => { promptDiv.style.display = "block"; }, 2000);
-    }
-
-    document.getElementById("allowNotifications").addEventListener("click", async () => {
-      promptDiv.style.display = "none";
+    document.addEventListener('DOMContentLoaded', () => {
+  const promptDiv = document.getElementById('notificationPrompt');
+  
+  // Kullanıcı daha önce izin verip vermediğini kontrol edebilirsin
+  if (Notification.permission === 'default') {
+    setTimeout(() => {
+      promptDiv.style.display = 'block';
+    }, 2000); // 2 saniye sonra göster
+  }
+  
+  document.getElementById('allowNotifications').addEventListener('click', async () => {
+    promptDiv.style.display = 'none';
+    try {
       const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        const token = await getToken(messaging, {
-          vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-        });
-        if (token && auth.currentUser) {
-          await saveTokenToFirestore(auth.currentUser.uid, token);
+      if (permission === 'granted') {
+        const currentToken = await getToken(messaging, { vapidKey: 'BURAYA_VAPID_KEYİNİ_KOY' });
+        if (currentToken) {
+          console.log('Token alındı:', currentToken);
+          const user = auth.currentUser;
+          if (user) {
+            await saveTokenToFirestore(user.uid, currentToken);
+            console.log('Token Firestore\'a kaydedildi.');
+          }
         }
+      } else {
+        console.log('Kullanıcı bildirim izni vermedi.');
       }
-    });
-
-    document.getElementById("denyNotifications").addEventListener("click", () => {
-      promptDiv.style.display = "none";
-    });
+    } catch (err) {
+      console.error('İzin istenirken hata oluştu:', err);
+    }
   });
 
-  loadAnnouncements();
-</script>
+  document.getElementById('denyNotifications').addEventListener('click', () => {
+    promptDiv.style.display = 'none';
+    console.log('Kullanıcı bildirim almak istemedi.');
+  });
+});
+
+    
+    loadAnnouncements();
+  </script>
 
 </body>
 </html>
