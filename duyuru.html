@@ -6,106 +6,87 @@
   <title>Economentor | Duyurular</title>
   <link rel="icon" href="image1.png">
   <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-image: url('image2.png');
-  background-size: cover;
-  background-position: center;
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  backdrop-filter: brightness(0.6);
-}
-
-h1 {
-  font-size: clamp(20px, 5vw, 32px);
-  margin-bottom: 20px;
-  text-shadow: 1px 1px 5px black;
-}
-
-.announcement {
-  background-color: rgba(0, 0, 0, 0.7);
-  border-left: 6px solid #4CAF50;
-  padding: 20px;
-  margin: 15px 0;
-  width: 100%;
-  max-width: 600px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.announcement p {
-  margin: 0 0 10px;
-  font-size: clamp(14px, 4vw, 17px);
-  line-height: 1.5;
-}
-
-.date {
-  font-size: clamp(12px, 3vw, 14px);
-  color: #ccc;
-  text-align: right;
-}
-
-.home-btn {
-  margin-top: 30px;
-  padding: 12px 25px;
-  background-color: #4CAF50;
-  border: none;
-  border-radius: 5px;
-  font-size: clamp(14px, 4vw, 16px);
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
-  max-width: 300px;
-}
-
-.home-btn:hover {
-  background-color: #45a049;
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 20px 10px;
-  }
-
-  .announcement {
-    padding: 15px;
-  }
-}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('image2.png');
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      backdrop-filter: brightness(0.6);
+    }
+    h1 {
+      font-size: clamp(20px, 5vw, 32px);
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 5px black;
+    }
+    .announcement {
+      background-color: rgba(0, 0, 0, 0.7);
+      border-left: 6px solid #4CAF50;
+      padding: 20px;
+      margin: 15px 0;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .announcement p {
+      margin: 0 0 10px;
+      font-size: clamp(14px, 4vw, 17px);
+      line-height: 1.5;
+    }
+    .date {
+      font-size: clamp(12px, 3vw, 14px);
+      color: #ccc;
+      text-align: right;
+    }
+    .home-btn {
+      margin-top: 30px;
+      padding: 12px 25px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      font-size: clamp(14px, 4vw, 16px);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      max-width: 300px;
+    }
+    .home-btn:hover { background-color: #45a049; }
+    @media (max-width: 600px) {
+      body { padding: 20px 10px; }
+      .announcement { padding: 15px; }
+    }
   </style>
 </head>
 <body>
 
   <h1>Duyurular</h1>
   <div id="announcementList"></div>
-
   <button class="home-btn" onclick="window.location.href='anasayfa.html'">Anasayfa</button>
 
   <div id="notificationPrompt" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#001f3d; color:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:1000; text-align:center;">
-  <p>📢 Bildirim almak ister misiniz?</p>
-  <button id="allowNotifications" style="margin:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">İzin Ver</button>
-  <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>
+    <p>📢 Bildirim almak ister misiniz?</p>
+    <button id="allowNotifications" style="margin:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">İzin Ver</button>
+    <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>
   </div>
-  
+
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, orderBy, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
-    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -121,10 +102,9 @@ h1 {
     const db = getFirestore(app);
     const auth = getAuth();
     const messaging = getMessaging(app);
-    
-    const announcementList = document.getElementById("announcementList");
 
     async function loadAnnouncements() {
+      const announcementList = document.getElementById("announcementList");
       const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
 
@@ -137,89 +117,79 @@ h1 {
         const data = doc.data();
         const div = document.createElement("div");
         div.className = "announcement";
-
         const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
-        div.innerHTML = `
-          <p>${data.text}</p>
-          <div class="date">${date}</div>
-        `;
-
+        div.innerHTML = `<p>${data.text}</p><div class="date">${date}</div>`;
         announcementList.appendChild(div);
       });
     }
 
     function saveTokenToFirestore(uid, token) {
-    const userRef = doc(db, "users", uid);
-    return setDoc(userRef, { fcmToken: token }, { merge: true });
-  }
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    try {
-      const currentToken = await getToken(messaging, {
-        vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-      });
-
-      if (currentToken) {
-        console.log("📦 Token alındı:", currentToken);
-        await saveTokenToFirestore(user.uid, currentToken);
-        console.log("✅ Token Firestore'a kaydedildi.");
-      } else {
-        console.log("⚠️ Token alınamadı. Bildirim izni verilmemiş olabilir.");
-      }
-    } catch (err) {
-      console.error("❌ Token alma hatası:", err);
-    }
-  } else {
-    console.log("🔒 Kullanıcı giriş yapmamış.");
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const promptDiv = document.getElementById('notificationPrompt');
-
-  // Bildirim izni yoksa veya reddedildiyse mesajı göster
-  if (Notification.permission === 'default' || Notification.permission === 'denied') {
-    setTimeout(() => {
-      promptDiv.style.display = 'block';
-    }, 2000);
-  }
-
-  document.getElementById('allowNotifications').addEventListener('click', async () => {
-    promptDiv.style.display = 'none';
-
-    if (Notification.permission === 'denied') {
-      alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
-      return;
+      const userRef = doc(db, "users", uid);
+      return setDoc(userRef, { fcmToken: token }, { merge: true });
     }
 
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const currentToken = await getToken(messaging, { vapidKey: 'BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s' });
-        if (currentToken) {
-          console.log('📦 Token alındı:', currentToken);
-          const user = auth.currentUser;
-          if (user) {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const currentToken = await getToken(messaging, {
+            vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+          });
+
+          if (currentToken) {
+            console.log("📦 Token alındı:", currentToken);
             await saveTokenToFirestore(user.uid, currentToken);
-            console.log('✅ Token Firestore\'a kaydedildi.');
+            console.log("✅ Token Firestore'a kaydedildi.");
+          } else {
+            console.log("⚠️ Token alınamadı. Bildirim izni verilmemiş olabilir.");
           }
+        } catch (err) {
+          console.error("❌ Token alma hatası:", err);
         }
       } else {
-        console.log('Kullanıcı izin vermedi.');
+        console.log("🔒 Kullanıcı giriş yapmamış.");
       }
-    } catch (err) {
-      console.error('Bildirim izni istenirken hata oluştu:', err);
-    }
-  });
+    });
 
-  document.getElementById('denyNotifications').addEventListener('click', () => {
-    promptDiv.style.display = 'none';
-    console.log('🔕 Kullanıcı bildirim almak istemedi.');
-  });
-});
+    document.addEventListener("DOMContentLoaded", () => {
+      const promptDiv = document.getElementById("notificationPrompt");
 
-    
+      if (Notification.permission === "default" || Notification.permission === "denied") {
+        setTimeout(() => {
+          promptDiv.style.display = "block";
+        }, 2000);
+      }
+
+      document.getElementById("allowNotifications").addEventListener("click", async () => {
+        promptDiv.style.display = "none";
+
+        if (Notification.permission === "denied") {
+          alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
+          return;
+        }
+
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            const currentToken = await getToken(messaging, {
+              vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+            });
+
+            if (currentToken && auth.currentUser) {
+              await saveTokenToFirestore(auth.currentUser.uid, currentToken);
+              console.log("✅ Token izinden sonra Firestore'a kaydedildi.");
+            }
+          }
+        } catch (err) {
+          console.error("🔴 Bildirim izni istenirken hata:", err);
+        }
+      });
+
+      document.getElementById("denyNotifications").addEventListener("click", () => {
+        promptDiv.style.display = "none";
+        console.log("🔕 Kullanıcı bildirim almak istemedi.");
+      });
+    });
+
     loadAnnouncements();
   </script>
 
