@@ -489,14 +489,14 @@ async function sendNotificationToAllUsersExceptAdmin(title, description) {
       const uid = docSnap.id;
 
       if (user.role !== "admin" && user.fcmToken) {
-        await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
             uid: uid,
-            title: "📢 Yeni Post Yayınlandı!",
+            title: "\"Economentor\" 📢 Yeni Post Yayınlandı!",
             body: `${title} - ${description}`,
             url: "https://economentor.netlify.app/"
           })
