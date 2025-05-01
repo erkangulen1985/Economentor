@@ -342,7 +342,7 @@ async function loadDocuments() {
   const documentsContainer = document.getElementById("documentsList");
   documentsContainer.innerHTML = "";
 
-  const snapshot = await getDocs(query(collection(db, "documents"), orderBy("timestamp", "desc")));
+  const snapshot = await getDocs(query(collection(db, "documents"), orderBy("uploadDate", "desc")));
   if (snapshot.empty) {
     documentsContainer.innerHTML = "<p>Henüz belge paylaşılmadı.</p>";
     return;
