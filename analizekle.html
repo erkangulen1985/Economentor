@@ -275,14 +275,14 @@ for (const docSnap of usersSnap.docs) {
                          (visibility === "all" && (user.role === "vip" || user.role === "user"));
 
     if (shouldNotify) {
-      await fetch("https://1815bd43-3d3c-419b-9fc1-696ecbd007bc-00-g6a10q6n22rp.pike.repl.co/sendToUid", {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           uid: uid,
-          title: "🎥 Yeni Analiz Videosu!",
+          title: '"Economentor" 🎥 Yeni Analiz Videosu!',
           body: `${title} eklendi.`,
           url: "https://economentor.netlify.app/analiz.html"
         })
