@@ -217,7 +217,7 @@
 
     async function loadTrainings() {
       const trainingList = document.getElementById("trainingList");
-      const snapshot = await getDocs(collection(db, "trainings"));
+      const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const div = document.createElement("div");
