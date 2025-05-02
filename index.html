@@ -140,9 +140,12 @@
     <h1>ECONOMENTOR</h1>
     <form id="loginForm">
       <input type="text" id="username" placeholder="Kullanıcı Adı" required />
-<div style="position: relative; width: 80%;">
-  <input type="password" id="password" placeholder="Şifre" required style="width: 100%; padding-right: 40px;" />
-  <i id="togglePassword" class="fa-solid fa-eye" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: black; padding: 5px; border-radius: 50%;"></i>
+<div class="password-container" style="position: relative; width: 80%; margin: 10px auto;">
+  <input type="password" id="password" placeholder="Şifre" required
+         style="width: 100%; padding: 12px; padding-right: 40px; font-size: 16px; border-radius: 6px; border: none; background: #fff; color: #333;" />
+  <i id="togglePassword" class="fa-solid fa-eye-slash"
+     style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: black; background-color: white; padding: 5px; border-radius: 50%;"></i>
 </div>
       <button type="submit">Giriş Yap</button>
       <div id="errorMsg" style="color: red;"></div>
