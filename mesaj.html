@@ -112,28 +112,38 @@
 }
 
 .send-box {
+  position: fixed;
+  bottom: 0;
+  left: 250px; /* chat list genişliği kadar */
+  right: 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
   display: flex;
   gap: 10px;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  z-index: 99;
 }
 
     .message {
-      padding: 10px;
-      margin-bottom: 10px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-      max-width: 80%;
-      position: relative;
-    }
-    .message.you {
-      background: rgba(0, 255, 127, 0.3);
-      align-self: flex-end;
-    }
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.message.you {
+  align-self: flex-end;
+  background-color: rgba(0, 255, 127, 0.3);
+  text-align: right;
+}
+
+.message.other {
+  align-self: flex-start;
+  background-color: rgba(255, 255, 255, 0.15);
+  text-align: left;
+}
     .sender-label {
       font-weight: bold;
       margin-bottom: 5px;
@@ -259,18 +269,18 @@
   <div class="mobile-search-wrapper">
   <input type="text" class="mobile-search-bar" id="mobileSearchBar" placeholder="Kişi ara..." oninput="filterChatList()">
   </div>
-  <div class="container">
-    <div class="chat-list" id="chatList">
-      <input type="text" class="search-bar" id="searchBar" placeholder="Kişi ara..." oninput="filterChatList()">
-      Yükleniyor...
-    </div>
-    <div class="chat-window">
-      <div class="messages" id="messageArea"></div>
+<div class="container">
+  <div class="chat-list" id="chatList"> ... </div>
+  <div class="chat-window">
+    <div class="messages" id="messageArea"></div>
+  </div>
+</div>
 
-      <div class="send-box" id="sendBox">
-        <input type="text" id="messageInput" placeholder="Mesaj yaz...">
-        <button class="send-btn" id="sendBtn">Gönder</button>
-      </div>
+<!-- Sabit mesaj kutusu container'ın DIŞINDA -->
+<div class="send-box" id="sendBox">
+  <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+  <button class="send-btn" id="sendBtn">Gönder</button>
+</div>
     </div>
   </div>
 
