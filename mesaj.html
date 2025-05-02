@@ -112,6 +112,7 @@
       padding-right: 10px;
       display: flex;
       flex-direction: column;
+      scroll-behavior: smooth;
     }
     .message {
       padding: 10px;
@@ -352,6 +353,17 @@ function getConversationId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
 }
 
+function scrollToBottom() {
+  const area = document.getElementById("messageArea");
+  if (!area) return;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      area.scrollTop = area.scrollHeight;
+    });
+  });
+}
+  
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
@@ -465,17 +477,6 @@ async function openChat(fid, el) {
       });
     }
   }
-
-function scrollToBottom() {
-  const area = document.getElementById("messageArea");
-  if (!area) return;
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      area.scrollTop = area.scrollHeight;
-    });
-  });
-}
   
 unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
   snapshot.docChanges().forEach(async (change) => {
