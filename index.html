@@ -9,17 +9,20 @@
   <meta name="theme-color" content="#001f3d" />
 
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      height: 100%;
+      overflow-x: hidden;
       background-color: #001f3d;
       color: white;
       font-family: Arial, sans-serif;
-      height: 100vh;
     }
 
     .background {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: url('image2.png') no-repeat center center;
       background-size: cover;
@@ -28,23 +31,23 @@
 
     .container {
       position: relative;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      margin: 100px auto;
       background: rgba(0, 0, 0, 0.7);
       padding: 30px;
       border-radius: 10px;
       text-align: center;
       width: 350px;
+      max-width: 90vw;
+      box-sizing: border-box;
     }
 
     input, button {
-      width: 80%;
+      width: 100%;
       padding: 12px;
-      margin: 10px auto;
-      display: block;
+      margin: 10px 0;
       font-size: 16px;
       border-radius: 6px;
+      box-sizing: border-box;
     }
 
     input {
@@ -68,6 +71,7 @@
       font-size: 14px;
       text-decoration: none;
     }
+
     .link:hover {
       text-decoration: underline;
     }
@@ -90,28 +94,12 @@
       margin-top: 10px;
       background: #4CAF50;
     }
+
     form {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px; /* Tüm öğeler arası eşit boşluk */
-@media (max-width: 400px) {
-  body {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .container {
-    width: 90%;
-    padding: 20px;
-    box-sizing: border-box;
-    transform: none;
-    top: auto;
-    left: auto;
-    margin: 80px auto 20px auto;
-  }
-}
+      gap: 5px;
     }
   </style>
 </head>
@@ -131,16 +119,16 @@
     <a class="link" href="kayitol.html">Kayıt Ol</a>
   </div>
 
-<div id="installPrompt">
-  <img src="https://economentor.netlify.app/image1.png" alt="Economentor icon" width="96" height="96" style="margin-bottom: 10px;">
-  <p>Uygulamayı ana ekrana eklemek ister misiniz?</p>
-  <button id="installButton">Yükle</button>
-</div>
+  <div id="installPrompt">
+    <img src="https://economentor.netlify.app/image1.png" alt="Economentor icon" width="96" height="96" style="margin-bottom: 10px;">
+    <p>Uygulamayı ana ekrana eklemek ister misiniz?</p>
+    <button id="installButton">Yükle</button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -173,45 +161,35 @@
         const email = userDoc.data().email;
         const role = userDoc.data().role || "user";
 
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        if (role === "admin") {
-          location.href = "adminpanel.html";
-        } else {
-          location.href = "duyuru.html";
-        }
+        await signInWithEmailAndPassword(auth, email, password);
+        location.href = (role === "admin") ? "adminpanel.html" : "duyuru.html";
       } catch (err) {
         console.error(err);
         errorBox.textContent = "Kullanıcı adı veya şifre hatalı!";
       }
     });
 
-    // ✅ Service Worker Kaydı
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(reg => {
-      console.log("📲 firebase-messaging-sw.js başarıyla kaydedildi.");
-    })
-    .catch(err => {
-      console.error("❌ Servis Worker hatası:", err);
-    });
-}
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(reg => console.log("📲 firebase-messaging-sw.js başarıyla kaydedildi."))
+        .catch(err => console.error("❌ Servis Worker hatası:", err));
+    }
 
-    // ✅ PWA Yükleme Kutusu
+    // PWA kurulum kutusu
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById("installPrompt").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("installPrompt").style.top = "0";
-      }, 300);
+      const promptBox = document.getElementById("installPrompt");
+      promptBox.style.display = "block";
+      setTimeout(() => promptBox.style.top = "0", 300);
     });
 
     document.getElementById("installButton").addEventListener("click", async () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log("Yükleme sonucu:", result.outcome);
+        await deferredPrompt.userChoice;
         deferredPrompt = null;
         document.getElementById("installPrompt").style.top = "-200px";
       }
