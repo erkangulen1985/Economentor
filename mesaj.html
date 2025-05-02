@@ -303,7 +303,7 @@
 </div>
     </div>
  </div>
-  <div id="scrollUpBtn" class="scroll-button" onclick="scrollToTop()">↑</div>
+<div id="scrollUpBtn" class="scroll-button" onclick="scrollToTop()">↑</div>
 <div id="scrollDownBtn" class="scroll-button" onclick="scrollToBottom()">↓</div>
 
 <script type="module">
@@ -734,11 +734,6 @@ function scrollToBottom() {
   if (area) area.scrollTop = 0;
 }
 
-  function scrollToTop() {
-  const area = document.getElementById("messageArea");
-  if (area) area.scrollTop = 0;
-}
-
 window.scrollToBottom = scrollToBottom; // dışarıdan erişim
 
 function updateScrollButtons() {
@@ -746,15 +741,19 @@ function updateScrollButtons() {
   const upBtn = document.getElementById("scrollUpBtn");
   const downBtn = document.getElementById("scrollDownBtn");
 
-  if (!area || window.innerWidth >= 769) return; // ⛔ Bilgisayar görünmesin
+  if (!area) return;
 
-  const nearTop = area.scrollTop < 50;
-  const nearBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 50;
+  const scrollTop = area.scrollTop;
+  const scrollHeight = area.scrollHeight;
+  const clientHeight = area.clientHeight;
 
-  if (nearTop) {
+  const atTop = scrollTop <= 0;
+  const atBottom = scrollTop + clientHeight >= scrollHeight - 2; // küçük tolerans
+
+  if (atTop) {
     upBtn.style.display = "none";
     downBtn.style.display = "flex";
-  } else if (nearBottom) {
+  } else if (atBottom) {
     upBtn.style.display = "flex";
     downBtn.style.display = "none";
   } else {
