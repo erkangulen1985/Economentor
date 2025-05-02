@@ -112,7 +112,6 @@
       padding-right: 10px;
       display: flex;
       flex-direction: column;
-      scroll-behavior: smooth;
     }
     .message {
       padding: 10px;
@@ -333,7 +332,7 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
+    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
   });
 }
 
@@ -346,19 +345,13 @@ window.setLang = setLang;
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
 }
 
 function getConversationId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
 }
 
-function scrollToBottom() {
-  const area = document.getElementById("messageArea");
-  if (!area) return;
-  area.scrollTop = area.scrollHeight;
-}
-  
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
@@ -401,7 +394,7 @@ async function loadChatList(uid) {
     // Chat öğesini oluştur
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
+    div.innerHTML = <strong>${name}</strong><div class="last-message">${lastMsg}</div>;
 
     // Eğer yeni mesaj varsa, bildirim ekle
     if (hasNew) {
@@ -472,47 +465,47 @@ async function openChat(fid, el) {
       });
     }
   }
-  
-unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-  snapshot.docChanges().forEach(async (change) => {
-    const msg = { id: change.doc.id, ...change.doc.data() };
+
+  // Start listening for new messages in real-time
+  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+    snapshot.docChanges().forEach(async (change) => {
+      const msg = { id: change.doc.id, ...change.doc.data() };
 
 if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   loadedMessageIds.add(msg.id);
   const div = await buildMessageDiv(msg);
-  const area = document.getElementById("messageArea");
-  area.appendChild(div);
-
-  setTimeout(scrollToBottom, 50);
+  document.getElementById("messageArea").appendChild(div);
   
-  // ✅ Sadece şu an açık olan sohbetle ilgiliyse scroll
-  const isFromMe = msg.sender === currentUser.uid;
-  const isFromSelectedFriend = msg.sender === selectedFriendId;
+  // 🔄 YALNIZCA yeni gelen mesajlar için scroll
+  setTimeout(() => {
+    document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight;
+  }, 100);
 
-  // 🔁 Okundu olarak işaretle
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
-  }
-}
-
-    // ✏️ Mesaj düzenlendiyse metni güncelle (scroll YOK)
-    if (change.type === "modified") {
-      const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        // If the message is not seen by the user, mark it as seen
+        if (!msg.seenBy?.includes(currentUser.uid)) {
+          await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+            seenBy: arrayUnion(currentUser.uid) // Mark as seen
+          });
+        }
       }
-    }
 
-    // 🗑️ Mesaj silindiyse DOM'dan kaldır (scroll YOK)
-    if (change.type === "removed") {
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) msgDiv.remove();
-    }
+      if (change.type === "modified") {
+        const updatedMsg = change.doc.data();
+        const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
+        if (msgDiv) {
+          msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+        }
+      }
+
+      if (change.type === "removed") {
+        const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
+        if (msgDiv) msgDiv.remove();
+      }
+    });
+
+    // Auto-scroll to the newest message when a new message arrives
+    document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
   });
-});
 
   // Sohbeti listeye ekleyelim
   const chatList = document.getElementById("chatList");
@@ -581,11 +574,11 @@ async function buildMessageDiv(msg) {
   }
 
   div.setAttribute("data-sender-name", senderName);
-  div.innerHTML = `
+  div.innerHTML = 
     <div class="sender-label">${senderName}</div>
     <div class="msg-text">${msg.text}</div>
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  `;
+  ;
 
   if (msg.sender === currentUser.uid) {
     const convoId = getConversationId(currentUser.uid, selectedFriendId);
@@ -606,7 +599,7 @@ async function buildMessageDiv(msg) {
     deleteBtn.onclick = async () => {
       if (confirm("Mesaj silinsin mi?")) {
         await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
-        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+        const divToRemove = document.querySelector(.message[data-id="${msg.id}"]);
         if (divToRemove) divToRemove.remove();
       }
     };
@@ -624,15 +617,13 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
   const editId = input.dataset.editing;
   if (!text || !selectedFriendId || !currentUser) return;
 
-  scrollToBottom();
-
   input.value = "";  // ⬅️ Mesaj kutusunu hemen temizle
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
   if (editId) {
     await updateDoc(doc(msgCol, editId), { text });
-    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+    const msgDiv = document.querySelector(.message[data-id="${editId}"]);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
   } else {
@@ -699,7 +690,6 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(reg => console.log("✅ firebase-messaging-sw.js yüklendi:", reg))
       .catch(err => console.error("❌ SW kaydedilemedi:", err));
   }
-  
 </script>
 </body>
 </html>
