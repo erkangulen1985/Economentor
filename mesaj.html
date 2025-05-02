@@ -251,7 +251,7 @@
     margin-top: 8px;
   }
 }
-  }
+/* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
   </style>
 </head>
 <body>
@@ -280,8 +280,7 @@
   <button class="send-btn" id="sendBtn">Gönder</button>
 </div>
     </div>
-  </div>
-  <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button>
+ </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -705,7 +704,7 @@ function scrollToBottom() {
     area.scrollTop = area.scrollHeight;
   }
 }
-window.scrollToBottom = scrollToBottom;
+/* window.scrollToBottom = scrollToBottom;
   
 </script>
 </body>
