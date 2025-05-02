@@ -97,31 +97,37 @@
       gap: 5px; /* Tüm öğeler arası eşit boşluk */
     }
 
-  /* ✅ Mobil uyarlama */
-  @media screen and (max-width: 480px) {
-    .container {
-      width: 90%;
-      padding: 20px;
-    }
-
-    input, button {
-      width: 100%;
-      font-size: 15px;
-    }
-
-    h1 {
-      font-size: 22px;
-    }
-
-    .link {
-      font-size: 13px;
-    }
-
-    #installPrompt img {
-      width: 72px;
-      height: 72px;
-    }
+@media screen and (max-width: 480px) {
+  .container {
+    width: 90% !important;
+    padding: 20px;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
   }
+
+  input, button {
+    width: 90% !important;
+    max-width: 300px;
+    font-size: 15px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .link {
+    font-size: 13px;
+  }
+
+  #installPrompt img {
+    width: 72px;
+    height: 72px;
+  }
+}
+
 </style>
 
 </head>
