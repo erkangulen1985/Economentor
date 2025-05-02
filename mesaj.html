@@ -275,9 +275,12 @@
   }
 
   .chat-window {
-    padding: 15px;
-    overflow-x: hidden;
-    box-sizing: border-box;
+    width: 100%;
+    height: auto; /* Boyutunu sabitlemek istersen örn. height: 300px; yapabilirsin */
+    padding: 10px;
+    margin-top: 10px;
+    height: 400px; /* örnek sabit yükseklik */
+    overflow-y: auto; /* içeriği kaydırılabilir yapar */
   }
 
   .send-box {
