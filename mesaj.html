@@ -124,13 +124,17 @@
   z-index: 99;
 }
 
-    .message {
+.message {
+  display: flex;
+  flex-direction: column;
   padding: 10px;
-  margin: 10px 0;
+  margin: 8px 0;
   border-radius: 10px;
-  max-width: 70%;
-  word-wrap: break-word;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.15);
+  word-break: break-word;
+  white-space: pre-wrap;
+  width: fit-content;
+  max-width: 65%;
 }
 
 .message.you {
@@ -141,7 +145,7 @@
 
 .message.other {
   align-self: flex-start;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
   text-align: left;
 }
     .sender-label {
