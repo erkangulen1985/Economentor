@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Profil | Economentor</title>
   <link rel="icon" href="image1.png" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
   <style>
     body {
       margin: 0;
@@ -117,14 +121,20 @@ input {
 
     <button id="saveBtn">Kaydet</button>
 
-    <label>Mevcut Şifre</label>
-    <input type="password" id="oldPassword" placeholder="Mevcut Şifre" autocomplete="new-password">
+<label>Mevcut Şifre</label>
+<div style="position: relative;">
+  <input type="password" id="oldPassword" placeholder="Mevcut Şifre" autocomplete="new-password">
+  <i class="fa-solid fa-eye toggle-password" data-target="oldPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+</div>
 
-    <label>Yeni Şifre (değiştirmek için doldur)</label>
-    <input type="password" id="newPassword" placeholder="Yeni Şifre">
-    <input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
-    <button id="changePasswordBtn">Şifreyi Değiştir</button>
+<label>Yeni Şifre (değiştirmek için doldur)</label>
+<div style="position: relative;">
+  <input type="password" id="newPassword" placeholder="Yeni Şifre">
+  <i class="fa-solid fa-eye toggle-password" data-target="newPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+</div>
 
+<input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
+    
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
 
     <button id="infoBtn" style="margin-top: 50px; background-color: #555; color: #fff;">
@@ -259,6 +269,23 @@ try {
 
   document.getElementById("infoBtn").addEventListener("click", () => {
   window.location.href = "bilgilendirme.html";
+  });
+});
+
+document.querySelectorAll('.toggle-password').forEach(icon => {
+  icon.addEventListener('click', () => {
+    const targetId = icon.getAttribute('data-target');
+    const input = document.getElementById(targetId);
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
   });
 });
 </script>
