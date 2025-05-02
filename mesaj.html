@@ -741,10 +741,6 @@ function scrollToBottom() {
   if (area) area.scrollTop = 0;
 }
 
-function scrollToBottom() {
-  const area = document.getElementById("messageArea");
-  if (area) area.scrollTop = area.scrollHeight;
-}
 window.scrollToBottom = scrollToBottom; // dışarıdan erişim
 
 function updateScrollButtons() {
