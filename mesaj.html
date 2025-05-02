@@ -476,17 +476,17 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   const area = document.getElementById("messageArea");
   area.appendChild(div);
 
-  // 👇 YALNIZCA yeni gelen mesaj, açık olan sohbete aitse scroll
+  // ✅ Sadece şu an açık olan sohbetle ilgiliyse scroll
   const isFromMe = msg.sender === currentUser.uid;
-  const isFromFriend = msg.sender === selectedFriendId;
-  if (isFromMe || isFromFriend) {
-    // 🔽 En aşağıya kaydır (YALNIZCA yeni mesajsa)
-    requestAnimationFrame(() => {
+  const isFromSelectedFriend = msg.sender === selectedFriendId;
+
+  if (isFromMe || isFromSelectedFriend) {
+    setTimeout(() => {
       area.scrollTop = area.scrollHeight;
-    });
+    }, 50); // bekleme kısa tutulur, DOM yüklensin
   }
 
-  // ✅ Okundu olarak işaretle
+  // 🔁 Okundu olarak işaretle
   if (!msg.seenBy?.includes(currentUser.uid)) {
     await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
       seenBy: arrayUnion(currentUser.uid)
