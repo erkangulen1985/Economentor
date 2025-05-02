@@ -356,7 +356,6 @@ function getConversationId(uid1, uid2) {
 function scrollToBottom() {
   const area = document.getElementById("messageArea");
   if (!area) return;
-
   area.scrollTop = area.scrollHeight;
 }
   
@@ -664,7 +663,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
       console.error("Bildirim gönderme hatası:", err);
     }
   }
-  setTimeout(scrollToBottom, 50);
+  scrollToBottom();
 });
 
 window.goHome = () => location.href = "anasayfa.html";
