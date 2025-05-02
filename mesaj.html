@@ -97,14 +97,13 @@
   color: white;
 }
     
-    .chat-window {
-      flex: 1;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background: rgba(0, 0, 0, 0.2);
-    }
+.chat-window {
+  height: calc(100vh - 120px); /* Header + send-box yüksekliği kadar çıkar */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+}
     .messages {
       flex: 1;
       overflow-y: auto;
