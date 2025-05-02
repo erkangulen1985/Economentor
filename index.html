@@ -138,24 +138,18 @@
 
   <div class="container">
     <h1>ECONOMENTOR</h1>
-<form id="loginForm" style="width: 100%; max-width: 350px; margin: 0 auto;">
-  <!-- Kullanıcı Adı -->
-  <input type="text" id="username" placeholder="Kullanıcı Adı" required
-         style="width: 100%; padding: 12px; margin-bottom: 10px;
-                font-size: 16px; border-radius: 6px; border: none;
-                background: #fff; color: #333;" />
+<form id="loginForm">
+  <div style="position: relative; width: 80%; margin: 10px auto;">
+    <input type="text" id="username" placeholder="Kullanıcı Adı" required
+           style="width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: none; background: #fff; color: #333;" />
+  </div>
 
-  <!-- Şifre -->
-  <div style="position: relative; width: 100%;">
+  <div style="position: relative; width: 80%; margin: 10px auto;">
     <input type="password" id="password" placeholder="Şifre" required
-           style="width: 100%; padding: 12px 40px 12px 12px;
-                  font-size: 16px; border-radius: 6px; border: none;
-                  background: #fff; color: #333;" />
+           style="width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: none; background: #fff; color: #333;" />
     <i id="togglePassword" class="fa-solid fa-eye-slash"
-       style="position: absolute; right: 12px; top: 50%;
-              transform: translateY(-50%);
-              cursor: pointer; color: black;
-              background-color: white; padding: 5px; border-radius: 50%;"></i>
+       style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+              cursor: pointer; color: black; background-color: white; padding: 5px; border-radius: 50%;"></i>
   </div>
       <button type="submit">Giriş Yap</button>
       <div id="errorMsg" style="color: red;"></div>
