@@ -124,13 +124,13 @@ input {
 <label>Mevcut Şifre</label>
 <div style="position: relative;">
   <input type="password" id="oldPassword" placeholder="Mevcut Şifre" autocomplete="new-password">
-  <i class="fa-solid fa-eye toggle-password" data-target="oldPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+  <i class="fa-solid fa-eye-slash toggle-password" data-target="oldPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
 </div>
 
 <label>Yeni Şifre (değiştirmek için doldur)</label>
 <div style="position: relative;">
   <input type="password" id="newPassword" placeholder="Yeni Şifre">
-  <i class="fa-solid fa-eye toggle-password" data-target="newPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+  <i class="fa-solid fa-eye-slash toggle-password" data-target="newPassword" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
 </div>
 
 <input type="password" id="confirmPassword" placeholder="Yeni Şifre (Tekrar)">
@@ -279,12 +279,12 @@ document.querySelectorAll('.toggle-password').forEach(icon => {
 
     if (input.type === 'password') {
       input.type = 'text';
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
-    } else {
-      input.type = 'password';
       icon.classList.remove('fa-eye-slash');
       icon.classList.add('fa-eye');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
     }
   });
 });
