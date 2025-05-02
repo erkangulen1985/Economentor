@@ -296,12 +296,19 @@
     margin-top: 8px;
   }
    
+  #scrollDownBtn, #scrollUpBtn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+
   #scrollDownBtn {
-    bottom: 0px !important; /* mobilde özel konum */
+    bottom: 60px; /* Mobilde biraz yukarı al */
   }
 
   #scrollUpBtn {
-    top: 200px !important; /* istersen yukarı oku da konumlandırabilirsin */
+    top: 10px; /* Mobilde yukarıdan biraz aşağıda başlasın */
   }
 }
 /* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
