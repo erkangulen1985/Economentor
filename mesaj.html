@@ -214,6 +214,10 @@
     .container {
     flex-direction: column;
   }
+  
+    body {
+    overflow-y: hidden; /* Sayfanın tamamında scroll'u engeller */
+  }
 
     .search-bar {
     display: none; /* PC'deki arama çubuğu mobilde GİZLENİR */
@@ -276,11 +280,11 @@
 
   .chat-window {
     width: 100%;
-    height: auto; /* Boyutunu sabitlemek istersen örn. height: 300px; yapabilirsin */
     padding: 10px;
     margin-top: 10px;
     height: 400px; /* örnek sabit yükseklik */
-    overflow-y: auto; /* içeriği kaydırılabilir yapar */
+    max-height: calc(100vh - 300px); /* header + chatlist + send-box yüksekliği kadar çıkar */
+    overflow-y: auto;
   }
 
   .send-box {
