@@ -473,16 +473,17 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
 if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   loadedMessageIds.add(msg.id);
   const div = await buildMessageDiv(msg);
-  document.getElementById("messageArea").appendChild(div);
+  const area = document.getElementById("messageArea");
+  area.appendChild(div);
 
-  // ✅ YALNIZCA yeni gelen mesaj bizim attığımız ya da bize gelense scroll
+  // 👇 YALNIZCA yeni gelen mesaj, açık olan sohbete aitse scroll
   const isFromMe = msg.sender === currentUser.uid;
   const isFromFriend = msg.sender === selectedFriendId;
   if (isFromMe || isFromFriend) {
-    setTimeout(() => {
-      const area = document.getElementById("messageArea");
+    // 🔽 En aşağıya kaydır (YALNIZCA yeni mesajsa)
+    requestAnimationFrame(() => {
       area.scrollTop = area.scrollHeight;
-    }, 50);
+    });
   }
 
   // ✅ Okundu olarak işaretle
