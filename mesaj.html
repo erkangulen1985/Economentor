@@ -166,6 +166,31 @@
     .mobile-search-wrapper {
   display: none;
 }
+
+    .scroll-button {
+  position: fixed;
+  right: 15px;
+  z-index: 9999;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 22px;
+  border-radius: 50%;
+  display: none; /* Başlangıçta gizli */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+#scrollUpBtn {
+  bottom: 70px;
+}
+#scrollDownBtn {
+  bottom: 20px;
+}
+    
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -250,6 +275,10 @@
   .send-box button.send-btn {
     margin-top: 8px;
   }
+
+  #scrollUpBtn, #scrollDownBtn {
+    display: none !important;
+  }
 }
 /* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
   </style>
@@ -281,6 +310,8 @@
 </div>
     </div>
  </div>
+  <div id="scrollUpBtn" class="scroll-button" onclick="scrollToTop()">↑</div>
+<div id="scrollDownBtn" class="scroll-button" onclick="scrollToBottom()">↓</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -704,6 +735,47 @@ function scrollToBottom() {
     area.scrollTop = area.scrollHeight;
   }
 }
+
+  function scrollToTop() {
+  const area = document.getElementById("messageArea");
+  if (area) area.scrollTop = 0;
+}
+
+function scrollToBottom() {
+  const area = document.getElementById("messageArea");
+  if (area) area.scrollTop = area.scrollHeight;
+}
+window.scrollToBottom = scrollToBottom; // dışarıdan erişim
+
+function updateScrollButtons() {
+  const area = document.getElementById("messageArea");
+  const upBtn = document.getElementById("scrollUpBtn");
+  const downBtn = document.getElementById("scrollDownBtn");
+
+  if (!area || window.innerWidth >= 769) return; // ⛔ Bilgisayar görünmesin
+
+  const nearTop = area.scrollTop < 50;
+  const nearBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 50;
+
+  if (nearTop) {
+    upBtn.style.display = "none";
+    downBtn.style.display = "flex";
+  } else if (nearBottom) {
+    upBtn.style.display = "flex";
+    downBtn.style.display = "none";
+  } else {
+    upBtn.style.display = "flex";
+    downBtn.style.display = "flex";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const area = document.getElementById("messageArea");
+  if (!area) return;
+  area.addEventListener("scroll", updateScrollButtons);
+  updateScrollButtons();
+});
+
 /* window.scrollToBottom = scrollToBottom; */
   
 </script>
