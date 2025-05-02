@@ -466,6 +466,18 @@ async function openChat(fid, el) {
     }
   }
 
+function scrollToBottom(containerId) {
+  const area = document.getElementById(containerId);
+  if (!area) return;
+
+  // DOM tamamen yüklendikten sonra çalışır
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      area.scrollTop = area.scrollHeight;
+    });
+  });
+}
+  
 unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
   snapshot.docChanges().forEach(async (change) => {
     const msg = { id: change.doc.id, ...change.doc.data() };
@@ -481,9 +493,7 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   const isFromSelectedFriend = msg.sender === selectedFriendId;
 
   if (isFromMe || isFromSelectedFriend) {
-    setTimeout(() => {
-      area.scrollTop = area.scrollHeight;
-    }, 50); // bekleme kısa tutulur, DOM yüklensin
+    scrollToBottom("messageArea");
   }
 
   // 🔁 Okundu olarak işaretle
