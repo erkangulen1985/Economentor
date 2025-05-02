@@ -466,11 +466,10 @@ async function openChat(fid, el) {
     }
   }
 
-function scrollToBottom(containerId) {
-  const area = document.getElementById(containerId);
+function scrollToBottom() {
+  const area = document.getElementById("messageArea");
   if (!area) return;
 
-  // DOM tamamen yüklendikten sonra çalışır
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       area.scrollTop = area.scrollHeight;
