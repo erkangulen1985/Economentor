@@ -357,11 +357,7 @@ function scrollToBottom() {
   const area = document.getElementById("messageArea");
   if (!area) return;
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      area.scrollTop = area.scrollHeight;
-    });
-  });
+  area.scrollTop = area.scrollHeight;
 }
   
 onAuthStateChanged(auth, user => {
@@ -488,7 +484,7 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   const area = document.getElementById("messageArea");
   area.appendChild(div);
 
-  scrollToBottom();
+  setTimeout(scrollToBottom, 50);
   
   // ✅ Sadece şu an açık olan sohbetle ilgiliyse scroll
   const isFromMe = msg.sender === currentUser.uid;
@@ -668,7 +664,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
       console.error("Bildirim gönderme hatası:", err);
     }
   }
-  scrollToBottom();
+  setTimeout(scrollToBottom, 50);
 });
 
 window.goHome = () => location.href = "anasayfa.html";
