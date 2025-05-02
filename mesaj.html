@@ -193,7 +193,11 @@
   bottom: 20px;
 }
     
-@media (max-width: 769px) {
+@media (max-width: 770px){
+  #scrollUpBtn,
+  #scrollDownBtn {
+    display: none !important;
+  }
   .container {
     flex-direction: column;
   }
@@ -271,10 +275,6 @@
 
   .send-box button.send-btn {
     margin-top: 8px;
-  }
-
-  #scrollUpBtn, #scrollDownBtn {
-    display: none !important;
   }
 }
 /* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
