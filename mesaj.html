@@ -488,13 +488,11 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
   const area = document.getElementById("messageArea");
   area.appendChild(div);
 
+  scrollToBottom();
+  
   // ✅ Sadece şu an açık olan sohbetle ilgiliyse scroll
   const isFromMe = msg.sender === currentUser.uid;
   const isFromSelectedFriend = msg.sender === selectedFriendId;
-
-  if (isFromMe || isFromSelectedFriend) {
-    scrollToBottom("messageArea");
-  }
 
   // 🔁 Okundu olarak işaretle
   if (!msg.seenBy?.includes(currentUser.uid)) {
@@ -670,6 +668,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
       console.error("Bildirim gönderme hatası:", err);
     }
   }
+  scrollToBottom();
 });
 
 window.goHome = () => location.href = "anasayfa.html";
