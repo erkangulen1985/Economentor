@@ -135,8 +135,13 @@
       margin-top: 5px;
     }
     .send-box {
+      position: sticky;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.7);
+      padding: 10px;
       display: flex;
       gap: 10px;
+      backdrop-filter: blur(6px);
     }
     input[type="text"] {
       flex: 1;
@@ -227,6 +232,9 @@
 
   .send-box {
     flex-direction: column;
+    position: sticky;
+    bottom: 0;
+    z-index: 99;
   }
 
   .send-box input[type="text"],
@@ -258,10 +266,11 @@
     </div>
     <div class="chat-window">
       <div class="messages" id="messageArea"></div>
-      <div class="send-box">
-        <input type="text" id="messageInput" placeholder="Mesaj yaz...">
-        <button class="send-btn" id="sendBtn">Gönder</button>
-      </div>
+    </div>
+    <div class="send-box" id="sendBox">
+      <input type="text" id="messageInput" placeholder="Mesaj yaz...">
+      <button class="send-btn" id="sendBtn">Gönder</button>
+    </div>
     </div>
   </div>
 
@@ -456,11 +465,15 @@ async function openChat(fid, el) {
     snapshot.docChanges().forEach(async (change) => {
       const msg = { id: change.doc.id, ...change.doc.data() };
 
-      if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
-        loadedMessageIds.add(msg.id);
-        const div = await buildMessageDiv(msg);
-        document.getElementById("messageArea").appendChild(div);
-        setTimeout(() => document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight, 100);
+if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+  loadedMessageIds.add(msg.id);
+  const div = await buildMessageDiv(msg);
+  document.getElementById("messageArea").appendChild(div);
+  
+  // 🔄 YALNIZCA yeni gelen mesajlar için scroll
+  setTimeout(() => {
+    document.getElementById("messageArea").scrollTop = document.getElementById("messageArea").scrollHeight;
+  }, 100);
 
         // If the message is not seen by the user, mark it as seen
         if (!msg.seenBy?.includes(currentUser.uid)) {
