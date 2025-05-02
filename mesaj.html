@@ -213,6 +213,12 @@
     backdrop-filter: blur(4px);
   }
 
+   .messages {
+    max-height: calc(100vh - 250px); /* header + input alanı + boşluklar */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .chat-item {
     flex: 0 0 auto;
     min-width: 140px;
