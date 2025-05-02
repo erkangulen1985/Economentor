@@ -823,6 +823,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(updateScrollButtons, 500);
 });
 
+window.addEventListener("load", () => {
+  document.body.style.overflow = "hidden"; // sadece mobil için bile olsa garanti
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+});
+  
 /* window.scrollToBottom = scrollToBottom; */
   
 </script>
