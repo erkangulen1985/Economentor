@@ -191,21 +191,13 @@
   bottom: 20px;
 }
     
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .container {
     flex-direction: column;
   }
 
     .search-bar {
     display: none; /* PC'deki arama çubuğu mobilde GİZLENİR */
-  }
-
-  .chat-list {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden; /* 👈 Yatay scroll var, dikey olmasın */
-    height: auto;        /* 👈 Sabit yüksekliği kaldır */
-    padding: 10px;       /* 👈 Çok büyük padding yerine sade */
   }
 
     .mobile-search-wrapper {
@@ -230,6 +222,7 @@
     max-width: none;
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden; /* 👈 Yatay scroll var, dikey olmasın */
     flex-direction: row;
     padding: 10px;
     gap: 10px;
@@ -258,6 +251,7 @@
 
   .chat-window {
     padding: 15px;
+    overflow-x: hidden;
   }
 
   .send-box {
