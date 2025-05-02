@@ -107,14 +107,15 @@
       background: rgba(0, 0, 0, 0.2);
       height: calc(105vh - 140px);
     }
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 20px;
-      padding-right: 10px;
-      display: flex;
-      flex-direction: column;
-    }
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Mobilde doğru scroll algısı için */
+  margin-bottom: 20px;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: column;
+}
     .message {
       padding: 10px;
       margin-bottom: 10px;
@@ -197,30 +198,6 @@
     .container {
     flex-direction: column;
   }
-
-  .scroll-button {
-  position: fixed;
-  right: 15px;
-  z-index: 9999;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(0,0,0,0.7);
-  color: white;
-  font-size: 22px;
-  border-radius: 50%;
-  display: flex; /* Burası çok önemli */
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-
-#scrollUpBtn {
-  bottom: 70px;
-}
-#scrollDownBtn {
-  bottom: 20px;
-}
 
     .search-bar {
     display: none; /* PC'deki arama çubuğu mobilde GİZLENİR */
@@ -791,12 +768,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const area = document.getElementById("messageArea");
   if (!area) return;
 
-  area.addEventListener("scroll", updateScrollButtons);
-  updateScrollButtons();
+  // Scroll olayını "passive: true" ile bağla
+  area.addEventListener("scroll", updateScrollButtons, { passive: true });
 
-  // ⬇️ Scroll tuşlarını burada bağla:
-  document.getElementById("scrollUpBtn")?.addEventListener("click", scrollToTop);
-  document.getElementById("scrollDownBtn")?.addEventListener("click", scrollToBottom);
+  // İlk görünürlük kontrolü
+  setTimeout(updateScrollButtons, 500);
 });
 
 /* window.scrollToBottom = scrollToBottom; */
