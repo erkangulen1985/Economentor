@@ -790,10 +790,11 @@ function updateScrollButtons() {
 document.addEventListener("DOMContentLoaded", () => {
   const area = document.getElementById("messageArea");
   if (!area) return;
+
   area.addEventListener("scroll", updateScrollButtons);
   updateScrollButtons();
-});
 
+  // ⬇️ Scroll tuşlarını burada bağla:
   document.getElementById("scrollUpBtn")?.addEventListener("click", scrollToTop);
   document.getElementById("scrollDownBtn")?.addEventListener("click", scrollToBottom);
 });
