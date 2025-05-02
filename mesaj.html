@@ -507,10 +507,6 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
   });
 });
 
-    // Auto-scroll to the newest message when a new message arrives
-    document.getElementById("messageArea").lastElementChild?.scrollIntoView({ behavior: "smooth" });
-  });
-
   // Sohbeti listeye ekleyelim
   const chatList = document.getElementById("chatList");
   const chatItem = el;
