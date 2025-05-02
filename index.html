@@ -139,7 +139,10 @@
     <h1>ECONOMENTOR</h1>
     <form id="loginForm">
       <input type="text" id="username" placeholder="Kullanıcı Adı" required />
-      <input type="password" id="password" placeholder="Şifre" required />
+<div style="position: relative; width: 80%;">
+  <input type="password" id="password" placeholder="Şifre" required style="width: 100%; padding-right: 40px;" />
+  <span id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">👁️</span>
+</div>
       <button type="submit">Giriş Yap</button>
       <div id="errorMsg" style="color: red;"></div>
     </form>
@@ -233,6 +236,12 @@ if ('serviceWorker' in navigator) {
         document.getElementById("installPrompt").style.top = "-200px";
       }
     });
+    document.getElementById("togglePassword").addEventListener("click", function () {
+    const passwordInput = document.getElementById("password");
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    this.textContent = isPassword ? "🙈" : "👁️"; // Emoji değişimi (isteğe bağlı)
+  });
   </script>
 </body>
 </html>
