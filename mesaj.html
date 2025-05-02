@@ -351,7 +351,7 @@ function formatTimestamp(ts) {
 function getConversationId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
 }
-
+  
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
@@ -482,7 +482,7 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
     setTimeout(() => {
       const area = document.getElementById("messageArea");
       area.scrollTop = area.scrollHeight;
-    }, 50);
+    }, 100);
   }
 
   // ✅ Okundu olarak işaretle
@@ -641,6 +641,8 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       inboxHasNew: true
     });
 
+    scrollToBottom();
+
     // 🔔 Push bildirim gönder
     try {
 await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
@@ -693,6 +695,14 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(reg => console.log("✅ firebase-messaging-sw.js yüklendi:", reg))
       .catch(err => console.error("❌ SW kaydedilemedi:", err));
   }
+
+function scrollToBottom() {
+  const area = document.getElementById("messageArea");
+  if (area) {
+    area.scrollTop = area.scrollHeight;
+  }
+}
+
   
 </script>
 </body>
