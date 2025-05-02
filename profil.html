@@ -243,16 +243,16 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     document.getElementById("oldPassword").value = "";
     document.getElementById("newPassword").value = "";
     document.getElementById("confirmPassword").value = "";
-  } catch (error) {
-    if (error.code === "auth/wrong-password") {
-      alert("Mevcut şifreniz yanlış.");
-    } else if (error.code === "auth/too-many-requests") {
-      alert("Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyiniz.");
-    } else {
-      alert("Mevcut şifreniz yanlış.");
-    }
-  }
-});
+if (
+  error.code === "auth/wrong-password" ||
+  error.code === "auth/invalid-credential"
+) {
+  alert("Mevcut şifreniz yanlış. Lütfen tekrar deneyiniz.");
+} else if (error.code === "auth/too-many-requests") {
+  alert("Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyiniz.");
+} else {
+  alert("Hata: " + error.message);
+}
 
 document.getElementById("infoBtn").addEventListener("click", () => {
   window.location.href = "bilgilendirme.html";
