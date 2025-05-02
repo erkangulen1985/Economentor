@@ -624,6 +624,8 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
   const editId = input.dataset.editing;
   if (!text || !selectedFriendId || !currentUser) return;
 
+  scrollToBottom();
+
   input.value = "";  // ⬅️ Mesaj kutusunu hemen temizle
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
@@ -644,8 +646,6 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     await updateDoc(doc(db, "users", selectedFriendId), {
       inboxHasNew: true
     });
-    
-    scrollToBottom();
 
     // 🔔 Push bildirim gönder
     try {
