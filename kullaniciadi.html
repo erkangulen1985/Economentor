@@ -96,6 +96,23 @@
     .link:hover {
         text-decoration: underline;
     }
+    .eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: black;
+  background-color: white;
+  padding: 5px;
+  border-radius: 50%;
+}
+    @media screen and (max-width: 480px) {
+  .eye-icon {
+    right: 30px;
+    padding: 4px;
+  }
+}
 </style>
 </head>
 <body>
@@ -106,7 +123,12 @@
             <div id="errorMsg"></div>
             
             <input type="email" id="email" placeholder="E-Posta Adresi" required>
-            <input type="password" id="password" placeholder="Şifre" required>
+            <div style="position: relative;">
+  <input type="password" id="password" placeholder="Şifre" required
+         style="width: 100%; padding: 12px 40px 12px 12px;
+                border-radius: 6px; border: none; font-size: 16px;" />
+  <i id="togglePassword" class="fa-solid fa-eye-slash eye-icon"></i>
+</div>
             
             <button type="submit">Kullanıcı Adımı Gönder</button>
             <button type="button" onclick="window.location.href='index.html'">Geri Dön</button>
@@ -160,6 +182,16 @@
                 errorBox.innerText = "Bir hata oluştu!";
             }
         });
+        const toggle = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+toggle.addEventListener("click", () => {
+  const isHidden = passwordInput.type === "password";
+  passwordInput.type = isHidden ? "text" : "password";
+
+  toggle.classList.toggle("fa-eye-slash");
+  toggle.classList.toggle("fa-eye");
+});
     </script>
 </body>
 </html>
