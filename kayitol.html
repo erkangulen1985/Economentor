@@ -167,8 +167,7 @@
 <label for="password">Şifre</label>
 <div style="position: relative;">
   <input type="password" id="password" placeholder="Şifre" required style="padding-right: 40px;">
-  <i id="togglePassword" class="fa-solid fa-eye" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; color: #ccc;"></i>
-</div>
+  <i id="togglePassword" class="fa-solid fa-eye-slash" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; color: black; background-color: white; padding: 4px; border-radius: 50%;"></i>
       <label for="confirmPassword">Şifre Tekrar</label>
       <input type="password" id="confirmPassword" placeholder="Şifre Tekrar" required>
       <button type="submit" id="registerBtn">Kayıt Ol</button>
@@ -303,10 +302,11 @@ const togglePassword = document.getElementById("togglePassword");
 const passwordInput = document.getElementById("password");
 
 togglePassword.addEventListener("click", () => {
-  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-  passwordInput.setAttribute("type", type);
-  togglePassword.classList.toggle("fa-eye");
-  togglePassword.classList.toggle("fa-eye-slash");
+  const isPassword = passwordInput.getAttribute("type") === "password";
+  passwordInput.setAttribute("type", isPassword ? "text" : "password");
+
+  togglePassword.classList.toggle("fa-eye-slash", !isPassword); // açıkken slash olmasın
+  togglePassword.classList.toggle("fa-eye", isPassword);       // açıkken eye görünsün
 });
   </script>
 </body>
