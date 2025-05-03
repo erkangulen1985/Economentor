@@ -153,42 +153,49 @@
     document.addEventListener("DOMContentLoaded", () => {
       const promptDiv = document.getElementById("notificationPrompt");
 
-      if (Notification.permission === "default" || Notification.permission === "denied") {
-        setTimeout(() => {
-          promptDiv.style.display = "block";
-        }, 2000);
+function checkNotificationPermission() {
+  if (Notification.permission !== "granted") {
+    setTimeout(() => {
+      promptDiv.style.display = "block";
+    }, 2000);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const promptDiv = document.getElementById("notificationPrompt");
+
+  checkNotificationPermission(); // her girişte kontrol eder
+
+  document.getElementById("allowNotifications").addEventListener("click", async () => {
+    promptDiv.style.display = "none";
+
+    if (Notification.permission === "denied") {
+      alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const currentToken = await getToken(messaging, {
+          vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
+        });
+
+        if (currentToken && auth.currentUser) {
+          await saveTokenToFirestore(auth.currentUser.uid, currentToken);
+          console.log("✅ Token izinden sonra Firestore'a kaydedildi.");
+        }
       }
+    } catch (err) {
+      console.error("🔴 Bildirim izni istenirken hata:", err);
+    }
+  });
 
-      document.getElementById("allowNotifications").addEventListener("click", async () => {
-        promptDiv.style.display = "none";
-
-        if (Notification.permission === "denied") {
-          alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
-          return;
-        }
-
-        try {
-          const permission = await Notification.requestPermission();
-          if (permission === "granted") {
-            const currentToken = await getToken(messaging, {
-              vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-            });
-
-            if (currentToken && auth.currentUser) {
-              await saveTokenToFirestore(auth.currentUser.uid, currentToken);
-              console.log("✅ Token izinden sonra Firestore'a kaydedildi.");
-            }
-          }
-        } catch (err) {
-          console.error("🔴 Bildirim izni istenirken hata:", err);
-        }
-      });
-
-      document.getElementById("denyNotifications").addEventListener("click", () => {
-        promptDiv.style.display = "none";
-        console.log("🔕 Kullanıcı bildirim almak istemedi.");
-      });
-    });
+  document.getElementById("denyNotifications").addEventListener("click", () => {
+    promptDiv.style.display = "none";
+    console.log("🔕 Kullanıcı bildirim almak istemedi.");
+  });
+});
 
     loadAnnouncements();
   </script>
