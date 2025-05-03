@@ -202,8 +202,8 @@ onAuthStateChanged(auth, async (user) => {
   
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
+  const data = userDoc.exists() ? userDoc.data() : {};
   if (userDoc.exists()) {
-    const data = userDoc.data();
     document.getElementById("fullName").value = data.fullName || "";
     document.getElementById("username").value = data.username || "";
     document.getElementById("dob").value = data.dob || "";
