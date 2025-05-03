@@ -133,30 +133,29 @@ onAuthStateChanged(auth, async (user) => {
     try {
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
+      const alreadySavedToken = userSnap.exists() ? userSnap.data().fcmToken : null;
 
-      if (userSnap.exists()) {
-        const existingToken = userSnap.data().fcmToken;
-
-        if (existingToken) {
-          console.log("📭 Kullanıcının FCM token'ı zaten kayıtlı:", existingToken);
-          return; // Token zaten kayıtlıysa yeniden alma
-        }
-      }
-
-      // Token alınmamışsa yeni token al
+      // getToken her zaman denensin:
       const currentToken = await getToken(messaging, {
         vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
       });
 
-      if (currentToken) {
+      if (!currentToken) {
+        console.warn("⚠️ Bildirim izni reddedilmiş olabilir, token alınamadı.");
+        return;
+      }
+
+      console.log("📦 Token alındı:", currentToken);
+
+      if (!alreadySavedToken) {
         await saveTokenToFirestore(user.uid, currentToken);
-        console.log("✅ Yeni token Firestore'a kaydedildi:", currentToken);
+        console.log("✅ Token Firestore'a kaydedildi.");
       } else {
-        console.log("⚠️ Token alınamadı. Bildirim izni verilmemiş olabilir.");
+        console.log("📭 Token zaten kayıtlı. Kaydedilmedi.");
       }
 
     } catch (err) {
-      console.error("❌ Token kontrol veya alma hatası:", err);
+      console.error("❌ Token alma hatası:", err);
     }
   } else {
     console.log("🔒 Kullanıcı giriş yapmamış.");
