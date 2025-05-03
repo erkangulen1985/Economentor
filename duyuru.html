@@ -103,6 +103,10 @@
     const auth = getAuth();
     const messaging = getMessaging(app);
 
+    function isMobileDevice() {
+     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    
     async function loadAnnouncements() {
       const announcementList = document.getElementById("announcementList");
       const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
@@ -165,13 +169,16 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener("DOMContentLoaded", () => {
   const promptDiv = document.getElementById("notificationPrompt");
 
-  function checkNotificationPermission() {
-    if (Notification.permission !== "granted") {
-      setTimeout(() => {
-        promptDiv.style.display = "block";
-      }, 2000);
-    }
+function checkNotificationPermission() {
+  // Sadece mobil cihazlardaysa bildirimi göster
+  if (isMobileDevice() && Notification.permission !== "granted") {
+    setTimeout(() => {
+      promptDiv.style.display = "block";
+    }, 2000);
+  } else {
+    console.log("💻 Masaüstü tespit edildi — bildirim kutusu gösterilmeyecek.");
   }
+}
 
   checkNotificationPermission(); // her girişte izin kontrolü yap
 
