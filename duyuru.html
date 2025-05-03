@@ -150,21 +150,18 @@
       }
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const promptDiv = document.getElementById("notificationPrompt");
-
-function checkNotificationPermission() {
-  if (Notification.permission !== "granted") {
-    setTimeout(() => {
-      promptDiv.style.display = "block";
-    }, 2000);
-  }
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   const promptDiv = document.getElementById("notificationPrompt");
 
-  checkNotificationPermission(); // her girişte kontrol eder
+  function checkNotificationPermission() {
+    if (Notification.permission !== "granted") {
+      setTimeout(() => {
+        promptDiv.style.display = "block";
+      }, 2000);
+    }
+  }
+
+  checkNotificationPermission(); // her girişte izin kontrolü yap
 
   document.getElementById("allowNotifications").addEventListener("click", async () => {
     promptDiv.style.display = "none";
@@ -197,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-    loadAnnouncements();
-  </script>
-
+loadAnnouncements();
+    
+</script>
 </body>
 </html>
