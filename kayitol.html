@@ -207,9 +207,8 @@
     let formSubmitted = false;
 
 form.addEventListener("submit", async (e) => {
-  if (!formSubmitted) return;
-
   e.preventDefault();
+
   const errorBox = document.getElementById("errorMsg");
   const successBox = document.getElementById("successMsg");
   errorBox.innerText = "";
@@ -223,6 +222,11 @@ form.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
+  if (!formSubmitted) {
+    modal.style.display = "flex";
+    return;
+  }
+
   if (password !== confirmPassword) {
     errorBox.innerText = "Şifreler uyuşmuyor!";
     errorBox.style.display = "block";
@@ -230,34 +234,24 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    // Firestore'dan tüm username_lowercase alanlarına sahip kullanıcıları kontrol et
-    const usersSnapshot = await getDocs(collection(db, "users"));
-    let usernameExists = false;
+    // Username check
+    const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
+    const querySnapshot = await getDocs(q);
 
-    usersSnapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      if (
-        (data.username_lowercase && data.username_lowercase === usernameLower) ||
-        (data.username && data.username.toLowerCase() === usernameLower)
-      ) {
-        usernameExists = true;
-      }
-    });
-
-    if (usernameExists) {
+    if (!querySnapshot.empty) {
       errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
       errorBox.style.display = "block";
       return;
     }
 
-    // Kullanıcıyı oluştur
+    // Register
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     await setDoc(doc(db, "users", user.uid), {
       fullName,
       dob,
-      username, // Orijinal haliyle kaydedilir
+      username,
       username_lowercase: usernameLower,
       email,
       registrationDate: Timestamp.fromDate(new Date()),
@@ -270,7 +264,7 @@ form.addEventListener("submit", async (e) => {
     setTimeout(() => {
       window.location.href = "index.html";
     }, 2000);
-    
+
   } catch (error) {
     let message = "Bilinmeyen hata!";
     if (error.code === 'auth/email-already-in-use') {
