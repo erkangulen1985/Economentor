@@ -127,13 +127,20 @@
       });
     }
 
+function extractModelCode(userAgent) {
+  const match = userAgent.match(/;\s?(SM-[A-Z0-9]+|[A-Z]+-[A-Z0-9]+)\s?/i);
+  return match ? match[1] : null;
+}
+    
 function saveTokenToFirestore(uid, token) {
-  const deviceInfo = navigator.userAgent; // cihaz/tarayıcı bilgisi
-
+  const userAgent = navigator.userAgent;
+  const modelCode = extractModelCode(userAgent);
+  
   const userRef = doc(db, "users", uid);
   return setDoc(userRef, {
     fcmToken: token,
-    deviceInfo: deviceInfo  // yeni eklenen alan
+    deviceInfo: userAgent,
+    deviceModel: modelCode || "Bilinmiyor"
   }, { merge: true });
 }
 
@@ -160,11 +167,16 @@ onAuthStateChanged(auth, async (user) => {
 
       console.log("📦 Alınan token:", currentToken);
 
-if (!alreadySavedToken || !userSnap.data().deviceInfo) {
+const userData = userSnap.exists() ? userSnap.data() : {};
+const alreadySavedToken = userData.fcmToken;
+const alreadySavedDeviceInfo = userData.deviceInfo;
+const alreadySavedDeviceModel = userData.deviceModel;
+
+if (!alreadySavedToken || !alreadySavedDeviceInfo || !alreadySavedDeviceModel) {
   await saveTokenToFirestore(user.uid, currentToken);
-  console.log("✅ Token veya cihaz bilgisi Firestore'a kaydedildi.");
+  console.log("✅ Eksik bilgiler Firestore'a kaydedildi.");
 } else {
-  console.log("📭 Token ve cihaz bilgisi zaten kayıtlı. Kaydedilmedi.");
+  console.log("📭 Tüm bilgiler zaten kayıtlı. Kaydedilmedi.");
 }
 
     } catch (err) {
