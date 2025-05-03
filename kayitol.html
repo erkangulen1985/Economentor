@@ -206,6 +206,12 @@
     const cancelBtn = document.getElementById("cancelModalBtn");
     let formSubmitted = false;
 
+  acceptBtn.addEventListener("click", () => {
+  modal.style.display = "none";    // Modal kapatılır
+  formSubmitted = true;            // Kullanıcı onayladı olarak işaretlenir
+  form.requestSubmit();            // Form yeniden gönderilir
+});
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
