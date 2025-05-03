@@ -87,6 +87,7 @@
     import { getFirestore, collection, getDocs, getDoc, orderBy, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+    import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -161,12 +162,13 @@ function extractModelCode(userAgent) {
 function saveTokenToFirestore(uid, token) {
   const userAgent = navigator.userAgent;
   const modelCode = extractModelCode(userAgent);
-  
+
   const userRef = doc(db, "users", uid);
   return setDoc(userRef, {
     fcmToken: token,
     deviceInfo: userAgent,
-    deviceModel: modelCode || "Bilinmiyor"
+    deviceModel: modelCode || "Bilinmiyor",
+    deviceModelSavedAt: serverTimestamp()  // ⏰ kayıt zamanı
   }, { merge: true });
 }
 
