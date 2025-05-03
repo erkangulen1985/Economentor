@@ -315,7 +315,6 @@ await updateDoc(doc(db, "users", uid), {
   deviceModelSavedAt: deleteField(),
   fcmToken: deleteField()
 });
-    });
 
     alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp tekrar giriş yapınız.");
     deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
