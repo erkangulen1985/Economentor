@@ -106,6 +106,10 @@
     function isMobileDevice() {
      return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
+
+    function isMobileDevice() {
+     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
     
     async function loadAnnouncements() {
       const announcementList = document.getElementById("announcementList");
@@ -133,23 +137,27 @@
     }
 
 onAuthStateChanged(auth, async (user) => {
+  if (!isMobileDevice()) {
+    console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
+    return;
+  }
+
   if (user) {
     try {
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
       const alreadySavedToken = userSnap.exists() ? userSnap.data().fcmToken : null;
 
-      // getToken her zaman denensin:
       const currentToken = await getToken(messaging, {
         vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
       });
 
       if (!currentToken) {
-        console.warn("⚠️ Bildirim izni reddedilmiş olabilir, token alınamadı.");
+        console.warn("⚠️ Token alınamadı. Bildirim izni verilmemiş olabilir.");
         return;
       }
 
-      console.log("📦 Token alındı:", currentToken);
+      console.log("📦 Alınan token:", currentToken);
 
       if (!alreadySavedToken) {
         await saveTokenToFirestore(user.uid, currentToken);
