@@ -160,12 +160,12 @@ onAuthStateChanged(auth, async (user) => {
 
       console.log("📦 Alınan token:", currentToken);
 
-      if (!alreadySavedToken) {
-        await saveTokenToFirestore(user.uid, currentToken);
-        console.log("✅ Token Firestore'a kaydedildi.");
-      } else {
-        console.log("📭 Token zaten kayıtlı. Kaydedilmedi.");
-      }
+if (!alreadySavedToken || !userSnap.data().deviceInfo) {
+  await saveTokenToFirestore(user.uid, currentToken);
+  console.log("✅ Token veya cihaz bilgisi Firestore'a kaydedildi.");
+} else {
+  console.log("📭 Token ve cihaz bilgisi zaten kayıtlı. Kaydedilmedi.");
+}
 
     } catch (err) {
       console.error("❌ Token alma hatası:", err);
