@@ -308,10 +308,12 @@ deleteDeviceBtn.addEventListener("click", async () => {
   if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
 
   try {
-    await updateDoc(doc(db, "users", uid), {
-      deviceInfo: deleteField(),
-      deviceModel: deleteField(),
-      deviceModelSavedAt: deleteField()
+await updateDoc(doc(db, "users", uid), {
+  deviceInfo: deleteField(),
+  deviceModel: deleteField(),
+  deviceModelSavedAt: deleteField(),
+  fcmToken: deleteField()
+});
     });
 
     alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp tekrar giriş yapınız.");
