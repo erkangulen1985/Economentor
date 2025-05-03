@@ -127,10 +127,15 @@
       });
     }
 
-    function saveTokenToFirestore(uid, token) {
-      const userRef = doc(db, "users", uid);
-      return setDoc(userRef, { fcmToken: token }, { merge: true });
-    }
+function saveTokenToFirestore(uid, token) {
+  const deviceInfo = navigator.userAgent; // cihaz/tarayıcı bilgisi
+
+  const userRef = doc(db, "users", uid);
+  return setDoc(userRef, {
+    fcmToken: token,
+    deviceInfo: deviceInfo  // yeni eklenen alan
+  }, { merge: true });
+}
 
 onAuthStateChanged(auth, async (user) => {
   if (!isMobileDevice()) {
