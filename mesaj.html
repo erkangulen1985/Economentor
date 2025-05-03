@@ -748,12 +748,12 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     
 // 🔔 Push bildirim gönder
     try {
-const friendDoc = await getDoc(doc(db, "users", selectedFriendId));
-const isAdmin = friendDoc.exists() && friendDoc.data().role === "admin";
+const recipientDoc = await getDoc(doc(db, "users", selectedFriendId));
 
-const notificationTitle = isAdmin
-  ? "\"Economentor 'Admin'\" 📩 Yeni mesaj!"
-  : "\"Economentor\" 📩 Yeni mesaj!";
+let notificationTitle = "\"Economentor\" 📩 Yeni mesaj!";
+if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
+  notificationTitle = "\"Economentor(Admin)\" 📩 Yeni mesaj!";
+}
 
       await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
         method: "POST",
