@@ -128,32 +128,35 @@
     }
 
 function extractModelCode(userAgent) {
+  // Önce gerçek cihaz modelini arıyoruz
   const patterns = [
-    /Android\s\d+;\s*([^)]+)/i,                      // Genel Android → "Android 10; K" veya "Android 13; Redmi Note 10"
-    /iPhone\sOS\s[\d_]+(?:\slike)?\sMac\sOS/i,       // iPhone
-    /iPhone(?:\s[\w\d]+)?/i,                         // iPhone [model] (iPhone 14, iPhone XR vs.)
-    /SM-[A-Z0-9]+/i,                                 // Samsung Galaxy
-    /Redmi[\s\w\d]+/i,                               // Xiaomi Redmi
-    /Mi\s[\w\d]+/i,                                  // Xiaomi Mi
-    /POCO[\s\w\d]+/i,                                // Xiaomi POCO
-    /OnePlus[\s\w\d]+/i,                             // OnePlus
-    /Pixel[\s\w\d]+/i,                               // Google Pixel
-    /HUAWEI[\s\w\d]+/i,                              // Huawei
-    /HONOR[\s\w\d]+/i,                               // Honor
-    /moto[\s\w\d]+/i,                                // Motorola
-    /Nokia[\s\w\d]+/i,                               // Nokia
-    /OPPO[\s\w\d]+/i,                                // OPPO
-    /Vivo[\s\w\d]+/i,                                // Vivo
-    /Realme[\s\w\d]+/i                               // Realme
+    /SM-[A-Z0-9]+/i,              // Samsung
+    /iPhone\s?[\w\d]*/i,          // iPhone
+    /Redmi\s?[\w\d ]*/i,          // Xiaomi Redmi
+    /Mi\s?[\w\d ]+/i,             // Xiaomi Mi
+    /POCO\s?[\w\d ]+/i,           // Xiaomi POCO
+    /Pixel\s?[\w\d ]*/i,          // Google Pixel
+    /OnePlus\s?[\w\d ]*/i,        // OnePlus
+    /HUAWEI\s?[\w\d ]*/i,         // Huawei
+    /HONOR\s?[\w\d ]*/i,          // Honor
+    /moto[\w\d ]*/i,              // Motorola
+    /Nokia\s?[\w\d ]*/i,          // Nokia
+    /OPPO\s?[\w\d ]*/i,           // OPPO
+    /Vivo\s?[\w\d ]*/i,           // Vivo
+    /Realme\s?[\w\d ]*/i          // Realme
   ];
 
-    for (let pattern of patterns) {
+  for (let pattern of patterns) {
     const match = userAgent.match(pattern);
-    if (match) return match[0].trim();
+    if (match && match[0].length >= 5) return match[0].trim();
   }
 
-    return "Bilinmiyor";
-  }
+  // Eğer Android sürümü varsa ama model yoksa, sadece Android 10 gibi bir bilgi döndür
+  const androidVersion = userAgent.match(/Android\s\d+/i);
+  if (androidVersion) return androidVersion[0];
+
+  return "Bilinmiyor";
+}
     
 function saveTokenToFirestore(uid, token) {
   const userAgent = navigator.userAgent;
