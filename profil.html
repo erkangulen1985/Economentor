@@ -151,6 +151,15 @@ input {
     
     <button class="danger" id="deleteAccountBtn">Hesabı Sil</button>
 
+    <div id="notificationDeviceSection" style="margin-top: 40px; text-align: center;">
+   <h3 style="color: #fff;">📱 Bildirim Aldığınız Cihaz</h3>
+   <p id="deviceInfoDisplay" style="margin: 10px 0;"></p>
+   <button id="deleteDeviceInfoBtn" class="danger" style="width: auto; margin-bottom: 10px;">Cihazı Sil</button>
+   <p id="deviceNote" style="color: #ddd; font-size: 13px; margin-top: 10px;">
+     * Yalnızca 1 cihazdan bildirim alabilirsiniz.
+   </p>
+   </div>
+    
     <button id="infoBtn" style="margin-top: 50px; background-color: #555; color: #fff;">
     Yatırım Bilgilendirme ve Kullanım Koşulları
     </button>
@@ -173,6 +182,7 @@ import {
   updateDoc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -281,6 +291,36 @@ try {
 }
 });
 
+// Cihaz bilgisi gösterimi
+const deviceDisplay = document.getElementById("deviceInfoDisplay");
+const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
+
+if (data.deviceModel && data.deviceModelSavedAt) {
+  const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
+  deviceDisplay.innerText = `📱 Model: ${data.deviceModel}\n📅 Kayıt Tarihi: ${savedDate}`;
+} else {
+  deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
+  deleteDeviceBtn.style.display = "none";
+}
+
+deleteDeviceBtn.addEventListener("click", async () => {
+  if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
+
+  try {
+    await updateDoc(doc(db, "users", uid), {
+      deviceInfo: deleteField(),
+      deviceModel: deleteField(),
+      deviceModelSavedAt: deleteField()
+    });
+
+    alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp tekrar giriş yapınız.");
+    deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
+    deleteDeviceBtn.style.display = "none";
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
+});
+  
   document.getElementById("infoBtn").addEventListener("click", () => {
   window.location.href = "bilgilendirme.html";
   });
