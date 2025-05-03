@@ -206,89 +206,84 @@
     const cancelBtn = document.getElementById("cancelModalBtn");
     let formSubmitted = false;
 
-    form.addEventListener("submit", (e) => {
-      if (!formSubmitted) {
-        e.preventDefault();
-        modal.style.display = "flex";
+form.addEventListener("submit", async (e) => {
+  if (!formSubmitted) return;
+
+  e.preventDefault();
+  const errorBox = document.getElementById("errorMsg");
+  const successBox = document.getElementById("successMsg");
+  errorBox.innerText = "";
+  successBox.innerText = "";
+
+  const fullName = document.getElementById("fullName").value;
+  const dob = document.getElementById("dob").value;
+  const username = document.getElementById("username").value.trim();
+  const usernameLower = username.toLowerCase();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (password !== confirmPassword) {
+    errorBox.innerText = "Şifreler uyuşmuyor!";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  try {
+    // Firestore'dan tüm username_lowercase alanlarına sahip kullanıcıları kontrol et
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    let usernameExists = false;
+
+    usersSnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (
+        (data.username_lowercase && data.username_lowercase === usernameLower) ||
+        (data.username && data.username.toLowerCase() === usernameLower)
+      ) {
+        usernameExists = true;
       }
     });
 
-    acceptBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-      formSubmitted = true;
-      form.requestSubmit();
+    if (usernameExists) {
+      errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    // Kullanıcıyı oluştur
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      fullName,
+      dob,
+      username, // Orijinal haliyle kaydedilir
+      username_lowercase: usernameLower,
+      email,
+      registrationDate: Timestamp.fromDate(new Date()),
+      role: "user"
     });
 
-    cancelBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-    });
+    successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
+    successBox.style.display = "block";
 
-    form.addEventListener("submit", async (e) => {
-      if (!formSubmitted) return;
-
-      e.preventDefault();
-      const errorBox = document.getElementById("errorMsg");
-      const successBox = document.getElementById("successMsg");
-      errorBox.innerText = "";
-      successBox.innerText = "";
-
-      const fullName = document.getElementById("fullName").value;
-      const dob = document.getElementById("dob").value;
-      const username = document.getElementById("username").value.trim()
-      const usernameLower = username.toLowerCase();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-
-      if (password !== confirmPassword) {
-        errorBox.innerText = "Şifreler uyuşmuyor!";
-        errorBox.style.display = "block";
-        return;
-      }
-
-      const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
-        errorBox.style.display = "block";
-        return;
-      }
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-await setDoc(doc(db, "users", user.uid), {
-  fullName,
-  dob,
-  username,               // Orijinal hali
-  username_lowercase: usernameLower,  // Arka plan kontrolü için
-  email,
-  registrationDate: Timestamp.fromDate(new Date()),
-  role: "user"
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 2000);
+    
+  } catch (error) {
+    let message = "Bilinmeyen hata!";
+    if (error.code === 'auth/email-already-in-use') {
+      message = "Bu e-posta adresi zaten kullanımda.";
+    } else if (error.code === 'auth/invalid-email') {
+      message = "Geçersiz e-posta adresi.";
+    } else if (error.code === 'auth/weak-password') {
+      message = "Şifre çok zayıf.";
+    }
+    errorBox.innerText = message;
+    errorBox.style.display = "block";
+  }
 });
-
-        successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
-        successBox.style.display = "block";
-
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 2000);
-
-      } catch (error) {
-        let message = "Bilinmeyen hata!";
-        if (error.code === 'auth/email-already-in-use') {
-          message = "Bu e-posta adresi zaten kullanımda.";
-        } else if (error.code === 'auth/invalid-email') {
-          message = "Geçersiz e-posta adresi.";
-        } else if (error.code === 'auth/weak-password') {
-          message = "Şifre çok zayıf.";
-        }
-        errorBox.innerText = message;
-        errorBox.style.display = "block";
-      }
-    });
   </script>
 </body>
 </html>
