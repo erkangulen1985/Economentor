@@ -745,26 +745,31 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     });
 
     scrollToBottom();
+    
+// 🔔 Push bildirim gönder
+try {
+  const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+  const isAdmin = currentUserDoc.exists() && currentUserDoc.data().role === "admin";
 
-    // 🔔 Push bildirim gönder
-    try {
-await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    uid: selectedFriendId,
-    title: "\"Economentor\" 📩 Yeni mesaj!",
-    body: text,
-    url: "https://economentor.netlify.app"  // bu alan önemli!
-  })
-});
-    } catch (err) {
-      console.error("Bildirim gönderme hatası:", err);
-    }
-  }
-});
+  const notificationTitle = isAdmin
+    ? "\"Economentor 'Admin'\" 📩 Yeni mesaj!"
+    : "\"Economentor\" 📩 Yeni mesaj!";
+
+  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      uid: selectedFriendId,
+      title: notificationTitle,
+      body: text,
+      url: "https://economentor.netlify.app"
+    })
+  });
+} catch (err) {
+  console.error("Bildirim gönderme hatası:", err);
+}
 
 window.goHome = () => location.href = "anasayfa.html";
 
