@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Economentor | Kayıt Ol</title>
   <link rel="icon" type="image/png" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; }
 
@@ -163,8 +164,11 @@
       <input type="text" id="username" placeholder="Kullanıcı Adı" required>
       <label for="email">E-Posta</label>
       <input type="email" id="email" placeholder="E-Posta" required>
-      <label for="password">Şifre</label>
-      <input type="password" id="password" placeholder="Şifre" required>
+<label for="password">Şifre</label>
+<div style="position: relative;">
+  <input type="password" id="password" placeholder="Şifre" required style="padding-right: 40px;">
+  <i id="togglePassword" class="fa-solid fa-eye" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; color: #ccc;"></i>
+</div>
       <label for="confirmPassword">Şifre Tekrar</label>
       <input type="password" id="confirmPassword" placeholder="Şifre Tekrar" required>
       <button type="submit" id="registerBtn">Kayıt Ol</button>
@@ -293,6 +297,16 @@ form.addEventListener("submit", async (e) => {
     errorBox.innerText = message;
     errorBox.style.display = "block";
   }
+});
+
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+togglePassword.addEventListener("click", () => {
+  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+  passwordInput.setAttribute("type", type);
+  togglePassword.classList.toggle("fa-eye");
+  togglePassword.classList.toggle("fa-eye-slash");
 });
   </script>
 </body>
