@@ -184,6 +184,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -233,7 +234,8 @@
 
       const fullName = document.getElementById("fullName").value;
       const dob = document.getElementById("dob").value;
-      const username = document.getElementById("username").value.trim();
+      const username = document.getElementById("username").value.trim()
+      const usernameLower = username.toLowerCase();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
@@ -244,18 +246,28 @@
         return;
       }
 
+      const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
+        errorBox.style.display = "block";
+        return;
+      }
+
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        await setDoc(doc(db, "users", user.uid), {
-          fullName,
-          dob,
-          username,
-          email,
-          registrationDate: Timestamp.fromDate(new Date()),
-          role: "user"
-        });
+await setDoc(doc(db, "users", user.uid), {
+  fullName,
+  dob,
+  username,               // Orijinal hali
+  username_lowercase: usernameLower,  // Arka plan kontrolü için
+  email,
+  registrationDate: Timestamp.fromDate(new Date()),
+  role: "user"
+});
 
         successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
         successBox.style.display = "block";
