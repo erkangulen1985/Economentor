@@ -359,11 +359,18 @@ row.innerHTML = `
       if (username.includes(keyword) || fullName.includes(keyword) || uid.includes(keyword)) {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${data.username || "-"}</td>
-          <td>${data.fullName || "-"}</td>
-          <td>${docSnap.id}</td>
-          <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-        `;
+  <td>${data.username || "-"}</td>
+  <td>${data.fullName || "-"}</td>
+  <td>${docSnap.id}</td>
+  <td>
+    <select class="roleSelect" data-uid="${docSnap.id}">
+      <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
+      <option value="vip" ${data.role === "vip" ? "selected" : ""}>VIP</option>
+      <option value="user" ${!data.role || data.role === "user" ? "selected" : ""}>Normal</option>
+    </select>
+  </td>
+  <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
+`;
         userContainer.appendChild(row);
       }
     });
