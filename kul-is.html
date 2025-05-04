@@ -355,7 +355,8 @@ row.innerHTML = `
       const data = docSnap.data();
       const username = (data.username || "").toLowerCase();
       const fullName = (data.fullName || "").toLowerCase();
-      if (username.includes(keyword) || fullName.includes(keyword)) {
+      const uid = docSnap.id.toLowerCase();
+      if (username.includes(keyword) || fullName.includes(keyword) || uid.includes(keyword)) {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${data.username || "-"}</td>
