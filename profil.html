@@ -215,22 +215,28 @@ onAuthStateChanged(auth, async (user) => {
 
   // Bilgileri kaydet
   document.getElementById("saveBtn").addEventListener("click", async () => {
-    const fullName = document.getElementById("fullName").value.trim();
-    const username = document.getElementById("username").value.trim();
-    const dob = document.getElementById("dob").value;
+  const fullName = document.getElementById("fullName").value.trim();
+  const username = document.getElementById("username").value.trim();
+  const dob = document.getElementById("dob").value;
 
-    try {
-      await updateDoc(doc(db, "users", uid), {
-        fullName,
-        username,
-        dob
-      });
+  // Doğrulama: Boş alan var mı kontrol et
+  if (!fullName || !username || !dob) {
+    alert("Lütfen tüm bilgileri eksiksiz doldurunuz.");
+    return;
+  }
 
-      alert("Bilgiler başarıyla güncellendi.");
-    } catch (err) {
-      alert("Hata: " + err.message);
-    }
-  });
+  try {
+    await updateDoc(doc(db, "users", uid), {
+      fullName,
+      username,
+      dob
+    });
+
+    alert("Bilgiler başarıyla güncellendi.");
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
+});
 
   // Hesap sil
   document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
