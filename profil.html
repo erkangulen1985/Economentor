@@ -238,7 +238,7 @@ onAuthStateChanged(auth, async (user) => {
 
     try {
       await deleteDoc(doc(db, "users", uid));
-      await deleteUser(auth.currentUser);
+      await deleteUser(user);
       alert("Hesabınız silindi.");
       location.href = "index.html";
     } catch (err) {
