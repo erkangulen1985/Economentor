@@ -274,7 +274,7 @@ form.addEventListener("submit", async (e) => {
     const emailSnapshot = await getDocs(emailQuery);
 
     if (!emailSnapshot.empty) {
-      errorBox.innerText = "Bu e-posta adresi zaten kayıtlı (veritabanında).";
+      errorBox.innerText = "Bu e-posta adresi zaten kayıtlı.";
       errorBox.style.display = "block";
       return;
     }
