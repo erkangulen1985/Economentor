@@ -262,7 +262,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    // Username check
+    // Kullanıcı adı kontrolü
     const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
     const querySnapshot = await getDocs(q);
 
@@ -272,13 +272,17 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
+    // E-posta kontrolü (doğru yere taşındı!)
+    const emailQuery = query(collection(db, "users"), where("email", "==", email));
+    const emailSnapshot = await getDocs(emailQuery);
+
     if (!emailSnapshot.empty) {
       errorBox.innerText = "Bu e-posta adresi zaten kayıtlı (veritabanında).";
       errorBox.style.display = "block";
-     return;
+      return;
     }
 
-    // Register
+    // Kayıt
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
