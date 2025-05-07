@@ -224,9 +224,6 @@
     const acceptBtn = document.getElementById("acceptModalBtn");
     const cancelBtn = document.getElementById("cancelModalBtn");
     let formSubmitted = false;
-
-    const emailQuery = query(collection(db, "users"), where("email", "==", email));
-    const emailSnapshot = await getDocs(emailQuery);
     
   acceptBtn.addEventListener("click", () => {
   modal.style.display = "none";    // Modal kapatılır
