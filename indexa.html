@@ -243,42 +243,49 @@ if ('serviceWorker' in navigator) {
 let isAppleDevice = /iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase());
 let isInStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
 let deferredPrompt = null;
+let installBoxShown = false;
 
-// Android ve destekleyen cihazlar için
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showInstallBox();
-});
-
-// Apple cihazları için (Safari - iOS/MacOS)
-if (isAppleDevice && !isInStandalone) {
-  // Birkaç saniye sonra göster (manuel)
-  setTimeout(() => {
-    showInstallBox();
-  }, 1500);
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then(() => console.log("✅ Service worker yüklendi"))
+    .catch(err => console.error("❌ Service worker hatası:", err));
 }
 
-function showInstallBox() {
+// Android/PC için beforeinstallprompt yakala
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log("✅ beforeinstallprompt tetiklendi");
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+// Tüm cihazlarda 3 saniye sonra kutuyu göster
+setTimeout(() => {
+  if (installBoxShown || isInStandalone) return; // zaten gösterildiyse ya da yüklenmişse gösterme tekrar
   const promptBox = document.getElementById("installPrompt");
   promptBox.style.display = "block";
   setTimeout(() => {
     promptBox.style.top = "0";
   }, 300);
-}
+  installBoxShown = true;
+}, 3000);
 
-// Yükle butonu her cihazda görünür
+// Yükle butonuna tıklandığında
 document.getElementById("installButton").addEventListener("click", async () => {
   if (deferredPrompt) {
-    // Android kullanıcıları için
+    // Android ve destekleyen PC tarayıcıları
     deferredPrompt.prompt();
     const result = await deferredPrompt.userChoice;
-    console.log("Yükleme sonucu:", result.outcome);
+    console.log("Kullanıcı kararı:", result.outcome);
     deferredPrompt = null;
     document.getElementById("installPrompt").style.top = "-200px";
   } else if (isAppleDevice) {
-    // Tüm Apple kullanıcılarına rehber göster
+    // Apple cihazlar için rehber
     alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (🧭) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
+    document.getElementById("installPrompt").style.top = "-200px";
+  } else {
+    // Hiçbir destek yoksa uyarı
+    alert("Tarayıcınız bu özelliği desteklemiyor. Lütfen desteklenen bir cihaz veya tarayıcı kullanın.");
     document.getElementById("installPrompt").style.top = "-200px";
   }
 });
