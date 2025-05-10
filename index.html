@@ -241,7 +241,7 @@ if ('serviceWorker' in navigator) {
 
     // ✅ PWA Yükleme Kutusu
 let isAppleDevice = /iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase());
-let isInStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
+let isInStandalone = (window.matchMedia('(display-mode: standalone)').matches) || ('standalone' in window.navigator && window.navigator.standalone);
 let deferredPrompt = null;
 let installBoxShown = false;
 
