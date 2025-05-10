@@ -240,25 +240,49 @@ if ('serviceWorker' in navigator) {
 }
 
     // ✅ PWA Yükleme Kutusu
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById("installPrompt").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("installPrompt").style.top = "0";
-      }, 300);
-    });
+let isAppleDevice = /iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase());
+let isInStandalone = ('standalone' in window.navigator) && window.navigator.standalone;
+let deferredPrompt = null;
 
-    document.getElementById("installButton").addEventListener("click", async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log("Yükleme sonucu:", result.outcome);
-        deferredPrompt = null;
-        document.getElementById("installPrompt").style.top = "-200px";
-      }
-    });
+// Android ve destekleyen cihazlar için
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallBox();
+});
+
+// Apple cihazları için (Safari - iOS/MacOS)
+if (isAppleDevice && !isInStandalone) {
+  // Birkaç saniye sonra göster (manuel)
+  setTimeout(() => {
+    showInstallBox();
+  }, 1500);
+}
+
+function showInstallBox() {
+  const promptBox = document.getElementById("installPrompt");
+  promptBox.style.display = "block";
+  setTimeout(() => {
+    promptBox.style.top = "0";
+  }, 300);
+}
+
+// Yükle butonu her cihazda görünür
+document.getElementById("installButton").addEventListener("click", async () => {
+  if (deferredPrompt) {
+    // Android kullanıcıları için
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    console.log("Yükleme sonucu:", result.outcome);
+    deferredPrompt = null;
+    document.getElementById("installPrompt").style.top = "-200px";
+  } else if (isAppleDevice) {
+    // Tüm Apple kullanıcılarına rehber göster
+    alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (🧭) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
+    document.getElementById("installPrompt").style.top = "-200px";
+  }
+});
+
   const toggle = document.getElementById("togglePassword");
   const password = document.getElementById("password");
 
