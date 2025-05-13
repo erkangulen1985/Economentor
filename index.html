@@ -270,18 +270,19 @@ setTimeout(() => {
 }, 3000);  
   
 // Yükle butonuna tıklandığında  
-document.getElementById("installButton").addEventListener("click", async () => {  
-  if (deferredPrompt) {  
-    // Android ve destekleyen PC tarayıcıları  
-    deferredPrompt.prompt();  
-    const result = await deferredPrompt.userChoice;  
-    console.log("Kullanıcı kararı:", result.outcome);  
-    deferredPrompt = null;  
-    document.getElementById("installPrompt").style.top = "-200px";  
+document.getElementById("installButton").addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log("Yükleme sonucu:", result.outcome);
+        deferredPrompt = null;
+    document.getElementById("installPrompt").style.top = "-200px"; 
+ 
   } else if (isAppleDevice) {  
     // Apple cihazlar için rehber  
     alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);  
     document.getElementById("installPrompt").style.top = "-200px";  
+
   } else {  
     // Hiçbir destek yoksa uyarı  
     alert("Tarayıcınız bu özelliği desteklemiyor. Lütfen desteklenen bir cihaz veya tarayıcı kullanın.");  
