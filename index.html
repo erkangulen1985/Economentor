@@ -244,13 +244,6 @@ let isInStandalone = (window.matchMedia('(display-mode: standalone)').matches) |
 let deferredPrompt = null;
 let installBoxShown = false;
 
-// Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then(() => console.log("✅ Service worker yüklendi"))
-    .catch(err => console.error("❌ Service worker hatası:", err));
-}
-
 // Android/PC için beforeinstallprompt yakala
 window.addEventListener('beforeinstallprompt', (e) => {
   console.log("✅ beforeinstallprompt tetiklendi");
