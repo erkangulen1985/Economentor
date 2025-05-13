@@ -245,39 +245,42 @@ let deferredPrompt = null;
 let installBoxShown = false;
 
 // Android/PC için beforeinstallprompt yakala
-window.addEventListener('beforeinstallprompt', (e) => {
-  console.log("✅ beforeinstallprompt tetiklendi");
-  e.preventDefault();
+let deferredPrompt = null;
+let installBoxShown = false;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault(); // varsayılan prompt'ı engelle
   deferredPrompt = e;
+  console.log("✅ beforeinstallprompt olayı kaydedildi");
+
+  // Android kullanıcıları için kutuyu göster
+  if (!installBoxShown && !window.matchMedia('(display-mode: standalone)').matches) {
+    const promptBox = document.getElementById("installPrompt");
+    promptBox.style.display = "block";
+    setTimeout(() => {
+      promptBox.style.top = "0";
+    }, 300);
+    installBoxShown = true;
+  }
 });
 
-// Tüm cihazlarda 3 saniye sonra kutuyu göster
-setTimeout(() => {
-  if (installBoxShown || isInStandalone) return; // zaten gösterildiyse ya da yüklenmişse gösterme tekrar
-  const promptBox = document.getElementById("installPrompt");
-  promptBox.style.display = "block";
-  setTimeout(() => {
-    promptBox.style.top = "0";
-  }, 300);
-  installBoxShown = true;
-}, 3000);
-
-// Yükle butonuna tıklandığında
 document.getElementById("installButton").addEventListener("click", async () => {
   if (deferredPrompt) {
-    // Android ve destekleyen PC tarayıcıları
-    deferredPrompt.prompt();
-    const result = await deferredPrompt.userChoice;
-    console.log("Kullanıcı kararı:", result.outcome);
-    deferredPrompt = null;
-    document.getElementById("installPrompt").style.top = "-200px";
-  } else if (isAppleDevice) {
-    // Apple cihazlar için rehber
+    try {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      console.log("Kullanıcı kararı:", result.outcome);
+      deferredPrompt = null;
+      document.getElementById("installPrompt").style.top = "-200px";
+    } catch (error) {
+      console.error("❌ Yükleme prompt başarısız:", error);
+      alert("Yükleme başlatılamadı. Tarayıcı desteklemiyor olabilir.");
+    }
+  } else if (/iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase())) {
     alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
     document.getElementById("installPrompt").style.top = "-200px";
   } else {
-    // Hiçbir destek yoksa uyarı
-    alert("Tarayıcınız bu özelliği desteklemiyor. Lütfen desteklenen bir cihaz veya tarayıcı kullanın.");
+    alert("Yükleme desteği bulunamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
     document.getElementById("installPrompt").style.top = "-200px";
   }
 });
