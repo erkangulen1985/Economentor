@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Economentor | Giriş</title>
   <link rel="icon" href="image1.png" />
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#001f3d" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -105,6 +105,7 @@
   transform: translateY(-50%);
   cursor: pointer;
   color: black;
+  background-color: white;
   padding: 5px;
   border-radius: 50%;
 }
@@ -249,30 +250,15 @@ window.addEventListener("beforeinstallprompt", (e) => {
   deferredPrompt = e;
   console.log("✅ beforeinstallprompt olayı kaydedildi");
 
-  // Android kullanıcıları için kutuyu göster
-  if (!installBoxShown && !window.matchMedia('(display-mode: standalone)').matches) {
-    const promptBox = document.getElementById("installPrompt");
-    promptBox.style.display = "block";
-    setTimeout(() => {
-      promptBox.style.top = "0";
-    }, 300);
-    installBoxShown = true;
-  }
-});
-
-document.getElementById("installButton").addEventListener("click", async () => {
-  if (deferredPrompt) {
-    try {
-      deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      console.log("Kullanıcı kararı:", result.outcome);
-      deferredPrompt = null;
-      document.getElementById("installPrompt").style.top = "-200px";
-    } catch (error) {
-      console.error("❌ Yükleme prompt başarısız:", error);
-      alert("Yükleme başlatılamadı. Tarayıcı desteklemiyor olabilir.");
-    }
-  } else if (/iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase())) {
+    document.getElementById("installButton").addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log("Yükleme sonucu:", result.outcome);
+        deferredPrompt = null;
+        document.getElementById("installPrompt").style.top = "-200px";
+            }
+  } if (/iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase())) {
     alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
     document.getElementById("installPrompt").style.top = "-200px";
   } else {
@@ -280,7 +266,6 @@ document.getElementById("installButton").addEventListener("click", async () => {
     document.getElementById("installPrompt").style.top = "-200px";
   }
 });
-
   const toggle = document.getElementById("togglePassword");
   const password = document.getElementById("password");
 
