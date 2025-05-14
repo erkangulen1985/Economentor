@@ -537,6 +537,13 @@ async function loadChatList(uid) {
   allItems.forEach(item => list.appendChild(item.element));
 
   scrollChatListToStart();
+
+if (window.innerWidth <= 770) {
+  setTimeout(() => {
+    const chatList = document.querySelector(".chat-list");
+    if (chatList) chatList.scrollLeft = 0;
+  }, 200);
+}
   
   filterChatList();
 }
@@ -728,7 +735,15 @@ function setupLoadMoreButton(messagesCol) {
     // Eski mesajlar yüklendikten sonra en alta kaydırıyoruz
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
     };
+
+     // 💡 Sohbet açıldığında mobilde sola kay
+  if (window.innerWidth <= 770) {
+    setTimeout(() => {
+      const chatList = document.querySelector(".chat-list");
+      if (chatList) chatList.scrollTo({ left: 0, behavior: "smooth" });
+    }, 50);
   }
+}
 }
 
 async function buildMessageDiv(msg) {
