@@ -482,7 +482,11 @@ onAuthStateChanged(auth, user => {
   if (!user) return location.href = "index.html";
   currentUser = user;
   setLang(lang);
-  loadChatList(user.uid);
+
+  // 💡 Chat listesi yüklendikten sonra watcher kur
+  loadChatList(user.uid).then(() => {
+    setupGlobalMessageWatcher(user.uid);
+  });
 });
 
 async function loadChatList(uid) {
@@ -524,7 +528,6 @@ async function loadChatList(uid) {
     allItems.push({ element: div, hasNew, username: username.toLowerCase() });
   }
 
-  // Önce bildirimi olanlar, sonra diğerleri
   allItems.sort((a, b) => {
     if (a.hasNew && !b.hasNew) return -1;
     if (!a.hasNew && b.hasNew) return 1;
@@ -533,10 +536,6 @@ async function loadChatList(uid) {
 
   allItems.forEach(item => list.appendChild(item.element));
 
-  loadChatList(user.uid).then(() => {
-  setupGlobalMessageWatcher(user.uid);
-  });
-  
   filterChatList();
 }
 
