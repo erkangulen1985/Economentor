@@ -285,20 +285,19 @@ button.send-btn:hover,
     overflow: hidden !important; /* container taşmasını engelle */
   }
 
-  #chatItems {
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory !important;
-    gap: 10px !important;
-    padding-bottom: 10px !important;
-    scroll-behavior: smooth; !important;
-    -webkit-overflow-scrolling: touch;
-    scroll-padding-left: 0; !important;
-    overscroll-behavior-x: contain; !important;
-    direction: ltr; !important;
-  }
+#chatItems {
+  direction: ltr !important;
+  text-align: left;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  display: flex;
+  flex-direction: row;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 10px;
+  gap: 10px;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain; /* ← scroll dışına çıkmayı engeller */
+}
 
     #chatItems::-webkit-scrollbar {
     display: none;
@@ -1055,6 +1054,27 @@ function preventLeftScroll() {
 document.addEventListener("DOMContentLoaded", () => {
   if (window.innerWidth <= 770) {
     preventLeftScroll();
+  }
+});
+
+function lockScrollLeftOnMobile() {
+  const chatItemsDiv = document.getElementById("chatItems");
+  if (window.innerWidth <= 770 && chatItemsDiv) {
+    chatItemsDiv.scrollLeft = Math.max(chatItemsDiv.scrollLeft, 0);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const chatItemsDiv = document.getElementById("chatItems");
+  if (chatItemsDiv) {
+    chatItemsDiv.scrollLeft = 0;
+
+    // Scroll olursa sola gitme
+    chatItemsDiv.addEventListener("scroll", () => {
+      if (chatItemsDiv.scrollLeft < 0) {
+        chatItemsDiv.scrollLeft = 0;
+      }
+    }, { passive: true });
   }
 });
   
