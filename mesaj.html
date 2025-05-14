@@ -262,7 +262,7 @@ button.send-btn:hover,
   }
 
   .search-bar {
-    display: none !important; /* Mobilde üstteki sabit arama çubuğu gizlensin */
+    display: none !important;
   }
 
   .mobile-search-wrapper {
@@ -282,12 +282,19 @@ button.send-btn:hover,
     padding: 10px !important;
     padding-top: 10px !important;
     box-sizing: border-box;
+    overflow: hidden !important; /* container taşmasını engelle */
+  }
+
+  #chatItems {
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x mandatory !important;
     gap: 10px !important;
+    padding-bottom: 10px !important;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
 
   .chat-item {
@@ -296,16 +303,16 @@ button.send-btn:hover,
     max-width: 200px !important;
     scroll-snap-align: start !important;
     background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 6px;
+    padding: 10px;
   }
 
-  #chatItems {
-  display: flex !important;
-  flex-direction: row !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  scroll-snap-type: x mandatory !important;
-  gap: 10px !important;
-  padding-bottom: 10px !important;
+  .chat-item.active {
+    background: rgba(0, 123, 255, 0.5) !important;
+    border: 2px solid #ffffff50;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    transform: scale(1.03);
   }
 
   .messages {
@@ -363,13 +370,6 @@ button.send-btn:hover,
     font-size: 16px;
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
-  }
-  .chat-item.active {
-  background: rgba(0, 123, 255, 0.5) !important;
-  border: 2px solid #ffffff50;
-  font-weight: bold;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-  transform: scale(1.03);
   }
 }
 
@@ -927,8 +927,16 @@ function updateScrollButtons() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const area = document.getElementById("messageArea");
-  if (!area) return;
+  const chatList = document.querySelector(".chat-list");
+  if (window.innerWidth <= 770 && chatList) {
+    chatList.scrollLeft = 0; // 👈 soldan başlat
+    chatList.addEventListener("scroll", () => {
+      if (chatList.scrollLeft < 0) {
+        chatList.scrollLeft = 0;
+      }
+    });
+  }
+});
 
   // Scroll olayını "passive: true" ile bağla
   area.addEventListener("scroll", updateScrollButtons, { passive: true });
