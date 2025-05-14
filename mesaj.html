@@ -583,30 +583,48 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
   snapshot.docChanges().forEach(async (change) => {
     const msg = { id: change.doc.id, ...change.doc.data() };
 
-if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
-  loadedMessageIds.add(msg.id);
-  const div = await buildMessageDiv(msg);
-  document.getElementById("messageArea").appendChild(div);
+    // 🔹 Yeni mesaj eklendiyse
+    if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      document.getElementById("messageArea").appendChild(div);
 
-  // ✅ YALNIZCA yeni gelen mesaj bizim attığımız ya da bize gelense scroll
-  const isFromMe = msg.sender === currentUser.uid;
-  const isFromFriend = msg.sender === selectedFriendId;
+      const isFromMe = msg.sender === currentUser.uid;
+      const isFromFriend = msg.sender === selectedFriendId;
 
-  if (isFromMe || isFromFriend) {
-  setTimeout(() => {
-    scrollToBottom();
-  }, 100);
-}
+      if (isFromMe || isFromFriend) {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      }
 
-  // ✅ Okundu olarak işaretle
-  if (!msg.seenBy?.includes(currentUser.uid)) {
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid)
-    });
-  }
-}
+      // ✅ Okundu olarak işaretle
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+      }
 
-    // ✏️ Mesaj düzenlendiyse metni güncelle (scroll YOK)
+      // ✅ Chat list son mesajı güncelle
+      try {
+        const senderId = msg.sender === currentUser.uid ? selectedFriendId : msg.sender;
+        const senderDoc = await getDoc(doc(db, "users", senderId));
+        const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
+
+        const chatItems = document.querySelectorAll(".chat-item");
+        chatItems.forEach(item => {
+          const nameEl = item.querySelector("strong");
+          if (nameEl && nameEl.innerText === senderName) {
+            const preview = item.querySelector(".last-message");
+            if (preview) preview.innerText = msg.text;
+          }
+        });
+      } catch (e) {
+        console.warn("Chat list güncellemesi başarısız:", e);
+      }
+    }
+
+    // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
       const updatedMsg = change.doc.data();
       const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
@@ -615,14 +633,14 @@ if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
       }
     }
 
-    // 🗑️ Mesaj silindiyse DOM'dan kaldır (scroll YOK)
+    // 🗑️ Mesaj silindiyse
     if (change.type === "removed") {
       const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (msgDiv) msgDiv.remove();
     }
   });
 });
-
+  
   // Sohbeti listeye ekleyelim
   const chatList = document.getElementById("chatList");
   const chatItem = el;
