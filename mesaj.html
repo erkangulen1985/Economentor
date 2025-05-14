@@ -297,6 +297,7 @@ button.send-btn:hover,
     -webkit-overflow-scrolling: touch;
     scroll-padding-left: 0; !important;
     overscroll-behavior-x: contain; !important;
+    direction: ltr; !important;
   }
 
     #chatItems::-webkit-scrollbar {
@@ -533,26 +534,28 @@ async function loadChatList(uid) {
 
     allItems.push({ element: div, hasNew, username: username.toLowerCase() });
   }
-
-
-  allItems.forEach(item => list.appendChild(item.element));
-
-  scrollChatListToStart();
-
-if (window.innerWidth <= 770) {
-  setTimeout(() => {
-    const chatList = document.querySelector(".chat-list");
-    if (chatList) chatList.scrollLeft = 0;
-  }, 200);
-}
   
   allItems.sort((a, b) => {
     if (a.hasNew && !b.hasNew) return -1;
     if (!a.hasNew && b.hasNew) return 1;
     return a.username.localeCompare(b.username);
   });
+
+
+  allItems.forEach(item => list.appendChild(item.element));
+
+  scrollChatListToStart();
   
   filterChatList();
+
+  if (window.innerWidth <= 770) {
+  setTimeout(() => {
+    const chatItemsDiv = document.getElementById("chatItems");
+    if (chatItemsDiv) {
+      chatItemsDiv.scrollLeft = 0; // Sıfırla
+    }
+  }, 300); // DOM otursun diye küçük gecikme
+}
 }
 
 async function openChat(fid, el) {
