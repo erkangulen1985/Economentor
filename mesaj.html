@@ -299,6 +299,10 @@ button.send-btn:hover,
     overscroll-behavior-x: contain; !important;
   }
 
+    #chatItems::-webkit-scrollbar {
+    display: none;
+  }
+
   .chat-item {
     flex: 0 0 auto !important;
     min-width: 140px !important;
@@ -1028,6 +1032,28 @@ function lockChatListLeftScroll() {
 
 document.addEventListener("DOMContentLoaded", lockChatListLeftScroll);
 window.addEventListener("resize", lockChatListLeftScroll);
+
+function preventLeftScroll() {
+  const el = document.getElementById("chatItems");
+  if (!el) return;
+
+  function fixScroll() {
+    if (el.scrollLeft < 0) {
+      el.scrollLeft = 0;
+    }
+    requestAnimationFrame(fixScroll); // Her karede kontrol et
+  }
+
+  requestAnimationFrame(fixScroll); // Başlat
+}
+
+// Sayfa yüklendiğinde başlat
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.innerWidth <= 770) {
+    preventLeftScroll();
+  }
+});
+  
 /* window.scrollToBottom = scrollToBottom; */
   
 </script>
