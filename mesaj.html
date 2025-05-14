@@ -377,6 +377,12 @@ button.send-btn:hover,
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
   }
+
+  .chat-start-spacer {
+  width: 10px;
+  flex-shrink: 0;
+  height: 1px;
+}
 }
 
 /* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
@@ -540,7 +546,10 @@ async function loadChatList(uid) {
     return a.username.localeCompare(b.username);
   });
 
-
+const spacer = document.createElement("div");
+spacer.className = "chat-start-spacer";
+list.appendChild(spacer);
+  
   allItems.forEach(item => list.appendChild(item.element));
 
   scrollChatListToStart();
