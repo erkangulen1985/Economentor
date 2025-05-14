@@ -545,10 +545,6 @@ async function loadChatList(uid) {
     if (!a.hasNew && b.hasNew) return 1;
     return a.username.localeCompare(b.username);
   });
-
-const spacer = document.createElement("div");
-spacer.className = "chat-start-spacer";
-list.appendChild(spacer);
   
   allItems.forEach(item => list.appendChild(item.element));
 
@@ -654,12 +650,17 @@ chatItems.forEach(item => {
   }
 });
       
-      if (!msg.seenBy?.includes(currentUser.uid)) {
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid)
-        });
-      }
-    }
+if (
+  !msg.seenBy?.includes(myUid) &&         // kullanıcı henüz görmedi
+  msg.sender !== myUid &&                 // kendi mesajı değil
+  selectedFriendId !== otherUid           // o kişiyle zaten konuşulmuyor
+) {
+  if (!item.querySelector(".notification")) {
+    const notif = document.createElement("div");
+    notif.className = "notification";
+    item.appendChild(notif);
+  }
+}
 
     // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
@@ -1071,21 +1072,7 @@ function lockScrollLeftOnMobile() {
   if (window.innerWidth <= 770 && chatItemsDiv) {
     chatItemsDiv.scrollLeft = Math.max(chatItemsDiv.scrollLeft, 0);
   }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const chatItemsDiv = document.getElementById("chatItems");
-  if (chatItemsDiv) {
-    chatItemsDiv.scrollLeft = 0;
-
-    // Scroll olursa sola gitme
-    chatItemsDiv.addEventListener("scroll", () => {
-      if (chatItemsDiv.scrollLeft < 0) {
-        chatItemsDiv.scrollLeft = 0;
-      }
-    }, { passive: true });
-  }
-});
+};
   
 /* window.scrollToBottom = scrollToBottom; */
   
