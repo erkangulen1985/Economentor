@@ -655,7 +655,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       } catch (e) {
         console.warn("Chat list güncellemesi (removed) başarısız:", e);
       }
-    }
+    }  
   });
 });
   
@@ -704,7 +704,8 @@ function setupLoadMoreButton(messagesCol) {
 
     // Eski mesajlar yüklendikten sonra en alta kaydırıyoruz
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-  };
+    };
+  }
 }
 
 async function buildMessageDiv(msg) {
