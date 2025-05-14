@@ -298,6 +298,16 @@ button.send-btn:hover,
     background: rgba(255, 255, 255, 0.15) !important;
   }
 
+  #chatItems {
+  display: flex !important;
+  flex-direction: row !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
+  gap: 10px !important;
+  padding-bottom: 10px !important;
+  }
+
   .messages {
     max-height: calc(100vh - 250px);
     overflow-y: auto;
