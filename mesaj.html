@@ -641,7 +641,7 @@ chatItems.forEach(item => {
         const convoId = getConversationId(currentUser.uid, senderId);
         const messagesCol = collection(db, "conversations", convoId, "messages");
 
-        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(2)));
+        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
         const lastText = lastSnap.empty ? "" : lastSnap.docs[0].data().text;
 
         const chatItems = document.querySelectorAll(".chat-item");
