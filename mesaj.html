@@ -536,6 +536,8 @@ async function loadChatList(uid) {
 
   allItems.forEach(item => list.appendChild(item.element));
 
+  scrollChatListToStart();
+  
   filterChatList();
 }
 
@@ -979,6 +981,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 300); // Liste yüklendikten sonra kaydır
 });
+
+function scrollChatListToStart() {
+  const chatList = document.querySelector(".chat-list");
+  if (window.innerWidth <= 770 && chatList) {
+    requestAnimationFrame(() => {
+      chatList.scrollLeft = 0;
+    });
+  }
+}
   
 /* window.scrollToBottom = scrollToBottom; */
   
