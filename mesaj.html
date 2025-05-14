@@ -625,21 +625,62 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     }
 
     // ✏️ Mesaj düzenlendiyse
-    if (change.type === "modified") {
-      const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+if (change.type === "modified") {
+  const updatedMsg = change.doc.data();
+  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+  if (msgDiv) {
+    msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+  }
+
+  // 🔄 Chat list güncelle
+  try {
+    const senderId = msg.sender === currentUser.uid ? selectedFriendId : msg.sender;
+    const senderDoc = await getDoc(doc(db, "users", senderId));
+    const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
+
+    const chatItems = document.querySelectorAll(".chat-item");
+    chatItems.forEach(item => {
+      const nameEl = item.querySelector("strong");
+      if (nameEl && nameEl.innerText === senderName) {
+        const preview = item.querySelector(".last-message");
+        if (preview) preview.innerText = updatedMsg.text;
       }
-    }
+    });
+  } catch (e) {
+    console.warn("Chat list güncellemesi (modified) başarısız:", e);
+  }
+}
 
     // 🗑️ Mesaj silindiyse
-    if (change.type === "removed") {
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) msgDiv.remove();
-    }
-  });
-});
+if (change.type === "removed") {
+  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+  if (msgDiv) msgDiv.remove();
+
+  // 🔄 Chat list güncelle: son mesaj silinmiş olabilir
+  try {
+    const senderId = msg.sender === currentUser.uid ? selectedFriendId : msg.sender;
+    const convoId = getConversationId(currentUser.uid, senderId);
+    const messagesCol = collection(db, "conversations", convoId, "messages");
+
+    // Son mesajı tekrar alalım
+    const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
+    const lastText = lastSnap.empty ? "" : lastSnap.docs[0].data().text;
+
+    const senderDoc = await getDoc(doc(db, "users", senderId));
+    const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
+
+    const chatItems = document.querySelectorAll(".chat-item");
+    chatItems.forEach(item => {
+      const nameEl = item.querySelector("strong");
+      if (nameEl && nameEl.innerText === senderName) {
+        const preview = item.querySelector(".last-message");
+        if (preview) preview.innerText = lastText;
+      }
+    });
+  } catch (e) {
+    console.warn("Chat list güncellemesi (removed) başarısız:", e);
+  }
+}
   
   // Sohbeti listeye ekleyelim
   const chatList = document.getElementById("chatList");
