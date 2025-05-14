@@ -480,27 +480,18 @@ async function loadChatList(uid) {
   list.innerHTML = "";
   list.appendChild(searchBar);
 
-  const users = [];
+  const withNotification = [];
+  const withoutNotification = [];
 
-  // Kullanıcıları diziye ekle (kendin hariç)
-  usersSnap.forEach(doc => {
-    const data = doc.data();
-    if (doc.id !== uid) {
-      users.push({ id: doc.id, username: data.username });
-    }
-  });
+  for (const docSnap of usersSnap.docs) {
+    const data = docSnap.data();
+    const userId = docSnap.id;
+    if (userId === uid) continue;
 
-  // 🔤 Alfabetik sırala (büyük/küçük harf duyarsız)
-  users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
-
-  // Şimdi sırayla ekleyelim
-  for (const user of users) {
-    const name = user.username;
-    const userId = user.id;
+    const name = data.username;
     const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
-
-    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
+    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
 
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
@@ -512,18 +503,24 @@ async function loadChatList(uid) {
     const div = document.createElement("div");
     div.className = "chat-item";
     div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
-
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
+      withNotification.push({ el: div, name });
+    } else {
+      withoutNotification.push({ el: div, name });
     }
 
     div.onclick = () => openChat(userId, div);
-    list.appendChild(div);
   }
 
-  filterChatList(); // Aramayı yeniden uygula
+  // Bildirim olanlar en üste, sonra diğerleri alfabetik sırayla
+  [...withNotification, ...withoutNotification]
+    .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    .forEach(item => list.appendChild(item.el));
+
+  filterChatList();
 }
 
 async function openChat(fid, el) {
@@ -639,7 +636,7 @@ chatItems.forEach(item => {
         const convoId = getConversationId(currentUser.uid, senderId);
         const messagesCol = collection(db, "conversations", convoId, "messages");
 
-        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
+        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(2)));
         const lastText = lastSnap.empty ? "" : lastSnap.docs[0].data().text;
 
         const chatItems = document.querySelectorAll(".chat-item");
