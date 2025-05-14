@@ -927,14 +927,20 @@ function updateScrollButtons() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const area = document.getElementById("messageArea");
-  if (!area) return;
+  if (window.innerWidth <= 770) {
+    const chatItems = document.getElementById("chatItems");
+    if (chatItems) {
+      // Mobilde sohbet sayfası açıldığında en başa kaydır
+      chatItems.scrollTo({ left: 0, behavior: "auto" });
 
-  // Scroll olayını "passive: true" ile bağla
-  area.addEventListener("scroll", updateScrollButtons, { passive: true });
-
-  // İlk görünürlük kontrolü
-  setTimeout(updateScrollButtons, 500);
+      // Kullanıcının sola kaymasını engelle
+      chatItems.addEventListener("scroll", () => {
+        if (chatItems.scrollLeft < 0) {
+          chatItems.scrollLeft = 0;
+        }
+      });
+    }
+  }
 });
 
 window.addEventListener("load", () => {
