@@ -248,23 +248,24 @@ button.send-btn:hover,
   bottom: 80px !important; /* istediğin yüksekliğe göre 60, 70, 80... */
 }
     
-@media (max-width: 770px){
-    .container {
+@media (max-width: 770px) {
+  .container {
     flex-direction: column;
   }
-  
-body {
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  height: 100vh;
-  max-height: 100vh;
-}
+
+  body {
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh;
+    max-height: 100vh;
+  }
 
   .search-bar {
     display: none !important; /* Mobilde üstteki sabit arama çubuğu gizlensin */
   }
-    .mobile-search-wrapper {
+
+  .mobile-search-wrapper {
     display: block !important;
     position: sticky;
     top: 0;
@@ -274,57 +275,41 @@ body {
     backdrop-filter: blur(4px);
   }
 
-   .messages {
-    max-height: calc(100vh - 250px); /* header + input alanı + boşluklar */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .chat-item {
-    min-width: 140px !important;
-    max-width: 200px !important;
-    scroll-snap-align: start !important;
-    flex-shrink: 0 !important;
-  }
-
   .chat-list {
     width: 100% !important;
     max-width: none !important;
     height: auto !important;
-    padding: 10px;
+    padding: 10px !important;
+    padding-top: 10px !important;
+    box-sizing: border-box;
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x mandatory !important;
-    gap: 10px;
-    padding-top: 10px;
-    box-sizing: border-box;
+    gap: 10px !important;
   }
 
   .chat-item {
-    flex: 0 0 auto;
-    min-width: 140px;
-    max-width: 200px;
-    scroll-snap-align: start;
+    flex: 0 0 auto !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    scroll-snap-align: start !important;
+    background: rgba(255, 255, 255, 0.15) !important;
   }
 
-  .mobile-search-bar {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
+  .messages {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .chat-window {
     width: 100%;
-    padding: 0px;
-    margin-top: 0px;
-    height: 400px; /* örnek sabit yükseklik */
-    max-height: calc(100vh - 250px); /* header + chatlist + send-box yüksekliği kadar çıkar */
+    padding: 0;
+    margin-top: 0;
+    height: 400px;
+    max-height: calc(100vh - 250px);
     overflow-y: auto;
   }
 
@@ -343,8 +328,9 @@ body {
   .send-box button.send-btn {
     margin-top: 8px;
   }
-   
-  #scrollDownBtn, #scrollUpBtn {
+
+  #scrollDownBtn,
+  #scrollUpBtn {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -352,13 +338,24 @@ body {
   }
 
   #scrollDownBtn {
-    bottom: 132px !important; /* Mobilde biraz yukarı al */
+    bottom: 132px !important;
   }
 
   #scrollUpBtn {
-    top: 210px; /* Mobilde yukarıdan biraz aşağıda başlasın */
+    top: 210px;
+  }
+
+  .mobile-search-bar {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }
+
 /* <button onclick="scrollToBottom()" style="position:fixed;top:10px;right:10px;z-index:999;">Scroll Test</button> */
   </style>
 </head>
