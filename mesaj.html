@@ -477,59 +477,53 @@ async function loadChatList(uid) {
   const list = document.getElementById("chatList");
   const searchBar = document.getElementById("searchBar");
 
-  list.innerHTML = ""; // Listeyi temizle
-
-  // Arama çubuğunu her zaman en üstte tutmak için yeniden ekle
+  list.innerHTML = "";
   list.appendChild(searchBar);
 
-  usersSnap.forEach(async (userDoc) => {
-    const userData = userDoc.data();
-    const userId = userDoc.id;
+  const users = [];
 
-    if (userId === uid) return; // Kendini ekleme
+  // Kullanıcıları diziye ekle (kendin hariç)
+  usersSnap.forEach(doc => {
+    const data = doc.data();
+    if (doc.id !== uid) {
+      users.push({ id: doc.id, username: data.username });
+    }
+  });
 
-    const name = userData.username;
+  // 🔤 Alfabetik sırala (büyük/küçük harf duyarsız)
+  users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
+
+  // Şimdi sırayla ekleyelim
+  for (const user of users) {
+    const name = user.username;
+    const userId = user.id;
     const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    // Son mesajı almak için Firestore sorgusu
     const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "asc"), limitToLast(1)));
 
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text;
-
-      // Görülmemiş mesaj var mı? Eğer varsa bildirim gösterilecek
       hasNew = !msg.seenBy?.includes(uid);
     }
 
-    // Chat öğesini oluştur
     const div = document.createElement("div");
     div.className = "chat-item";
     div.innerHTML = `<strong>${name}</strong><div class="last-message">${lastMsg}</div>`;
 
-    // Eğer yeni mesaj varsa, bildirim ekle
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
     }
 
-    // Sohbeti tıklanabilir hale getirme
     div.onclick = () => openChat(userId, div);
-    
-    // Yeni sohbeti listeye ekle
     list.appendChild(div);
+  }
 
-    // Yalnızca yeni mesaj geldiyse, sohbeti üstte göstermek için
-    if (hasNew) {
-      list.prepend(div); // Yeni mesajı olan kişi en üste taşınır
-    }
-  });
-
-  // Arama fonksiyonunu güncelle
-  filterChatList(); // Arama çubuğuna göre listeyi filtrele
+  filterChatList(); // Aramayı yeniden uygula
 }
 
 async function openChat(fid, el) {
