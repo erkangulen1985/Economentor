@@ -534,11 +534,6 @@ async function loadChatList(uid) {
     allItems.push({ element: div, hasNew, username: username.toLowerCase() });
   }
 
-  allItems.sort((a, b) => {
-    if (a.hasNew && !b.hasNew) return -1;
-    if (!a.hasNew && b.hasNew) return 1;
-    return a.username.localeCompare(b.username);
-  });
 
   allItems.forEach(item => list.appendChild(item.element));
 
@@ -550,6 +545,12 @@ if (window.innerWidth <= 770) {
     if (chatList) chatList.scrollLeft = 0;
   }, 200);
 }
+  
+  allItems.sort((a, b) => {
+    if (a.hasNew && !b.hasNew) return -1;
+    if (!a.hasNew && b.hasNew) return 1;
+    return a.username.localeCompare(b.username);
+  });
   
   filterChatList();
 }
