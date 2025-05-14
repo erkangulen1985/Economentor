@@ -995,19 +995,17 @@ async function setupGlobalMessageWatcher(myUid) {
 }
   
 document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    const chatList = document.querySelector(".chat-list");
-    if (window.innerWidth <= 770 && chatList) {
-      chatList.scrollTo({ left: 0, behavior: "smooth" });
-    }
-  }, 300); // Liste yüklendikten sonra kaydır
+  const chatItems = document.getElementById("chatItems");
+  if (window.innerWidth <= 770 && chatItems) {
+    chatItems.scrollTo({ left: 0, behavior: "smooth" });
+  }
 });
 
 function scrollChatListToStart() {
-  const chatList = document.querySelector(".chat-list");
-  if (window.innerWidth <= 770 && chatList) {
+  const chatItems = document.getElementById("chatItems");
+  if (window.innerWidth <= 770 && chatItems) {
     requestAnimationFrame(() => {
-      chatList.scrollLeft = 0;
+      chatItems.scrollLeft = 0;
     });
   }
 }
