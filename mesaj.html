@@ -595,17 +595,16 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
         }, 100);
       }
 
-      // ✅ Chat list son mesajı güncelle ve en üste al
-      const chatItems = document.querySelectorAll(".chat-item");
-      chatItems.forEach(item => {
-        const nameEl = item.querySelector("strong");
-        if (nameEl && nameEl.innerText === senderName) {
-          const preview = item.querySelector(".last-message");
-          if (preview) preview.innerText = msg.text;
-          item.parentNode.prepend(item); // En üste taşı
-        }
-      });
-
+const chatItems = document.querySelectorAll(".chat-item");
+chatItems.forEach(item => {
+  const nameEl = item.querySelector("strong");
+  if (nameEl && nameEl.innerText === senderName) {
+    const preview = item.querySelector(".last-message");
+    if (preview) preview.innerText = msg.text;
+    item.parentNode.prepend(item); // 🔼 En üste al
+  }
+});
+      
       if (!msg.seenBy?.includes(currentUser.uid)) {
         await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
           seenBy: arrayUnion(currentUser.uid)
@@ -640,7 +639,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
         const convoId = getConversationId(currentUser.uid, senderId);
         const messagesCol = collection(db, "conversations", convoId, "messages");
 
-        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(1)));
+        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
         const lastText = lastSnap.empty ? "" : lastSnap.docs[0].data().text;
 
         const chatItems = document.querySelectorAll(".chat-item");
