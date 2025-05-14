@@ -474,56 +474,51 @@ onAuthStateChanged(auth, user => {
 
 async function loadChatList(uid) {
   const usersSnap = await getDocs(collection(db, "users"));
-  const list = document.getElementById("chatList");
-  const searchBar = document.getElementById("searchBar");
-
+  const list = document.getElementById("chatItems");
   list.innerHTML = "";
-  list.appendChild(searchBar);
 
-  const withNotif = [];
-  const withoutNotif = [];
+  const allItems = [];
 
   for (const docSnap of usersSnap.docs) {
-    const data = docSnap.data();
     const userId = docSnap.id;
     if (userId === uid) continue;
 
-    const username = data.username || "Bilinmeyen";
+    const username = docSnap.data().username || "Bilinmeyen";
     const convoId = getConversationId(uid, userId);
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
-    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limitToLast(1)));
+    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
 
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
-      lastMsg = msg.text;
+      lastMsg = msg.text || "";
       hasNew = !msg.seenBy?.includes(uid);
     }
 
     const div = document.createElement("div");
     div.className = "chat-item";
     div.innerHTML = `<strong>${username}</strong><div class="last-message">${lastMsg}</div>`;
-    
+
     if (hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
-      withNotif.push({ username: username.toLowerCase(), element: div });
-    } else {
-      withoutNotif.push({ username: username.toLowerCase(), element: div });
     }
 
     div.onclick = () => openChat(userId, div);
+
+    allItems.push({ element: div, hasNew, username: username.toLowerCase() });
   }
 
-  // Sıralı şekilde ekle: önce bildirimi olanlar, sonra olmayanlar
-  withNotif.sort((a, b) => a.username.localeCompare(b.username));
-  withoutNotif.sort((a, b) => a.username.localeCompare(b.username));
-
-  [...withNotif, ...withoutNotif].forEach(item => {
-    list.appendChild(item.element);
+  // Önce bildirimi olanlar, sonra diğerleri
+  allItems.sort((a, b) => {
+    if (a.hasNew && !b.hasNew) return -1;
+    if (!a.hasNew && b.hasNew) return 1;
+    return a.username.localeCompare(b.username);
   });
+
+  allItems.forEach(item => list.appendChild(item.element));
 
   filterChatList();
 }
