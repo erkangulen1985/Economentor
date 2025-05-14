@@ -289,16 +289,16 @@ body {
   }
 
   .chat-list {
-    width: 100%;
-    max-width: none;
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden; /* 👈 Yatay scroll var, dikey olmasın */
-    flex-direction: row;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
     padding: 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
     gap: 10px;
-    scroll-snap-type: x mandatory;
-    height: auto;
     padding-top: 10px;
     box-sizing: border-box;
   }
