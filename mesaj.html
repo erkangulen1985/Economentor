@@ -293,10 +293,10 @@ button.send-btn:hover,
     scroll-snap-type: x mandatory !important;
     gap: 10px !important;
     padding-bottom: 10px !important;
-    scroll-behavior: smooth;
+    scroll-behavior: smooth; !important;
     -webkit-overflow-scrolling: touch;
-    scroll-padding-left: 0;
-    overscroll-behavior-x: contain;
+    scroll-padding-left: 0; !important;
+    overscroll-behavior-x: contain; !important;
   }
 
   .chat-item {
@@ -1011,7 +1011,23 @@ function scrollChatListToStart() {
     });
   }
 }
-  
+
+function lockChatListLeftScroll() {
+  const chatItems = document.getElementById("chatItems");
+  if (window.innerWidth <= 770 && chatItems) {
+    chatItems.scrollLeft = 0;
+
+    // Sol kayma olursa anında geri çek
+    chatItems.addEventListener("scroll", () => {
+      if (chatItems.scrollLeft < 0) {
+        chatItems.scrollLeft = 0;
+      }
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", lockChatListLeftScroll);
+window.addEventListener("resize", lockChatListLeftScroll);
 /* window.scrollToBottom = scrollToBottom; */
   
 </script>
