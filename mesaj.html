@@ -650,17 +650,12 @@ chatItems.forEach(item => {
   }
 });
       
-if (
-  !msg.seenBy?.includes(myUid) &&         // kullanıcı henüz görmedi
-  msg.sender !== myUid &&                 // kendi mesajı değil
-  selectedFriendId !== otherUid           // o kişiyle zaten konuşulmuyor
-) {
-  if (!item.querySelector(".notification")) {
-    const notif = document.createElement("div");
-    notif.className = "notification";
-    item.appendChild(notif);
-  }
-}
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
+        });
+      }
+    }
 
     // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
@@ -993,13 +988,17 @@ async function setupGlobalMessageWatcher(myUid) {
             if (preview) preview.innerText = msg.text || "";
 
             // Eğer mesaj henüz görülmediyse ve mesaj karşıdan geldiyse
-            if (!msg.seenBy?.includes(myUid) && msg.sender !== myUid) {
-              if (!item.querySelector(".notification")) {
-                const notif = document.createElement("div");
-                notif.className = "notification";
-                item.appendChild(notif);
-              }
-            }
+if (
+  !msg.seenBy?.includes(myUid) &&
+  msg.sender !== myUid &&
+  selectedFriendId !== otherUid
+) {
+  if (!item.querySelector(".notification")) {
+    const notif = document.createElement("div");
+    notif.className = "notification";
+    item.appendChild(notif);
+  }
+}
 
             // Chatlist'te en üste taşı
             const chatList = document.getElementById("chatItems");
