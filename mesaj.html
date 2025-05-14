@@ -533,6 +533,10 @@ async function loadChatList(uid) {
 
   allItems.forEach(item => list.appendChild(item.element));
 
+  loadChatList(user.uid).then(() => {
+  setupGlobalMessageWatcher(user.uid);
+  });
+  
   filterChatList();
 }
 
@@ -913,6 +917,51 @@ window.addEventListener("load", () => {
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
 });
+
+async function setupGlobalMessageWatcher(myUid) {
+  const usersSnap = await getDocs(collection(db, "users"));
+  usersSnap.forEach(otherUserDoc => {
+    const otherUid = otherUserDoc.id;
+    if (otherUid === myUid) return;
+
+    const convoId = getConversationId(myUid, otherUid);
+    const messagesCol = collection(db, "conversations", convoId, "messages");
+
+    onSnapshot(
+      query(messagesCol, orderBy("timestamp", "desc"), limit(1)),
+      snapshot => {
+        if (snapshot.empty) return;
+        const msgDoc = snapshot.docs[0];
+        const msg = msgDoc.data();
+        const chatItems = document.querySelectorAll(".chat-item");
+
+        // Sohbet zaten chatlist'te varsa
+        chatItems.forEach(item => {
+          const name = item.querySelector("strong")?.innerText?.trim().toLowerCase();
+          if (name === (otherUserDoc.data().username || "").toLowerCase()) {
+            const preview = item.querySelector(".last-message");
+            if (preview) preview.innerText = msg.text || "";
+
+            // Eğer mesaj henüz görülmediyse ve mesaj karşıdan geldiyse
+            if (!msg.seenBy?.includes(myUid) && msg.sender !== myUid) {
+              if (!item.querySelector(".notification")) {
+                const notif = document.createElement("div");
+                notif.className = "notification";
+                item.appendChild(notif);
+              }
+            }
+
+            // Chatlist'te en üste taşı
+            const chatList = document.getElementById("chatItems");
+            if (chatList && item.parentNode === chatList) {
+              chatList.prepend(item);
+            }
+          }
+        });
+      }
+    );
+  });
+}
   
 /* window.scrollToBottom = scrollToBottom; */
   
