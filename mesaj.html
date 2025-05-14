@@ -927,16 +927,8 @@ function updateScrollButtons() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const chatList = document.querySelector(".chat-list");
-  if (window.innerWidth <= 770 && chatList) {
-    chatList.scrollLeft = 0; // 👈 soldan başlat
-    chatList.addEventListener("scroll", () => {
-      if (chatList.scrollLeft < 0) {
-        chatList.scrollLeft = 0;
-      }
-    });
-  }
-});
+  const area = document.getElementById("messageArea");
+  if (!area) return;
 
   // Scroll olayını "passive: true" ile bağla
   area.addEventListener("scroll", updateScrollButtons, { passive: true });
