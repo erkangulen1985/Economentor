@@ -261,12 +261,11 @@ body {
   max-height: 100vh;
 }
 
-    .search-bar {
-    display: none; /* PC'deki arama çubuğu mobilde GİZLENİR */
+  .search-bar {
+    display: none !important; /* Mobilde üstteki sabit arama çubuğu gizlensin */
   }
-
     .mobile-search-wrapper {
-    display: block;
+    display: block !important;
     position: sticky;
     top: 0;
     z-index: 99;
@@ -282,10 +281,10 @@ body {
   }
   
   .chat-item {
-    flex: 0 0 auto;
-    min-width: 140px;
-    max-width: 180px;
-    scroll-snap-align: start;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    scroll-snap-align: start !important;
+    flex-shrink: 0 !important;
   }
 
   .chat-list {
