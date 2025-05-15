@@ -514,6 +514,11 @@ async function loadChatList(uid) {
 
   const allItems = [];
 
+const leftSpacer = document.createElement("div");
+leftSpacer.style.minWidth = "10px";
+leftSpacer.style.height = "1px";
+leftSpacer.style.flexShrink = "0";
+  
   for (const docSnap of usersSnap.docs) {
     const userId = docSnap.id;
     if (userId === uid) continue;
@@ -523,14 +528,6 @@ async function loadChatList(uid) {
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
     const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
-
-const list = document.getElementById("chatItems");
-list.innerHTML = "";
-
-const leftSpacer = document.createElement("div");
-leftSpacer.style.minWidth = "10px";
-leftSpacer.style.height = "1px";
-leftSpacer.style.flexShrink = "0";
 
 list.appendChild(leftSpacer);
     
