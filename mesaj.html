@@ -518,10 +518,12 @@ async function loadChatList(uid) {
 
     const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
 
-    let lastMsg = "", hasNew = false;
+    let lastMsg = "", hasNew = false, hasConversation = false;
+
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
       lastMsg = msg.text || "";
+      hasConversation = true;
       hasNew = !msg.seenBy?.includes(uid);
     }
 
@@ -537,29 +539,38 @@ async function loadChatList(uid) {
 
     div.onclick = () => openChat(userId, div);
 
-    allItems.push({ element: div, hasNew, username: username.toLowerCase() });
+    allItems.push({
+      element: div,
+      hasNew,
+      hasConversation,
+      username: username.toLowerCase()
+    });
   }
-  
+
+  // 📊 Özel sıralama: bildirimli → konuşulmuş → alfabetik
   allItems.sort((a, b) => {
     if (a.hasNew && !b.hasNew) return -1;
     if (!a.hasNew && b.hasNew) return 1;
+
+    if (a.hasConversation && !b.hasConversation) return -1;
+    if (!a.hasConversation && b.hasConversation) return 1;
+
     return a.username.localeCompare(b.username);
   });
-  
+
   allItems.forEach(item => list.appendChild(item.element));
 
   scrollChatListToStart();
-  
   filterChatList();
 
   if (window.innerWidth <= 770) {
-  setTimeout(() => {
-    const chatItemsDiv = document.getElementById("chatItems");
-    if (chatItemsDiv) {
-      chatItemsDiv.scrollLeft = 0; // Sıfırla
-    }
-  }, 300); // DOM otursun diye küçük gecikme
-}
+    setTimeout(() => {
+      const chatItemsDiv = document.getElementById("chatItems");
+      if (chatItemsDiv) {
+        chatItemsDiv.scrollLeft = 0;
+      }
+    }, 300);
+  }
 }
 
 async function openChat(fid, el) {
