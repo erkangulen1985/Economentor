@@ -527,7 +527,7 @@ async function loadChatList(uid) {
 
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = <strong>${username}</strong><div class="last-message">${lastMsg}</div>;
+    div.innerHTML = `<strong>${username}</strong><div class="last-message">${lastMsg}</div>`;
 
     if (hasNew) {
       const notif = document.createElement("div");
