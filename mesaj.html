@@ -657,7 +657,7 @@ chatItems.forEach(item => {
   if (nameEl && nameEl.innerText === senderName) {
     const preview = item.querySelector(".last-message");
     if (preview) preview.innerText = msg.text;
-    item.parentNode.prepend(item); // 🔼 En üste al
+    await loadChatList(currentUser.uid); // 🔼 En üste al
   }
 });
       
