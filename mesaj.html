@@ -652,6 +652,11 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
         setTimeout(() => {
           scrollToBottom();
         }, 100);
+            if (window.innerWidth <= 770) {
+      setTimeout(() => {
+        const chatList = document.querySelector(".chat-list");
+      }, 100); // DOM güncellenene kadar 100ms bekle
+    }
       }
 
 const chatItems = document.querySelectorAll(".chat-item");
