@@ -296,7 +296,9 @@ button.send-btn:hover,
   padding-bottom: 10px;
   gap: 10px;
   scroll-behavior: smooth;
-  overscroll-behavior-x: none; /* ← scroll dışına çıkmayı engeller */
+  overscroll-behavior-x: contain; /* ← scroll dışına çıkmayı engeller */
+  padding-left: 10px
+  scroll-padding-left: 10px;
 }
 
     #chatItems::-webkit-scrollbar {
@@ -518,6 +520,16 @@ async function loadChatList(uid) {
 
     const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
 
+const list = document.getElementById("chatItems");
+list.innerHTML = "";
+
+const leftSpacer = document.createElement("div");
+leftSpacer.style.minWidth = "10px";
+leftSpacer.style.height = "1px";
+leftSpacer.style.flexShrink = "0";
+
+list.appendChild(leftSpacer);
+    
     let lastMsg = "", hasNew = false;
     if (!lastMsgSnap.empty) {
       const msg = lastMsgSnap.docs[0].data();
