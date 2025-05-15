@@ -641,7 +641,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
 
     if (window.innerWidth <= 770) {
       setTimeout(() => {
-        const chatList = document.querySelector(".chat-list");
+        const chatList = document.querySelector(".chatItems");
         if (chatList) {
           chatList.scrollTo({ left: 0, behavior: "smooth" });
         }
@@ -654,7 +654,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
         }, 100);
             if (window.innerWidth <= 770) {
       setTimeout(() => {
-        const chatList = document.querySelector(".chat-list");
+        const chatList = document.querySelector(".chatItems");
       }, 100); // DOM güncellenene kadar 100ms bekle
     }
       }
