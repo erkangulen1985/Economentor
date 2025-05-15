@@ -297,7 +297,7 @@ button.send-btn:hover,
   gap: 10px;
   scroll-behavior: smooth;
   overscroll-behavior-x: contain; /* ← scroll dışına çıkmayı engeller */
-  padding-left: 10px
+  padding-left: 0px
   scroll-padding-left: 10px;
 }
 
@@ -315,6 +315,10 @@ button.send-btn:hover,
     padding: 10px;
   }
 
+.chat-item:first-child {
+  margin-left: 0 !important;
+}
+  
   .chat-item.active {
     background: rgba(0, 123, 255, 0.5) !important;
     border: 2px solid #ffffff50;
