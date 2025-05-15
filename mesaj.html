@@ -288,7 +288,7 @@ button.send-btn:hover,
 #chatItems {
   direction: ltr !important;
   text-align: left;
-  overflow-x: hidden !important;
+  overflow-x: auto !important;
   overflow-y: hidden !important;
   display: flex;
   flex-direction: row;
@@ -608,7 +608,7 @@ async function openChat(fid, el) {
       });
     }
   }
-
+  
 unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
   snapshot.docChanges().forEach(async (change) => {
     const msg = { id: change.doc.id, ...change.doc.data() };
@@ -702,6 +702,10 @@ chatItems.forEach(item => {
     }  
   });
 });
+
+if (window.innerWidth <= 770) {
+  scrollToFirstChatItem();
+}
   
 function setupLoadMoreButton(messagesCol) {
   const loadBtn = document.getElementById("loadMoreBtn");
@@ -1072,6 +1076,18 @@ function lockScrollLeftOnMobile() {
     chatItemsDiv.scrollLeft = Math.max(chatItemsDiv.scrollLeft, 0);
   }
 };
+
+function scrollToFirstChatItem() {
+  const chatItems = document.getElementById("chatItems");
+  if (!chatItems) return;
+
+  // DOM içeriği değiştiği için birden fazla frame bekletiyoruz
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      chatItems.scrollLeft = 0;
+    });
+  });
+}
   
 /* window.scrollToBottom = scrollToBottom; */
   
