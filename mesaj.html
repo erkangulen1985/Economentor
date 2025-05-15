@@ -518,6 +518,7 @@ const leftSpacer = document.createElement("div");
 leftSpacer.style.minWidth = "10px";
 leftSpacer.style.height = "1px";
 leftSpacer.style.flexShrink = "0";
+leftSpacer.className = "chat-start-spacer"; // varsa mobilde stil için
   
   for (const docSnap of usersSnap.docs) {
     const userId = docSnap.id;
@@ -713,6 +714,7 @@ chatItems.forEach(item => {
         console.warn("Chat list güncellemesi (removed) başarısız:", e);
       }
     }  
+    scrollToBottom
   });
 });
 
