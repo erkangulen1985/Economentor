@@ -514,12 +514,6 @@ async function loadChatList(uid) {
 
   const allItems = [];
 
-const leftSpacer = document.createElement("div");
-leftSpacer.style.minWidth = "10px";
-leftSpacer.style.height = "1px";
-leftSpacer.style.flexShrink = "0";
-leftSpacer.className = "chat-start-spacer"; // varsa mobilde stil için
-  
   for (const docSnap of usersSnap.docs) {
     const userId = docSnap.id;
     if (userId === uid) continue;
@@ -529,6 +523,14 @@ leftSpacer.className = "chat-start-spacer"; // varsa mobilde stil için
     const messagesCol = collection(db, "conversations", convoId, "messages");
 
     const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
+
+const list = document.getElementById("chatItems");
+list.innerHTML = "";
+
+const leftSpacer = document.createElement("div");
+leftSpacer.style.minWidth = "10px";
+leftSpacer.style.height = "1px";
+leftSpacer.style.flexShrink = "0";
 
 list.appendChild(leftSpacer);
     
@@ -714,7 +716,6 @@ chatItems.forEach(item => {
         console.warn("Chat list güncellemesi (removed) başarısız:", e);
       }
     }  
-    scrollToBottom
   });
 });
 
@@ -768,7 +769,15 @@ function setupLoadMoreButton(messagesCol) {
     // Eski mesajlar yüklendikten sonra en alta kaydırıyoruz
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
     };
+
+     // 💡 Sohbet açıldığında mobilde sola kay
+  if (window.innerWidth <= 770) {
+    setTimeout(() => {
+      const chatList = document.querySelector(".chat-list");
+      if (chatList) chatList.scrollTo({ left: 0, behavior: "smooth" });
+    }, 50);
   }
+}
 }
 
 async function buildMessageDiv(msg) {
