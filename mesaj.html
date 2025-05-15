@@ -288,7 +288,7 @@ button.send-btn:hover,
 #chatItems {
   direction: ltr !important;
   text-align: left;
-  overflow-x: auto !important;
+  overflow-x: hidden !important;
   overflow-y: hidden !important;
   display: flex;
   flex-direction: row;
@@ -296,7 +296,7 @@ button.send-btn:hover,
   padding-bottom: 10px;
   gap: 10px;
   scroll-behavior: smooth;
-  overscroll-behavior-x: contain; /* ← scroll dışına çıkmayı engeller */
+  overscroll-behavior-x: none; /* ← scroll dışına çıkmayı engeller */
 }
 
     #chatItems::-webkit-scrollbar {
