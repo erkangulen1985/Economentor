@@ -1021,6 +1021,10 @@ if (
             if (chatList && item.parentNode === chatList) {
               chatList.prepend(item);
             }
+              const chatItems = document.getElementById("chatItems");
+            if (window.innerWidth <= 770 && chatItems) {
+               chatItems.scrollTo({ left: 0, behavior: "smooth" });
+  }
           }
         });
       }
