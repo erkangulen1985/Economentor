@@ -818,7 +818,8 @@ async function createNotificationForUser(uid, message, postId = null) {
     postId: postId,
     timestamp: Timestamp.now(),
     read: false
-  });
+    });
+  }
 }
 
 let usersList = [];
