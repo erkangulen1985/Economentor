@@ -91,18 +91,18 @@ nav a:hover {
 }
 
 #notificationPanel {
-  position: fixed;
+  position: fixed !important;
   top: 20px;
   right: 20px;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.95);
-  padding: 20px;
   width: 300px;
   max-height: 400px;
-  overflow-y: auto;
-  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.95);
   color: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  overflow-y: auto;
+  z-index: 99999;
 }
 
 #postsContainer {
@@ -387,30 +387,16 @@ nav a:hover {
   <div id="roleBadge" style="margin-top: 10px;"></div>
 </div>
 
-<div id="notificationPanel" style="
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 320px;
-  max-height: 400px;
-  background-color: rgba(0,0,0,0.95);
-  color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.7);
-  padding: 20px;
-  overflow-y: auto;
-  z-index: 9999;
-">
+  <div class="post-container" id="postsContainer">
+    <!-- Paylaşımlar burada görüntülenecek -->
+  </div>
+
+  <div id="notificationPanel" style="
   <h3 style="margin-top: 0; font-size: 18px;">🔔 Bildirimler</h3>
   <div id="notificationsList">
     <!-- Bildirimler buraya eklenecek -->
   </div>
 </div>
-
-  <div class="post-container" id="postsContainer">
-    <!-- Paylaşımlar burada görüntülenecek -->
-  </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
