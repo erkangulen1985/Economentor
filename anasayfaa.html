@@ -648,7 +648,7 @@ async function postComment(id, post, el) {
   await updateDoc(ref, { comments: arrayUnion(newComment) });
   input.value = "";
 
-  const mentions = text.match(/@(\w+)/g);
+  const mentions = text.match(/@([\w\.\-_]+)/g);
   console.log("Mentions bulundu:", mentions);
 
   if (mentions) {
