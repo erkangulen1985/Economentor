@@ -298,6 +298,7 @@ window.saveDuyuru = async function () {
   loadDuyurular();
 
   // 🔥 Bildirim gönder (admin hariç herkese)
+const usersSnap = await getDocs(collection(db, "users"));
 const title = `"Economentor" 📢 Yeni Duyuru`;
 const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
 const url = "https://economentor.netlify.app";
