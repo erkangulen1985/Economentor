@@ -305,7 +305,7 @@ window.saveDuyuru = async function () {
 
     if (userData.role !== "admin" && userData.fcmToken) {
       try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/send", {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
