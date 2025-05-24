@@ -816,16 +816,6 @@ async function postComment(id, post, el) {
           ? `“${post.title}” başlıklı gönderide sizden bahsedildi.`
           : `Bir görsel içeren gönderide sizden bahsedildi.`;
 
-        // Bildirimi Firestore'a ekle
-        await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
-          to: mentionedUser.uid,
-          from: user.uid,
-          postId: id,
-          message: messageText,
-          timestamp: Timestamp.now(),
-          read: false
-        });
-
         // FCM bildirimi gönder
         try {
           const fcmBody = messageText;
