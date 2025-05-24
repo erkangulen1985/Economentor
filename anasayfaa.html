@@ -686,8 +686,8 @@ async function postComment(id, post, el) {
   // FCM Bildirimi
   try {
     const fcmBody = post.title
-      ? `“${post.title}” adlı gönderide sizden @${mentionedUser.username} olarak bahsedildiniz.`
-      : `Bir görsel içeren gönderide sizden @${mentionedUser.username} olarak bahsedildiniz.`;
+      ? `“${post.title}” adlı gönderide sizden bahsedildi.`
+      : `Bir görsel içeren gönderide sizden bahsedildi.`;
 
     await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
       method: "POST",
