@@ -404,52 +404,58 @@ usersList = usersSnap.docs.map(doc => ({
   });
 
   // Yorum yap
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("commentBtn")) {
-      const id = e.target.dataset.id;
-      const input = document.getElementById("input-" + id);
-      const text = input.value.trim();
-      if (!text) return;
-      const ref = doc(db, "analizler", id);
-      const comment = {
-        user: uid,
-        username,
-        text,
-        timestamp: new Date().toISOString()
-      };
-      await updateDoc(ref, {
-        comments: arrayUnion(comment)
-      });
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("commentBtn")) {
+    const id = e.target.dataset.id;
+    const input = document.getElementById("input-" + id);
+    const text = input.value.trim();
+    if (!text) return;
 
-  const mentions = text.match(/@(\w+[\.\w]*)/g);
-  for (const mention of mentions || []) {
-  const name = mention.substring(1).toLowerCase();
-  const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
-  if (mentionedUser && mentionedUser.uid !== uid) {
-    await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
-      to: mentionedUser.uid,
-      from: uid,
-      videoId: id,
-      message: `"${data.title || 'Bir analiz'}" başlıklı analizde sizden bahsedildi.`,
-      timestamp: Timestamp.now(),
-      read: false
+    const ref = doc(db, "analizler", id);
+    const comment = {
+      user: uid,
+      username,
+      text,
+      timestamp: new Date().toISOString()
+    };
+    await updateDoc(ref, {
+      comments: arrayUnion(comment)
     });
-  }
-}
 
-      const list = document.getElementById("commentList-" + id);
-      const div = document.createElement("div");
-      div.classList.add("comment");
-      div.innerHTML = `
-        <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
-        <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
-      `;
-      list.insertBefore(div, list.firstChild);
-      input.value = "";
-const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-if (countEl) countEl.textContent = list.children.length;
+    // ✅ YENİ: Başlık DOM'dan alınır
+    const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
+
+    // 👥 Bahsetmeler
+    const mentions = text.match(/@(\w+[\.\w]*)/g);
+    for (const mention of mentions || []) {
+      const name = mention.substring(1).toLowerCase();
+      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+      if (mentionedUser && mentionedUser.uid !== uid) {
+        await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
+          to: mentionedUser.uid,
+          from: uid,
+          videoId: id,
+          message: `"${title}" başlıklı analizde sizden bahsedildi.`,
+          timestamp: Timestamp.now(),
+          read: false
+        });
+      }
     }
-  });
+
+    const list = document.getElementById("commentList-" + id);
+    const div = document.createElement("div");
+    div.classList.add("comment");
+    div.innerHTML = `
+      <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
+      <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
+    `;
+    list.insertBefore(div, list.firstChild);
+    input.value = "";
+
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+    if (countEl) countEl.textContent = list.children.length;
+  }
+});
 
   // Yorum sil
   document.addEventListener("click", async (e) => {
@@ -477,59 +483,14 @@ if (countEl) countEl.textContent = comments.length;
   });
 
   // Yorumları göster/gizle
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("commentBtn")) {
-    const id = e.target.dataset.id;
-    const input = document.getElementById("input-" + id);
-    const text = input.value.trim();
-    if (!text) return;
-
-    const ref = doc(db, "analizler", id);
-    const comment = {
-      user: uid,
-      username,
-      text,
-      timestamp: new Date().toISOString()
-    };
-    await updateDoc(ref, {
-      comments: arrayUnion(comment)
-    });
-
-    // 🔧 Başlığı karttan al
-    const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
-
-    // 🔔 Bahsetme kontrolü ve bildirim gönderme
-    const mentions = text.match(/@(\w+[\.\w]*)/g);
-    for (const mention of mentions || []) {
-      const name = mention.substring(1).toLowerCase();
-      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
-      if (mentionedUser && mentionedUser.uid !== uid) {
-        await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
-          to: mentionedUser.uid,
-          from: uid,
-          videoId: id,
-          message: `"${title}" başlıklı analizde sizden bahsedildi.`,
-          timestamp: Timestamp.now(),
-          read: false
-        });
-      }
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("toggle-comments")) {
+      const id = e.target.dataset.id;
+      const section = document.getElementById("comments-" + id);
+      section.style.display = section.style.display === "none" ? "block" : "none";
+      e.target.textContent = section.style.display === "block" ? "💬 Yorumları Gizle" : "💬 Yorumları Göster";
     }
-
-    // Yorumu anında göster
-    const list = document.getElementById("commentList-" + id);
-    const div = document.createElement("div");
-    div.classList.add("comment");
-    div.innerHTML = `
-      <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
-      <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
-    `;
-    list.insertBefore(div, list.firstChild);
-    input.value = "";
-
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = list.children.length;
-  }
-});
+  });
 });
 </script>
 
