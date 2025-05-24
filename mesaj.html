@@ -866,6 +866,9 @@ if (mentions) {
 
       // Firestore'a bildirim
       await createNotificationForUser(mentionedUser.uid, messageText);
+    }
+  }
+}
     
 try {
 const recipientDoc = await getDoc(doc(db, "users", selectedFriendId));
@@ -889,7 +892,7 @@ if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
       });
     } catch (err) {
       console.error("Bildirim gönderme hatası:", err);
-     }
+    }
   }
 }); 
 
