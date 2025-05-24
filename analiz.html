@@ -405,7 +405,6 @@ usersList = usersSnap.docs.map(doc => ({
 
   // Yorum yap
   document.addEventListener("click", async (e) => {
-    const mentions = text.match(/@(\w+[\.\w]*)/g);
     if (e.target.classList.contains("commentBtn")) {
       const id = e.target.dataset.id;
       const input = document.getElementById("input-" + id);
