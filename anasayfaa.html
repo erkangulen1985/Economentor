@@ -808,6 +808,16 @@ async function postComment(id, post, el) {
   el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
   renderComments(el.querySelector(".comment-list"), updatedComments, user.uid);
 }
+async function createNotificationForUser(uid, message, postId = null) {
+  const docId = `${uid}_${Date.now()}`;
+  await setDoc(doc(db, "notifications", docId), {
+    to: uid,
+    message: message,
+    postId: postId,
+    timestamp: Timestamp.now(),
+    read: false
+  });
+}
 
 let usersList = [];
 let activeInput = null;
