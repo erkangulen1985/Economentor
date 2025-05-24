@@ -793,15 +793,15 @@ async function postComment(id, post, el) {
         url: "https://economentor.netlify.app"
       })
     });
-  } catch (err) {
-    console.error("FCM bildirim gönderilemedi:", err);
-  }
-}       
-      else {
-        console.log("Bildirim gönderilmedi. Eşleşme bulunamadı veya kendine bahsetti.");
-      }
-    }
-  }
+  // FCM başarılı olsa da Firestore'a da ekleyelim (yedekli çalışır)
+  await createNotificationForUser(mentionedUser.uid, messageText, id);
+
+} catch (err) {
+  console.error("FCM bildirim gönderilemedi:", err);
+
+  // FCM başarısızsa yine de Firestore'a ekle
+  await createNotificationForUser(mentionedUser.uid, messageText, id);
+}
 
   const updatedComments = [...(post.comments || []), newComment];
   post.comments = updatedComments;
