@@ -622,7 +622,13 @@ async function dislikePost(id, post, el) {
 }
 
 async function postComment(id, post, el) {
-  if (!usersList.length) await loadUsers();
+  if (!usersList.length) {
+    console.log("usersList boştu, yeniden yükleniyor...");
+    await loadUsers();
+  }
+
+  console.log("usersList:", usersList); // listeyi yazdır
+
   const input = document.getElementById(`commentInput-${id}`);
   const text = input.value.trim();
   if (!text) return alert("Yorum boş olamaz.");
@@ -642,13 +648,17 @@ async function postComment(id, post, el) {
   await updateDoc(ref, { comments: arrayUnion(newComment) });
   input.value = "";
 
-  // Bildirim: yorumda bahsedilen kullanıcıları tespit et
   const mentions = text.match(/@(\w+)/g);
+  console.log("Mentions bulundu:", mentions);
+
   if (mentions) {
     for (let mention of mentions) {
       const name = mention.substring(1).toLowerCase();
       const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+      console.log("Bahsedilen kullanıcı:", mentionedUser);
+
       if (mentionedUser && mentionedUser.uid !== user.uid) {
+        console.log("BİLDİRİM GÖNDERİLİYOR...");
         await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
           to: mentionedUser.uid,
           from: user.uid,
@@ -657,6 +667,8 @@ async function postComment(id, post, el) {
           timestamp: Timestamp.now(),
           read: false
         });
+      } else {
+        console.log("Bildirim gönderilmedi. Eşleşme bulunamadı veya kendine bahsetti.");
       }
     }
   }
