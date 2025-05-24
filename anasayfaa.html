@@ -339,6 +339,24 @@ nav a:hover {
   background-color: #333;
 }
 
+.notification-item {
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.delete-notification-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: #f44;
+  font-size: 18px;
+  cursor: pointer;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -544,6 +562,8 @@ badgeContainer.innerHTML = `
     alert("Kullanıcı bilgisi bulunamadı.");
     location.href = "index.html";
   }
+
+  loadRealTimeNotifications(user.uid);
   await loadPosts();
 });
 
@@ -872,6 +892,44 @@ function insertMention(username) {
   input.value = before + after;
   input.focus();
   hideMentionBox();
+}
+
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+function loadRealTimeNotifications(uid) {
+  const notiRef = collection(db, "notifications");
+  const q = query(notiRef, orderBy("timestamp", "desc"));
+  const notificationsList = document.getElementById("notificationsList");
+
+  // Gerçek zamanlı dinleme
+  onSnapshot(q, (snapshot) => {
+    notificationsList.innerHTML = ""; // Önce temizle
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.to !== uid) return; // Sadece kullanıcıya aitse göster
+
+      const item = document.createElement("div");
+      item.className = "notification-item";
+      item.style.marginBottom = "15px";
+      item.innerHTML = `
+        <div style="text-align:left">
+          ${data.message}<br/>
+          <small>${new Date(data.timestamp.toDate()).toLocaleString("tr-TR")}</small>
+        </div>
+        <button data-id="${docSnap.id}" class="delete-notification-btn">❌</button>
+      `;
+
+      notificationsList.appendChild(item);
+    });
+
+    // Silme butonları
+    document.querySelectorAll(".delete-notification-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-id");
+        await deleteDoc(doc(db, "notifications", id));
+      });
+    });
+  });
 }
 
 // Load user list once on load
