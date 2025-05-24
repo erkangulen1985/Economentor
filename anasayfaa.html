@@ -90,41 +90,41 @@ nav a:hover {
   font-weight: bold;
 }
 
-.content-flex {
+.content-row {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
-  padding: 40px;
-  max-width: 1000px;
+  gap: 30px;
   margin: 100px auto 0 auto;
-  background: rgba(0, 0, 0, 0.85);
-  border-radius: 12px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  max-width: 1200px;
+  padding: 30px;
+  flex-wrap: wrap;
 }
 
-.welcome-box {
-  flex: 1;
-}
-
+.welcome-box,
 .notification-box {
-  width: 300px;
-  background-color: rgba(0, 0, 0, 0.95);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+  flex: 1 1 48%;
   color: white;
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
-.notification-scroll::-webkit-scrollbar {
+.scrollable-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.scrollable-list::-webkit-scrollbar {
   width: 6px;
 }
-.notification-scroll::-webkit-scrollbar-thumb {
+.scrollable-list::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
-.notification-scroll::-webkit-scrollbar-thumb:hover {
+.scrollable-list::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
@@ -382,7 +382,13 @@ nav a:hover {
     padding: 12px;
     font-size: 16px;
   }
-}
+  .content-row {
+    flex-direction: column;
+  }
+  .welcome-box,
+  .notification-box {
+    flex: 1 1 100%;
+  }
 }
 </style>
 </head>
@@ -405,16 +411,16 @@ nav a:hover {
   <a href="index.html"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
 </nav>
 
-<div class="content-flex">
+<div class="content-row">
   <div class="welcome-box">
     <h2 id="welcomeMessage"></h2>
-    <div id="roleBadge" style="margin-top: 10px;"></div>
+    <div id="roleBadge"></div>
   </div>
 
   <div class="notification-box">
-    <h3 style="margin-top: 0; font-size: 18px;">🔔 Bildirimler</h3>
-    <div id="notificationsList" class="notification-scroll">
-      <!-- Bildirimler buraya gelecek -->
+    <h3>🔔 Bildirimler</h3>
+    <div id="notificationsList" class="scrollable-list">
+      <!-- Bildirimler buraya gelir -->
     </div>
   </div>
 </div>
