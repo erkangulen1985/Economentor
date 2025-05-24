@@ -382,19 +382,22 @@ nav a:hover {
   <a href="index.html"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
 </nav>
 
-<div class="content">
-  <h2 id="welcomeMessage"></h2>
-  <div id="roleBadge" style="margin-top: 10px;"></div>
+<div class="content-flex">
+  <div class="welcome-box">
+    <h2 id="welcomeMessage"></h2>
+    <div id="roleBadge" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="notification-box">
+    <h3 style="margin-top: 0; font-size: 18px;">🔔 Bildirimler</h3>
+    <div id="notificationsList" class="notification-scroll">
+      <!-- Bildirimler buraya gelecek -->
+    </div>
+  </div>
 </div>
 
   <div class="post-container" id="postsContainer">
     <!-- Paylaşımlar burada görüntülenecek -->
-  </div>
-
-  <div id="notificationPanel" style="
-  <h3 style="margin-top: 0; font-size: 18px;">🔔 Bildirimler</h3>
-  <div id="notificationsList">
-    <!-- Bildirimler buraya eklenecek -->
   </div>
 </div>
 <script type="module">
