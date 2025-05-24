@@ -622,6 +622,7 @@ async function dislikePost(id, post, el) {
 }
 
 async function postComment(id, post, el) {
+  if (!usersList.length) await loadUsers();
   const input = document.getElementById(`commentInput-${id}`);
   const text = input.value.trim();
   if (!text) return alert("Yorum boş olamaz.");
