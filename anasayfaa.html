@@ -667,7 +667,43 @@ async function postComment(id, post, el) {
           timestamp: Timestamp.now(),
           read: false
         });
-      } else {
+      } 
+
+      if (mentionedUser && mentionedUser.uid !== user.uid) {
+  const messageText = post.title
+    ? `“${post.title}” başlıklı gönderide sizden bahsedildi.`
+    : `Bir görsel içeren gönderide sizden bahsedildi.`;
+
+  await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
+    to: mentionedUser.uid,
+    from: user.uid,
+    postId: id,
+    message: messageText,
+    timestamp: Timestamp.now(),
+    read: false
+  });
+
+  // FCM Bildirimi
+  try {
+    const fcmBody = post.title
+      ? `“${post.title}” adlı gönderide sizden @${mentionedUser.username} olarak bahsedildiniz.`
+      : `Bir görsel içeren gönderide sizden @${mentionedUser.username} olarak bahsedildiniz.`;
+
+    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uid: mentionedUser.uid,
+        title: "\"Economentor\" 📝 Bahsedildiniz!",
+        body: fcmBody,
+        url: "https://economentor.netlify.app"
+      })
+    });
+  } catch (err) {
+    console.error("FCM bildirim gönderilemedi:", err);
+  }
+}       
+      else {
         console.log("Bildirim gönderilmedi. Eşleşme bulunamadı veya kendine bahsetti.");
       }
     }
