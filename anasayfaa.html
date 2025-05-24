@@ -657,6 +657,51 @@ toggleBtn.addEventListener("click", () => {
   });
 }
 
+function listenToNotifications(userId) {
+  const notiRef = collection(db, "notifications");
+  const q = query(notiRef, where("to", "==", userId), orderBy("timestamp", "desc"));
+
+  onSnapshot(q, (snapshot) => {
+    const container = document.getElementById("notificationsList");
+    container.innerHTML = ""; // Önce temizle
+    if (snapshot.empty) {
+      container.innerHTML = "<p style='color:#ccc'>Henüz bildiriminiz yok.</p>";
+      return;
+    }
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const msg = document.createElement("div");
+      msg.className = "notification-item";
+      msg.style.cssText = `
+        background: #111; padding: 10px 15px; margin-bottom: 10px;
+        border-radius: 8px; color: #fff; position: relative;
+        text-align: left; font-size: 14px;
+      `;
+
+      msg.innerHTML = `
+        <div>${data.message}</div>
+        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
+          ${new Date(data.timestamp.toDate()).toLocaleString("tr-TR")}
+        </div>
+        <button data-id="${doc.id}" class="delete-noti-btn" style="
+          position: absolute; top: 8px; right: 10px;
+          background: none; border: none; color: red; font-size: 16px; cursor: pointer;">❌</button>
+      `;
+
+      container.appendChild(msg);
+    });
+  });
+}
+
+// ❌ Bildirimi sil
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-noti-btn")) {
+    const id = e.target.getAttribute("data-id");
+    await deleteDoc(doc(db, "notifications", id));
+  }
+});
+
 function renderComments(container, comments, userId) {
   container.innerHTML = "";
   comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
