@@ -306,16 +306,18 @@ onAuthStateChanged(auth, async (user) => {
 
     if (role !== "admin" && fcmToken) {
       try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token: fcmToken,
-            title: "\"Economentor\" 📢 Yeni Duyuru",
-            body: text,
-            url: "https://economentor.netlify.app"
-          })
-        });
+await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    uid: mentionedUser.uid,                // FCM sunucusu bu UID ile tokeni bulmalı
+    title: "\"Economentor\" 📢 Yeni Duyuru",
+    body: "Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!",
+    url: "https://economentor.netlify.app" // Bildirime tıklanınca yönlenecek yer
+  })
+});
       } catch (err) {
         console.error(`Bildirim gönderilemedi (${uid}):`, err);
       }
