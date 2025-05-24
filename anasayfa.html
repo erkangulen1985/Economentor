@@ -437,7 +437,7 @@ badgeContainer.innerHTML = `
 async function loadPosts() {
   const postsRef = collection(db, "posts");
   const q = query(postsRef, orderBy("timestamp", "desc"));
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocs(q); 
 
   querySnapshot.forEach((postDoc) => {
     const post = postDoc.data();
