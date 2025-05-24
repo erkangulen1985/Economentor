@@ -444,16 +444,21 @@ document.addEventListener("click", async (e) => {
       const mentionedUserDoc = await getDoc(doc(db, "users", mentionedUser.uid));
 const fcmToken = mentionedUserDoc.data().fcmToken;
 
-if (fcmToken) {
-  fetch("https://economentor-fcm.onrender.com/send", {
+try {
+  const fcmBody = `"${title}" başlıklı analizde sizden bahsedildi.`;
+
+  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      token: fcmToken,
-      title: `"Economentor"`,
-      body: `"${title}" başlıklı analizde sizden bahsedildi.`,
-    }),
+      uid: mentionedUser.uid,
+      title: "\"Economentor\" 🧠 Yeni Bahsetme!",
+      body: fcmBody,
+      url: "https://economentor.netlify.app"
+    })
   });
+} catch (err) {
+  console.error("FCM gönderimi başarısız:", err);
 }
     }
 
