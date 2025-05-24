@@ -228,6 +228,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+let usersList = [];
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
@@ -239,7 +241,6 @@ onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById("videoContainer");
   container.innerHTML = "";
 
-let usersList = [];
 const usersSnap = await getDocs(collection(db, "users"));
 usersList = usersSnap.docs.map(doc => ({
   uid: doc.id,
