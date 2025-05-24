@@ -856,7 +856,18 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     scrollToBottom();
     
 // 🔔 Push bildirim gönder
-    try {
+if (mentions) {
+  for (let mention of mentions) {
+    const name = mention.substring(1).toLowerCase();
+    const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+
+    if (mentionedUser && mentionedUser.uid !== currentUser.uid) {
+      const messageText = `@${name} size mesajda bahsetti.`;
+
+      // Firestore'a bildirim
+      await createNotificationForUser(mentionedUser.uid, messageText);
+    
+try {
 const recipientDoc = await getDoc(doc(db, "users", selectedFriendId));
 
 let notificationTitle = "\"Economentor\" 📩 Yeni mesaj!";
@@ -879,7 +890,6 @@ if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
     } catch (err) {
       console.error("Bildirim gönderme hatası:", err);
      }
-    await createNotificationForUser(mentionedUser.uid, messageText, id);
   }
 }); 
 
