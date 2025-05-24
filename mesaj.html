@@ -853,21 +853,13 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       inboxHasNew: true
     });
 
+    await createNotificationForUser(
+  selectedFriendId,
+  `"${text}" içerikli yeni bir mesaj aldınız.`,
+  null // istersen convoId ekleyebilirsin
+);
+
     scrollToBottom();
-
-    // 🔔 MENTION TESPİTİ VE BİLDİRİM
-    const mentions = text.match(/@([\w\.\-_]+)/g);  // ← işte bu eksikti
-    if (mentions && Array.isArray(mentions)) {
-      for (let mention of mentions) {
-        const name = mention.substring(1).toLowerCase();
-        const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
-
-        if (mentionedUser && mentionedUser.uid !== currentUser.uid) {
-          const messageText = `@${name} size mesajda bahsetti.`;
-          await createNotificationForUser(mentionedUser.uid, messageText);
-        }
-      }
-    }
 
     // 🔔 Push bildirim gönder
     try {
