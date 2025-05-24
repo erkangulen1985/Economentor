@@ -475,6 +475,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -894,36 +895,39 @@ function insertMention(username) {
   hideMentionBox();
 }
 
-import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
 function loadRealTimeNotifications(uid) {
-  const notiRef = collection(db, "notifications");
-  const q = query(notiRef, orderBy("timestamp", "desc"));
   const notificationsList = document.getElementById("notificationsList");
 
-  // Gerçek zamanlı dinleme
-  onSnapshot(q, (snapshot) => {
-    notificationsList.innerHTML = ""; // Önce temizle
+  const notiQuery = query(
+    collection(db, "notifications"),
+    where("to", "==", uid),
+    orderBy("timestamp", "desc")
+  );
+
+  onSnapshot(notiQuery, (snapshot) => {
+    notificationsList.innerHTML = "";
+
+    if (snapshot.empty) {
+      notificationsList.innerHTML = "<p>Yeni bildiriminiz yok.</p>";
+      return;
+    }
+
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      if (data.to !== uid) return; // Sadece kullanıcıya aitse göster
-
-      const item = document.createElement("div");
-      item.className = "notification-item";
-      item.style.marginBottom = "15px";
-      item.innerHTML = `
-        <div style="text-align:left">
-          ${data.message}<br/>
-          <small>${new Date(data.timestamp.toDate()).toLocaleString("tr-TR")}</small>
+      const notifEl = document.createElement("div");
+      notifEl.className = "notification-item";
+      notifEl.innerHTML = `
+        <div style="text-align:left; margin-bottom: 5px;">
+          ${data.message}<br>
+          <small style="color: #ccc;">${new Date(data.timestamp?.toDate?.() || data.timestamp).toLocaleString("tr-TR")}</small>
         </div>
-        <button data-id="${docSnap.id}" class="delete-notification-btn">❌</button>
+        <button data-id="${docSnap.id}" class="delete-notification-btn" style="margin-top: 5px;">❌ Sil</button>
+        <hr style="opacity:0.2">
       `;
-
-      notificationsList.appendChild(item);
+      notificationsList.appendChild(notifEl);
     });
 
-    // Silme butonları
-    document.querySelectorAll(".delete-notification-btn").forEach((btn) => {
+    document.querySelectorAll(".delete-notification-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         const id = btn.getAttribute("data-id");
         await deleteDoc(doc(db, "notifications", id));
@@ -931,6 +935,7 @@ function loadRealTimeNotifications(uid) {
     });
   });
 }
+
 
 // Load user list once on load
 loadUsers();
