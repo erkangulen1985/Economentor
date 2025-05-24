@@ -846,8 +846,6 @@ async function postComment(id, post, el) {
 
         } catch (err) {
           console.error("FCM bildirim gönderilemedi:", err);
-          // Hata olsa bile yine de bildirim Firestore'a eklensin
-          await createNotificationForUser(mentionedUser.uid, messageText, id);
         }
       }
     }
