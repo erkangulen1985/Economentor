@@ -376,15 +376,20 @@ nav a:hover {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 300px;
-  background: rgba(0,0,0,0.9);
-  padding: 20px;
+  width: 320px;
+  max-height: 400px;
+  background-color: rgba(0,0,0,0.95);
+  color: white;
   border-radius: 10px;
-  box-shadow: 0 0 10px black;
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+  padding: 20px;
+  overflow-y: auto;
   z-index: 9999;
 ">
-  <h3 style="margin-top:0; font-size: 18px; color: #66ccff;">📢 Bildirimler</h3>
-  <div id="notificationsList" style="max-height: 400px; overflow-y: auto;"></div>
+  <h3 style="margin-top: 0; font-size: 18px;">🔔 Bildirimler</h3>
+  <div id="notificationsList">
+    <!-- Bildirimler buraya eklenecek -->
+  </div>
 </div>
 
   <div class="post-container" id="postsContainer">
