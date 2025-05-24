@@ -323,8 +323,9 @@ for (const userDoc of usersSnap.docs) {
     });
   } catch (err) {
     console.error("Bildirim gönderilemedi (" + uid + "):", err);
+    }
   }
-}
+};
 
         window.loadDuyurular = async function () {
             const duyuruList = document.getElementById("duyuruList");
