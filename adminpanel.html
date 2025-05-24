@@ -306,7 +306,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (role !== "admin" && fcmToken) {
       try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/send", {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
