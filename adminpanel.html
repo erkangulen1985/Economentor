@@ -285,15 +285,43 @@ onAuthStateChanged(auth, async (user) => {
         }
 
         window.saveDuyuru = async function () {
-            const text = document.getElementById("duyuruText").value.trim();
-            if (!text) return alert("Duyuru metni boş olamaz.");
-            await addDoc(collection(db, "announcements"), {
-                text,
-                createdAt: Timestamp.now()
-            });
-            document.getElementById("duyuruText").value = "";
-            loadDuyurular();
-        }
+  const text = document.getElementById("duyuruText").value.trim();
+  if (!text) return alert("Duyuru metni boş olamaz.");
+
+  const newDocRef = await addDoc(collection(db, "announcements"), {
+    text,
+    createdAt: Timestamp.now()
+  });
+
+  document.getElementById("duyuruText").value = "";
+  loadDuyurular();
+
+  // 🔥 Kullanıcılara Bildirim Gönder
+  const usersSnap = await getDocs(collection(db, "users"));
+  for (const docSnap of usersSnap.docs) {
+    const user = docSnap.data();
+    const uid = docSnap.id;
+    const role = user.role || "user";
+    const fcmToken = user.fcmToken;
+
+    if (role !== "admin" && fcmToken) {
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: fcmToken,
+            title: "\"Economentor\" 📢 Yeni Duyuru",
+            body: text,
+            url: "https://economentor.netlify.app"
+          })
+        });
+      } catch (err) {
+        console.error(`Bildirim gönderilemedi (${uid}):`, err);
+      }
+    }
+  }
+};
 
         window.loadDuyurular = async function () {
             const duyuruList = document.getElementById("duyuruList");
