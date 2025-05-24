@@ -876,13 +876,26 @@ if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
           url: "https://economentor.netlify.app"
         })
       });
-    } catch (err) {
+    }     
+    await createNotificationForUser(mentionedUser.uid, messageText, id);
+    catch (err) {
       console.error("Bildirim gönderme hatası:", err);
     }
   }
 }); 
 
 window.goHome = () => location.href = "anasayfa.html";
+
+async function createNotificationForUser(uid, message, postId = null) {
+  const docId = `${uid}_${Date.now()}`;
+  await setDoc(doc(db, "notifications", docId), {
+    to: uid,
+    message: message,
+    postId: postId,
+    timestamp: Timestamp.now(),
+    read: false
+  });
+}
 
 function filterChatList() {
   const searchInput = window.innerWidth <= 768
