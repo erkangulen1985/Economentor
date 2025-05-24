@@ -158,6 +158,31 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+.mention-suggestions {
+  position: absolute;
+  background-color: #111;
+  color: white;
+  border: 1px solid #444;
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 9999;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 4px 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.mention-suggestions div {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.mention-suggestions div:hover {
+  background-color: #333;
+}
+
   </style>
 </head>
 <body>
@@ -214,6 +239,13 @@ onAuthStateChanged(auth, async (user) => {
   const container = document.getElementById("videoContainer");
   container.innerHTML = "";
 
+let usersList = [];
+const usersSnap = await getDocs(collection(db, "users"));
+usersList = usersSnap.docs.map(doc => ({
+  uid: doc.id,
+  username: doc.data().username
+}));
+  
   // 🔥 Eğer kullanıcı 'user' rolünde ise VIP uyarısı göster
   if (currentUserRole === "user") {
     const warning = document.createElement("div");
@@ -285,7 +317,7 @@ onAuthStateChanged(auth, async (user) => {
         </div>
       </div>
     `;
-
+    
     container.appendChild(card);
   });
 
@@ -373,6 +405,7 @@ onAuthStateChanged(auth, async (user) => {
 
   // Yorum yap
   document.addEventListener("click", async (e) => {
+    const mentions = text.match(/@(\w+[\.\w]*)/g);
     if (e.target.classList.contains("commentBtn")) {
       const id = e.target.dataset.id;
       const input = document.getElementById("input-" + id);
@@ -388,6 +421,22 @@ onAuthStateChanged(auth, async (user) => {
       await updateDoc(ref, {
         comments: arrayUnion(comment)
       });
+
+  const mentions = text.match(/@(\w+[\.\w]*)/g);
+  for (const mention of mentions || []) {
+  const name = mention.substring(1).toLowerCase();
+  const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+  if (mentionedUser && mentionedUser.uid !== uid) {
+    await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
+      to: mentionedUser.uid,
+      from: uid,
+      videoId: id,
+      message: `"${data.title || 'Bir analiz'}" başlıklı analizde sizden bahsedildi.`,
+      timestamp: Timestamp.now(),
+      read: false
+    });
+  }
+}
 
       const list = document.getElementById("commentList-" + id);
       const div = document.createElement("div");
