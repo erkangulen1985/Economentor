@@ -248,11 +248,14 @@ nav a:hover {
   border: 1px solid #444;
   max-height: 150px;
   overflow-y: auto;
+  overflow-x: hidden; /* Bu satırı ekle */
   z-index: 9999;
   border-radius: 6px;
   font-size: 14px;
   padding: 4px 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4); /* görünürlüğü artırır */
 }
+  
 .mention-suggestions div {
   padding: 8px 12px;
   cursor: pointer;
@@ -686,7 +689,7 @@ document.addEventListener("input", (e) => {
   
   if (match) {
     const term = match[1].toLowerCase();
-    const filtered = usersList.filter(u => u.username.toLowerCase().startsWith(term)).slice(0, 5);
+    const filtered = usersList.filter(u => u.username.toLowerCase().startsWith(term));
     showMentionBox(filtered, e.target);
   } else {
     hideMentionBox();
