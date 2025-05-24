@@ -284,11 +284,12 @@ onAuthStateChanged(auth, async (user) => {
 }
         }
 
-        window.saveDuyuru = async function () {
+window.saveDuyuru = async function () {
   const text = document.getElementById("duyuruText").value.trim();
   if (!text) return alert("Duyuru metni boş olamaz.");
 
-  const newDocRef = await addDoc(collection(db, "announcements"), {
+  // Firestore'a duyuruyu kaydet
+  await addDoc(collection(db, "announcements"), {
     text,
     createdAt: Timestamp.now()
   });
@@ -296,34 +297,31 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("duyuruText").value = "";
   loadDuyurular();
 
-  // 🔥 Kullanıcılara Bildirim Gönder
+  // 🔥 Bildirim gönder (admin hariç herkese)
   const usersSnap = await getDocs(collection(db, "users"));
   for (const docSnap of usersSnap.docs) {
-    const user = docSnap.data();
+    const userData = docSnap.data();
     const uid = docSnap.id;
-    const role = user.role || "user";
-    const fcmToken = user.fcmToken;
 
-    if (role !== "admin" && fcmToken) {
+    if (userData.role !== "admin" && userData.fcmToken) {
       try {
-await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    uid: mentionedUser.uid,                // FCM sunucusu bu UID ile tokeni bulmalı
-    title: "\"Economentor\" 📢 Yeni Duyuru",
-    body: "Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!",
-    url: "https://economentor.netlify.app" // Bildirime tıklanınca yönlenecek yer
-  })
-});
+        await fetch("https://fcm-server-1-3uer.onrender.com/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token: userData.fcmToken,
+            title: `"Economentor" 📢 Yeni Duyuru`,
+            body: "Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!",
+            url: "https://economentor.netlify.app"
+          })
+        });
       } catch (err) {
-        console.error(`Bildirim gönderilemedi (${uid}):`, err);
+        console.error("Bildirim gönderilemedi (" + uid + "):", err.message);
       }
     }
   }
 };
+
 
         window.loadDuyurular = async function () {
             const duyuruList = document.getElementById("duyuruList");
