@@ -832,7 +832,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
   const editId = input.dataset.editing;
   if (!text || !selectedFriendId || !currentUser) return;
 
-  input.value = "";  // ⬅️ Mesaj kutusunu hemen temizle
+  input.value = "";
   const convoId = getConversationId(currentUser.uid, selectedFriendId);
   const msgCol = collection(db, "conversations", convoId, "messages");
 
@@ -854,35 +854,32 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
     });
 
     scrollToBottom();
-    
-// 🔔 Push bildirim gönder
-if (mentions) {
-  for (let mention of mentions) {
-    const name = mention.substring(1).toLowerCase();
-    const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
 
-    if (mentionedUser && mentionedUser.uid !== currentUser.uid) {
-      const messageText = `@${name} size mesajda bahsetti.`;
+    // 🔔 MENTION TESPİTİ VE BİLDİRİM
+    const mentions = text.match(/@([\w\.\-_]+)/g);  // ← işte bu eksikti
+    if (mentions && Array.isArray(mentions)) {
+      for (let mention of mentions) {
+        const name = mention.substring(1).toLowerCase();
+        const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
 
-      // Firestore'a bildirim
-      await createNotificationForUser(mentionedUser.uid, messageText);
+        if (mentionedUser && mentionedUser.uid !== currentUser.uid) {
+          const messageText = `@${name} size mesajda bahsetti.`;
+          await createNotificationForUser(mentionedUser.uid, messageText);
+        }
+      }
     }
-  }
-}
-    
-try {
-const recipientDoc = await getDoc(doc(db, "users", selectedFriendId));
 
-let notificationTitle = "\"Economentor\" 📩 Yeni mesaj!";
-if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
-  notificationTitle = "\"Economentor(Admin)\" 📩 Yeni mesaj!";
-}
+    // 🔔 Push bildirim gönder
+    try {
+      const recipientDoc = await getDoc(doc(db, "users", selectedFriendId));
+      let notificationTitle = "\"Economentor\" 📩 Yeni mesaj!";
+      if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
+        notificationTitle = "\"Economentor(Admin)\" 📩 Yeni mesaj!";
+      }
 
       await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: selectedFriendId,
           title: notificationTitle,
@@ -894,8 +891,8 @@ if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
       console.error("Bildirim gönderme hatası:", err);
     }
   }
-}); 
-
+});
+  
 window.goHome = () => location.href = "anasayfa.html";
 
 async function createNotificationForUser(uid, message, postId = null) {
