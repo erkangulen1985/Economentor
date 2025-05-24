@@ -298,30 +298,33 @@ window.saveDuyuru = async function () {
   loadDuyurular();
 
   // 🔥 Bildirim gönder (admin hariç herkese)
-  const usersSnap = await getDocs(collection(db, "users"));
-  for (const docSnap of usersSnap.docs) {
-    const userData = docSnap.data();
-    const uid = docSnap.id;
+const title = `"Economentor" 📢 Yeni Duyuru`;
+const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
+const url = "https://economentor.netlify.app";
 
-    if (userData.role !== "admin" && userData.fcmToken) {
-      try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            token: userData.fcmToken,
-            title: `"Economentor" 📢 Yeni Duyuru`,
-            body: "Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!",
-            url: "https://economentor.netlify.app"
-          })
-        });
-      } catch (err) {
-        console.error("Bildirim gönderilemedi (" + uid + "):", err.message);
-      }
-    }
+for (const userDoc of usersSnap.docs) {
+  const uid = userDoc.id;
+  const userData = userDoc.data();
+
+  if (userData.role === "admin") continue;
+
+  try {
+    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        uid,
+        title,
+        body,
+        url
+      })
+    });
+  } catch (err) {
+    console.error("Bildirim gönderilemedi (" + uid + "):", err);
   }
-};
-
+}
 
         window.loadDuyurular = async function () {
             const duyuruList = document.getElementById("duyuruList");
