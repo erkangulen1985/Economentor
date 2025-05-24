@@ -721,8 +721,6 @@ async function postComment(id, post, el) {
     await loadUsers();
   }
 
-  console.log("usersList:", usersList); // listeyi yazdır
-
   const input = document.getElementById(`commentInput-${id}`);
   const text = input.value.trim();
   if (!text) return alert("Yorum boş olamaz.");
@@ -743,73 +741,60 @@ async function postComment(id, post, el) {
   input.value = "";
 
   const mentions = text.match(/@([\w\.\-_]+)/g);
-  console.log("Mentions bulundu:", mentions);
-
   if (mentions) {
     for (let mention of mentions) {
       const name = mention.substring(1).toLowerCase();
       const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
-      console.log("Bahsedilen kullanıcı:", mentionedUser);
 
       if (mentionedUser && mentionedUser.uid !== user.uid) {
-        console.log("BİLDİRİM GÖNDERİLİYOR...");
+        const messageText = post.title
+          ? `“${post.title}” başlıklı gönderide sizden bahsedildi.`
+          : `Bir görsel içeren gönderide sizden bahsedildi.`;
+
+        // Bildirimi Firestore'a ekle
         await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
           to: mentionedUser.uid,
           from: user.uid,
           postId: id,
-          message: `“${post.title || 'Bir gönderi'}” başlıklı gönderide sizden bahsedildi.`,
+          message: messageText,
           timestamp: Timestamp.now(),
           read: false
         });
-      } 
 
-      if (mentionedUser && mentionedUser.uid !== user.uid) {
-  const messageText = post.title
-    ? `“${post.title}” başlıklı gönderide sizden bahsedildi.`
-    : `Bir görsel içeren gönderide sizden bahsedildi.`;
+        // FCM bildirimi gönder
+        try {
+          const fcmBody = messageText;
 
-  await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
-    to: mentionedUser.uid,
-    from: user.uid,
-    postId: id,
-    message: messageText,
-    timestamp: Timestamp.now(),
-    read: false
-  });
+          await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid: mentionedUser.uid,
+              title: "\"Economentor\" 📝 Bahsedildiniz!",
+              body: fcmBody,
+              url: "https://economentor.netlify.app"
+            })
+          });
 
-  // FCM Bildirimi
-  try {
-    const fcmBody = post.title
-      ? `“${post.title}” adlı gönderide sizden bahsedildi.`
-      : `Bir görsel içeren gönderide sizden bahsedildi.`;
+          // FCM başarılı olsa da Firestore'a da ekleyelim (yedekli)
+          await createNotificationForUser(mentionedUser.uid, messageText, id);
 
-    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: mentionedUser.uid,
-        title: "\"Economentor\" 📝 Bahsedildiniz!",
-        body: fcmBody,
-        url: "https://economentor.netlify.app"
-      })
-    });
-  // FCM başarılı olsa da Firestore'a da ekleyelim (yedekli çalışır)
-  await createNotificationForUser(mentionedUser.uid, messageText, id);
+        } catch (err) {
+          console.error("FCM bildirim gönderilemedi:", err);
+          // Hata olsa bile yine de bildirim Firestore'a eklensin
+          await createNotificationForUser(mentionedUser.uid, messageText, id);
+        }
+      }
+    }
+  }
 
-} catch (err) {
-  console.error("FCM bildirim gönderilemedi:", err);
-
-  // FCM başarısızsa yine de Firestore'a ekle
-  await createNotificationForUser(mentionedUser.uid, messageText, id);
-}
-
+  // Yorumları güncelle
   const updatedComments = [...(post.comments || []), newComment];
   post.comments = updatedComments;
   el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
   renderComments(el.querySelector(".comment-list"), updatedComments, user.uid);
-  }
 }
-    
+
 async function createNotificationForUser(uid, message, postId = null) {
   const docId = `${uid}_${Date.now()}`;
   await setDoc(doc(db, "notifications", docId), {
@@ -818,8 +803,7 @@ async function createNotificationForUser(uid, message, postId = null) {
     postId: postId,
     timestamp: Timestamp.now(),
     read: false
-    });
-  }
+  });
 }
 
 let usersList = [];
@@ -893,6 +877,5 @@ function insertMention(username) {
 // Load user list once on load
 loadUsers();
 </script>
-
 </body>
 </html>
