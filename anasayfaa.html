@@ -475,7 +475,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -563,9 +563,8 @@ badgeContainer.innerHTML = `
     alert("Kullanıcı bilgisi bulunamadı.");
     location.href = "index.html";
   }
-
-  loadRealTimeNotifications(user.uid);
   await loadPosts();
+  listenToNotifications(user.uid);
 });
 
 // Gönderileri yükle
@@ -939,48 +938,6 @@ function insertMention(username) {
   input.focus();
   hideMentionBox();
 }
-
-function loadRealTimeNotifications(uid) {
-  const notificationsList = document.getElementById("notificationsList");
-
-  const notiQuery = query(
-    collection(db, "notifications"),
-    where("to", "==", uid),
-    orderBy("timestamp", "desc")
-  );
-
-  onSnapshot(notiQuery, (snapshot) => {
-    notificationsList.innerHTML = "";
-
-    if (snapshot.empty) {
-      notificationsList.innerHTML = "<p>Yeni bildiriminiz yok.</p>";
-      return;
-    }
-
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      const notifEl = document.createElement("div");
-      notifEl.className = "notification-item";
-      notifEl.innerHTML = `
-        <div style="text-align:left; margin-bottom: 5px;">
-          ${data.message}<br>
-          <small style="color: #ccc;">${new Date(data.timestamp?.toDate?.() || data.timestamp).toLocaleString("tr-TR")}</small>
-        </div>
-        <button data-id="${docSnap.id}" class="delete-notification-btn" style="margin-top: 5px;">❌ Sil</button>
-        <hr style="opacity:0.2">
-      `;
-      notificationsList.appendChild(notifEl);
-    });
-
-    document.querySelectorAll(".delete-notification-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-id");
-        await deleteDoc(doc(db, "notifications", id));
-      });
-    });
-  });
-}
-
 
 // Load user list once on load
 loadUsers();
