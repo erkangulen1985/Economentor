@@ -876,11 +876,10 @@ if (recipientDoc.exists() && recipientDoc.data().role === "admin") {
           url: "https://economentor.netlify.app"
         })
       });
-    }     
-    await createNotificationForUser(mentionedUser.uid, messageText, id);
-    catch (err) {
+    } catch (err) {
       console.error("Bildirim gönderme hatası:", err);
-    }
+     }
+    await createNotificationForUser(mentionedUser.uid, messageText, id);
   }
 }); 
 
