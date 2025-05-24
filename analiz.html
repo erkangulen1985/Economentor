@@ -441,6 +441,20 @@ document.addEventListener("click", async (e) => {
           read: false
         });
       }
+      const mentionedUserDoc = await getDoc(doc(db, "users", mentionedUser.uid));
+const fcmToken = mentionedUserDoc.data().fcmToken;
+
+if (fcmToken) {
+  fetch("https://economentor-fcm.onrender.com/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token: fcmToken,
+      title: `"Economentor"`,
+      body: `"${title}" başlıklı analizde sizden bahsedildi.`,
+    }),
+  });
+}
     }
 
     const list = document.getElementById("commentList-" + id);
@@ -501,6 +515,7 @@ function showMentionSuggestions(input, matches, start, end) {
 
   suggestionBox = document.createElement("div");
   suggestionBox.className = "mention-suggestions";
+
   matches.forEach(user => {
     const div = document.createElement("div");
     div.textContent = user.username;
@@ -518,6 +533,9 @@ function showMentionSuggestions(input, matches, start, end) {
   const rect = input.getBoundingClientRect();
   suggestionBox.style.left = rect.left + "px";
   suggestionBox.style.top = rect.bottom + window.scrollY + "px";
+
+  // ✨ Genişlik input kadar olsun
+  suggestionBox.style.width = input.offsetWidth + "px";
 }
 
 function hideMentionSuggestions() {
