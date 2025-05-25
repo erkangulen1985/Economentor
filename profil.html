@@ -265,35 +265,41 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
   try {
     const user = auth.currentUser;
-
-    // Yeni e-posta farklı mı?
     const isEmailDifferent = newEmail !== user.email;
 
-    alert("Bilgiler başarıyla kaydedildi.");
+    // 1. Bilgileri kaydet
+    await updateDoc(doc(db, "users", user.uid), {
+      fullName,
+      username,
+      dob
+    });
 
+    // 2. E-posta değişikliği gerekiyorsa işlemleri başlat
     if (isEmailDifferent) {
-      // ✅ Adım 3: Doğrulama bağlantısını oluştur
       const verifyLink = `https://economentor.com/verify-email-change.html?uid=${user.uid}`;
 
-      // ✅ Bu linki e-posta ile gönder. Örneğin EmailJS, Replit server, Firebase Extension vb.
-      // Test için sadece göster:
+      // Firestore'a geçici e-posta ve zamanı kaydet
+      await updateDoc(doc(db, "users", user.uid), {
+        pendingEmail: newEmail,
+        pendingEmailRequestedAt: new Date()
+      });
+
+      // Google Apps Script ile e-posta gönder
+      await fetch("https://script.google.com/macros/s/1RiG0zNRPkysK85esal2jS0F4kgy49cRxq3s5_ZijyNIoi5pkMBb4YUmX/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: newEmail,
+          link: verifyLink
+        })
+      });
+
       alert("Yeni e-posta adresinize doğrulama bağlantısı gönderildi:\n" + verifyLink);
+    } else {
+      alert("Bilgiler başarıyla kaydedildi.");
     }
-
-    if (isEmailDifferent) {
-  // 1. Firestore'a geçici olarak yeni e-posta ve zamanını kaydet
-  await updateDoc(doc(db, "users", user.uid), {
-    pendingEmail: newEmail,
-    pendingEmailRequestedAt: new Date()
-  });
-
-  // 2. Doğrulama bağlantısını oluştur
-  const verifyLink = `https://economentor.com/verify-email-change.html?uid=${user.uid}`;
-
-  // 3. Bu bağlantıyı gerçek projede e-posta ile gönderirsin (şimdilik sadece gösteriyoruz)
-  alert("Yeni e-posta adresinize doğrulama bağlantısı gönderildi:\n" + verifyLink);
-}
-
   } catch (err) {
     alert("Hata: " + err.message);
   }
@@ -408,7 +414,7 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     }
   }
 });
-
+  
 function doPost(e) {
   try {
     MailApp.sendEmail("onurgulen2006@gmail.com", "Script çalıştı", "doPost fonksiyonu çağrıldı!");
