@@ -380,21 +380,33 @@ document.querySelectorAll('.toggle-password').forEach(icon => {
 
 document.getElementById("updateEmailBtn").addEventListener("click", async () => {
   const newEmail = document.getElementById("newEmail").value.trim();
-  const currentPassword = prompt("Mevcut şifrenizi girin:");
+  const user = auth.currentUser;
 
-  if (!newEmail || !currentPassword) {
-    alert("Lütfen yeni e-posta adresini ve mevcut şifrenizi girin.");
+  if (!newEmail || !user?.email) {
+    alert("Yeni e-posta veya mevcut e-posta eksik.");
     return;
   }
 
+  if (newEmail === user.email) {
+    alert("E-posta zaten aynı.");
+    return;
+  }
+
+  const password = prompt("Mevcut şifrenizi girin:");
+  if (!password) return alert("İşlem iptal edildi.");
+
   try {
-    const user = auth.currentUser;
-    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    const credential = EmailAuthProvider.credential(user.email, password);
     await reauthenticateWithCredential(user, credential);
     await updateEmail(user, newEmail);
-    alert("E-posta başarıyla güncellendi!");
-    document.getElementById("newEmail").value = newEmail;
+
+    await updateDoc(doc(db, "users", user.uid), {
+      email: newEmail
+    });
+
+    alert("E-posta başarıyla güncellendi.");
   } catch (err) {
+    console.error(err.code, err.message);
     if (err.code === "auth/email-already-in-use") {
       alert("Bu e-posta zaten kullanımda.");
     } else if (err.code === "auth/invalid-email") {
@@ -403,13 +415,14 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
       alert("Mevcut şifre yanlış.");
     } else if (err.code === "auth/too-many-requests") {
       alert("Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.");
-    } else if (err.code === "auth/operation-not-allowed") {
-      alert("Firebase projenizde e-posta güncelleme izni yok. Firebase Authentication ayarlarından 'Email/Password' giriş yönteminin aktif olduğundan emin olun.");
+    } else if (err.code === "auth/requires-recent-login") {
+      alert("Lütfen tekrar giriş yapıp yeniden deneyin.");
     } else {
-      alert("Hata: " + err.message);
+      alert("Hata oluştu: " + err.message);
     }
   }
 });
+  
 </script>
 </body>
 </html>
