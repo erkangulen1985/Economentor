@@ -236,74 +236,70 @@ onAuthStateChanged(auth, async (user) => {
     await uploadVideo("vip");
   });
 
-  async function uploadVideo(visibility) {
-    const file = document.getElementById("videoFile").files[0];
-    const title = document.getElementById("videoTitle").value;
-    const description = document.getElementById("videoDesc").value;
+async function uploadVideo(visibility) {
+  const file = document.getElementById("videoFile").files[0];
+  const title = document.getElementById("videoTitle").value;
+  const description = document.getElementById("videoDesc").value;
 
-    if (!file || !title || !description) return alert("Tüm alanları doldurun.");
+  if (!file || !title || !description) return alert("Tüm alanları doldurun.");
 
-    const safeFileName = sanitizeFilename(file.name);
-    const filePath = `analiz/${Date.now()}-${safeFileName}`;
-    const { error } = await supabase.storage.from("analizler").upload(filePath, file);
-    if (error) return alert("Video yükleme hatası: " + error.message);
+  const safeFileName = sanitizeFilename(file.name);
+  const filePath = `analiz/${Date.now()}-${safeFileName}`;
+  const { error } = await supabase.storage.from("analizler").upload(filePath, file);
+  if (error) return alert("Video yükleme hatası: " + error.message);
 
-    const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
+  const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
 
-    await addDoc(collection(db, "analizler"), {
-      title,
-      description,
-      videoUrl: publicUrl,
-      videoPath: filePath,
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      timestamp: new Date(),
-      visibility: visibility
-    });
-
-    alert("Video başarıyla yüklendi!");
-    loadVideos();
-
-// 🔔 Bildirim gönder
-const usersSnap = await getDocs(collection(db, "users"));
-for (const docSnap of usersSnap.docs) {
-  const user = docSnap.data();
-  const uid = docSnap.id;
-
-  // Bildirim gönderilmeye uygun mu?
-  const shouldNotify = (
-    (visibility === "vip" && user.role === "vip") ||
-    (visibility === "all" && (user.role === "vip" || user.role === "user"))
-  );
-
-  if (!user.fcmToken || user.role === "admin" || !shouldNotify) continue;
-
-  // Firestore'a bildirim kaydet
-  await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-    to: uid,
-    message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-    postId: null,
-    timestamp: Timestamp.now(),
-    read: false
+  await addDoc(collection(db, "analizler"), {
+    title,
+    description,
+    videoUrl: publicUrl,
+    videoPath: filePath,
+    likes: 0,
+    dislikes: 0,
+    comments: [],
+    timestamp: new Date(),
+    visibility: visibility
   });
 
-  // Push bildirimi gönder
-await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    uid: uid,
-    title: `"Economentor" 🎥 Yeni Analiz Videosu!`,
-    body: `${title} eklendi.`,
-    url: "https://economentor.netlify.app"
-    })
-  })
+  alert("Video başarıyla yüklendi!");
+  loadVideos();
+
+  // 🔔 Bildirim gönder
+  const usersSnap = await getDocs(collection(db, "users"));
+  for (const docSnap of usersSnap.docs) {
+    const user = docSnap.data();
+    const uid = docSnap.id;
+
+    const shouldNotify = (
+      (visibility === "vip" && user.role === "vip") ||
+      (visibility === "all" && (user.role === "vip" || user.role === "user"))
+    );
+
+    if (!user.fcmToken || user.role === "admin" || !shouldNotify) continue;
+
+    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+      to: uid,
+      message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+      postId: null,
+      timestamp: Timestamp.now(),
+      read: false
+    });
+
+    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        uid: uid,
+        title: `"Economentor" 🎥 Yeni Analiz Videosu!`,
+        body: `${title} eklendi.`,
+        url: "https://economentor.netlify.app"
+      })
+    });
+  }
 }
-}
-});
 
   async function loadVideos() {
     const container = document.getElementById("videosContainer");
