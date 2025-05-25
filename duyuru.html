@@ -123,7 +123,7 @@
         const div = document.createElement("div");
         div.className = "announcement";
         const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
-        div.innerHTML = `<p>${data.text}</p><div class="date">${date}</div>`;
+        div.innerHTML = `<p style="white-space: pre-line;">${data.text}</p><div class="date">${date}</div>`;
         announcementList.appendChild(div);
       });
     }
