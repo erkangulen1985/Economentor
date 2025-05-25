@@ -283,6 +283,7 @@ await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
   read: false
 });
     
+try {
   const res = await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -298,6 +299,7 @@ await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
     const errorText = await res.text();
     throw new Error(`HTTP ${res.status} - ${errorText}`);
   }
+
 } catch (err) {
   console.error("❌ FCM gönderim hatası:", err);
 }
