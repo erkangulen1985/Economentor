@@ -204,55 +204,52 @@ onAuthStateChanged(auth, async (user) => {
 
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
-  const data = userDoc.exists() ? userDoc.data() : {};
-  if (userDoc.exists()) {
-    document.getElementById("fullName").value = data.fullName || "";
-    document.getElementById("username").value = data.username || "";
-    document.getElementById("dob").value = data.dob || "";
 
-    onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "index.html";
+  if (!userDoc.exists()) return;
 
-  const uid = user.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
-  const data = userDoc.exists() ? userDoc.data() : {};
+  const data = userDoc.data();
 
-  if (userDoc.exists()) {
-    document.getElementById("fullName").value = data.fullName || "";
-    document.getElementById("username").value = data.username || "";
-    document.getElementById("dob").value = data.dob || "";
+  // Bilgileri doldur
+  document.getElementById("fullName").value = data.fullName || "";
+  document.getElementById("username").value = data.username || "";
+  document.getElementById("dob").value = data.dob || "";
 
-    // ===> BU BLOĞU BURAYA EKLE <===
-    const deviceDisplay = document.getElementById("deviceInfoDisplay");
-    const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
+  // Anasayfa butonu
+  document.getElementById("homeBtn").addEventListener("click", () => {
+    window.location.href = "anasayfa.html";
+  });
 
-    if (data.deviceModel && data.deviceModelSavedAt) {
-      const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
-      deviceDisplay.innerText = `📱 Model: ${data.deviceModel}\n📅 Kayıt Tarihi: ${savedDate}`;
-    } else {
+  // Bildirim cihazı bilgisi
+  const deviceDisplay = document.getElementById("deviceInfoDisplay");
+  const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
+
+  if (data.deviceModel && data.deviceModelSavedAt) {
+    const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
+    deviceDisplay.innerText = `📱 Model: ${data.deviceModel}\n📅 Kayıt Tarihi: ${savedDate}`;
+  } else {
+    deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
+    deleteDeviceBtn.style.display = "none";
+  }
+
+  deleteDeviceBtn.addEventListener("click", async () => {
+    if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
+
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        deviceInfo: deleteField(),
+        deviceModel: deleteField(),
+        deviceModelSavedAt: deleteField(),
+        fcmToken: deleteField()
+      });
+
+      alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar giriş yapınız.");
       deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
       deleteDeviceBtn.style.display = "none";
+    } catch (err) {
+      alert("Hata: " + err.message);
     }
-
-    deleteDeviceBtn.addEventListener("click", async () => {
-      if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
-
-      try {
-        await updateDoc(doc(db, "users", uid), {
-          deviceInfo: deleteField(),
-          deviceModel: deleteField(),
-          deviceModelSavedAt: deleteField(),
-          fcmToken: deleteField()
-        });
-
-        alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar giriş yapınız.");
-        deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
-        deleteDeviceBtn.style.display = "none";
-      } catch (err) {
-        alert("Hata: " + err.message);
-      }
-    });
-  }
+  });
+});
 
   document.getElementById("homeBtn").addEventListener("click", () => {
     window.location.href = "anasayfa.html";
@@ -270,7 +267,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   const fullName = document.getElementById("fullName").value.trim();
   const username = document.getElementById("username").value.trim();
   const dob = document.getElementById("dob").value;
-  const newEmail = document.getElementById("email").value.trim();
+  const newEmail = document.getElementById("newEmail").value.trim();
 
   if (!fullName || !username || !dob || !newEmail) {
     alert("Lütfen tüm bilgileri eksiksiz doldurunuz.");
