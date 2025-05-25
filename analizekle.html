@@ -275,30 +275,30 @@ for (const docSnap of usersSnap.docs) {
     const shouldNotify = (visibility === "vip" && user.role === "vip") ||
                          (visibility === "all" && (user.role === "vip" || user.role === "user"));
 
-  if (shouldNotify) {
-    // 🔔 Firestore bildirimini de ekle
-    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-      to: uid,
-      message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-      postId: null,
-      timestamp: Timestamp.now(),
-      read: false
-    });
+if (shouldNotify) {
+  // 🔔 Firestore bildirimini de ekle
+  await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+    to: uid,
+    message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+    postId: null,
+    timestamp: Timestamp.now(),
+    read: false
+  });
 
-    // 🔔 FCM bildirimi gönder
-    if (user.fcmToken && user.role !== "admin") {
-await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    uid: uid,
-    title: '"Economentor" 🎥 Yeni Analiz Videosu!',
-    body: `${title} eklendi.`,
-    url: "https://economentor.netlify.app"
-  })
-});
-      }
-    }
+  // 🔔 FCM bildirimi gönder
+  try {
+    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uid: uid,
+        title: '"Economentor" 🎥 Yeni Analiz Videosu!',
+        body: `${title} eklendi.`,
+        url: "https://economentor.netlify.app"
+      })
+    });
+  } catch (err) {
+    console.error("📛 FCM gönderim hatası:", err);
   }
 }
 
