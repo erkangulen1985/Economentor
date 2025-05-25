@@ -263,47 +263,40 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     return;
   }
 
-try {
-  const user = auth.currentUser;
-  const isEmailDifferent = newEmail !== user.email;
-  const verifyLink = `https://script.google.com/macros/s/AKfycbzb-ZFOcj_Jmp52spP_X7Y6cCYtWNCsJX371VZHqGRS963mO7JCE0fhcXmgaH-1j56fQA/exec?uid=${user.uid}`;
- // <-- burada tanımla
+  try {
+    // Firebase Authentication'daki mevcut kullanıcı
+    const user = auth.currentUser;
 
-  // 1. Kullanıcının diğer bilgilerini kaydet
-  await updateDoc(doc(db, "users", user.uid), {
-    fullName,
-    username,
-    dob
-  });
+    // Eğer e-posta değişmişse
+    if (newEmail !== user.email) {
+      const password = prompt("E-posta değiştirmek için lütfen mevcut şifrenizi giriniz:");
+      if (!password) return alert("İşlem iptal edildi.");
 
-  // 2. E-posta değişikliği varsa işlem başlat
-if (isEmailDifferent) {
-  await updateDoc(doc(db, "users", user.uid), {
-    pendingEmail: newEmail,
-    pendingEmailRequestedAt: new Date()
-  });
+      // Kimliği yeniden doğrula
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
 
-    // Google Apps Script ile doğrulama bağlantısını gönder
-const params = {
-  email: newEmail,
-  link: verifyLink
-};
+      // E-postayı güncelle
+      await updateEmail(user, newEmail);
+    }
 
-await fetch("https://script.google.com/macros/s/AKfyc.../exec", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(params)  // ❗ JSON formatta gönderiyoruz
-});
+    // Firestore'da güncelle
+    await updateDoc(doc(db, "users", user.uid), {
+      fullName,
+      username,
+      dob
+    });
 
-    alert("Yeni e-posta adresinize doğrulama bağlantısı gönderildi:\n" + verifyLink);
-  } else {
-    alert("Bilgiler başarıyla kaydedildi.");
+    alert("Bilgiler başarıyla güncellendi.");
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      alert("Bu e-posta adresi başka bir hesapta kullanılıyor.");
+    } else if (err.code === "auth/invalid-email") {
+      alert("Geçerli bir e-posta adresi giriniz.");
+    } else {
+      alert("Hata: " + err.message);
+    }
   }
-} catch (err) {
-  alert("Hata: " + err.message);
-}
 });
 
   // Hesap sil
@@ -399,6 +392,11 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     const user = auth.currentUser;
     const credential = EmailAuthProvider.credential(user.email, currentPassword);
     await reauthenticateWithCredential(user, credential);
+    await updateEmail(user, newEmail);
+
+    // ✅ E-posta doğrulama eklendi
+    alert(Lütfen tekrar giriş yapınız.");
+    document.getElementById("newEmail").value = newEmail;
   } catch (err) {
     if (err.code === "auth/email-already-in-use") {
       alert("Bu e-posta zaten kullanımda.");
@@ -415,30 +413,6 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     }
   }
 });
-  
-function doPost(e) {
-  try {
-    MailApp.sendEmail("onurgulen2006@gmail.com", "Script çalıştı", "doPost fonksiyonu çağrıldı!");
-
-    if (!e || !e.postData || !e.postData.contents) {
-      return ContentService.createTextOutput("Geçersiz istek").setMimeType(ContentService.MimeType.TEXT);
-    }
-
-    const data = JSON.parse(e.postData.contents);
-    const email = data.email;
-    const link = data.link;
-
-    // Burası test için: gerçekten e-posta geliyor mu?
-    MailApp.sendEmail(email, "Economentor Test", `Doğrulama bağlantısı: ${link}`);
-
-    return ContentService.createTextOutput("E-posta gönderildi").setMimeType(ContentService.MimeType.TEXT);
-    
-  } catch (error) {
-    MailApp.sendEmail("onurgulen2006@gmail.com", "Script Hata", error.toString());
-    return ContentService.createTextOutput("Hata oluştu").setMimeType(ContentService.MimeType.TEXT);
-  }
-}
-
   
 </script>
 </body>
