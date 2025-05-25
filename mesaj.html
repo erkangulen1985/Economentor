@@ -701,37 +701,28 @@ if (change.type === "modified") {
     msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
   }
 
-  // 🔵 GÖRÜLDÜ anlık güncellemesi
-  if (updatedMsg.sender === currentUser.uid) {
-    let seenDiv = msgDiv.querySelector(".seen-status");
-    if (!seenDiv) {
-      seenDiv = document.createElement("div");
-      seenDiv.classList.add("seen-status");
-      seenDiv.setAttribute("data-msgid", msg.id);
-      msgDiv.appendChild(seenDiv);
-    }
-
+// ✅ GÖRÜLDÜ yazısını canlı güncelle
+if (updatedMsg.sender === currentUser.uid) {
+  let seenDiv = document.querySelector(`.seen-status[data-msgid="${updatedMsg.id}"]`);
+  
+  // Eğer DOM'da div yoksa ekle
+  if (!seenDiv) {
+    seenDiv = document.createElement("div");
+    seenDiv.className = "seen-status pending"; // başlangıçta gri
+    seenDiv.setAttribute("data-msgid", updatedMsg.id);
     seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
 
-    if (updatedMsg.seenBy?.includes(selectedFriendId)) {
-      seenDiv.classList.remove("pending");
-      seenDiv.classList.add("active");
-    } else {
-      seenDiv.classList.remove("active");
-      seenDiv.classList.add("pending");
-    }
+    const msgDiv = document.querySelector(`.message[data-id="${updatedMsg.id}"]`);
+    if (msgDiv) msgDiv.appendChild(seenDiv);
   }
-}
-    
-    const seenStatus = msgDiv.querySelector(".seen-status");
-if (updatedMsg.sender === currentUser.uid) {
+
+  // Sınıf güncellemesi
   if (updatedMsg.seenBy?.includes(selectedFriendId)) {
-    if (!seenStatus) {
-      const newStatus = document.createElement("div");
-      newStatus.className = "seen-status";
-      newStatus.innerText = lang === "tr" ? "Görüldü" : "Seen";
-      msgDiv.appendChild(newStatus);
-    }
+    seenDiv.classList.remove("pending");
+    seenDiv.classList.add("active");
+  } else {
+    seenDiv.classList.remove("active");
+    seenDiv.classList.add("pending");
   }
 }
 
