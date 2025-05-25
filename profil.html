@@ -325,6 +325,7 @@ try {
 const deviceDisplay = document.getElementById("deviceInfoDisplay");
 const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
 const data = userDoc.exists() ? userDoc.data() : {};
+const userDoc = await getDoc(doc(db, "users", uid));
 
 if (data.deviceModel && data.deviceModelSavedAt) {
   const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
