@@ -120,10 +120,7 @@ input {
     <button id="homeBtn">Anasayfa</button>
 
     <label>E-posta</label>
-    <input type="email" id="email" placeholder="e-posta adresi">
-    
-    <label>Yeni E-posta</label>
-    <input type="email" id="newEmail" placeholder="Yeni e-posta adresi">
+    <input type="email" id="newEmail" placeholder="e-posta adresi">
     <button id="updateEmailBtn">E-posta Güncelle</button>
 
     <label>Ad Soyad</label>
@@ -218,7 +215,7 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById("fullName").value = data.fullName || "";
   document.getElementById("username").value = data.username || "";
   document.getElementById("dob").value = data.dob || "";
-  document.getElementById("email").value = user.email || "";
+  document.getElementById("newEmail").value = user.email || "";
 
   // Anasayfa butonu
   document.getElementById("homeBtn").addEventListener("click", () => {
