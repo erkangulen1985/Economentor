@@ -292,6 +292,7 @@ window.editTraining = async function(docId, btn) {
   await deleteDoc(doc(db, "trainings", docId));
   trainingDiv.remove();
 };
-  </script>
+</script>
+<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
