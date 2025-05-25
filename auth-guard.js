@@ -3,13 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+  measurementId: "G-FS3FMPYVPD"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
