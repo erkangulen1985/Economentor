@@ -297,33 +297,45 @@ window.saveDuyuru = async function () {
   document.getElementById("duyuruText").value = "";
   loadDuyurular();
 
-  // 🔥 Bildirim gönder (admin hariç herkese)
-const usersSnap = await getDocs(collection(db, "users"));
-const title = `"Economentor" 📢 Yeni Duyuru`;
-const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
-const url = "https://economentor.netlify.app";
+  // 🔔 Bildirim gönder (admin hariç herkese)
+  const usersSnap = await getDocs(collection(db, "users"));
+  const title = `"Economentor" 📢 Yeni Duyuru`;
+  const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
+  const url = "https://economentor.netlify.app";
 
-for (const userDoc of usersSnap.docs) {
-  const uid = userDoc.id;
-  const userData = userDoc.data();
+  for (const userDoc of usersSnap.docs) {
+    const uid = userDoc.id;
+    const userData = userDoc.data();
 
-  if (userData.role === "admin") continue;
+    if (userData.role === "admin") continue;
 
-  try {
-    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        uid,
-        title,
-        body,
-        url
-      })
+    // 🔔 1. Firestore notification (anasayfa bildirimi)
+    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+      to: uid,
+      message: `Yeni bir duyuru yayınlandı: "${text}"`,
+      postId: null,
+      timestamp: Timestamp.now(),
+      read: false
     });
-  } catch (err) {
-    console.error("Bildirim gönderilemedi (" + uid + "):", err);
+
+    // 🔔 2. FCM bildirimi (varsa)
+    if (userData.fcmToken) {
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid,
+            title,
+            body,
+            url
+          })
+        });
+      } catch (err) {
+        console.error("Bildirim gönderilemedi (" + uid + "):", err);
+      }
     }
   }
 };
