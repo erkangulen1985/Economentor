@@ -122,7 +122,7 @@ input {
     <input type="text" id="fullName" placeholder="Ad Soyad" />
 
     <label>E-posta</label>
-    <input type="email" id="email" placeholder="E-posta" disabled />
+    <input type="email" id="email" placeholder="E-posta" />
 
     <label>Kullanıcı Adı</label>
     <input type="text" id="username" placeholder="Kullanıcı Adı" />
@@ -183,6 +183,7 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { updateEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -213,20 +214,36 @@ onAuthStateChanged(auth, async (user) => {
 });
   }
 
-  // Bilgileri kaydet
-  document.getElementById("saveBtn").addEventListener("click", async () => {
+document.getElementById("saveBtn").addEventListener("click", async () => {
   const fullName = document.getElementById("fullName").value.trim();
   const username = document.getElementById("username").value.trim();
   const dob = document.getElementById("dob").value;
+  const newEmail = document.getElementById("email").value.trim();
 
-  // Doğrulama: Boş alan var mı kontrol et
-  if (!fullName || !username || !dob) {
+  if (!fullName || !username || !dob || !newEmail) {
     alert("Lütfen tüm bilgileri eksiksiz doldurunuz.");
     return;
   }
 
   try {
-    await updateDoc(doc(db, "users", uid), {
+    // Firebase Authentication'daki mevcut kullanıcı
+    const user = auth.currentUser;
+
+    // Eğer e-posta değişmişse
+    if (newEmail !== user.email) {
+      const password = prompt("E-posta değiştirmek için lütfen mevcut şifrenizi giriniz:");
+      if (!password) return alert("İşlem iptal edildi.");
+
+      // Kimliği yeniden doğrula
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
+
+      // E-postayı güncelle
+      await updateEmail(user, newEmail);
+    }
+
+    // Firestore'da güncelle
+    await updateDoc(doc(db, "users", user.uid), {
       fullName,
       username,
       dob
@@ -234,7 +251,13 @@ onAuthStateChanged(auth, async (user) => {
 
     alert("Bilgiler başarıyla güncellendi.");
   } catch (err) {
-    alert("Hata: " + err.message);
+    if (err.code === "auth/email-already-in-use") {
+      alert("Bu e-posta adresi başka bir hesapta kullanılıyor.");
+    } else if (err.code === "auth/invalid-email") {
+      alert("Geçerli bir e-posta adresi giriniz.");
+    } else {
+      alert("Hata: " + err.message);
+    }
   }
 });
 
