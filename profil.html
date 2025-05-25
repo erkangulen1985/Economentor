@@ -266,25 +266,24 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   try {
     const user = auth.currentUser;
     const isEmailDifferent = newEmail !== user.email;
+    const verifyLink = `https://economentor.com/verify-email-change.html?uid=${user.uid}`;
 
-    // 1. Bilgileri kaydet
+    // 1. Kullanıcının diğer bilgilerini kaydet
     await updateDoc(doc(db, "users", user.uid), {
       fullName,
       username,
       dob
     });
 
-    // 2. E-posta değişikliği gerekiyorsa işlemleri başlat
+    // 2. E-posta değişikliği varsa işlem başlat
     if (isEmailDifferent) {
-      const verifyLink = `https://economentor.com/verify-email-change.html?uid=${user.uid}`;
-
       // Firestore'a geçici e-posta ve zamanı kaydet
       await updateDoc(doc(db, "users", user.uid), {
         pendingEmail: newEmail,
         pendingEmailRequestedAt: new Date()
       });
 
-      // Google Apps Script ile e-posta gönder
+      // Google Apps Script ile doğrulama bağlantısını gönder
       await fetch("https://script.google.com/macros/s/1RiG0zNRPkysK85esal2jS0F4kgy49cRxq3s5_ZijyNIoi5pkMBb4YUmX/exec", {
         method: "POST",
         headers: {
@@ -300,6 +299,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     } else {
       alert("Bilgiler başarıyla kaydedildi.");
     }
+
   } catch (err) {
     alert("Hata: " + err.message);
   }
