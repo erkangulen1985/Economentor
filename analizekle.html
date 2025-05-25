@@ -271,34 +271,36 @@ for (const docSnap of usersSnap.docs) {
   const user = docSnap.data();
   const uid = docSnap.id;
 
-  if (user.fcmToken && user.role !== "admin") {
-    const shouldNotify = (visibility === "vip" && user.role === "vip") ||
-                         (visibility === "all" && (user.role === "vip" || user.role === "user"));
+  const shouldNotify = (visibility === "vip" && user.role === "vip") ||
+                       (visibility === "all" && (user.role === "vip" || user.role === "user"));
 
-          await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-            to: uid,
-            message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-            postId: null,
-            timestamp: Timestamp.now(),
-            read: false
-          });
-    
-    if (shouldNotify) {
-      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          uid: uid,
-          title: '"Economentor" 🎥 Yeni Analiz Videosu!',
-          body: `${title} eklendi.`,
-          url: "https://economentor.netlify.app"
-        })
-      });
-    }
-  }
+  // 👇 Bu kontrolü en başa alıyoruz
+  if (!user.fcmToken || user.role === "admin" || !shouldNotify) continue;
+
+  // 🔔 Firestore'a bildirim kaydet
+  await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+    to: uid,
+    message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+    postId: null,
+    timestamp: Timestamp.now(),
+    read: false
+  });
+
+  // 🔔 FCM Push bildirimi gönder
+  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      uid: uid,
+      title: '"Economentor" 🎥 Yeni Analiz Videosu!',
+      body: `${title} eklendi.`,
+      url: "https://economentor.netlify.app"
+    })
+  });
 }
+  }
 }
 
   async function loadVideos() {
