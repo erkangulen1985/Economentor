@@ -858,7 +858,7 @@ const senderName = currentUserDoc.exists() ? currentUserDoc.data().username : "B
 
 await createNotificationForUser(
   selectedFriendId,
-  `${senderName} size "${text}" içerikli bir mesaj gönderdi.`,
+  `"${senderName}" size "${text}" içerikli bir mesaj gönderdi.`,
   null
 );
 
