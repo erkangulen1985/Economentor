@@ -192,7 +192,7 @@ html, body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -265,20 +265,16 @@ onAuthStateChanged(auth, async (user) => {
     alert("Video başarıyla yüklendi!");
     loadVideos();
 
-    // 🔔 Bildirim gönder
-    const usersSnap = await getDocs(collection(db, "users"));
+// 🔔 Bildirim gönder
+const usersSnap = await getDocs(collection(db, "users"));
+for (const docSnap of usersSnap.docs) {
+  const user = docSnap.data();
+  const uid = docSnap.id;
 
-    for (const docSnap of usersSnap.docs) {
-      const user = docSnap.data();
-      const uid = docSnap.id;
+  if (user.fcmToken && user.role !== "admin") {
+    const shouldNotify = (visibility === "vip" && user.role === "vip") ||
+                         (visibility === "all" && (user.role === "vip" || user.role === "user"));
 
-      if (user.fcmToken && user.role !== "admin") {
-        const shouldNotify =
-          (visibility === "vip" && user.role === "vip") ||
-          (visibility === "all" && (user.role === "vip" || user.role === "user"));
-
-        if (shouldNotify) {
-          // Firestore bildirimini kaydet
           await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
             to: uid,
             message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
@@ -286,26 +282,24 @@ onAuthStateChanged(auth, async (user) => {
             timestamp: Timestamp.now(),
             read: false
           });
-
-          // FCM bildirimi gönder
-          try {
-            await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                uid: uid,
-                title: '"Economentor" 🎥 Yeni Analiz Videosu!',
-                body: `${title} eklendi.`,
-                url: "https://economentor.netlify.app"
-              })
-            });
-          } catch (err) {
-            console.error("📛 FCM gönderim hatası:", err);
-          }
-        }
-      }
-    } // <-- BU PARANTEZ EKSİKTİ
-
+    
+    if (shouldNotify) {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: uid,
+          title: '"Economentor" 🎥 Yeni Analiz Videosu!',
+          body: `${title} eklendi.`,
+          url: "https://economentor.netlify.app"
+        })
+      });
+    }
+  }
+}
+}
 
   async function loadVideos() {
     const container = document.getElementById("videosContainer");
@@ -456,7 +450,7 @@ div.innerHTML = `
           </div>
         `;
         container.appendChild(div);
-      });
+      }
     });
   });
 });
