@@ -266,13 +266,6 @@ onAuthStateChanged(auth, async (user) => {
     loadVideos();
 
 // 🔔 Bildirim gönder
-await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-  to: uid,
-  message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-  postId: null,
-  timestamp: Timestamp.now(),
-  read: false
-});
 const usersSnap = await getDocs(collection(db, "users"));
 for (const docSnap of usersSnap.docs) {
   const user = docSnap.data();
@@ -282,22 +275,30 @@ for (const docSnap of usersSnap.docs) {
     const shouldNotify = (visibility === "vip" && user.role === "vip") ||
                          (visibility === "all" && (user.role === "vip" || user.role === "user"));
 
-    if (shouldNotify) {
-      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          uid: uid,
-          title: '"Economentor" 🎥 Yeni Analiz Videosu!',
-          body: `${title} eklendi.`,
-          url: "https://economentor.netlify.app"
-        })
-      });
+await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+  to: uid,
+  message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+  postId: null,
+  timestamp: Timestamp.now(),
+  read: false
+});
+    
+try {
+  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      uid: uid,
+      title: '"Economentor" 🎥 Yeni Analiz Videosu!',
+      body: `${title} eklendi.`,
+      url: "https://economentor.netlify.app"
+    })
+  });
+} catch (err) {
+  console.error("❌ Push bildirimi gönderilemedi:", err);
+      }
     }
   }
-}
 }
 
   async function loadVideos() {
