@@ -289,18 +289,18 @@ for (const docSnap of usersSnap.docs) {
   });
 
   // Push bildirimi gönder
-  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      uid: uid,
-      title: `"Economentor" 🎥 Yeni Analiz Videosu!`,
-      body: `${title} eklendi.`,
-      url: "https://economentor.netlify.app"
-        })
-      });
+await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    uid: uid,
+    title: `"Economentor" 🎥 Yeni Analiz Videosu!`,
+    body: `${title} eklendi.`,
+    url: "https://economentor.netlify.app"
+  })
+});
     }
   }
 }
