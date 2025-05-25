@@ -250,10 +250,19 @@ button.send-btn:hover,
 
 .seen-status {
   font-size: 0.75em;
-  margin-top: 3px;
-  color: #0f0;
+  margin-top: 4px;
   text-align: right;
-  opacity: 0.7;
+  font-weight: 600;
+  opacity: 0.8;
+  transition: color 0.3s ease;
+}
+
+.seen-status.pending {
+  color: #999; /* Gri - Henüz karşı taraf sayfayı açmadı */
+}
+
+.seen-status.active {
+  color: #1e90ff; /* Koyu asil mavi - Görüldü */
 }
     
 @media (max-width: 770px) {
@@ -685,22 +694,31 @@ chatItems.forEach(item => {
     }
 
     // ✏️ Mesaj düzenlendiyse
-    if (change.type === "modified") {
-      const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
-      }
+if (change.type === "modified") {
+  const updatedMsg = change.doc.data();
+  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+  if (msgDiv) {
+    msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+  }
 
-      const chatItems = document.querySelectorAll(".chat-item");
-      chatItems.forEach(item => {
-        const nameEl = item.querySelector("strong");
-        if (nameEl && nameEl.innerText === senderName) {
-          const preview = item.querySelector(".last-message");
-          if (preview) preview.innerText = updatedMsg.text;
-        }
-      });
+  const chatItems = document.querySelectorAll(".chat-item");
+  chatItems.forEach(item => {
+    const nameEl = item.querySelector("strong");
+    if (nameEl && nameEl.innerText === senderName) {
+      const preview = item.querySelector(".last-message");
+      if (preview) preview.innerText = updatedMsg.text;
     }
+  });
+
+  // ✅ GÖRÜLDÜ yazısını canlı güncelle
+  if (updatedMsg.sender === currentUser.uid) {
+    const seenDiv = document.querySelector(`.seen-status[data-msgid="${updatedMsg.id}"]`);
+    if (seenDiv && updatedMsg.seenBy?.includes(selectedFriendId)) {
+      seenDiv.classList.remove("pending");
+      seenDiv.classList.add("active");
+    }
+  }
+}
     
     const seenStatus = msgDiv.querySelector(".seen-status");
 if (updatedMsg.sender === currentUser.uid) {
@@ -814,16 +832,23 @@ async function buildMessageDiv(msg) {
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
   // Görüldü kontrolü
-let seenText = "";
-if (isMine && msg.seenBy && msg.seenBy.includes(selectedFriendId)) {
-  seenText = `<div class="seen-status">${lang === "tr" ? "Görüldü" : "Seen"}</div>`;
+let seenClass = "";
+let seenLabel = "";
+if (msg.sender === currentUser.uid) {
+  seenLabel = lang === "tr" ? "Görüldü" : "Seen";
+
+  if (msg.seenBy?.includes(selectedFriendId)) {
+    seenClass = "active";
+  } else {
+    seenClass = "pending";
+  }
 }
 
 div.innerHTML = `
   <div class="sender-label">${senderName}</div>
   <div class="msg-text">${msg.text}</div>
-  <div class="timestamp">${timeStr}</div>
-  ${seenText}
+  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+  ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
 `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
