@@ -395,7 +395,7 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     await updateEmail(user, newEmail);
 
     // ✅ E-posta doğrulama eklendi
-    alert(Lütfen tekrar giriş yapınız.");
+    alert("Lütfen tekrar giriş yapınız.");
     document.getElementById("newEmail").value = newEmail;
   } catch (err) {
     if (err.code === "auth/email-already-in-use") {
