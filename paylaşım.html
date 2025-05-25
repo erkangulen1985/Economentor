@@ -487,36 +487,37 @@ async function sendNotificationToAllUsersExceptAdmin(title, description) {
   try {
     const usersSnap = await getDocs(collection(db, "users"));
 
-    for (const docSnap of usersSnap.docs) {
-      const user = docSnap.data();
-      const uid = docSnap.id;
+for (const docSnap of usersSnap.docs) {
+  const user = docSnap.data();
+  const uid = docSnap.id;
 
-      if (user.role !== "admin" && user.fcmToken) {
-        // Firestore bildirim kaydı
-        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-          to: uid,
-          message: `"${title}" başlıklı yeni bir gönderi yayınlandı.`,
-          postId: null,
-          timestamp: Timestamp.now(),
-          read: false
-        });
+  if (user.role !== "admin") {
+    // Firestore bildirim (anasayfa için) → HERKES almalı
+    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+      to: uid,
+      message: `"${title}" başlıklı yeni bir gönderi yayınlandı.`,
+      postId: null,
+      timestamp: Timestamp.now(),
+      read: false
+    });
 
-        // FCM bildirimi
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            uid: uid,
-            title: "\"Economentor\" 📢 Yeni Post Yayınlandı!",
-            body: `${title} - ${description}`,
-            url: "https://economentor.netlify.app"
-          })
-        });
-      }
+    // FCM bildirimi → SADECE fcmToken varsa
+    if (user.fcmToken) {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          uid: uid,
+          title: "\"Economentor\" 📢 Yeni Post Yayınlandı!",
+          body: `${title} - ${description}`,
+          url: "https://economentor.netlify.app"
+        })
+      });
     }
-  } catch (err) {
+  }
+} catch (err) {
     console.error("📛 Bildirim gönderilemedi:", err);
   }
 }
