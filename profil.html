@@ -214,6 +214,39 @@ onAuthStateChanged(auth, async (user) => {
     <button id="updateEmailBtn">E-posta Güncelle</button>
     document.getElementById("homeBtn").addEventListener("click", () => {
     window.location.href = "anasayfa.html";
+    document.getElementById("updateEmailBtn").addEventListener("click", async () => {
+ 
+  const newEmail = document.getElementById("newEmail").value.trim();
+  const currentPassword = prompt("Mevcut şifrenizi girin:");
+
+  if (!newEmail || !currentPassword) {
+    alert("Lütfen yeni e-posta adresini ve mevcut şifrenizi girin.");
+    return;
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+    await reauthenticateWithCredential(auth.currentUser, credential);
+    await updateEmail(auth.currentUser, newEmail);
+    alert("E-posta başarıyla güncellendi!");
+    document.getElementById("email").value = newEmail; // ekranda da güncelle
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      alert("Bu e-posta zaten kullanımda.");
+    } else if (err.code === "auth/invalid-email") {
+      alert("Geçersiz e-posta adresi.");
+    } else if (err.code === "auth/wrong-password") {
+      alert("Mevcut şifre yanlış.");
+    } else if (err.code === "auth/too-many-requests") {
+      alert("Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.");
+    } else if (err.code === "auth/operation-not-allowed") {
+      alert("Firebase projenizde e-posta güncelleme izni yok. Bu işlemi destek açmalısınız.");
+    } else {
+      alert("Hata: " + err.message);
+    }
+  }
+});
+
 });
   }
 
