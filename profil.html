@@ -284,16 +284,17 @@ try {
     });
 
     // Google Apps Script ile doğrulama bağlantısını gönder
-    await fetch("https://script.google.com/macros/s/1RiG0zNRPkysK85esal2jS0F4kgy49cRxq3s5_ZijyNIoi5pkMBb4YUmX/exec", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: newEmail,
-        link: verifyLink
-      })
-    });
+const params = new URLSearchParams();
+params.append("email", newEmail);
+params.append("link", verifyLink);
+
+await fetch("https://script.google.com/macros/s/1RiG0zNRPkysK85esal2jS0F4kgy49cRxq3s5_ZijyNIoi5pkMBb4YUmX/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: params
+});
 
     alert("Yeni e-posta adresinize doğrulama bağlantısı gönderildi:\n" + verifyLink);
   } else {
