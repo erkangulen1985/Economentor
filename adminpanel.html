@@ -744,7 +744,7 @@ window.saveDuyuru = async function () {
                 div.className = "announcement";
                 const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
                 div.innerHTML = `
-                    <p>${data.text}</p>
+                    <p style="white-space: pre-line;">${data.text}</p>
                     <small>${tarih}</small>
                     <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
                 `;
