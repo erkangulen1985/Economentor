@@ -1,0 +1,65 @@
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updateEmail
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteField
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "senin-api-key",
+  authDomain: "senin-domain.firebaseapp.com",
+  projectId: "senin-proje-id"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// URL'den UID çek
+const params = new URLSearchParams(window.location.search);
+const uid = params.get("uid");
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return alert("Lütfen önce giriş yapın.");
+  if (user.uid !== uid) return alert("Kimlik doğrulama eşleşmiyor.");
+
+  const userRef = doc(db, "users", uid);
+  const userDoc = await getDoc(userRef);
+  const data = userDoc.data();
+  const pendingEmail = data.pendingEmail;
+
+  if (!pendingEmail) return alert("Bekleyen e-posta bulunamadı.");
+
+  try {
+    // Şifreyi tekrar sor
+    const password = prompt("Lütfen hesabınızın şifresini girin:");
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+
+    // E-posta değiştir
+    await updateEmail(user, pendingEmail);
+
+    // Firestore'dan temizle
+    await updateDoc(userRef, {
+      email: pendingEmail,
+      pendingEmail: deleteField(),
+      pendingEmailRequestedAt: deleteField()
+    });
+
+    alert("✅ E-posta adresiniz başarıyla güncellendi!");
+    window.location.href = "anasayfa.html";
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
+});
+</script>
