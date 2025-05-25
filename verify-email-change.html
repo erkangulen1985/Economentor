@@ -1,10 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>E-posta Doğrulama | Economentor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      padding-top: 100px;
+    }
+    .box {
+      background: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+    h1 {
+      color: #333;
+    }
+    p {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="box" id="resultBox">
+    <h1>İşleniyor...</h1>
+    <p>Lütfen bekleyiniz.</p>
+  </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getAuth,
-  onAuthStateChanged,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
   updateEmail
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
@@ -15,51 +46,75 @@ import {
   deleteField
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
-  apiKey: "senin-api-key",
-  authDomain: "senin-domain.firebaseapp.com",
-  projectId: "senin-proje-id"
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-// URL'den UID çek
-const params = new URLSearchParams(window.location.search);
-const uid = params.get("uid");
+// Yardımcı
+function showMessage(title, message) {
+  const box = document.getElementById("resultBox");
+  box.innerHTML = `<h1>${title}</h1><p>${message}</p>`;
+}
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return alert("Lütfen önce giriş yapın.");
-  if (user.uid !== uid) return alert("Kimlik doğrulama eşleşmiyor.");
+// UID'yi URL'den al
+const urlParams = new URLSearchParams(window.location.search);
+const uid = urlParams.get("uid");
 
-  const userRef = doc(db, "users", uid);
-  const userDoc = await getDoc(userRef);
-  const data = userDoc.data();
-  const pendingEmail = data.pendingEmail;
-
-  if (!pendingEmail) return alert("Bekleyen e-posta bulunamadı.");
-
+if (!uid) {
+  showMessage("Hatalı Bağlantı", "Geçerli bir kullanıcı ID bulunamadı.");
+} else {
   try {
-    // Şifreyi tekrar sor
-    const password = prompt("Lütfen hesabınızın şifresini girin:");
-    const credential = EmailAuthProvider.credential(user.email, password);
-    await reauthenticateWithCredential(user, credential);
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
 
-    // E-posta değiştir
-    await updateEmail(user, pendingEmail);
+    if (!userDocSnap.exists()) {
+      showMessage("Kullanıcı Bulunamadı", "Bu bağlantı geçersiz olabilir.");
+    } else {
+      const data = userDocSnap.data();
+      const pendingEmail = data.pendingEmail;
+      const requestedAt = data.pendingEmailRequestedAt;
 
-    // Firestore'dan temizle
-    await updateDoc(userRef, {
-      email: pendingEmail,
-      pendingEmail: deleteField(),
-      pendingEmailRequestedAt: deleteField()
-    });
+      if (!pendingEmail || !requestedAt) {
+        showMessage("İşlem Bulunamadı", "Bu bağlantının süresi dolmuş olabilir.");
+      } else {
+        // 1 saat içinde mi?
+        const now = Date.now();
+        const sentTime = requestedAt.seconds * 1000;
+        const diff = now - sentTime;
 
-    alert("✅ E-posta adresiniz başarıyla güncellendi!");
-    window.location.href = "anasayfa.html";
+        if (diff > 3600000) { // 1 saat = 3600000 ms
+          showMessage("Süre Doldu", "Bu bağlantı artık geçerli değil.");
+        } else {
+          // Güncel kullanıcıyı getir ve e-postayı güncelle
+          const user = auth.currentUser;
+
+          if (!user || user.uid !== uid) {
+            showMessage("Oturum Gerekli", "Lütfen hesabınıza giriş yaparak tekrar deneyin.");
+          } else {
+            await updateEmail(user, pendingEmail);
+            await updateDoc(userDocRef, {
+              pendingEmail: deleteField(),
+              pendingEmailRequestedAt: deleteField()
+            });
+            showMessage("Başarılı", "E-posta adresiniz başarıyla güncellendi.");
+          }
+        }
+      }
+    }
   } catch (err) {
-    alert("Hata: " + err.message);
+    showMessage("Hata", "İşlem sırasında bir hata oluştu: " + err.message);
   }
-});
+}
 </script>
+</body>
+</html>
