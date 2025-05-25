@@ -701,21 +701,24 @@ if (change.type === "modified") {
     msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
   }
 
-  const chatItems = document.querySelectorAll(".chat-item");
-  chatItems.forEach(item => {
-    const nameEl = item.querySelector("strong");
-    if (nameEl && nameEl.innerText === senderName) {
-      const preview = item.querySelector(".last-message");
-      if (preview) preview.innerText = updatedMsg.text;
-    }
-  });
-
-  // ✅ GÖRÜLDÜ yazısını canlı güncelle
+  // 🔵 GÖRÜLDÜ anlık güncellemesi
   if (updatedMsg.sender === currentUser.uid) {
-    const seenDiv = document.querySelector(`.seen-status[data-msgid="${updatedMsg.id}"]`);
-    if (seenDiv && updatedMsg.seenBy?.includes(selectedFriendId)) {
+    let seenDiv = msgDiv.querySelector(".seen-status");
+    if (!seenDiv) {
+      seenDiv = document.createElement("div");
+      seenDiv.classList.add("seen-status");
+      seenDiv.setAttribute("data-msgid", msg.id);
+      msgDiv.appendChild(seenDiv);
+    }
+
+    seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
+
+    if (updatedMsg.seenBy?.includes(selectedFriendId)) {
       seenDiv.classList.remove("pending");
       seenDiv.classList.add("active");
+    } else {
+      seenDiv.classList.remove("active");
+      seenDiv.classList.add("pending");
     }
   }
 }
