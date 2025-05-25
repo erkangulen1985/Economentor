@@ -201,7 +201,7 @@ const auth = getAuth(app);
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
-  
+
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
   const data = userDoc.exists() ? userDoc.data() : {};
@@ -210,8 +210,8 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("username").value = data.username || "";
     document.getElementById("dob").value = data.dob || "";
     document.getElementById("homeBtn").addEventListener("click", () => {
-    window.location.href = "anasayfa.html";
-});
+      window.location.href = "anasayfa.html";
+    });
   }
 });
 
