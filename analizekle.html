@@ -192,7 +192,7 @@ html, body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, getDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -266,6 +266,13 @@ onAuthStateChanged(auth, async (user) => {
     loadVideos();
 
 // 🔔 Bildirim gönder
+await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+  to: uid,
+  message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+  postId: null,
+  timestamp: Timestamp.now(),
+  read: false
+});
 const usersSnap = await getDocs(collection(db, "users"));
 for (const docSnap of usersSnap.docs) {
   const user = docSnap.data();
