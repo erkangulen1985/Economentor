@@ -209,6 +209,57 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("fullName").value = data.fullName || "";
     document.getElementById("username").value = data.username || "";
     document.getElementById("dob").value = data.dob || "";
+
+    onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
+
+  const uid = user.uid;
+  const userDoc = await getDoc(doc(db, "users", uid));
+  const data = userDoc.exists() ? userDoc.data() : {};
+
+  if (userDoc.exists()) {
+    document.getElementById("fullName").value = data.fullName || "";
+    document.getElementById("username").value = data.username || "";
+    document.getElementById("dob").value = data.dob || "";
+
+    // ===> BU BLOĞU BURAYA EKLE <===
+    const deviceDisplay = document.getElementById("deviceInfoDisplay");
+    const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
+
+    if (data.deviceModel && data.deviceModelSavedAt) {
+      const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
+      deviceDisplay.innerText = `📱 Model: ${data.deviceModel}\n📅 Kayıt Tarihi: ${savedDate}`;
+    } else {
+      deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
+      deleteDeviceBtn.style.display = "none";
+    }
+
+    deleteDeviceBtn.addEventListener("click", async () => {
+      if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
+
+      try {
+        await updateDoc(doc(db, "users", uid), {
+          deviceInfo: deleteField(),
+          deviceModel: deleteField(),
+          deviceModelSavedAt: deleteField(),
+          fcmToken: deleteField()
+        });
+
+        alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar giriş yapınız.");
+        deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
+        deleteDeviceBtn.style.display = "none";
+      } catch (err) {
+        alert("Hata: " + err.message);
+      }
+    });
+  }
+
+  document.getElementById("homeBtn").addEventListener("click", () => {
+    window.location.href = "anasayfa.html";
+  });
+});
+
+    
     document.getElementById("homeBtn").addEventListener("click", () => {
       window.location.href = "anasayfa.html";
     });
@@ -319,40 +370,6 @@ try {
     alert("Hata: " + error.message);
   }
 }
-});
-
-// Cihaz bilgisi gösterimi
-const deviceDisplay = document.getElementById("deviceInfoDisplay");
-const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
-const uid = user.uid;
-const userDoc = await getDoc(doc(db, "users", uid));
-const data = userDoc.exists() ? userDoc.data() : {};
-
-if (data.deviceModel && data.deviceModelSavedAt) {
-  const savedDate = new Date(data.deviceModelSavedAt.seconds * 1000).toLocaleString("tr-TR");
-  deviceDisplay.innerText = `📱 Model: ${data.deviceModel}\n📅 Kayıt Tarihi: ${savedDate}`;
-} else {
-  deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
-  deleteDeviceBtn.style.display = "none";
-}
-
-deleteDeviceBtn.addEventListener("click", async () => {
-  if (!confirm("Kayıtlı bildirim cihazını silmek istediğinize emin misiniz?")) return;
-
-  try {
-await updateDoc(doc(db, "users", uid), {
-  deviceInfo: deleteField(),
-  deviceModel: deleteField(),
-  deviceModelSavedAt: deleteField(),
-  fcmToken: deleteField()
-});
-
-    alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar giriş yapınız.");
-    deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
-    deleteDeviceBtn.style.display = "none";
-  } catch (err) {
-    alert("Hata: " + err.message);
-  }
 });
   
   document.getElementById("infoBtn").addEventListener("click", () => {
