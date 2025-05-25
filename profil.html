@@ -408,6 +408,30 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     }
   }
 });
+
+function doPost(e) {
+  try {
+    MailApp.sendEmail("onurgulen2006@gmail.com", "Script çalıştı", "doPost fonksiyonu çağrıldı!");
+
+    if (!e || !e.postData || !e.postData.contents) {
+      return ContentService.createTextOutput("Geçersiz istek").setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    const data = JSON.parse(e.postData.contents);
+    const email = data.email;
+    const link = data.link;
+
+    // Burası test için: gerçekten e-posta geliyor mu?
+    MailApp.sendEmail(email, "Economentor Test", `Doğrulama bağlantısı: ${link}`);
+
+    return ContentService.createTextOutput("E-posta gönderildi").setMimeType(ContentService.MimeType.TEXT);
+    
+  } catch (error) {
+    MailApp.sendEmail("onurgulen2006@gmail.com", "Script Hata", error.toString());
+    return ContentService.createTextOutput("Hata oluştu").setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
   
 </script>
 </body>
