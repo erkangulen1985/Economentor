@@ -699,20 +699,19 @@ if (change.type === "modified") {
   const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
   if (msgDiv) {
     msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
-  }
 
-  const chatItems = document.querySelectorAll(".chat-item");
-  chatItems.forEach(item => {
-    const nameEl = item.querySelector("strong");
-    if (nameEl && nameEl.innerText === senderName) {
-      const preview = item.querySelector(".last-message");
-      if (preview) preview.innerText = updatedMsg.text;
-    }
-  });
+    // GÖRÜLDÜ durumu için güncelleme
+    if (updatedMsg.sender === currentUser.uid) {
+      let seenDiv = msgDiv.querySelector(".seen-status");
 
-  if (updatedMsg.sender === currentUser.uid) {
-    const seenDiv = document.querySelector(`.seen-status[data-msgid="${updatedMsg.id}"]`);
-    if (seenDiv) {
+      if (!seenDiv) {
+        seenDiv = document.createElement("div");
+        seenDiv.classList.add("seen-status");
+        seenDiv.setAttribute("data-msgid", updatedMsg.id);
+        seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
+        msgDiv.appendChild(seenDiv);
+      }
+
       if (updatedMsg.seenBy?.includes(selectedFriendId)) {
         seenDiv.classList.remove("pending");
         seenDiv.classList.add("active");
@@ -722,6 +721,16 @@ if (change.type === "modified") {
       }
     }
   }
+
+  // Chat list "önizleme" güncellemesi
+  const chatItems = document.querySelectorAll(".chat-item");
+  chatItems.forEach(item => {
+    const nameEl = item.querySelector("strong");
+    if (nameEl && nameEl.innerText === senderName) {
+      const preview = item.querySelector(".last-message");
+      if (preview) preview.innerText = updatedMsg.text;
+    }
+  });
 }
 
     // 🗑️ Mesaj silindiyse
