@@ -179,17 +179,20 @@ function extractModelCode(userAgent) {
   return "Bilinmiyor";
 }
     
-function saveTokenToFirestore(uid, token) {
+async function saveTokenToFirestore(uid, token) {
   const userAgent = navigator.userAgent;
   const modelCode = extractModelCode(userAgent);
 
   const userRef = doc(db, "users", uid);
-  return setDoc(userRef, {
+  await setDoc(userRef, {
     fcmToken: token,
     deviceInfo: userAgent,
     deviceModel: modelCode || "Bilinmiyor",
-    deviceModelSavedAt: serverTimestamp()  // ⏰ kayıt zamanı
+    deviceModelSavedAt: serverTimestamp()
   }, { merge: true });
+
+  // Token başarıyla kaydedildiğinde anasayfa bildirimi ekle
+  await addNotificationForTokenSetup(uid);
 }
 
 const fcmStatusDiv = document.getElementById("fcmStatus");
@@ -207,6 +210,16 @@ function showSetupMessage() {
     notificationSetupTimeout = setTimeout(() => {
       resolve();
     }, 3000);
+  });
+}
+
+async function addNotificationForTokenSetup(uid) {
+  const notifRef = doc(collection(db, "notifications"));
+  await setDoc(notifRef, {
+    to: uid,
+    message: "Bildirimleriniz ayarlandı!",
+    timestamp: Timestamp.now(),
+    read: false
   });
 }
 
