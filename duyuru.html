@@ -194,10 +194,36 @@ function saveTokenToFirestore(uid, token) {
 
 const fcmStatusDiv = document.getElementById("fcmStatus");
 
+let notificationSetupInProgress = false;
+let notificationSetupTimeout = null;
+
+function showSetupMessage() {
+  notificationSetupInProgress = true;
+  fcmStatusDiv.style.display = "block";
+  fcmStatusDiv.textContent = "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz...";
+  
+  // Minimum 3 saniye bekleme promise'i döndür
+  return new Promise(resolve => {
+    notificationSetupTimeout = setTimeout(() => {
+      resolve();
+    }, 3000);
+  });
+}
+
+function hideSetupMessage() {
+  fcmStatusDiv.style.display = "none";
+  notificationSetupInProgress = false;
+  if (notificationSetupTimeout) {
+    clearTimeout(notificationSetupTimeout);
+    notificationSetupTimeout = null;
+  }
+}
+
 window.addEventListener("beforeunload", (event) => {
-  if (fcmStatusDiv && fcmStatusDiv.style.display === "block") {
+  if (notificationSetupInProgress) {
     event.preventDefault();
-    event.returnValue = "";
+    event.returnValue = "Bildirim ayarlama işlemi tamamlanmadı, lütfen sayfadan ayrılmayınız.";
+    return event.returnValue;
   }
 });
     
@@ -227,10 +253,8 @@ onAuthStateChanged(auth, async (user) => {
     const shouldRefreshToken = !savedToken;
 
     if (shouldRefreshToken) {
-      // Yeni token alınacak, mesajı göster
-      fcmStatusDiv.style.display = "block";
-      fcmStatusDiv.textContent =
-        "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz...";
+      // Ayarlama mesajını göster ve 3 saniyelik minimum bekleme başlat
+      const minWaitPromise = showSetupMessage();
 
       const token = await getToken(messaging, {
         vapidKey:
@@ -240,85 +264,31 @@ onAuthStateChanged(auth, async (user) => {
       if (token) {
         await saveTokenToFirestore(user.uid, token);
         console.log("✅ Yeni token Firestore'a kaydedildi.");
-        // Başarılı mesajı göster, 5 sn sonra gizle
-        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
+        // 3 saniyelik bekleme tamamlanana kadar mesajı tut
+        await minWaitPromise;
+        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı. (Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
+
+        // Mesajı 5 saniye gösterip gizle
         setTimeout(() => {
-          fcmStatusDiv.style.display = "none";
+          hideSetupMessage();
         }, 5000);
       } else {
         console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");
-        // Eğer token alınamazsa mesajı kapatabiliriz ya da uyarı gösterebiliriz
-        fcmStatusDiv.style.display = "none";
+        // Minimum beklemeyi tamamla ve mesajı gizle
+        await minWaitPromise;
+        hideSetupMessage();
       }
     } else {
-      // Token zaten var veya cihaz uyuşmuyor, mesaj gösterme
       console.log(
         "📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı."
       );
-      fcmStatusDiv.style.display = "none";
+      hideSetupMessage();
     }
   } catch (err) {
     console.error("❌ Token kontrol hatası:", err);
-    fcmStatusDiv.style.display = "none";
+    hideSetupMessage();
   }
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const promptDiv = document.getElementById("notificationPrompt");
-
-function checkNotificationPermission() {
-  // Sadece mobil cihazlardaysa bildirimi göster
-  if (isMobileDevice() && Notification.permission !== "granted") {
-    setTimeout(() => {
-      promptDiv.style.display = "block";
-    }, 2000);
-  } else {
-    console.log("💻 Masaüstü tespit edildi — bildirim kutusu gösterilmeyecek.");
-  }
-}
-
-  checkNotificationPermission(); // her girişte izin kontrolü yap
-
-  document.getElementById("allowNotifications").addEventListener("click", async () => {
-    promptDiv.style.display = "none";
-
-    if (Notification.permission === "denied") {
-      alert("⚠️ Bildirim izni tarayıcınızda engellenmiş. Lütfen site ayarlarından bildirimleri açın.");
-      return;
-    }
-
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        const currentToken = await getToken(messaging, {
-          vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
-        });
-
-        if (currentToken && auth.currentUser) {
-          await saveTokenToFirestore(auth.currentUser.uid, currentToken);
-          console.log("✅ Token izinden sonra Firestore'a kaydedildi.");
-        }
-      }
-    } catch (err) {
-      console.error("🔴 Bildirim izni istenirken hata:", err);
-    }
-  });
-
-  document.getElementById("denyNotifications").addEventListener("click", () => {
-    promptDiv.style.display = "none";
-    console.log("🔕 Kullanıcı bildirim almak istemedi.");
-  });
-});
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then((registration) => {
-      console.log('✅ Service Worker başarıyla kaydedildi:', registration);
-    })
-    .catch((err) => {
-      console.error('❌ Service Worker kaydı başarısız:', err);
-    });
-}
 
 loadAnnouncements();
     
