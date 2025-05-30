@@ -260,8 +260,11 @@ async function loadStatistics() {
       if (role === "admin") adminCount++;
       else if (role === "vip") vipCount++;
       else userCount++;
+      if (userDoc.data().fcmToken) {
+      notificationTokenCount++;
+      }
     });
-
+    
     // 👥 Sayıları Dashboard'a ekle
     document.getElementById("totalAdmins").textContent = adminCount;
     document.getElementById("totalVIPs").textContent = vipCount;
