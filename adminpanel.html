@@ -201,6 +201,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let isSending = false;
+
+window.addEventListener("beforeunload", function (e) {
+    if (isSending) {
+        e.preventDefault();
+        e.returnValue = "Bildirimler hala gönderiliyor. Sayfadan çıkarsanız işlemler tamamlanmayabilir.";
+    }
+});
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userRef = doc(db, "users", user.uid);
@@ -232,16 +241,17 @@ onAuthStateChanged(auth, async (user) => {
             const container = document.getElementById("dynamicContent");
             container.innerHTML = "";
 
-            if (section === 'duyuru-admin') {
-                container.innerHTML = `
-                    <h3>Yeni Duyuru Ekle</h3>
-                    <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-                    <button class="button" onclick="saveDuyuru()">Kaydet</button>
-                    <h3 style="margin-top:30px">Tüm Duyurular</h3>
-                    <div id="duyuruList"></div>
-                `;
-                loadDuyurular();
-            }
+if (section === 'duyuru-admin') {
+    container.innerHTML = `
+        <h3>Yeni Duyuru Ekle</h3>
+        <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
+        <button class="button" id="kaydetBtn" onclick="saveDuyuru()">Kaydet</button>
+        <p id="loadingMsg" style="color: yellow; display: none;">Lütfen bekleyin, duyuru bildiriliyor...</p>
+        <h3 style="margin-top:30px">Tüm Duyurular</h3>
+        <div id="duyuruList"></div>
+    `;
+    loadDuyurular();
+}
 
             if (section === 'hakkinda-admin') {
                 const hakRef = doc(db, "site", "hakkinda");
@@ -285,59 +295,77 @@ onAuthStateChanged(auth, async (user) => {
         }
 
 window.saveDuyuru = async function () {
-  const text = document.getElementById("duyuruText").value.trim();
-  if (!text) return alert("Duyuru metni boş olamaz.");
+    const text = document.getElementById("duyuruText").value.trim();
+    const button = document.getElementById("kaydetBtn");
+    const loadingMsg = document.getElementById("loadingMsg");
 
-  // Firestore'a duyuruyu kaydet
-  await addDoc(collection(db, "announcements"), {
-    text,
-    createdAt: Timestamp.now()
-  });
+    if (!text) return alert("Duyuru metni boş olamaz.");
 
-  document.getElementById("duyuruText").value = "";
-  loadDuyurular();
+    isSending = true;
+    loadingMsg.style.display = "block";
+    button.disabled = true;
 
-  // 🔔 Bildirim gönder (admin hariç herkese)
-  const usersSnap = await getDocs(collection(db, "users"));
-  const title = `"Economentor" 📢 Yeni Duyuru`;
-  const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
-  const url = "https://economentor.netlify.app";
-
-  for (const userDoc of usersSnap.docs) {
-    const uid = userDoc.id;
-    const userData = userDoc.data();
-
-    if (userData.role === "admin") continue;
-
-    // 🔔 1. Firestore notification (anasayfa bildirimi)
-    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-      to: uid,
-      message: `Yeni bir duyuru yayınlandı: "${text}"`,
-      postId: null,
-      timestamp: Timestamp.now(),
-      read: false
-    });
-
-    // 🔔 2. FCM bildirimi (varsa)
-    if (userData.fcmToken) {
-      try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            uid,
-            title,
-            body,
-            url
-          })
+    try {
+        // Duyuruyu kaydet
+        await addDoc(collection(db, "announcements"), {
+            text,
+            createdAt: Timestamp.now()
         });
-      } catch (err) {
-        console.error("Bildirim gönderilemedi (" + uid + "):", err);
-      }
+
+        document.getElementById("duyuruText").value = "";
+        loadDuyurular();
+
+        // Kullanıcıları al
+        const usersSnap = await getDocs(collection(db, "users"));
+        const title = `"Economentor" 📢 Yeni Duyuru`;
+        const body = `Yeni bir duyuru yayınlandı. Göz atmayı unutmayın!`;
+        const url = "https://economentor.netlify.app";
+
+        // Tüm kullanıcılar için bildirim işlemlerini sırala
+        const notificationPromises = usersSnap.docs.map(async (userDoc) => {
+            const uid = userDoc.id;
+            const userData = userDoc.data();
+
+            if (userData.role === "admin") return;
+
+            try {
+                await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+                    to: uid,
+                    message: `Yeni bir duyuru yayınlandı: "${text}"`,
+                    postId: null,
+                    timestamp: Timestamp.now(),
+                    read: false
+                });
+            } catch (e) {
+                console.warn(`Firestore bildirimi başarısız: ${uid}`, e);
+            }
+
+            try {
+                if (userData.fcmToken) {
+                    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ uid, title, body, url })
+                    });
+                }
+            } catch (e) {
+                console.warn(`FCM bildirimi başarısız: ${uid}`, e);
+            }
+        });
+
+        await Promise.allSettled(notificationPromises);
+
+        alert("Duyuru başarıyla yayınlandı. Bildirimler gönderilmeye çalışıldı.");
+    } catch (err) {
+        console.error("Duyuru işlemi sırasında hata:", err);
+        alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+    } finally {
+        isSending = false;
+        loadingMsg.style.display = "none";
+        button.disabled = false;
     }
-  }
 };
 
         window.loadDuyurular = async function () {
