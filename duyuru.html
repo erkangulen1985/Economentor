@@ -230,7 +230,7 @@ onAuthStateChanged(auth, async (user) => {
       // Yeni token alınacak, mesajı göster
       fcmStatusDiv.style.display = "block";
       fcmStatusDiv.textContent =
-        "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz (Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı silip doğru cihaz ile yeniden giriş sağlayınız.)";
+        "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz...";
 
       const token = await getToken(messaging, {
         vapidKey:
@@ -241,7 +241,7 @@ onAuthStateChanged(auth, async (user) => {
         await saveTokenToFirestore(user.uid, token);
         console.log("✅ Yeni token Firestore'a kaydedildi.");
         // Başarılı mesajı göster, 5 sn sonra gizle
-        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı.";
+        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
         setTimeout(() => {
           fcmStatusDiv.style.display = "none";
         }, 5000);
