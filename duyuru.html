@@ -200,6 +200,18 @@ window.addEventListener("beforeunload", (event) => {
     event.returnValue = "";
   }
 });
+
+import { addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+async function addUserNotification(uid, message) {
+  const notificationsRef = collection(db, "notifications"); // Dilersen users/{uid}/notifications olarak da yapabilirsin
+  await addDoc(notificationsRef, {
+    to: uid,
+    message: message,
+    timestamp: serverTimestamp(),
+    read: false
+  });
+}
     
 onAuthStateChanged(auth, async (user) => {
   if (!isMobileDevice()) {
@@ -242,6 +254,10 @@ onAuthStateChanged(auth, async (user) => {
       if (token) {
         await saveTokenToFirestore(user.uid, token);
         console.log("✅ Yeni token Firestore'a kaydedildi.");
+
+          // İşte burada anasayfaya bildirim ekle:
+        await addUserNotification(user.uid, "Bildirimleriniz ayarlandı.");
+        
         // Başarılı mesajı göster, 5 sn sonra gizle
         fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı.";
         setTimeout(() => {
