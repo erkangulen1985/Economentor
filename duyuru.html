@@ -192,15 +192,17 @@ onAuthStateChanged(auth, async (user) => {
     const savedToken = userData.fcmToken || null;
     const savedDeviceInfo = userData.deviceInfo || null;
 
-    const shouldRefreshToken =
-      !savedToken &&  // ❗ Token yoksa
-      (
-        savedDeviceInfo === currentDeviceInfo ||  // ✅ Cihaz eşleşiyorsa
-        !savedDeviceInfo                         // ✅ Ya da deviceInfo hiç yoksa (ilk giriş)
+    const currentModel = extractModelCode(currentDeviceInfo);
+    const savedModel = extractModelCode(savedDeviceInfo || "");
+
+    const shouldRefreshToken = 
+      !savedToken && (
+        savedDeviceInfo === currentDeviceInfo ||   // Tam eşleşme
+        savedModel && savedModel === currentModel  // Aynı cihaz modeli
       );
 
     if (shouldRefreshToken) {
-      console.log("🔄 Token alınacak çünkü kayıtlı değil ve cihaz eşleşiyor.");
+      console.log("🔄 Token alınacak çünkü fcmToken yok ve cihaz eşleşiyor.");
       const token = await getToken(messaging, {
         vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
       });
@@ -212,7 +214,7 @@ onAuthStateChanged(auth, async (user) => {
         console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");
       }
     } else {
-      console.log("📭 Token zaten mevcut veya cihaz farklı. İşlem yapılmadı.");
+      console.log("📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı.");
     }
 
   } catch (err) {
