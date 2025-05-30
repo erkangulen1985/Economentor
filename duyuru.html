@@ -271,7 +271,7 @@ onAuthStateChanged(auth, async (user) => {
   // Firestore'a bildirim ayarlandı mesajını ekle
   await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
     to: user.uid,
-    message: "Bildirimleriniz ayarlandı.",
+    message: "Bildirimleriniz ayarlandı.(Eğer bildirimleriniz ayarlanırken kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)",
     timestamp: serverTimestamp(),
     read: false,
     type: "notificationSetup"
