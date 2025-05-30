@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Paneli | Finans Yönetimi</title>
+  <title>Admin Paneli | Site Yönetimi</title>
   <link rel="icon" href="image1.png">
   <style>
     /* Genel Stil Ayarları */
@@ -157,15 +157,16 @@
       <div id="dashboard" class="card">
         <h3>Genel Bakış</h3>
         <p>Toplam Kullanıcı Sayısı: <span id="totalUsers">0</span></p>
+        <p>Admin Kullanıcı Sayısı: <span id="totalAdmins">0</span></p>
+        <p>VIP Kullanıcı Sayısı: <span id="totalVIPs">0</span></p>
+        <p>Normal Kullanıcı Sayısı: <span id="totalNormalUsers">0</span></p>
+        <p>Bildirim Alan Kullanıcı Sayısı: <span id="totalNotificationUsers">0</span></p>
         <p>Toplam İçerik Sayısı: <span id="totalContents">0</span></p>
         <p>Toplam Belge Sayısı: <span id="totalDocuments">0</span></p>
         <p>Toplam Dilek/Şikayet Sayısı: <span id="totalFeedbacks">0</span></p>
         <p>Toplam Beğeni Sayısı: <span id="totalLikes">0</span></p>
         <p>Toplam Beğenmeme Sayısı: <span id="totalDislikes">0</span></p>
         <p>Toplam Yorum Sayısı: <span id="totalComments">0</span></p>
-        <p>Admin Kullanıcı Sayısı: <span id="totalAdmins">0</span></p>
-        <p>VIP Kullanıcı Sayısı: <span id="totalVIPs">0</span></p>
-        <p>Normal Kullanıcı Sayısı: <span id="totalNormalUsers">0</span></p>
       </div>
 
       <!-- Kullanıcı Yönetimi -->
@@ -247,6 +248,7 @@ async function loadStatistics() {
     let totalLikes = 0;
     let totalDislikes = 0;
     let totalComments = 0;
+    let notificationTokenCount = 0;
 
     // 👥 Role göre sayaçlar
     let adminCount = 0;
@@ -264,6 +266,7 @@ async function loadStatistics() {
     document.getElementById("totalAdmins").textContent = adminCount;
     document.getElementById("totalVIPs").textContent = vipCount;
     document.getElementById("totalNormalUsers").textContent = userCount;
+    document.getElementById("totalNotificationUsers").textContent = notificationTokenCount;
 
     // ✅ ANALİZLER
     for (const analiz of analizler.docs) {
