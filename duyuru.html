@@ -173,10 +173,6 @@ function saveTokenToFirestore(uid, token) {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  if (!isMobileDevice()) {
-    console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
-    return;
-  }
 
   if (!user) {
     console.log("🔒 Kullanıcı giriş yapmamış.");
