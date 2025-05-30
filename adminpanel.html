@@ -357,7 +357,7 @@ window.saveDuyuru = async function () {
 
         await Promise.allSettled(notificationPromises);
 
-        alert("Duyuru başarıyla yayınlandı. Bildirimler gönderilmeye çalışıldı.");
+        alert("Duyuru başarıyla yayınlandı. Bildirim gönderme işlemi tamamlandı.");
     } catch (err) {
         console.error("Duyuru işlemi sırasında hata:", err);
         alert("Bir hata oluştu. Lütfen tekrar deneyin.");
