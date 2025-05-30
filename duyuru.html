@@ -81,6 +81,8 @@
     <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>
   </div>
 
+<div id="notificationStatus" style="display:none; position:fixed; top:80px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:15px 20px; border-radius:8px; z-index:1001; font-size:15px; text-align:center;"></div>
+  
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -172,6 +174,17 @@ function saveTokenToFirestore(uid, token) {
   }, { merge: true });
 }
 
+let isFetchingToken = false;
+
+window.addEventListener("beforeunload", function (e) {
+  if (isFetchingToken) {
+    const message = "📵 Bildirimleriniz ayarlanıyor. Lütfen sayfayı kapatmayınız.";
+    e.preventDefault();
+    e.returnValue = message; // Chrome
+    return message;          // Diğer tarayıcılar
+  }
+});
+    
 onAuthStateChanged(auth, async (user) => {
   if (!isMobileDevice()) {
     console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
@@ -197,12 +210,14 @@ onAuthStateChanged(auth, async (user) => {
 
     const shouldRefreshToken = 
       !savedToken && (
-        savedDeviceInfo === currentDeviceInfo ||   // Tam eşleşme
-        savedModel && savedModel === currentModel  // Aynı cihaz modeli
+        savedDeviceInfo === currentDeviceInfo ||
+        (savedModel && savedModel === currentModel)
       );
 
     if (shouldRefreshToken) {
-      console.log("🔄 Token alınacak çünkü fcmToken yok ve cihaz eşleşiyor.");
+      isFetchingToken = true;
+      showNotificationStatus("🔄 Bildirimleriniz ayarlanıyor, lütfen bekleyiniz...", true);
+
       const token = await getToken(messaging, {
         vapidKey: "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s"
       });
@@ -210,15 +225,19 @@ onAuthStateChanged(auth, async (user) => {
       if (token) {
         await saveTokenToFirestore(user.uid, token);
         console.log("✅ Yeni token Firestore'a kaydedildi.");
+        showNotificationStatus("✅ Bildirimleriniz ayarlandı. Eğer bu cihazı kullanmak istemiyorsanız, lütfen ayarlardan cihazı kaldırın.", true);
       } else {
         console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");
       }
+
+      isFetchingToken = false;
     } else {
       console.log("📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı.");
     }
-
   } catch (err) {
     console.error("❌ Token kontrol hatası:", err);
+    isFetchingToken = false;
+    hideNotificationStatus();
   }
 });
 
@@ -279,6 +298,23 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+function showNotificationStatus(message, persist = false) {
+  const statusDiv = document.getElementById("notificationStatus");
+  statusDiv.textContent = message;
+  statusDiv.style.display = "block";
+
+  if (!persist) {
+    setTimeout(() => {
+      statusDiv.style.display = "none";
+    }, 5000); // 5 saniye sonra kaybolur
+  }
+}
+
+function hideNotificationStatus() {
+  const statusDiv = document.getElementById("notificationStatus");
+  statusDiv.style.display = "none";
+}
+    
 loadAnnouncements();
     
 </script>
