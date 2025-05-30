@@ -81,8 +81,6 @@
     <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>
   </div>
 
-<div id="errorBox" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#ff4d4d;color:white;padding:10px 20px;border-radius:5px;z-index:9999;display:none;font-weight:bold;"></div>
-
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -100,13 +98,6 @@
       appId: "1:835370350520:web:d9bb275eb4b7502997814d",
       measurementId: "G-FS3FMPYVPD"
     };
-
-function showError(message) {
-  const errorBox = document.getElementById("errorBox");
-  errorBox.textContent = message;
-  errorBox.style.display = "block";
-  setTimeout(() => { errorBox.style.display = "none"; }, 7000);
-}
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -226,9 +217,8 @@ onAuthStateChanged(auth, async (user) => {
       console.log("📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı.");
     }
 
-  } catch (error) {
-    showError("Token alma hatası: " + error.message);
-    console.error(error);
+  } catch (err) {
+    console.error("❌ Token kontrol hatası:", err);
   }
 });
 
