@@ -273,7 +273,7 @@ onAuthStateChanged(auth, async (user) => {
         console.log("✅ Yeni token Firestore'a kaydedildi.");
         // 3 saniyelik bekleme tamamlanana kadar mesajı tut
         await minWaitPromise;
-        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı. (Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
+        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu bildirim kaybolduktan sonra anasayfaya dönüş sağlayabilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
 
         // Mesajı 5 saniye gösterip gizle
         setTimeout(() => {
