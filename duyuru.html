@@ -224,9 +224,7 @@ onAuthStateChanged(auth, async (user) => {
     const currentModel = extractModelCode(currentDeviceInfo);
     const savedModel = extractModelCode(savedDeviceInfo || "");
 
-    const shouldRefreshToken =
-      !savedToken &&
-      (savedDeviceInfo === currentDeviceInfo || savedModel === currentModel);
+    const shouldRefreshToken = !savedToken;
 
     if (shouldRefreshToken) {
       // Yeni token alınacak, mesajı göster
