@@ -262,24 +262,31 @@ onAuthStateChanged(auth, async (user) => {
       });
 
       if (token) {
-        await saveTokenToFirestore(user.uid, token);
+  // 3 saniyelik bekleme mesajını göster
+  const minWaitPromise = showSetupMessage();
 
-        await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
-  type: "notificationSetup",
-  message: "Bildirimleriniz ayarlandı.",
-  timestamp: serverTimestamp()
-});
+  // Token'ı Firestore'a kaydet
+  await saveTokenToFirestore(user.uid, token);
 
-        console.log("✅ Yeni token Firestore'a kaydedildi.");
-        // 3 saniyelik bekleme tamamlanana kadar mesajı tut
-        await minWaitPromise;
-        fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu bildirim kaybolduktan sonra anasayfaya dönüş sağlayabilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
+  // Firestore'a bildirim ayarlandı mesajını ekle
+  await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
+    to: user.uid,
+    message: "Bildirimleriniz ayarlandı.",
+    timestamp: serverTimestamp(),
+    read: false,
+    type: "notificationSetup"
+  });
 
-        // Mesajı 5 saniye gösterip gizle
-        setTimeout(() => {
-          hideSetupMessage();
-        }, 5000);
-      } else {
+  // 3 saniyelik bekleme tamamlanana kadar bekle
+  await minWaitPromise;
+
+  // Kullanıcıya mesaj göster
+  fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, Bu yazı kaybolduktan sonra anasayfaya dönebilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
+
+  setTimeout(() => {
+    hideSetupMessage();
+  }, 7000);
+} else {
         console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");
         // Minimum beklemeyi tamamla ve mesajı gizle
         await minWaitPromise;
