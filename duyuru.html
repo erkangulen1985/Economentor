@@ -200,7 +200,7 @@ let notificationSetupTimeout = null;
 function showSetupMessage() {
   notificationSetupInProgress = true;
   fcmStatusDiv.style.display = "block";
-  fcmStatusDiv.textContent = "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz...";
+  fcmStatusDiv.textContent = "Şu anda bildirimleriniz ayarlanıyor, lütfen bekleyiniz ve sayfadan ayrılmayınız...";
   
   // Minimum 3 saniye bekleme promise'i döndür
   return new Promise(resolve => {
