@@ -215,6 +215,7 @@
     <input type="text" id="imageTitle" placeholder="Başlık Girin">
     <textarea id="imageDescription" placeholder="Açıklama Girin" rows="4"></textarea>
     <button id="uploadButton">Paylaş</button>
+    <p id="loadingMsg" style="display: none; color: orange;">Bildirim gönderiliyor, lütfen bekleyin...</p>
   </div>
 
   <input type="text" id="searchInput" placeholder="Paylaşım başlığı ya da açıklama ara..." 
@@ -265,6 +266,15 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+let isSending = false;
+
+window.addEventListener("beforeunload", function (e) {
+  if (isSending) {
+    e.preventDefault();
+    e.returnValue = "Post bildirimi gönderiliyor. Lütfen sayfayı kapatmayın.";
+  }
+});
+
 function sanitizeFilename(filename) {
   return filename
     .normalize("NFD")
@@ -279,17 +289,23 @@ async function uploadPost() {
   const imageFile = document.getElementById("imageUpload").files[0];
   const title = document.getElementById("imageTitle").value.trim();
   const description = document.getElementById("imageDescription").value.trim();
+  const loadingMsg = document.getElementById("loadingMsg");
+  const button = document.getElementById("uploadButton");
 
   if (!title || !description) {
     alert("Lütfen başlık ve açıklama girin!");
     return;
   }
 
+  isSending = true;
+  loadingMsg.style.display = "block";
+  button.disabled = true;
+
   let imageUrl = '';
   let imagePath = '';
 
-  if (imageFile) {
-    try {
+  try {
+    if (imageFile) {
       const safeFileName = sanitizeFilename(imageFile.name);
       const timestamp = Date.now();
       imagePath = 'images/' + timestamp + '-' + safeFileName;
@@ -299,21 +315,11 @@ async function uploadPost() {
         .from('anasayfa-paylasimlari')
         .upload(imagePath, imageFile);
 
-      if (error) {
-        console.error("Supabase yükleme hatası:", error.message);
-        alert("Resim yüklenemedi!");
-        return;
-      }
+      if (error) throw new Error("Resim yüklenemedi: " + error.message);
 
       imageUrl = `${supabaseUrl}/storage/v1/object/public/anasayfa-paylasimlari/${imagePath}`;
-    } catch (err) {
-      console.error("Yükleme sırasında hata oluştu:", err);
-      alert("Resim yüklenemedi.");
-      return;
     }
-  }
 
-  try {
     await addDoc(collection(db, "posts"), {
       title,
       description,
@@ -325,17 +331,65 @@ async function uploadPost() {
       timestamp: new Date()
     });
 
-    alert("Paylaşım yapıldı!");
     document.getElementById("imageUpload").value = "";
     document.getElementById("imageTitle").value = "";
     document.getElementById("imageDescription").value = "";
 
-    await sendNotificationToAllUsersExceptAdmin(title, description);
-    
-    loadPosts(); // her durumda çağrılır
+    // Bildirim gönderimi
+    const usersSnap = await getDocs(collection(db, "users"));
+    const titleNotif = "\"Economentor\" 📢 Yeni Post Yayınlandı!";
+    const bodyNotif = `${title} - ${description}`;
+    const url = "https://economentor.netlify.app";
+
+    const notificationPromises = usersSnap.docs.map(async (docSnap) => {
+      const user = docSnap.data();
+      const uid = docSnap.id;
+
+      if (user.role !== "admin") {
+        try {
+          await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+            to: uid,
+            message: `"${title}" başlıklı yeni bir gönderi yayınlandı.`,
+            postId: null,
+            timestamp: Timestamp.now(),
+            read: false
+          });
+        } catch (e) {
+          console.warn(`Firestore bildirimi başarısız (${uid})`, e);
+        }
+
+        if (user.fcmToken) {
+          try {
+            await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                uid,
+                title: titleNotif,
+                body: bodyNotif,
+                url
+              })
+            });
+          } catch (e) {
+            console.warn(`FCM bildirimi başarısız (${uid})`, e);
+          }
+        }
+      }
+    });
+
+    await Promise.allSettled(notificationPromises);
+
+    alert("Post başarıyla paylaşıldı ve bildirimler gönderildi.");
+    loadPosts();
   } catch (err) {
-    console.error("Post kaydedilemedi:", err);
-    alert("Post kaydedilirken bir hata oluştu.");
+    console.error("Post işlemi sırasında hata:", err);
+    alert("Post gönderilirken bir hata oluştu.");
+  } finally {
+    isSending = false;
+    loadingMsg.style.display = "none";
+    button.disabled = false;
   }
 }
 
