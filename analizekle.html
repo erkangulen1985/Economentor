@@ -177,11 +177,12 @@ html, body {
       <input type="file" id="videoFile" accept="video/*">
       <input type="text" id="videoTitle" placeholder="Başlık">
       <textarea id="videoDesc" rows="3" placeholder="Açıklama"></textarea>
-      <div style="margin-top: 10px;">
+    <div style="margin-top: 10px;">
       <button id="userShareBtn">Herkes İçin Paylaş</button>
       <button id="vipShareBtn">VIP İçin Paylaş</button>
-      </div>
-      </div>
+      <p id="loadingMsg" style="display: none; color: orange;">📡 Bildirimler gönderiliyor, lütfen bekleyin...</p>
+    </div>
+  </div>
     
     <input type="text" class="search" id="searchInput" placeholder="Başlık ya da açıklama ara...">
 
@@ -215,6 +216,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let isSending = false;
+
+window.addEventListener("beforeunload", function (e) {
+  if (isSending) {
+    e.preventDefault();
+    e.returnValue = "Bildirimler gönderiliyor. Sayfadan çıkmayın!";
+  }
+});
+
 function sanitizeFilename(filename) {
   return filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_.-]/g, "");
 }
@@ -240,64 +250,91 @@ async function uploadVideo(visibility) {
   const file = document.getElementById("videoFile").files[0];
   const title = document.getElementById("videoTitle").value;
   const description = document.getElementById("videoDesc").value;
+  const loadingMsg = document.getElementById("loadingMsg");
+  const userBtn = document.getElementById("userShareBtn");
+  const vipBtn = document.getElementById("vipShareBtn");
 
   if (!file || !title || !description) return alert("Tüm alanları doldurun.");
 
-  const safeFileName = sanitizeFilename(file.name);
-  const filePath = `analiz/${Date.now()}-${safeFileName}`;
-  const { error } = await supabase.storage.from("analizler").upload(filePath, file);
-  if (error) return alert("Video yükleme hatası: " + error.message);
+  isSending = true;
+  loadingMsg.style.display = "block";
+  userBtn.disabled = true;
+  vipBtn.disabled = true;
 
-  const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
+  try {
+    const safeFileName = sanitizeFilename(file.name);
+    const filePath = `analiz/${Date.now()}-${safeFileName}`;
+    const { error } = await supabase.storage.from("analizler").upload(filePath, file);
+    if (error) throw new Error("Video yüklenemedi: " + error.message);
 
-  await addDoc(collection(db, "analizler"), {
-    title,
-    description,
-    videoUrl: publicUrl,
-    videoPath: filePath,
-    likes: 0,
-    dislikes: 0,
-    comments: [],
-    timestamp: new Date(),
-    visibility: visibility
-  });
+    const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
 
-  alert("Video başarıyla yüklendi!");
-  loadVideos();
-
-  // 🔔 Bildirim gönder
-  const usersSnap = await getDocs(collection(db, "users"));
-  for (const docSnap of usersSnap.docs) {
-    const user = docSnap.data();
-    const uid = docSnap.id;
-
-    const shouldNotify = (
-      (visibility === "vip" && user.role === "vip") ||
-      (visibility === "all" && (user.role === "vip" || user.role === "user"))
-    );
-
-    if (!user.fcmToken || user.role === "admin" || !shouldNotify) continue;
-
-    await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-      to: uid,
-      message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-      postId: null,
-      timestamp: Timestamp.now(),
-      read: false
+    await addDoc(collection(db, "analizler"), {
+      title,
+      description,
+      videoUrl: publicUrl,
+      videoPath: filePath,
+      likes: 0,
+      dislikes: 0,
+      comments: [],
+      timestamp: new Date(),
+      visibility: visibility
     });
 
-    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        uid: uid,
-        title: `"Economentor" 🎥 Yeni Analiz Videosu!`,
-        body: `${title} eklendi.`,
-        url: "https://economentor.netlify.app"
-      })
+    const usersSnap = await getDocs(collection(db, "users"));
+    const titleNotif = `"Economentor" 🎥 Yeni Analiz Videosu!`;
+    const bodyNotif = `${title} eklendi.`;
+    const url = "https://economentor.netlify.app";
+
+    const notificationPromises = usersSnap.docs.map(async (docSnap) => {
+      const user = docSnap.data();
+      const uid = docSnap.id;
+
+      const shouldNotify = (
+        (visibility === "vip" && user.role === "vip") ||
+        (visibility === "all" && (user.role === "vip" || user.role === "user"))
+      );
+
+      if (!user.fcmToken || user.role === "admin" || !shouldNotify) return;
+
+      try {
+        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+          to: uid,
+          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+          postId: null,
+          timestamp: Timestamp.now(),
+          read: false
+        });
+      } catch (err) {
+        console.warn(`Firestore bildirimi başarısız (${uid})`, err);
+      }
+
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
+        });
+      } catch (err) {
+        console.warn(`FCM bildirimi başarısız (${uid})`, err);
+      }
     });
+
+    await Promise.allSettled(notificationPromises);
+
+    alert("Video başarıyla yüklendi ve bildirimler gönderildi.");
+    document.getElementById("videoFile").value = "";
+    document.getElementById("videoTitle").value = "";
+    document.getElementById("videoDesc").value = "";
+    loadVideos();
+  } catch (err) {
+    console.error("Video gönderim hatası:", err);
+    alert("Yükleme sırasında bir hata oluştu.");
+  } finally {
+    isSending = false;
+    loadingMsg.style.display = "none";
+    userBtn.disabled = false;
+    vipBtn.disabled = false;
   }
 }
 
