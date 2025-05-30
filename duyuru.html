@@ -253,20 +253,17 @@ onAuthStateChanged(auth, async (user) => {
     const shouldRefreshToken = !savedToken;
 
     if (shouldRefreshToken) {
-      // Ayarlama mesajını göster ve 3 saniyelik minimum bekleme başlat
+      // Bildirim ayarlama mesajını göster ve promise döndür
       const minWaitPromise = showSetupMessage();
 
+      // Token al
       const token = await getToken(messaging, {
-        vapidKey:
-          "BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",
+        vapidKey:"BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",
       });
 
       if (token) {
-  // 3 saniyelik bekleme mesajını göster
-  const minWaitPromise = showSetupMessage();
-
-  // Token'ı Firestore'a kaydet
-  await saveTokenToFirestore(user.uid, token);
+        // Token'ı Firestore'a kaydet
+        await saveTokenToFirestore(user.uid, token);
 
   // Firestore'a bildirim ayarlandı mesajını ekle
   await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
