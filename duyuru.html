@@ -281,18 +281,17 @@ function checkNotificationPermission() {
 document.addEventListener("DOMContentLoaded", () => {
   const promptDiv = document.getElementById("notificationPrompt");
 
-function checkNotificationPermission() {
-  // Sadece mobil cihazlardaysa bildirimi göster
-  if (isMobileDevice() && Notification.permission !== "granted") {
-    setTimeout(() => {
-      promptDiv.style.display = "block";
-    }, 2000);
-  } else {
-    console.log("💻 Masaüstü tespit edildi — bildirim kutusu gösterilmeyecek.");
+  function checkNotificationPermission() {
+    if (isMobileDevice() && Notification.permission !== "granted") {
+      setTimeout(() => {
+        promptDiv.style.display = "block";
+      }, 2000);
+    } else {
+      console.log("💻 Masaüstü tespit edildi — bildirim kutusu gösterilmeyecek.");
+    }
   }
-}
 
-  checkNotificationPermission(); // her girişte izin kontrolü yap
+  checkNotificationPermission();
 
   document.getElementById("allowNotifications").addEventListener("click", async () => {
     promptDiv.style.display = "none";
