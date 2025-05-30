@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Paneli | Site Yönetimi</title>
+  <title>Admin Paneli | Finans Yönetimi</title>
   <link rel="icon" href="image1.png">
   <style>
     /* Genel Stil Ayarları */
@@ -166,7 +166,6 @@
         <p>Admin Kullanıcı Sayısı: <span id="totalAdmins">0</span></p>
         <p>VIP Kullanıcı Sayısı: <span id="totalVIPs">0</span></p>
         <p>Normal Kullanıcı Sayısı: <span id="totalNormalUsers">0</span></p>
-        <p>Bildirim Alan Kullanıcı Sayısı: <span id="totalNotificationUsers">0</span></p>
       </div>
 
       <!-- Kullanıcı Yönetimi -->
@@ -245,28 +244,26 @@ async function loadStatistics() {
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     document.getElementById("totalDocuments").textContent = documents.size;
 
-let adminCount = 0;
-let vipCount = 0;
-let userCount = 0;
-let notificationTokenCount = 0;
+    let totalLikes = 0;
+    let totalDislikes = 0;
+    let totalComments = 0;
 
-users.forEach(userDoc => {
-  const data = userDoc.data();
-  const role = (data.role || "user").toLowerCase();
+    // 👥 Role göre sayaçlar
+    let adminCount = 0;
+    let vipCount = 0;
+    let userCount = 0;
 
-  if (role === "admin") adminCount++;
-  else if (role === "vip") vipCount++;
-  else userCount++;
+    users.forEach(userDoc => {
+      const role = (userDoc.data().role || "user").toLowerCase();
+      if (role === "admin") adminCount++;
+      else if (role === "vip") vipCount++;
+      else userCount++;
+    });
 
-  if (data.fcmToken) {
-    notificationTokenCount++;
-  }
-});
-
-document.getElementById("totalAdmins").textContent = adminCount;
-document.getElementById("totalVIPs").textContent = vipCount;
-document.getElementById("totalNormalUsers").textContent = userCount;
-document.getElementById("totalNotificationUsers").textContent = notificationTokenCount;
+    // 👥 Sayıları Dashboard'a ekle
+    document.getElementById("totalAdmins").textContent = adminCount;
+    document.getElementById("totalVIPs").textContent = vipCount;
+    document.getElementById("totalNormalUsers").textContent = userCount;
 
     // ✅ ANALİZLER
     for (const analiz of analizler.docs) {
@@ -306,6 +303,10 @@ document.getElementById("totalNotificationUsers").textContent = notificationToke
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
     }
+
+    document.getElementById("totalLikes").textContent = totalLikes;
+    document.getElementById("totalDislikes").textContent = totalDislikes;
+    document.getElementById("totalComments").textContent = totalComments;
 
   } catch (error) {
     console.error("Veri çekme hatası: ", error);
