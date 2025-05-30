@@ -263,6 +263,13 @@ onAuthStateChanged(auth, async (user) => {
 
       if (token) {
         await saveTokenToFirestore(user.uid, token);
+
+        await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
+  type: "notificationSetup",
+  message: "Bildirimleriniz ayarlandı.",
+  timestamp: serverTimestamp()
+});
+
         console.log("✅ Yeni token Firestore'a kaydedildi.");
         // 3 saniyelik bekleme tamamlanana kadar mesajı tut
         await minWaitPromise;
