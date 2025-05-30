@@ -232,7 +232,7 @@ onAuthStateChanged(auth, async (user) => {
       // Yeni token alınacak, mesajı göster
       fcmStatusDiv.style.display = "block";
       fcmStatusDiv.textContent =
-        "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz (Eğer şu anda kullandığınız cihaz yanlış ise ayarlar üzerinden cihazınızı silip doğru cihaz ile yeniden giriş sağlayınız.)";
+        "Sayfada bildirimleriniz ayarlanıyor, lütfen bekleyiniz (Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı silip doğru cihaz ile yeniden giriş sağlayınız.)";
 
       const token = await getToken(messaging, {
         vapidKey:
