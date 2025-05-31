@@ -232,21 +232,6 @@ function sanitizeFilename(filename) {
 let currentUserUID = null;
 let currentUserRole = "user";
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "index.html";
-
-  const uid = user.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
-  currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
-
-  document.getElementById("userShareBtn").addEventListener("click", async () => {
-    await uploadVideo("all");
-  });
-
-  document.getElementById("vipShareBtn").addEventListener("click", async () => {
-    await uploadVideo("vip");
-  });
-
 async function uploadVideo(visibility) {
   const file = document.getElementById("videoFile").files[0];
   const title = document.getElementById("videoTitle").value;
