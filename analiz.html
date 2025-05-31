@@ -423,45 +423,83 @@ document.addEventListener("click", async (e) => {
       comments: arrayUnion(comment)
     });
 
-    // ✅ YENİ: Başlık DOM'dan alınır
+    // Bildirim için video başlığı
     const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
 
-    // 👥 Bahsetmeler
+    // 🔔 1. Adminlere bildirim gönder (Firestore ve FCM)
+    const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
+    const adminsSnap = await getDocs(adminsQuery);
+
+    for (const adminDoc of adminsSnap.docs) {
+      const adminId = adminDoc.id;
+      if (adminId === uid) continue; // Yorum yapan adminse atla
+
+      const adminMessage = `${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.`;
+
+      // Firestore bildirimi
+      await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+        to: adminId,
+        from: uid,
+        videoId: id,
+        message: adminMessage,
+        timestamp: Timestamp.now(),
+        read: false
+      });
+
+      // FCM bildirimi
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: adminId,
+            title: "\"Economentor\" 💬 Yeni Yorum",
+            body: adminMessage,
+            url: "https://economentor.netlify.app/analiz.html"
+          })
+        });
+      } catch (err) {
+        console.error("Admin FCM bildirimi başarısız:", err);
+      }
+    }
+
+    // 🔔 2. Eğer yorum @mention içeriyorsa, bahsedilen kullanıcıya bildirim gönderme
     const mentions = text.match(/@(\w+[\.\w]*)/g);
     for (const mention of mentions || []) {
       const name = mention.substring(1).toLowerCase();
       const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
       if (mentionedUser && mentionedUser.uid !== uid) {
+        const mentionMessage = `"${title}" başlıklı analizde sizden bahsedildi.`;
+
+        // Firestore bildirimi
         await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
           to: mentionedUser.uid,
           from: uid,
           videoId: id,
-          message: `"${title}" başlıklı analizde sizden bahsedildi.`,
+          message: mentionMessage,
           timestamp: Timestamp.now(),
           read: false
         });
+
+        // FCM bildirimi
+        try {
+          await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid: mentionedUser.uid,
+              title: "\"Economentor\" 🧠 Yeni Bahsetme!",
+              body: mentionMessage,
+              url: "https://economentor.netlify.app/analiz.html"
+            })
+          });
+        } catch (err) {
+          console.error("FCM gönderimi başarısız:", err);
+        }
       }
-      const mentionedUserDoc = await getDoc(doc(db, "users", mentionedUser.uid));
-const fcmToken = mentionedUserDoc.data().fcmToken;
-
-try {
-  const fcmBody = `"${title}" başlıklı analizde sizden bahsedildi.`;
-
-  await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      uid: mentionedUser.uid,
-      title: "\"Economentor\" 🧠 Yeni Bahsetme!",
-      body: fcmBody,
-      url: "https://economentor.netlify.app"
-    })
-  });
-} catch (err) {
-  console.error("FCM gönderimi başarısız:", err);
-}
     }
 
+    // Yorum listesini güncelle
     const list = document.getElementById("commentList-" + id);
     const div = document.createElement("div");
     div.classList.add("comment");
