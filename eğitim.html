@@ -134,8 +134,9 @@ import {
   setDoc,
   deleteDoc,
   getDoc,
-  addDoc, 
-  Timestamp
+  addDoc,
+  Timestamp,
+  where
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -154,6 +155,7 @@ const trainingRef = collection(db, "trainings");
 
 async function loadTrainings() {
   const list = document.getElementById("trainingList");
+  list.innerHTML = "";  // Temizle
   const q = query(trainingRef, orderBy("timestamp", "asc"));
   const snapshot = await getDocs(q);
 
@@ -177,7 +179,6 @@ async function loadTrainings() {
   });
 }
 
-// Auth kontrol ve istek butonları işlemi
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Lütfen giriş yapınız.");
@@ -187,67 +188,61 @@ onAuthStateChanged(auth, async (user) => {
 
   const userId = user.uid;
 
-  // Eğitimler yüklendikten sonra butonların durumunu güncelle
   await loadTrainings();
   await updateRequestButtons(userId);
 
-document.getElementById("trainingList").addEventListener("click", async (e) => {
-  if (e.target.classList.contains("request-btn")) {
-    const btn = e.target;
-    const trainingId = btn.dataset.trainingId;
-    const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
-    const requestSnap = await getDoc(requestDocRef);
+  document.getElementById("trainingList").addEventListener("click", async (e) => {
+    if (e.target.classList.contains("request-btn")) {
+      const btn = e.target;
+      const trainingId = btn.dataset.trainingId;
+      const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
+      const requestSnap = await getDoc(requestDocRef);
 
-    // Eğitim başlığını almak için trainings koleksiyonundan doc çek
-    const trainingDoc = await getDoc(doc(db, "trainings", trainingId));
-    const trainingTitle = trainingDoc.exists() ? trainingDoc.data().title : "Bilinmeyen Eğitim";
+      // Eğitim başlığını almak için trainings koleksiyonundan doc çek
+      const trainingDoc = await getDoc(doc(db, "trainings", trainingId));
+      const trainingTitle = trainingDoc.exists() ? trainingDoc.data().title : "Bilinmeyen Eğitim";
 
-    if (requestSnap.exists()) {
-      // Talep varsa iptal et
-      await deleteDoc(requestDocRef);
-      btn.classList.remove("requested");
-      btn.textContent = "Talep Et";
+      if (requestSnap.exists()) {
+        // Talep varsa iptal et
+        await deleteDoc(requestDocRef);
+        btn.classList.remove("requested");
+        btn.textContent = "Talep Et";
 
-      // Admin bildirimi - talep iptal edildi
-      await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
-    } else {
-      // Yeni talep ekle
-      await setDoc(requestDocRef, {
-        userId,
-        trainingId,
-        requestedAt: new Date(),
-      });
-      btn.classList.add("requested");
-      btn.textContent = "Talep Edildi";
+        await notifyAdmins(`${user.displayName || userId} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
+      } else {
+        // Yeni talep ekle
+        await setDoc(requestDocRef, {
+          userId,
+          trainingId,
+          requestedAt: Timestamp.now(),
+        });
+        btn.classList.add("requested");
+        btn.textContent = "Talep Edildi";
 
-      alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
+        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
 
-      // Admin bildirimi - yeni talep
-      await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
+        await notifyAdmins(`${user.displayName || userId} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
+      }
     }
-  }
+  });
 });
 
-// Adminlere bildirim gönderme fonksiyonu
 async function notifyAdmins(message, trainingId, type) {
-  // Adminleri al
   const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
   const adminsSnap = await getDocs(adminsQuery);
 
   for (const adminDoc of adminsSnap.docs) {
     const adminId = adminDoc.id;
 
-    // Firestore bildirimi ekle
     await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
       to: adminId,
       message,
       trainingId,
-      type, // "new" veya "cancel"
+      type,
       timestamp: Timestamp.now(),
       read: false
     });
 
-    // FCM bildirimi gönder
     try {
       await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
         method: "POST",
