@@ -474,24 +474,24 @@ window.editDuyuru = function(id, text) {
     div.style.display = "block";
   };
 
-  saveBtn.onclick = async () => {
-    const newText = textarea.value.trim();
-    if (!newText) return alert("Duyuru metni boş olamaz.");
+saveBtn.onclick = async () => {
+  const newText = textarea.value.trim();
+  if (!newText) return alert("Duyuru metni boş olamaz.");
 
-    try {
-      await setDoc(doc(db, "announcements", id), {
-        text: newText,
-        createdAt: Timestamp.now()
-      }, { merge: true });
+  try {
+    // Sadece text alanını güncelle, createdAt'ı değiştirme
+    await setDoc(doc(db, "announcements", id), {
+      text: newText
+    }, { merge: true });
 
-      div.textContent = newText;
-      editDiv.remove();
-      div.style.display = "block";
-    } catch (err) {
-      alert("Duyuru güncellenirken hata oluştu.");
-      console.error(err);
-    }
-  };
+    div.textContent = newText;
+    editDiv.remove();
+    div.style.display = "block";
+  } catch (err) {
+    alert("Duyuru güncellenirken hata oluştu.");
+    console.error("Duyuru güncelleme hatası:", err);
+  }
+};
 };
 
         window.deleteDuyuru = async function (id) {
