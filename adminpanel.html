@@ -413,10 +413,10 @@ div.innerHTML = `
 }
 
 window.editDuyuru = function(id, text) {
+  if (document.getElementById(`edit-${id}`)) return; // Zaten açıksa çık
+
   const div = document.getElementById(`text-${id}`);
   if (!div) return;
-
-  if (div.querySelector("textarea")) return; // Zaten düzenleme açıksa engelle
 
   const textarea = document.createElement("textarea");
   textarea.style.width = "100%";
