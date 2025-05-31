@@ -133,7 +133,9 @@ import {
   doc,
   setDoc,
   deleteDoc,
-  getDoc
+  getDoc,
+  addDoc, 
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -189,33 +191,79 @@ onAuthStateChanged(auth, async (user) => {
   await loadTrainings();
   await updateRequestButtons(userId);
 
-  document.getElementById("trainingList").addEventListener("click", async (e) => {
-    if (e.target.classList.contains("request-btn")) {
-      const btn = e.target;
-      const trainingId = btn.dataset.trainingId;
-      const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
-      const requestSnap = await getDoc(requestDocRef);
+document.getElementById("trainingList").addEventListener("click", async (e) => {
+  if (e.target.classList.contains("request-btn")) {
+    const btn = e.target;
+    const trainingId = btn.dataset.trainingId;
+    const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
+    const requestSnap = await getDoc(requestDocRef);
 
-      if (requestSnap.exists()) {
-        // Talep varsa iptal et
-        await deleteDoc(requestDocRef);
-        btn.classList.remove("requested");
-        btn.textContent = "Talep Et";
-      } else {
-        // Yeni talep ekle
-        await setDoc(requestDocRef, {
-          userId,
-          trainingId,
-          requestedAt: new Date(),
-        });
-        btn.classList.add("requested");
-        btn.textContent = "Talep Edildi";
+    // Eğitim başlığını almak için trainings koleksiyonundan doc çek
+    const trainingDoc = await getDoc(doc(db, "trainings", trainingId));
+    const trainingTitle = trainingDoc.exists() ? trainingDoc.data().title : "Bilinmeyen Eğitim";
 
-        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
-      }
+    if (requestSnap.exists()) {
+      // Talep varsa iptal et
+      await deleteDoc(requestDocRef);
+      btn.classList.remove("requested");
+      btn.textContent = "Talep Et";
+
+      // Admin bildirimi - talep iptal edildi
+      await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
+    } else {
+      // Yeni talep ekle
+      await setDoc(requestDocRef, {
+        userId,
+        trainingId,
+        requestedAt: new Date(),
+      });
+      btn.classList.add("requested");
+      btn.textContent = "Talep Edildi";
+
+      alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
+
+      // Admin bildirimi - yeni talep
+      await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
     }
-  });
+  }
 });
+
+// Adminlere bildirim gönderme fonksiyonu
+async function notifyAdmins(message, trainingId, type) {
+  // Adminleri al
+  const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
+  const adminsSnap = await getDocs(adminsQuery);
+
+  for (const adminDoc of adminsSnap.docs) {
+    const adminId = adminDoc.id;
+
+    // Firestore bildirimi ekle
+    await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+      to: adminId,
+      message,
+      trainingId,
+      type, // "new" veya "cancel"
+      timestamp: Timestamp.now(),
+      read: false
+    });
+
+    // FCM bildirimi gönder
+    try {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: adminId,
+          title: "\"Economentor\" Eğitim Talebi",
+          body: message,
+          url: "https://economentor.netlify.app/egitimler.html"
+        })
+      });
+    } catch (err) {
+      console.error("Admin FCM bildirimi başarısız:", err);
+    }
+  }
+}
 
 async function updateRequestButtons(userId) {
   const buttons = document.querySelectorAll(".request-btn");
