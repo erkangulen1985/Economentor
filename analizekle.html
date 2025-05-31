@@ -18,34 +18,34 @@ html, body {
   color: #333;
 }
 
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 28px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
+header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  font-size: 28px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
 
-    nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #333;
-      padding: 15px 0;
-    }
+nav {
+  display: flex;
+  justify-content: space-around;
+  background-color: #333;
+  padding: 15px 0;
+}
 
-    nav a {
-      text-decoration: none;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      padding: 10px;
-      transition: background 0.3s ease;
-    }
+nav a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px;
+  transition: background 0.3s ease;
+}
 
-    nav a:hover {
-      background-color: #4CAF50;
-    }
+nav a:hover {
+  background-color: #4CAF50;
+}
 
 .container {
   flex: 1;
@@ -54,112 +54,144 @@ html, body {
   margin: 30px auto;
 }
 
-    .upload-section,
-    .video-card {
-      background-color: #fff;
-      padding: 20px;
-      margin-bottom: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.upload-section,
+.video-card {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    .upload-section input,
-    .upload-section textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+.upload-section input,
+.upload-section textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
 
-    .upload-section button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+.upload-section button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    .upload-section button:hover {
-      background-color: #388e3c;
-    }
+.upload-section button:hover {
+  background-color: #388e3c;
+}
 
-    video {
-      width: 100%;
-      border-radius: 10px;
-      margin: 15px 0;
-    }
+video {
+  width: 100%;
+  border-radius: 10px;
+  margin: 15px 0;
+}
 
-    .video-footer {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
+/* Video footer */
+.video-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  align-items: center;
+}
 
-    .video-footer span {
-      font-size: 16px;
-      color: #555;
-    }
+.video-footer span {
+  font-size: 16px;
+  color: #555;
+  margin-right: 15px;
+}
 
-    .video-footer button {
-      padding: 6px 12px;
-      font-size: 15px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-      margin-left: 8px;
-    }
+/* Butonları saran div */
+.video-footer div:last-child {
+  display: flex;
+  gap: 10px;
+}
 
-    .like { background-color: #f39c12; color: white; }
-    .dislike { background-color: #e74c3c; color: white; }
-    .edit-button { background-color: #3498db; color: white; }
-    .delete-button { background-color: #9b59b6; color: white; }
+.video-footer button {
+  padding: 6px 12px;
+  font-size: 15px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  /* margin-left kaldırıldı çünkü gap kullandık */
+}
 
-    .comment-section {
-      margin-top: 20px;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-    }
+/* Buton renkleri */
+.like { background-color: #f39c12; color: white; }
+.dislike { background-color: #e74c3c; color: white; }
+.edit-button { background-color: #3498db; color: white; }
+.delete-button { background-color: #9b59b6; color: white; }
+.show-likes { background-color: #27ae60; color: white; }
+.show-dislikes { background-color: #c0392b; color: white; }
 
-    .comment {
-      background-color: #eee;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* Hover efektleri (isteğe bağlı) */
+.video-footer button:hover {
+  opacity: 0.9;
+}
 
-    .comment span { font-size: 15px; }
+.comment-section {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
 
-    .comment button {
-      background-color: #e74c3c;
-      border: none;
-      padding: 6px 10px;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+.comment {
+  background-color: #eee;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    input[type="text"].search {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      margin-bottom: 30px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+.comment span {
+  font-size: 15px;
+}
 
-    .footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #333;
-      color: white;
-    }
+.comment button {
+  background-color: #e74c3c;
+  border: none;
+  padding: 6px 10px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type="text"].search {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 30px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
+
+/* Likes/Dislikes list container */
+.likes-list,
+.dislikes-list {
+  margin-top: 10px;
+  background: #222;
+  padding: 10px;
+  border-radius: 6px;
+  color: white;
+  max-height: 150px;
+  overflow-y: auto;
+  white-space: nowrap;
+}
   </style>
 </head>
 <body>
@@ -462,32 +494,39 @@ div.innerHTML = `
         const div = document.createElement("div");
         div.classList.add("video-card");
         div.id = `video-${id}`;
-        div.innerHTML = `
-          <h3>${data.title}</h3>
-          <video controls src="${data.videoUrl}"></video>
-          <p>${data.description}</p>
-          <div class="video-footer">
-            <div>
-              <span>👍 ${data.likes || 0}</span>
-              <span>👎 ${data.dislikes || 0}</span>
-              <span>💬 ${comments.length}</span>
-            </div>
-            <div>
-              <button class="edit-button" data-id="${id}">Düzenle</button>
-              <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-              <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
-              <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
-            </div>
-           </div>
-          <div class="comment-section" id="comments-${id}">
-            ${comments.map((c, i) => `
-              <div class="comment">
-                <span><b>${c.username}</b>: ${c.text}</span>
-                <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-              </div>
-            `).join("")}
-          </div>
-        `;
+div.innerHTML = `
+  <h3>${data.title}</h3>
+  <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
+    Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
+  </p>
+  <video controls src="${data.videoUrl}"></video>
+  <p>${data.description}</p>
+  <div class="video-footer">
+    <div>
+      <span>👍 ${data.likes || 0}</span>
+      <span>👎 ${data.dislikes || 0}</span>
+      <span>💬 ${comments.length}</span>
+    </div>
+    <div>
+      <button class="edit-button" data-id="${id}">Düzenle</button>
+      <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+      <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
+      <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
+    </div>
+  </div>
+
+  <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
+  <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
+
+  <div class="comment-section" id="comments-${id}">
+    ${comments.map((c, i) => `
+      <div class="comment">
+        <span><b>${c.username}</b>: ${c.text}</span>
+        <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+      </div>
+    `).join("")}
+  </div>
+`;
         container.appendChild(div);
       }
     });
