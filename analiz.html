@@ -306,6 +306,7 @@ usersList = usersSnap.docs.map(doc => ({
       <p style="margin-top:10px; font-size:14px; color:#bbb;">💬 Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>
       <div class="comment-section" id="comments-${id}" style="display:none;">
 <div class="commentList" id="commentList-${id}"></div>
+          </div>
           ${comments
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
             .map((c, i) => `
@@ -314,6 +315,7 @@ usersList = usersSnap.docs.map(doc => ({
                 ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
               </div>
             `).join("")}
+            </div>
 <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
 <button class="commentBtn" data-id="${id}">Yorum Yap</button>
         </div>
@@ -516,30 +518,30 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-  // Yorum sil
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("delete-comment")) {
-      const id = e.target.dataset.id;
-      const index = parseInt(e.target.dataset.index);
-      const ref = doc(db, "analizler", id);
-      const snap = await getDoc(ref);
-      const comments = snap.data().comments || [];
-      comments.splice(index, 1);
-      await updateDoc(ref, { comments });
+// Yorum sil
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-comment")) {
+    const id = e.target.dataset.id;
+    const index = parseInt(e.target.dataset.index);
+    const ref = doc(db, "analizler", id);
+    const snap = await getDoc(ref);
+    const comments = snap.data().comments || [];
+    comments.splice(index, 1);
+    await updateDoc(ref, { comments });
 
-      const list = document.getElementById("commentList-" + id);
-      list.innerHTML = comments
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-          </div>
-        `).join("");
-const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-if (countEl) countEl.textContent = comments.length;
-    }
-  });
+    const list = document.getElementById("commentList-" + id);
+    list.innerHTML = comments
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .map((c, i) => `
+        <div class="comment">
+          <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+          ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+        </div>
+      `).join("");
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+    if (countEl) countEl.textContent = comments.length;
+  }
+});
 
   // Yorumları göster/gizle
   document.addEventListener("click", (e) => {
