@@ -221,6 +221,26 @@ input[type="text"].search {
     <div id="videosContainer"></div>
   </div>
 
+  <div id="userListModal" style="
+  display:none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 10000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+">
+  <h3 id="userListTitle">Kullanıcılar</h3>
+  <ul id="userList" style="list-style:none; padding-left:0;"></ul>
+  <button onclick="document.getElementById('userListModal').style.display='none'" style="margin-top:20px; padding:10px 20px;">Kapat</button>
+</div>
+
   <div class="footer">© 2025 Economentor. Tüm Hakları Saklıdır.</div>
 
 <script type="module">
@@ -418,7 +438,7 @@ div.innerHTML = `
 `;
 
         container.appendChild(div);
-
+        
         // Düzenle
         div.querySelector(".edit-button").addEventListener("click", async () => {
           const ref = doc(db, "analizler", id);
@@ -471,6 +491,10 @@ div.innerHTML = `
             const updated = (snap.data().comments || []).filter((_, i) => i !== index);
             await updateDoc(ref, { comments: updated });
             loadVideos();
+
+            
+        div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
+        div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
           });
         });
       }
@@ -490,6 +514,9 @@ div.innerHTML = `
       const data = docSnap.data();
       const id = docSnap.id;
       const comments = data.comments || [];
+
+     div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
+     div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
 
       if (
         (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) &&
@@ -532,6 +559,9 @@ div.innerHTML = `
   </div>
 `;
         container.appendChild(div);
+
+        div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
+        div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
       }
     });
   });
