@@ -426,12 +426,6 @@ async function loadPosts() {
       </div>
     `).join("");
     
-const viewLikersBtn = postElement.querySelector(".view-likers");
-const viewDislikersBtn = postElement.querySelector(".view-dislikers");
-
-viewLikersBtn.addEventListener("click", () => showUserList(postId, "likes"));
-viewDislikersBtn.addEventListener("click", () => showUserList(postId, "dislikes"));
-    
 postElement.innerHTML = `
   ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : ''}
   <h3>${post.title}</h3>
@@ -454,7 +448,14 @@ postElement.innerHTML = `
     ${comments || "<p>Yorum yok.</p>"}
   </div>
 `;
-    postsContainer.appendChild(postElement);
+
+const viewLikersBtn = postElement.querySelector(".view-likers");
+const viewDislikersBtn = postElement.querySelector(".view-dislikers");
+
+viewLikersBtn.addEventListener("click", () => showUserList(postId, "likes"));
+viewDislikersBtn.addEventListener("click", () => showUserList(postId, "dislikes"));
+
+postsContainer.appendChild(postElement);
   });
 }
 
