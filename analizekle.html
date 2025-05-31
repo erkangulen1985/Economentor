@@ -392,26 +392,30 @@ div.innerHTML = `
   </p>
   <video controls src="${data.videoUrl}"></video>
   <p>${data.description}</p>
-          <div class="video-footer">
-            <div>
-              <span>👍 ${data.likes || 0}</span>
-              <span>👎 ${data.dislikes || 0}</span>
-              <span>💬 ${comments.length}</span>
-            </div>
-            <div>
-              <button class="edit-button" data-id="${id}">Düzenle</button>
-              <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-            </div>
-          </div>
-          <div class="comment-section" id="comments-${id}">
-            ${comments.map((c, i) => `
-              <div class="comment">
-                <span><b>${c.username}</b>: ${c.text}</span>
-                <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-              </div>
-            `).join("")}
-          </div>
-        `;
+  <div class="video-footer">
+    <div>
+      <span>👍 ${data.likes || 0}</span>
+      <span>👎 ${data.dislikes || 0}</span>
+      <span>💬 ${comments.length}</span>
+    </div>
+    <div>
+      <button class="edit-button" data-id="${id}">Düzenle</button>
+      <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+      <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
+      <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
+    </div>
+  </div>
+  <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
+  <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
+  <div class="comment-section" id="comments-${id}">
+    ${comments.map((c, i) => `
+      <div class="comment">
+        <span><b>${c.username}</b>: ${c.text}</span>
+        <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+      </div>
+    `).join("")}
+  </div>
+`;
 
         container.appendChild(div);
 
