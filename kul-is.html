@@ -340,11 +340,10 @@ async function loadStatistics() {
   
   loadStatistics();
 
-  async function loadTrainingRequests() {
+async function loadTrainingRequests() {
   const listContainer = document.getElementById("trainingRequestList");
   listContainer.innerHTML = ""; // Temizle
 
-  // Eğitimleri çek
   const trainingsSnapshot = await getDocs(collection(db, "trainings"));
 
   if (trainingsSnapshot.empty) {
@@ -357,21 +356,66 @@ async function loadStatistics() {
     const trainingData = trainingDoc.data();
     const title = trainingData.title || "Bilinmeyen Eğitim";
 
-    // Bu eğitimi talep edenlerin sayısı
+    // Bu eğitimi talep edenlerin referansları
     const requestsQuery = query(
       collection(db, "requests"),
       where("trainingId", "==", trainingId)
     );
     const requestsSnapshot = await getDocs(requestsQuery);
-    const requestCount = requestsSnapshot.size;
 
-    // Listeye ekle
+    if (requestsSnapshot.empty) continue; // Talep yoksa gösterme
+
+    // Eğitim başlığı ve talep sayısı
     const li = document.createElement("li");
-    li.textContent = `${title} - Talep Sayısı: ${requestCount}`;
+    li.style.marginBottom = "15px";
+    li.innerHTML = `<strong>${title}</strong> - Talep Sayısı: ${requestsSnapshot.size}`;
+
+    // Talep edenlerin listesi
+    const ul = document.createElement("ul");
+    ul.style.listStyle = "none";
+    ul.style.paddingLeft = "15px";
+
+    // Her talep eden için kullanıcı adını çek ve listeye ekle
+    for (const requestDoc of requestsSnapshot.docs) {
+      const requestData = requestDoc.data();
+      const userId = requestData.userId;
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const fullName = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
+
+      const userLi = document.createElement("li");
+      userLi.style.marginBottom = "6px";
+
+      // Kullanıcı ismi ve iptal butonu
+      userLi.innerHTML = `
+        ${fullName} 
+        <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${requestDoc.id}" title="Talebi İptal Et">&#10006;</button>
+      `;
+
+      ul.appendChild(userLi);
+    }
+
+    li.appendChild(ul);
     listContainer.appendChild(li);
   }
 }
 
+// Talep iptal butonu tıklama işlemi
+document.getElementById("trainingRequestList").addEventListener("click", async (e) => {
+  if (e.target.tagName === "BUTTON" && e.target.dataset.requestId) {
+    const requestId = e.target.dataset.requestId;
+    if (!confirm("Bu talebi iptal etmek istediğinize emin misiniz?")) return;
+
+    try {
+      await deleteDoc(doc(db, "requests", requestId));
+      alert("Talep başarıyla iptal edildi.");
+      await loadTrainingRequests(); // Listeyi yenile
+    } catch (err) {
+      alert("Talep iptal edilemedi: " + err.message);
+    }
+  }
+});
+
+// Sayfa açılırken çağır
 loadTrainingRequests();
 
   // Kullanıcıyı listele ve sil
