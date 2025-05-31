@@ -598,6 +598,43 @@ document.addEventListener("click", async (e) => {
     dislikesListDiv.style.display = dislikesListDiv.style.display === "none" ? "block" : "none";
   }
 });
+
+  async function showUserList(postId, type) {
+  const listRef = collection(db, "analizler", postId, type); // type: 'likes' or 'dislikes'
+  const snap = await getDocs(listRef);
+
+  const users = [];
+  for (const docSnap of snap.docs) {
+    const uid = docSnap.id;
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+      users.push(userDoc.data().username || uid);
+    } else {
+      users.push(uid);
+    }
+  }
+
+  const modal = document.getElementById("userListModal");
+  const list = document.getElementById("userList");
+  const title = document.getElementById("userListTitle");
+
+  title.textContent = type === "likes" ? "Beğenenler" : "Beğenmeyenler";
+
+  list.innerHTML = "";
+  if (users.length === 0) {
+    list.innerHTML = "<li>Henüz kimse yok.</li>";
+  } else {
+    users.forEach(name => {
+      const li = document.createElement("li");
+      li.textContent = name;
+      li.style.padding = "6px 0";
+      list.appendChild(li);
+    });
+  }
+
+  modal.style.display = "block";  // **Modalı görünür yap!**
+}
+
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
