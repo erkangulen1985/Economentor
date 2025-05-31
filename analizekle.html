@@ -515,9 +515,6 @@ div.innerHTML = `
       const id = docSnap.id;
       const comments = data.comments || [];
 
-     div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
-     div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
-
       if (
         (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) &&
         (data.title.toLowerCase().includes(keyword) || data.description.toLowerCase().includes(keyword))
