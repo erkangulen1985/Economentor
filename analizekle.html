@@ -354,7 +354,7 @@ async function getUsernames(uids) {
 }
 
 async function loadVideos() {
-  if (!currentUserUID) return;  // Kullanıcı yoksa fonksiyonu durdur
+  if (!currentUserUID) return;
 
   const container = document.getElementById("videosContainer");
   container.innerHTML = "";
@@ -366,50 +366,49 @@ async function loadVideos() {
     const id = docSnap.id;
     const comments = data.comments || [];
 
-    // Görünürlük kontrolü
-    if (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) {
-      
-      // Beğenen ve beğenmeyen kullanıcı isimlerini çek
-      const likesUsernames = await getUsernames(data.likesUsers || []);
-      const dislikesUsernames = await getUsernames(data.dislikesUsers || []);
+    // Rol bazlı görünürlük filtresi
+    if (data.visibility === "vip" && currentUserRole === "user") continue;
 
-      const div = document.createElement("div");
-      div.classList.add("video-card");
-      div.id = `video-${id}`;
+    // Like ve dislike subcollection referansları
+    const likeRef = doc(db, "analizler", id, "likes", currentUserUID);
+    const dislikeRef = doc(db, "analizler", id, "dislikes", currentUserUID);
 
-      div.innerHTML = `
-        <h3>${data.title}</h3>
-        <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
-          Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
-        </p>
-        <video controls src="${data.videoUrl}"></video>
-        <p>${data.description}</p>
-        <div class="video-footer">
-          <div>
-            <button class="like-button" data-id="${id}">👍 ${data.likes || 0}</button>
-            <button class="dislike-button" data-id="${id}">👎 ${data.dislikes || 0}</button>
-            <span>💬 ${comments.length}</span>
-          </div>
-          <div>
-            <button class="edit-button" data-id="${id}">Düzenle</button>
-            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-          </div>
+    const [likeSnap, dislikeSnap] = await Promise.all([
+      getDoc(likeRef),
+      getDoc(dislikeRef)
+    ]);
+
+    // Kart oluştur
+    const div = document.createElement("div");
+    div.classList.add("video-card");
+
+    div.innerHTML = `
+      <h3>${data.title}</h3>
+      <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
+        Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık"}
+      </p>
+      <video controls src="${data.videoUrl}"></video>
+      <p>${data.description}</p>
+      <div class="video-footer">
+        <div>
+          <button class="like-button" data-id="${id}" style="background-color: ${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 ${data.likes || 0}</button>
+          <button class="dislike-button" data-id="${id}" style="background-color: ${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 ${data.dislikes || 0}</button>
+          <span>💬 ${comments.length}</span>
         </div>
         <div>
-          <b>👍 Beğenenler:</b> ${likesUsernames.length > 0 ? likesUsernames.join(", ") : "Henüz yok"}
+          <button class="edit-button" data-id="${id}">Düzenle</button>
+          <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
         </div>
-        <div>
-          <b>👎 Beğenmeyenler:</b> ${dislikesUsernames.length > 0 ? dislikesUsernames.join(", ") : "Henüz yok"}
-        </div>
-        <div class="comment-section" id="comments-${id}">
-          ${comments.map((c, i) => `
-            <div class="comment">
-              <span><b>${c.username}</b>: ${c.text}</span>
-              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
-            </div>
-          `).join("")}
-        </div>
-      `;
+      </div>
+      <div class="comment-section" id="comments-${id}">
+        ${comments.map((c, i) => `
+          <div class="comment">
+            <span><b>${c.username}</b>: ${c.text}</span>
+            ${c.user === currentUserUID ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+          </div>
+        `).join("")}
+      </div>
+    `;
 
       container.appendChild(div);
 
