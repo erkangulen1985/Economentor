@@ -230,6 +230,13 @@
     <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
   </div>
 
+  <div id="userListModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  background:#222; color:#fff; padding:20px; border-radius:10px; z-index:10000; box-shadow:0 0 20px rgba(0,0,0,0.8); max-width:90%; max-height:70vh; overflow:auto;">
+  <h3 id="userListTitle">Kullanıcılar</h3>
+  <ul id="userList" style="list-style:none; padding-left:0;"></ul>
+  <button onclick="document.getElementById('userListModal').style.display='none'" style="margin-top:20px; padding:10px 20px;">Kapat</button>
+  </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -428,11 +435,13 @@ postElement.innerHTML = `
     <span>👎 ${post.dislikes || 0}</span>
     <span>💬 ${(post.comments || []).length}</span>
   </div>
-  <button onclick="showLikedUsers('${postId}')">Beğenenler</button>
-  <button onclick="showDislikedUsers('${postId}')">Beğenmeyenler</button>
   <div class="post-footer">
     <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
     <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
+  </div>
+  <div>
+  <button class="view-likers" data-id="${postDoc.id}">👍 Beğenenler</button>
+  <button class="view-dislikers" data-id="${postDoc.id}">👎 Beğenmeyenler</button>
   </div>
   <div class="comment-section">
     <h4>Yorumlar</h4>
@@ -440,6 +449,11 @@ postElement.innerHTML = `
   </div>
 `;
 
+const viewLikersBtn = postElement.querySelector(".view-likers");
+const viewDislikersBtn = postElement.querySelector(".view-dislikers");
+
+viewLikersBtn.addEventListener("click", () => showUserList(postDoc.id, "likes"));
+viewDislikersBtn.addEventListener("click", () => showUserList(postDoc.id, "dislikes"));
     postsContainer.appendChild(postElement);
   });
 }
@@ -577,49 +591,41 @@ async function sendNotificationToAllUsersExceptAdmin(title, description) {
   }
 }
 
-window.showLikedUsers = async function(postId) {
-  const postRef = doc(db, "posts", postId);
-  const snap = await getDoc(postRef);
-  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
+async function showUserList(postId, type) {
+  const listRef = collection(db, "posts", postId, type); // type: 'likes' or 'dislikes'
+  const snap = await getDocs(listRef);
 
-  const post = snap.data();
-  const users = post.likedBy || [];
-  showModal("Beğenenler", users);
-};
+  const users = [];
+  for (const docSnap of snap.docs) {
+    const uid = docSnap.id;
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      users.push(userData.username || uid);
+    } else {
+      users.push(uid);
+    }
+  }
 
-window.showDislikedUsers = async function(postId) {
-  const postRef = doc(db, "posts", postId);
-  const snap = await getDoc(postRef);
-  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
-
-  const post = snap.data();
-  const users = post.dislikedBy || [];
-  showModal("Beğenmeyenler", users);
-};
-
-function showModal(title, users) {
-  document.getElementById("modalTitle").innerText = title;
-  const ul = document.getElementById("userList");
-  ul.innerHTML = "";
+  const modal = document.getElementById("userListModal");
+  const list = document.getElementById("userList");
+  const title = document.getElementById("userListTitle");
+  title.textContent = type === "likes" ? "Beğenenler" : "Beğenmeyenler";
+  list.innerHTML = "";
 
   if (users.length === 0) {
-    ul.innerHTML = "<li>Henüz kimse yok.</li>";
+    list.innerHTML = "<li>Henüz kimse yok.</li>";
   } else {
-    users.forEach(user => {
+    users.forEach(name => {
       const li = document.createElement("li");
-      li.innerText = user.username || user.uid || "Bilinmeyen kullanıcı";
-      ul.appendChild(li);
+      li.textContent = name;
+      li.style.padding = "6px 0";
+      list.appendChild(li);
     });
   }
 
-  document.getElementById("userListModal").style.display = "block";
-  document.getElementById("modalBackdrop").style.display = "block";
+  modal.style.display = "block";
 }
-
-window.closeModal = function() {
-  document.getElementById("userListModal").style.display = "none";
-  document.getElementById("modalBackdrop").style.display = "none";
-};
   
 loadPosts();
 </script>
