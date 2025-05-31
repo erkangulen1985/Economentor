@@ -122,6 +122,8 @@
   </div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
   collection,
@@ -134,10 +136,26 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Sonrasında onAuthStateChanged ile kullanıcı kontrolü ve diğer işlemler
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Lütfen giriş yapınız.");
+    location.href = "index.html";
+    return;
+  }
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -235,6 +253,5 @@ async function updateRequestButtons(userId) {
 
   loadTrainings();
 </script>
-<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
