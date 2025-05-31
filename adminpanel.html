@@ -99,6 +99,21 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+
+        .announcement .btn-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: red;
+}
+
+.announcement .btn-edit {
+    position: absolute;
+    top: 10px;
+    right: 80px; /* Sil tuşunun solunda */
+    background-color: orange;
+}
+        
         .feedback {
             background-color: #444;
             padding: 15px;
@@ -385,12 +400,12 @@ window.loadDuyurular = async function () {
     div.className = "announcement";
     const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
 
-    div.innerHTML = `
-      <p style="white-space: pre-line;" id="text-${docSnap.id}">${data.text}</p>
-      <small>${tarih}</small>
-      <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-      <button onclick="editDuyuru('${docSnap.id}', '${escapeQuotes(data.text)}')">Düzenle</button>
-    `;
+div.innerHTML = `
+  <p style="white-space: pre-line;" id="text-${docSnap.id}">${data.text}</p>
+  <small>${tarih}</small>
+  <button class="btn-delete" onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
+  <button class="btn-edit" onclick="editDuyuru('${docSnap.id}', '${escapeQuotes(data.text)}')">Düzenle</button>
+`;
 
     duyuruList.appendChild(div);
   });
@@ -417,10 +432,12 @@ window.editDuyuru = function(id, text) {
   cancelBtn.className = "button";
   cancelBtn.style.backgroundColor = "#f44336";
 
-  const btnDiv = document.createElement("div");
-  btnDiv.style.marginTop = "10px";
-  btnDiv.appendChild(saveBtn);
-  btnDiv.appendChild(cancelBtn);
+const btnDiv = document.createElement("div");
+btnDiv.style.marginTop = "10px";
+btnDiv.style.display = "flex";
+btnDiv.style.gap = "10px";
+btnDiv.appendChild(saveBtn);
+btnDiv.appendChild(cancelBtn);
 
   div.style.display = "none";
 
