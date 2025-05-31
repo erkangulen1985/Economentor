@@ -452,8 +452,8 @@ postElement.innerHTML = `
 const viewLikersBtn = postElement.querySelector(".view-likers");
 const viewDislikersBtn = postElement.querySelector(".view-dislikers");
 
-viewLikersBtn.addEventListener("click", () => showUserList(postDoc.id, "likes"));
-viewDislikersBtn.addEventListener("click", () => showUserList(postDoc.id, "dislikes"));
+viewLikersBtn.addEventListener("click", () => showUserList(postId, "likes"));
+viewDislikersBtn.addEventListener("click", () => showUserList(postId, "dislikes"));
     postsContainer.appendChild(postElement);
   });
 }
