@@ -369,7 +369,7 @@ async function getUsernames(uids) {
 }
 
 async function loadVideos() {
-  if (!currentUserUID) return;  // Kullanıcı yoksa dur
+  if (!currentUserUID) return;  // Kullanıcı yoksa fonksiyonu durdur
 
   const container = document.getElementById("videosContainer");
   container.innerHTML = "";
@@ -401,8 +401,8 @@ async function loadVideos() {
         <p>${data.description}</p>
         <div class="video-footer">
           <div>
-            <span>👍 ${data.likes || 0}</span>
-            <span>👎 ${data.dislikes || 0}</span>
+            <button class="like-button" data-id="${id}">👍 ${data.likes || 0}</button>
+            <button class="dislike-button" data-id="${id}">👎 ${data.dislikes || 0}</button>
             <span>💬 ${comments.length}</span>
           </div>
           <div>
@@ -411,10 +411,10 @@ async function loadVideos() {
           </div>
         </div>
         <div>
-          <b>👍 Beğenenler:</b> ${likesUsernames.join(", ") || "Henüz yok"}
+          <b>👍 Beğenenler:</b> ${likesUsernames.length > 0 ? likesUsernames.join(", ") : "Henüz yok"}
         </div>
         <div>
-          <b>👎 Beğenmeyenler:</b> ${dislikesUsernames.join(", ") || "Henüz yok"}
+          <b>👎 Beğenmeyenler:</b> ${dislikesUsernames.length > 0 ? dislikesUsernames.join(", ") : "Henüz yok"}
         </div>
         <div class="comment-section" id="comments-${id}">
           ${comments.map((c, i) => `
@@ -428,19 +428,71 @@ async function loadVideos() {
 
       container.appendChild(div);
 
-      // Düzenle butonu eventi (aynı şekilde)
+      // Beğen butonu eventi
+      div.querySelector(".like-button").addEventListener("click", async () => {
+        await toggleLike(id, currentUserUID);
+        await loadVideos();
+      });
+
+      // Beğenmeme butonu eventi
+      div.querySelector(".dislike-button").addEventListener("click", async () => {
+        await toggleDislike(id, currentUserUID);
+        await loadVideos();
+      });
+
+      // Düzenle butonu eventini burada eklemelisin
       div.querySelector(".edit-button").addEventListener("click", async () => {
-        // ... düzenleme kodu ...
+        const ref = doc(db, "analizler", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
+
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+
+        let newVisibility = data.visibility;
+        const visibilityChoice = prompt("Görünürlük seçin:\n1 = User (user/vip/admin görür)\n2 = VIP (vip/admin görür)", data.visibility === "all" ? "1" : "2");
+        if (visibilityChoice === "1") {
+          newVisibility = "all";
+        } else if (visibilityChoice === "2") {
+          newVisibility = "vip";
+        }
+
+        if (!newTitle || !newDesc || !newVisibility) return;
+
+        await updateDoc(ref, { 
+          title: newTitle,
+          description: newDesc,
+          visibility: newVisibility
+        });
+
+        alert("Güncellendi! Sayfa yenileniyor...");
+        loadVideos();
       });
 
-      // Sil butonu eventi (aynı şekilde)
+      // Sil butonu eventi
       div.querySelector(".delete-button").addEventListener("click", async () => {
-        // ... silme kodu ...
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
       });
 
-      // Yorum silme butonları eventleri (aynı şekilde)
+      // Yorum silme butonları eventleri
       div.querySelectorAll(".delete-comment").forEach(btn => {
-        // ... yorum silme kodu ...
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+          loadVideos();
+        });
       });
     }
   }
@@ -519,6 +571,29 @@ document.getElementById("searchInput").addEventListener("input", async (e) => {
     likesUsers.push(currentUserUID);
     // Eğer dislike’te varsa çıkar
     dislikesUsers = dislikesUsers.filter(uid => uid !== currentUserUID);
+  }
+
+  await updateDoc(ref, { 
+    likesUsers, 
+    dislikesUsers,
+    likes: likesUsers.length,
+    dislikes: dislikesUsers.length
+  });
+}
+
+  async function toggleDislike(videoId, currentUserUID) {
+  const ref = doc(db, "analizler", videoId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+
+  let likesUsers = data.likesUsers || [];
+  let dislikesUsers = data.dislikesUsers || [];
+
+  if (dislikesUsers.includes(currentUserUID)) {
+    dislikesUsers = dislikesUsers.filter(uid => uid !== currentUserUID);
+  } else {
+    dislikesUsers.push(currentUserUID);
+    likesUsers = likesUsers.filter(uid => uid !== currentUserUID);
   }
 
   await updateDoc(ref, { 
