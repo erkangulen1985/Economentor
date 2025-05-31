@@ -413,7 +413,7 @@ div.innerHTML = `
 }
 
 window.editDuyuru = function(id, text) {
-  if (document.getElementById(`edit-${id}`)) return; // Zaten açıksa çık
+  if (document.getElementById(`edit-${id}`)) return; // Düzenleme zaten açık
 
   const div = document.getElementById(`text-${id}`);
   if (!div) return;
@@ -435,11 +435,11 @@ window.editDuyuru = function(id, text) {
   cancelBtn.style.minWidth = "80px";
 
   const btnDiv = document.createElement("div");
-  btnDiv.style.position = "absolute";
-  btnDiv.style.bottom = "10px";
-  btnDiv.style.right = "10px";
+  btnDiv.style.marginTop = "10px";
   btnDiv.style.display = "flex";
+  btnDiv.style.justifyContent = "flex-end";
   btnDiv.style.gap = "10px";
+  btnDiv.style.position = "relative";  // absolute yerine relative
 
   btnDiv.appendChild(saveBtn);
   btnDiv.appendChild(cancelBtn);
