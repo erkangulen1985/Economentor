@@ -442,7 +442,10 @@ async function loadPosts() {
 
     const postElement = document.createElement("div");
     postElement.classList.add("post");
-    postElement.style.margin = "0 auto";
+    postElement.style.marginTop = "10px";
+    postElement.style.marginBottom = "10px";
+    postElement.style.marginLeft = "auto";
+    postElement.style.marginRight = "auto";
 
     const comments = (post.comments || []).map((c, i) => `
       <div class="comment">
