@@ -413,7 +413,7 @@ div.innerHTML = `
 }
 
 window.editDuyuru = function(id, text) {
-  if (document.getElementById(`edit-${id}`)) return; // Zaten açıksa çık
+  if (document.getElementById(`edit-${id}`)) return; // Düzenleme zaten açık
 
   const div = document.getElementById(`text-${id}`);
   if (!div) return;
@@ -439,7 +439,10 @@ window.editDuyuru = function(id, text) {
   btnDiv.style.display = "flex";
   btnDiv.style.justifyContent = "flex-end";
   btnDiv.style.gap = "10px";
-  // Position kaldırıldı, artık normal akışta
+  btnDiv.style.position = "relative";
+  btnDiv.style.alignItems = "center";
+
+  // Butonları alt tarafa taşıyan temel kısım: btnDiv normal akışta, position absolute değil
 
   btnDiv.appendChild(saveBtn);
   btnDiv.appendChild(cancelBtn);
@@ -449,8 +452,7 @@ window.editDuyuru = function(id, text) {
   const parent = div.parentElement;
   const editDiv = document.createElement("div");
   editDiv.id = `edit-${id}`;
-  // Position relative kaldırıldı veya istersen bırakabilirsin
-  // editDiv.style.position = "relative";
+  editDiv.style.position = "relative";
   editDiv.appendChild(textarea);
   editDiv.appendChild(btnDiv);
 
