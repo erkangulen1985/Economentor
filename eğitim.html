@@ -92,6 +92,23 @@
       margin-top: 10px;
       color: #ccc;
     }
+    
+    .request-btn {
+      float: right;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .request-btn.requested {
+      background-color: #27ae60;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -111,7 +128,11 @@
     collection,
     getDocs,
     query,
-    orderBy
+    orderBy,
+    doc,
+    setDoc,
+    deleteDoc,
+    getDoc
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -141,15 +162,72 @@
       const t = docSnap.data();
       const el = document.createElement("div");
       el.className = "training";
-      el.innerHTML = `
-        <h3>${t.title}</h3>
-        <p>${(t.description || '').replace(/\n/g, '<br>')}</p>
-        <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
-        <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
-      `;
+el.innerHTML = `
+  <h3>${t.title}</h3>
+  <p>${(t.description || '').replace(/\n/g, '<br>')}</p>
+  <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+  <button class="request-btn" data-training-id="${docSnap.id}">Talep Et</button>
+  <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
+`;
       list.appendChild(el);
     });
   }
+
+  onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Lütfen giriş yapınız.");
+    location.href = "index.html";
+    return;
+  }
+
+  const userId = user.uid;
+
+  // Eğitimler yüklendikten sonra butonların durumunu güncelle
+  updateRequestButtons(userId);
+
+  document.getElementById("trainingList").addEventListener("click", async (e) => {
+    if (e.target.classList.contains("request-btn")) {
+      const btn = e.target;
+      const trainingId = btn.dataset.trainingId;
+      const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
+      const requestSnap = await getDoc(requestDocRef);
+
+      if (requestSnap.exists()) {
+        // Talep varsa iptal et
+        await deleteDoc(requestDocRef);
+        btn.classList.remove("requested");
+        btn.textContent = "Talep Et";
+      } else {
+        // Yeni talep ekle
+        await setDoc(requestDocRef, {
+          userId,
+          trainingId,
+          requestedAt: new Date(),
+        });
+        btn.classList.add("requested");
+        btn.textContent = "Talep Edildi";
+
+        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
+      }
+    }
+  });
+});
+
+async function updateRequestButtons(userId) {
+  const buttons = document.querySelectorAll(".request-btn");
+  for (const btn of buttons) {
+    const trainingId = btn.dataset.trainingId;
+    const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
+    const requestSnap = await getDoc(requestDocRef);
+    if (requestSnap.exists()) {
+      btn.classList.add("requested");
+      btn.textContent = "Talep Edildi";
+    } else {
+      btn.classList.remove("requested");
+      btn.textContent = "Talep Et";
+    }
+  }
+}
 
   loadTrainings();
 </script>
