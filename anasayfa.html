@@ -793,15 +793,19 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-function renderComments(container, comments, userId) {
+function renderComments(container, comments, userId, postTitleOrId) {
   container.innerHTML = "";
   comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   comments.forEach((comment, index) => {
+    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     const el = document.createElement("div");
     el.className = "comment";
-    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     el.innerHTML = `
-      <div><b>${comment.username}</b> <small>(${dateStr})</small><br/>${comment.text}</div>
+      <div>
+        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+        <i style="font-size:12px; color:#aaa;">Gönderi: ${postTitleOrId}</i><br/>
+        ${comment.text}
+      </div>
       ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
     `;
     container.appendChild(el);
