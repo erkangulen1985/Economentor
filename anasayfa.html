@@ -514,8 +514,12 @@ nav a:hover {
   <img src="FOTO_URL" alt="Resim" />
   <div class="image-menu-button">⋮</div> <!-- üç nokta ikon -->
   <div class="image-menu-content">
-    <a href="FOTO_URL" download target="_blank" rel="noopener noreferrer">📥 İndir</a>
-    <a href="FOTO_URL" target="_blank" rel="noopener noreferrer">🔍 Tam Ekran</a>
+<a href="#" onclick="downloadImage('RESIM_URL', 'image.jpg'); return false;">
+  <i class="fas fa-download"></i> İndir
+</a>
+<a href="RESIM_URL" target="_blank" rel="noopener noreferrer">
+  <i class="fas fa-expand"></i> Tam Ekran
+</a>
   </div>
 </div>
 </div>
@@ -648,8 +652,12 @@ const postImage = post.imageUrl
     <img src="${post.imageUrl}" alt="Resim" />
     <div class="image-menu-button">⋮</div>
     <div class="image-menu-content">
-      <a href="${post.imageUrl}" download target="_blank" rel="noopener noreferrer">📥 İndir</a>
-      <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">🔍 Tam Ekran</a>
+      <a href="#" onclick="downloadImage('${post.imageUrl}', 'image.jpg'); return false;">
+        <i class="fas fa-download"></i> İndir
+      </a>
+      <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">
+        <i class="fas fa-expand"></i> Tam Ekran
+      </a>
     </div>
   </div>
   `
@@ -1045,6 +1053,20 @@ function insertMention(username) {
   input.value = before + after;
   input.focus();
   hideMentionBox();
+}
+
+function downloadImage(url, filename) {
+  fetch(url, {mode: 'cors'})
+    .then(resp => resp.blob())
+    .then(blob => {
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename || 'image.jpg';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    })
+    .catch(() => alert("Resim indirilemedi."));
 }
 
 // Load user list once on load
