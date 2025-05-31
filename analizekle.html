@@ -342,24 +342,36 @@ async function loadVideos() {
   const container = document.getElementById("videosContainer");
   container.innerHTML = "";
 
-  if (!currentUserUID) return; // Kullanıcı henüz yüklenmediyse çık
+  if (!currentUserUID) return; // Kullanıcı yoksa çık
 
   const snapshot = await getDocs(query(collection(db, "analizler"), orderBy("timestamp", "desc")));
 
-  for (const docSnap of snapshot.docs) {
+  if (snapshot.empty) {
+    container.innerHTML = "<p>Henüz video yok.</p>";
+    return;
+  }
+
+  snapshot.forEach(async (docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
     const comments = data.comments || [];
 
     // Görünürlük kontrolü
-    if (data.visibility !== "all" && !(data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) {
-      continue;
+    if (!(data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin")))) {
+      return;
     }
 
-    // Kart oluştur
     const div = document.createElement("div");
     div.classList.add("video-card");
     div.id = `video-${id}`;
+
+    // Beğenen / Beğenmeyen kullanıcıları almak için Firestore koleksiyonlarını sorgula
+    const likesSnap = await getDocs(collection(db, "analizler", id, "likes"));
+    const dislikesSnap = await getDocs(collection(db, "analizler", id, "dislikes"));
+
+    // Kullanıcının beğenip beğenmediğini kontrol et
+    const userLiked = likesSnap.docs.some(doc => doc.id === currentUserUID);
+    const userDisliked = dislikesSnap.docs.some(doc => doc.id === currentUserUID);
 
     div.innerHTML = `
       <h3>${data.title}</h3>
@@ -370,18 +382,14 @@ async function loadVideos() {
       <p>${data.description}</p>
       <div class="video-footer">
         <div>
-          <span>👍 0</span>
-          <span>👎 0</span>
+          <button class="like ${userLiked ? "liked" : ""}" data-id="${id}">👍 ${likesSnap.size}</button>
+          <button class="dislike ${userDisliked ? "disliked" : ""}" data-id="${id}">👎 ${dislikesSnap.size}</button>
           <span>💬 ${comments.length}</span>
         </div>
         <div>
           <button class="edit-button" data-id="${id}">Düzenle</button>
           <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
         </div>
-      </div>
-      <div>
-        <button class="like-button" data-id="${id}">👍 Beğen</button>
-        <button class="dislike-button" data-id="${id}">👎 Beğenme</button>
       </div>
       <div class="comment-section" id="comments-${id}">
         ${comments.map((c, i) => `
@@ -395,73 +403,47 @@ async function loadVideos() {
 
     container.appendChild(div);
 
-    // Buton referansları
-    const likeBtn = div.querySelector(".like-button");
-    const dislikeBtn = div.querySelector(".dislike-button");
+    // Beğenme işlemi
+    div.querySelector(".like").addEventListener("click", async (e) => {
+      const vid = e.target.dataset.id;
+      const likeRef = doc(db, "analizler", vid, "likes", currentUserUID);
+      const dislikeRef = doc(db, "analizler", vid, "dislikes", currentUserUID);
 
-    // Beğeni/Beğenmeme durumu ve sayılarını getir, UI'yı güncelle
-    async function updateLikeDislikeUI() {
-      const likesRef = collection(db, "analizler", id, "likes");
-      const dislikesRef = collection(db, "analizler", id, "dislikes");
-
-      const [likesSnap, dislikesSnap] = await Promise.all([getDocs(likesRef), getDocs(dislikesRef)]);
-      const likeCount = likesSnap.size;
-      const dislikeCount = dislikesSnap.size;
-
-      // Sayıları güncelle
-      const footerDiv = div.querySelector(".video-footer > div:first-child");
-      footerDiv.children[0].textContent = `👍 ${likeCount}`;
-      footerDiv.children[1].textContent = `👎 ${dislikeCount}`;
-
-      // Kullanıcı beğenisi kontrolü
-      const userLiked = likesSnap.docs.some(doc => doc.id === currentUserUID);
-      const userDisliked = dislikesSnap.docs.some(doc => doc.id === currentUserUID);
-
-      // Buton renklerini ayarla
-      likeBtn.style.backgroundColor = userLiked ? "#f39c12" : "#fff";
-      dislikeBtn.style.backgroundColor = userDisliked ? "#e74c3c" : "#fff";
-    }
-
-    // Beğen butonuna tıklandığında
-    likeBtn.addEventListener("click", async () => {
-      if (!currentUserUID) return alert("Beğenmek için giriş yapmalısınız.");
-      const likesRef = doc(db, "analizler", id, "likes", currentUserUID);
-      const dislikesRef = doc(db, "analizler", id, "dislikes", currentUserUID);
-
-      const likeSnap = await getDoc(likesRef);
-      const dislikeSnap = await getDoc(dislikesRef);
+      const likeSnap = await getDoc(likeRef);
+      const dislikeSnap = await getDoc(dislikeRef);
 
       if (likeSnap.exists()) {
-        await deleteDoc(likesRef); // Beğeniyi kaldır
+        // Beğeniyi kaldır
+        await deleteDoc(likeRef);
       } else {
-        await setDoc(likesRef, { likedAt: Timestamp.now() }); // Beğen
-        if (dislikeSnap.exists()) await deleteDoc(dislikesRef); // Dislike varsa kaldır
+        // Beğen
+        await setDoc(likeRef, { timestamp: Timestamp.now() });
+        if (dislikeSnap.exists()) await deleteDoc(dislikeRef);
       }
-      await updateLikeDislikeUI();
+      loadVideos();
     });
 
-    // Beğenmeme butonuna tıklandığında
-    dislikeBtn.addEventListener("click", async () => {
-      if (!currentUserUID) return alert("Beğenmemek için giriş yapmalısınız.");
-      const likesRef = doc(db, "analizler", id, "likes", currentUserUID);
-      const dislikesRef = doc(db, "analizler", id, "dislikes", currentUserUID);
+    // Beğenmeme işlemi
+    div.querySelector(".dislike").addEventListener("click", async (e) => {
+      const vid = e.target.dataset.id;
+      const likeRef = doc(db, "analizler", vid, "likes", currentUserUID);
+      const dislikeRef = doc(db, "analizler", vid, "dislikes", currentUserUID);
 
-      const likeSnap = await getDoc(likesRef);
-      const dislikeSnap = await getDoc(dislikesRef);
+      const likeSnap = await getDoc(likeRef);
+      const dislikeSnap = await getDoc(dislikeRef);
 
       if (dislikeSnap.exists()) {
-        await deleteDoc(dislikesRef); // Beğenmeyi kaldır
+        // Beğenmeme kaldır
+        await deleteDoc(dislikeRef);
       } else {
-        await setDoc(dislikesRef, { dislikedAt: Timestamp.now() }); // Beğenmeyi ekle
-        if (likeSnap.exists()) await deleteDoc(likesRef); // Like varsa kaldır
+        // Beğenmeme yap
+        await setDoc(dislikeRef, { timestamp: Timestamp.now() });
+        if (likeSnap.exists()) await deleteDoc(likeRef);
       }
-      await updateLikeDislikeUI();
+      loadVideos();
     });
 
-    // İlk yüklemede buton renklerini ve sayıları güncelle
-    await updateLikeDislikeUI();
-
-    // Düzenle, Sil ve Yorum sil işlemleri (önceki koddan aynen)
+    // Düzenle butonu
     div.querySelector(".edit-button").addEventListener("click", async () => {
       const ref = doc(db, "analizler", id);
       const snap = await getDoc(ref);
@@ -490,6 +472,7 @@ async function loadVideos() {
       loadVideos();
     });
 
+    // Sil butonu
     div.querySelector(".delete-button").addEventListener("click", async () => {
       const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
       if (!confirmed) return;
@@ -503,6 +486,7 @@ async function loadVideos() {
       div.remove();
     });
 
+    // Yorum silme butonları
     div.querySelectorAll(".delete-comment").forEach(btn => {
       btn.addEventListener("click", async () => {
         const index = parseInt(btn.dataset.index);
@@ -513,7 +497,7 @@ async function loadVideos() {
         loadVideos();
       });
     });
-  }
+  });
 }
 
 loadVideos();
