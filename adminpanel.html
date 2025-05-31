@@ -82,6 +82,17 @@
   cursor: pointer;
   min-width: 80px; /* Buton genişliği sabit */
 }
+.button-kaydet {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  min-width: 80px; /* Buton genişliği sabit */
+}
         .announcement {
             background-color: #444;
             padding: 15px;
@@ -261,7 +272,7 @@ if (section === 'duyuru-admin') {
     container.innerHTML = `
         <h3>Yeni Duyuru Ekle</h3>
         <textarea id="duyuruText" placeholder="Yeni duyuruyu buraya yazın..."></textarea>
-        <button class="button" id="kaydetBtn" onclick="saveDuyuru()">Kaydet</button>
+        <button class="button-kaydet" id="kaydetBtn" onclick="saveDuyuru()">Kaydet</button>
         <p id="loadingMsg" style="color: yellow; display: none;">Lütfen bekleyin, duyuru bildiriliyor...</p>
         <h3 style="margin-top:30px">Tüm Duyurular</h3>
         <div id="duyuruList"></div>
