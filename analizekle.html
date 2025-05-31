@@ -498,7 +498,13 @@ async function loadVideos() {
               <button class="edit-button" data-id="${id}">Düzenle</button>
               <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
             </div>
-          </div>
+            <div>
+              <b>👍 Beğenenler:</b> ${likesUsernames.join(", ") || "Henüz yok"}
+            </div>
+            <div>
+              <b>👎 Beğenmeyenler:</b> ${dislikesUsernames.join(", ") || "Henüz yok"}
+            </div>
+           0 </div>
           <div class="comment-section" id="comments-${id}">
             ${comments.map((c, i) => `
               <div class="comment">
@@ -513,6 +519,32 @@ async function loadVideos() {
     });
   });
 });
+
+  async function toggleLike(videoId, currentUserUID) {
+  const ref = doc(db, "analizler", videoId);
+  const snap = await getDoc(ref);
+  const data = snap.data();
+
+  let likesUsers = data.likesUsers || [];
+  let dislikesUsers = data.dislikesUsers || [];
+
+  // Kullanıcı zaten beğendiyse çıkar, yoksa ekle
+  if (likesUsers.includes(currentUserUID)) {
+    likesUsers = likesUsers.filter(uid => uid !== currentUserUID);
+  } else {
+    likesUsers.push(currentUserUID);
+    // Eğer dislike’te varsa çıkar
+    dislikesUsers = dislikesUsers.filter(uid => uid !== currentUserUID);
+  }
+
+  await updateDoc(ref, { 
+    likesUsers, 
+    dislikesUsers,
+    likes: likesUsers.length,
+    dislikes: dislikesUsers.length
+  });
+}
+
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
