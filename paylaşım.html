@@ -133,18 +133,42 @@
       margin-top: 10px;
     }
 
-    .post-footer button {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+.post-footer button, /* Sil ve Düzenle butonları */
+.view-likers, .view-dislikers { /* Beğenenler ve Beğenmeyenler butonları */
+  margin-right: 10px; /* Butonların sağında boşluk bırak */
+  border-radius: 5px; /* Yuvarlak köşeler */
+  padding: 8px 16px;
+  border: 1px solid #ccc; /* Daha belirgin kenarlık */
+  background-color: #f0f0f0; /* Daha açık bir arka plan */
+  color: #333;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
 
-    .post-footer button:hover {
-      background-color: #c0392b;
-    }
+.post-footer button:hover,
+.view-likers:hover,
+.view-dislikers:hover {
+  background-color: #e0e0e0;
+}
+
+.view-likers, .view-dislikers {
+  border-color: #aaa;
+  background-color: #fff;
+  color: #555;
+}
+
+/* Sil butonunu diğerlerinden ayırmak için */
+.post-footer button.delete-button {
+  margin-right: 15px; /* Daha fazla boşluk */
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+}
+
+.post-footer button.delete-button:hover {
+  background-color: #c0392b;
+}
 
     .post-footer .edit-button {
       background-color: #f39c12;
@@ -435,14 +459,14 @@ postElement.innerHTML = `
     <span>👎 ${post.dislikes || 0}</span>
     <span>💬 ${(post.comments || []).length}</span>
   </div>
-  <div class="post-footer">
-    <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
-    <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
-  </div>
-  <div>
-    <button class="view-likers" data-id="${postId}">👍 Beğenenler</button>
-    <button class="view-dislikers" data-id="${postId}">👎 Beğenmeyenler</button>
-  </div>
+<div class="post-footer">
+  <button class="delete-button" onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
+  <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
+</div>
+<div>
+  <button class="view-likers" data-id="${postId}">👍 Beğenenler</button>
+  <button class="view-dislikers" data-id="${postId}">👎 Beğenmeyenler</button>
+</div>
   <div class="comment-section">
     <h4>Yorumlar</h4>
     ${comments || "<p>Yorum yok.</p>"}
