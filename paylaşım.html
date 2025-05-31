@@ -576,6 +576,50 @@ async function sendNotificationToAllUsersExceptAdmin(title, description) {
     console.error("📛 Bildirim gönderilemedi:", err);
   }
 }
+
+window.showLikedUsers = async function(postId) {
+  const postRef = doc(db, "posts", postId);
+  const snap = await getDoc(postRef);
+  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
+
+  const post = snap.data();
+  const users = post.likedBy || [];
+  showModal("Beğenenler", users);
+};
+
+window.showDislikedUsers = async function(postId) {
+  const postRef = doc(db, "posts", postId);
+  const snap = await getDoc(postRef);
+  if (!snap.exists()) return alert("Paylaşım bulunamadı.");
+
+  const post = snap.data();
+  const users = post.dislikedBy || [];
+  showModal("Beğenmeyenler", users);
+};
+
+function showModal(title, users) {
+  document.getElementById("modalTitle").innerText = title;
+  const ul = document.getElementById("userList");
+  ul.innerHTML = "";
+
+  if (users.length === 0) {
+    ul.innerHTML = "<li>Henüz kimse yok.</li>";
+  } else {
+    users.forEach(user => {
+      const li = document.createElement("li");
+      li.innerText = user.username || user.uid || "Bilinmeyen kullanıcı";
+      ul.appendChild(li);
+    });
+  }
+
+  document.getElementById("userListModal").style.display = "block";
+  document.getElementById("modalBackdrop").style.display = "block";
+}
+
+window.closeModal = function() {
+  document.getElementById("userListModal").style.display = "none";
+  document.getElementById("modalBackdrop").style.display = "none";
+};
   
 loadPosts();
 </script>
