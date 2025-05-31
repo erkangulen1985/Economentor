@@ -793,19 +793,15 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-function renderComments(container, comments, userId, postTitleOrId) {
+function renderComments(container, comments, userId) {
   container.innerHTML = "";
   comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   comments.forEach((comment, index) => {
-    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     const el = document.createElement("div");
     el.className = "comment";
+    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     el.innerHTML = `
-      <div>
-        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-        <i style="font-size:12px; color:#aaa;">Gönderi: ${postTitleOrId}</i><br/>
-        ${comment.text}
-      </div>
+      <div><b>${comment.username}</b> <small>(${dateStr})</small><br/>${comment.text}</div>
       ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
     `;
     container.appendChild(el);
@@ -951,7 +947,7 @@ for (const adminDoc of adminsSnap.docs) {
   const adminId = adminDoc.id;
   if (adminId === user.uid) continue; // Yorum sahibi adminse, bildirim gönderme
 
-  const adminMessage = `${username} adlı kullanıcı yeni bir yorum yaptı.`;
+  const adminMessage = `${username} adlı kullanıcı "${post.title || 'Bir gönderi'}" başlıklı gönderiye yeni bir yorum yaptı.`;
   
   // Firestore bildirimi
   await createNotificationForUser(adminId, adminMessage, id);
