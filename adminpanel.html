@@ -434,13 +434,15 @@ window.editDuyuru = function(id, text) {
   textarea.style.height = "100px";
   textarea.value = text.replace(/\\n/g, "\n");
 
-  const saveBtn = document.createElement("button-kaydet");
+  const saveBtn = document.createElement("button");
   saveBtn.textContent = "Kaydet";
+  saveBtn.className = "button-kaydet";
   saveBtn.style.minWidth = "80px";
   saveBtn.style.marginRight = "10px";
 
-  const cancelBtn = document.createElement("button-kaydet");
+  const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "İptal";
+  cancelBtn.className = "button-kaydet";
   cancelBtn.style.minWidth = "80px";
   cancelBtn.style.backgroundColor = "#f44336";
 
