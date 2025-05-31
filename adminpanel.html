@@ -450,10 +450,7 @@ window.editDuyuru = function(id, text) {
   btnDiv.style.display = "flex";
   btnDiv.style.justifyContent = "flex-end";
   btnDiv.style.gap = "10px";
-  btnDiv.style.position = "relative";
   btnDiv.style.alignItems = "center";
-
-  // Butonları alt tarafa taşıyan temel kısım: btnDiv normal akışta, position absolute değil
 
   btnDiv.appendChild(saveBtn);
   btnDiv.appendChild(cancelBtn);
@@ -463,7 +460,6 @@ window.editDuyuru = function(id, text) {
   const parent = div.parentElement;
   const editDiv = document.createElement("div");
   editDiv.id = `edit-${id}`;
-  editDiv.style.position = "relative";
   editDiv.appendChild(textarea);
   editDiv.appendChild(btnDiv);
 
@@ -474,24 +470,23 @@ window.editDuyuru = function(id, text) {
     div.style.display = "block";
   };
 
-saveBtn.onclick = async () => {
-  const newText = textarea.value.trim();
-  if (!newText) return alert("Duyuru metni boş olamaz.");
+  saveBtn.onclick = async () => {
+    const newText = textarea.value.trim();
+    if (!newText) return alert("Duyuru metni boş olamaz.");
 
-  try {
-    // Sadece text alanını güncelle, createdAt'ı değiştirme
-    await setDoc(doc(db, "announcements", id), {
-      text: newText
-    }, { merge: true });
+    try {
+      await setDoc(doc(db, "announcements", id), {
+        text: newText
+      }, { merge: true });
 
-    div.textContent = newText;
-    editDiv.remove();
-    div.style.display = "block";
-  } catch (err) {
-    alert("Duyuru güncellenirken hata oluştu.");
-    console.error("Duyuru güncelleme hatası:", err);
-  }
-};
+      div.textContent = newText;
+      editDiv.remove();
+      div.style.display = "block";
+    } catch (err) {
+      alert("Duyuru güncellenirken hata oluştu.");
+      console.error(err);
+    }
+  };
 };
 
         window.deleteDuyuru = async function (id) {
