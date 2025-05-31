@@ -116,7 +116,7 @@
 .history-section .post {
   background-color: #fff;
   padding: 15px;
-  margin-bottom: 100px; /* Burayı artırdım, postlar arası boşluk için */
+  margin-bottom: 10px; /* Burayı artırdım, postlar arası boşluk için */
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -547,7 +547,7 @@ document.getElementById("searchInput")?.addEventListener("input", async (e) => {
       const postId = docSnap.id;
       const postElement = document.createElement("div");
       postElement.classList.add("post");
-      postElement.style.margin = "0 auto";
+      postElement.style.margin = "10px auto";
 
       const comments = (post.comments || []).map((c, i) => `
         <div class="comment">
