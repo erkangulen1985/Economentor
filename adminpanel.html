@@ -203,10 +203,6 @@
 
         let isSending = false;
 
-function escapeQuotes(str) {
-  return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
-}
-
 window.addEventListener("beforeunload", function (e) {
     if (isSending) {
         e.preventDefault();
@@ -372,40 +368,45 @@ window.saveDuyuru = async function () {
     }
 };
 
+function escapeQuotes(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+}
+
 window.loadDuyurular = async function () {
-    const duyuruList = document.getElementById("duyuruList");
-    if (!duyuruList) return;
-    duyuruList.innerHTML = "";
-    const querySnapshot = await getDocs(query(collection(db, "announcements"), orderBy("createdAt", "desc")));
-    querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "announcement";
-        const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
-        div.innerHTML = `
-            <p style="white-space: pre-line;" id="text-${docSnap.id}">${data.text}</p>
-            <small>${tarih}</small>
-            <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
-            <button onclick="editDuyuru('${docSnap.id}', '${escapeQuotes(data.text)}')">Düzenle</button>
-        `;
-        duyuruList.appendChild(div);
-    });
+  const duyuruList = document.getElementById("duyuruList");
+  if (!duyuruList) return;
+  duyuruList.innerHTML = "";
+
+  const querySnapshot = await getDocs(query(collection(db, "announcements"), orderBy("createdAt", "desc")));
+  
+  querySnapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "announcement";
+    const tarih = data.createdAt?.toDate().toLocaleString("tr-TR") || "Tarih yok";
+
+    div.innerHTML = `
+      <p style="white-space: pre-line;" id="text-${docSnap.id}">${data.text}</p>
+      <small>${tarih}</small>
+      <button onclick="deleteDuyuru('${docSnap.id}')">Sil</button>
+      <button onclick="editDuyuru('${docSnap.id}', '${escapeQuotes(data.text)}')">Düzenle</button>
+    `;
+
+    duyuruList.appendChild(div);
+  });
 }
 
 window.editDuyuru = function(id, text) {
   const div = document.getElementById(`text-${id}`);
   if (!div) return;
 
-  // Eğer zaten edit modu açıksa kapat
-  if (div.querySelector("textarea")) return;
+  if (div.querySelector("textarea")) return; // Zaten düzenleme açıksa engelle
 
-  // Mevcut metni textarea içine al
   const textarea = document.createElement("textarea");
   textarea.style.width = "100%";
   textarea.style.height = "100px";
   textarea.value = text.replace(/\\n/g, "\n");
 
-  // Kaydet ve İptal butonları
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Kaydet";
   saveBtn.className = "button";
@@ -416,23 +417,18 @@ window.editDuyuru = function(id, text) {
   cancelBtn.className = "button";
   cancelBtn.style.backgroundColor = "#f44336";
 
-  // Butonları koyacak div
   const btnDiv = document.createElement("div");
   btnDiv.style.marginTop = "10px";
-
   btnDiv.appendChild(saveBtn);
   btnDiv.appendChild(cancelBtn);
 
-  // Mevcut yazıyı gizle
   div.style.display = "none";
 
-  // Yeni düzenleme alanını göster
   const parent = div.parentElement;
   const editDiv = document.createElement("div");
   editDiv.id = `edit-${id}`;
   editDiv.appendChild(textarea);
   editDiv.appendChild(btnDiv);
-
   parent.insertBefore(editDiv, div.nextSibling);
 
   cancelBtn.onclick = () => {
@@ -447,10 +443,9 @@ window.editDuyuru = function(id, text) {
     try {
       await setDoc(doc(db, "announcements", id), {
         text: newText,
-        createdAt: Timestamp.now()  // istersen tarih güncellenir, istersen eski bırak
+        createdAt: Timestamp.now() // Tarihi güncelliyor, istersen kaldırabilirsin
       }, { merge: true });
 
-      // Güncelleme sonrası
       div.textContent = newText;
       editDiv.remove();
       div.style.display = "block";
