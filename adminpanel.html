@@ -424,7 +424,7 @@ div.innerHTML = `
 }
 
 window.editDuyuru = function(id, text) {
-  if (document.getElementById(`edit-${id}`)) return; // Düzenleme zaten açık
+  if (document.getElementById(`edit-${id}`)) return;
 
   const div = document.getElementById(`text-${id}`);
   if (!div) return;
@@ -436,20 +436,18 @@ window.editDuyuru = function(id, text) {
 
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Kaydet";
-  saveBtn.className = "button";
   saveBtn.style.minWidth = "80px";
+  saveBtn.style.marginRight = "10px";
 
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "İptal";
-  cancelBtn.className = "button";
-  cancelBtn.style.backgroundColor = "#f44336";
   cancelBtn.style.minWidth = "80px";
+  cancelBtn.style.backgroundColor = "#f44336";
 
   const btnDiv = document.createElement("div");
   btnDiv.style.marginTop = "10px";
   btnDiv.style.display = "flex";
-  btnDiv.style.justifyContent = "flex-end";
-  btnDiv.style.gap = "10px";
+  btnDiv.style.justifyContent = "flex-start";
   btnDiv.style.alignItems = "center";
 
   btnDiv.appendChild(saveBtn);
