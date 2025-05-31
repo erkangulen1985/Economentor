@@ -357,6 +357,59 @@ nav a:hover {
   cursor: pointer;
 }
 
+.post-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-menu-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  z-index: 10;
+}
+
+.image-menu-content {
+  position: absolute;
+  top: 38px;
+  right: 8px;
+  background: rgba(0,0,0,0.9);
+  border-radius: 8px;
+  min-width: 120px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.image-menu-content a {
+  color: white;
+  padding: 10px 14px;
+  text-decoration: none;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  user-select: none;
+}
+
+.image-menu-content a:last-child {
+  border-bottom: none;
+}
+
+.image-menu-content a:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -456,6 +509,15 @@ nav a:hover {
   <div class="post-container" id="postsContainer">
     <!-- Paylaşımlar burada görüntülenecek -->
   </div>
+
+  <div class="post-image-wrapper">
+  <img src="FOTO_URL" alt="Resim" />
+  <div class="image-menu-button">⋮</div> <!-- üç nokta ikon -->
+  <div class="image-menu-content">
+    <a href="FOTO_URL" download target="_blank" rel="noopener noreferrer">📥 İndir</a>
+    <a href="FOTO_URL" target="_blank" rel="noopener noreferrer">🔍 Tam Ekran</a>
+  </div>
+</div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
