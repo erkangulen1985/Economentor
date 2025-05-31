@@ -426,27 +426,33 @@ window.editDuyuru = function(id, text) {
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Kaydet";
   saveBtn.className = "button";
-  saveBtn.style.marginRight = "10px";
+  saveBtn.style.minWidth = "80px";
 
   const cancelBtn = document.createElement("button");
   cancelBtn.textContent = "İptal";
   cancelBtn.className = "button";
   cancelBtn.style.backgroundColor = "#f44336";
+  cancelBtn.style.minWidth = "80px";
 
-const btnDiv = document.createElement("div");
-btnDiv.style.marginTop = "10px";
-btnDiv.style.display = "flex";
-btnDiv.style.gap = "10px";
-btnDiv.appendChild(saveBtn);
-btnDiv.appendChild(cancelBtn);
+  const btnDiv = document.createElement("div");
+  btnDiv.style.position = "absolute";
+  btnDiv.style.bottom = "10px";
+  btnDiv.style.right = "10px";
+  btnDiv.style.display = "flex";
+  btnDiv.style.gap = "10px";
+
+  btnDiv.appendChild(saveBtn);
+  btnDiv.appendChild(cancelBtn);
 
   div.style.display = "none";
 
   const parent = div.parentElement;
   const editDiv = document.createElement("div");
   editDiv.id = `edit-${id}`;
+  editDiv.style.position = "relative";
   editDiv.appendChild(textarea);
   editDiv.appendChild(btnDiv);
+
   parent.insertBefore(editDiv, div.nextSibling);
 
   cancelBtn.onclick = () => {
@@ -461,7 +467,7 @@ btnDiv.appendChild(cancelBtn);
     try {
       await setDoc(doc(db, "announcements", id), {
         text: newText,
-        createdAt: Timestamp.now() // Tarihi güncelliyor, istersen kaldırabilirsin
+        createdAt: Timestamp.now()
       }, { merge: true });
 
       div.textContent = newText;
