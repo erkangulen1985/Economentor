@@ -162,26 +162,65 @@ textarea::placeholder {
       }
     });
 
-    window.submitFeedback = async function () {
-      const message = document.getElementById("message").value.trim();
-      if (!message) {
-        alert("Lütfen mesajınızı yazın.");
-        return;
-      }
+window.submitFeedback = async function () {
+  const message = document.getElementById("message").value.trim();
+  if (!message) {
+    alert("Lütfen mesajınızı yazın.");
+    return;
+  }
 
-      const timestamp = new Date();
-      const readable = timestamp.toLocaleString("tr-TR");
+  const timestamp = new Date();
+  const readable = timestamp.toLocaleString("tr-TR");
 
-      await addDoc(collection(db, "feedback"), {
-        username: currentUsername,
-        message: message,
-        timestamp: serverTimestamp(),
-        readableTime: readable
+  // Feedback kaydı
+  await addDoc(collection(db, "feedback"), {
+    username: currentUsername,
+    message: message,
+    timestamp: serverTimestamp(),
+    readableTime: readable
+  });
+
+  // Adminleri çek
+  const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
+  const adminsSnap = await getDocs(adminsQuery);
+
+  // Adminlere bildirim gönder
+  for (const adminDoc of adminsSnap.docs) {
+    const adminId = adminDoc.id;
+    if (adminId === auth.currentUser.uid) continue; // Eğer admin kendisi ise atla
+
+    const adminMessage = `${currentUsername} adlı kullanıcı dilek-şikayette bulundu.`;
+
+    // Firestore bildirim ekle
+    await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+      to: adminId,
+      from: auth.currentUser.uid,
+      message: adminMessage,
+      timestamp: serverTimestamp(),
+      read: false,
+      type: "feedback"
+    });
+
+    // FCM push bildirimi gönder
+    try {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: adminId,
+          title: "\"Economentor\" 📝 Yeni Dilek-Şikayet!",
+          body: adminMessage,
+          url: "https://economentor.netlify.app/dilek-şikayet.html"
+        })
       });
+    } catch (err) {
+      console.error("Admin FCM bildirimi başarısız:", err);
+    }
+  }
 
-      alert("Mesajınız gönderildi. Teşekkür ederiz!");
-      document.getElementById("message").value = "";
-    };
+  alert("Mesajınız gönderildi. Teşekkür ederiz!");
+  document.getElementById("message").value = "";
+};
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
