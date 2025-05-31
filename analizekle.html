@@ -338,169 +338,134 @@ async function uploadVideo(visibility) {
   }
 }
 
+let currentUserUID = null;
+let currentUserRole = "user";
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "index.html";
+
+  currentUserUID = user.uid;
+  const userDoc = await getDoc(doc(db, "users", currentUserUID));
+  currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
+
+  document.getElementById("userShareBtn").addEventListener("click", async () => {
+    await uploadVideo("all");
+  });
+
+  document.getElementById("vipShareBtn").addEventListener("click", async () => {
+    await uploadVideo("vip");
+  });
+
+  // Kullanıcı bilgileri hazır, videoları yükle
+  loadVideos();
+});
+
 async function loadVideos() {
+  if (!currentUserUID) return;  // Kullanıcı yoksa dur
+
   const container = document.getElementById("videosContainer");
   container.innerHTML = "";
 
-  if (!currentUserUID) return; // Kullanıcı yoksa çık
-
   const snapshot = await getDocs(query(collection(db, "analizler"), orderBy("timestamp", "desc")));
 
-  if (snapshot.empty) {
-    container.innerHTML = "<p>Henüz video yok.</p>";
-    return;
-  }
-
-  snapshot.forEach(async (docSnap) => {
+  snapshot.forEach(docSnap => {
     const data = docSnap.data();
     const id = docSnap.id;
     const comments = data.comments || [];
 
     // Görünürlük kontrolü
-    if (!(data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin")))) {
-      return;
-    }
+    if (data.visibility === "all" || (data.visibility === "vip" && (currentUserRole === "vip" || currentUserRole === "admin"))) {
+      const div = document.createElement("div");
+      div.classList.add("video-card");
+      div.id = `video-${id}`;
 
-    const div = document.createElement("div");
-    div.classList.add("video-card");
-    div.id = `video-${id}`;
-
-    // Beğenen / Beğenmeyen kullanıcıları almak için Firestore koleksiyonlarını sorgula
-    const likesSnap = await getDocs(collection(db, "analizler", id, "likes"));
-    const dislikesSnap = await getDocs(collection(db, "analizler", id, "dislikes"));
-
-    // Kullanıcının beğenip beğenmediğini kontrol et
-    const userLiked = likesSnap.docs.some(doc => doc.id === currentUserUID);
-    const userDisliked = dislikesSnap.docs.some(doc => doc.id === currentUserUID);
-
-    div.innerHTML = `
-      <h3>${data.title}</h3>
-      <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
-        Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
-      </p>
-      <video controls src="${data.videoUrl}"></video>
-      <p>${data.description}</p>
-      <div class="video-footer">
-        <div>
-          <button class="like ${userLiked ? "liked" : ""}" data-id="${id}">👍 ${likesSnap.size}</button>
-          <button class="dislike ${userDisliked ? "disliked" : ""}" data-id="${id}">👎 ${dislikesSnap.size}</button>
-          <span>💬 ${comments.length}</span>
-        </div>
-        <div>
-          <button class="edit-button" data-id="${id}">Düzenle</button>
-          <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
-        </div>
-      </div>
-      <div class="comment-section" id="comments-${id}">
-        ${comments.map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b>: ${c.text}</span>
-            <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+      div.innerHTML = `
+        <h3>${data.title}</h3>
+        <p style="font-size: 14px; color: #666; margin-top: -10px; margin-bottom: 10px;">
+          Görünürlük: ${data.visibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
+        </p>
+        <video controls src="${data.videoUrl}"></video>
+        <p>${data.description}</p>
+        <div class="video-footer">
+          <div>
+            <span>👍 ${data.likes || 0}</span>
+            <span>👎 ${data.dislikes || 0}</span>
+            <span>💬 ${comments.length}</span>
           </div>
-        `).join("")}
-      </div>
-    `;
+          <div>
+            <button class="edit-button" data-id="${id}">Düzenle</button>
+            <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+          </div>
+        </div>
+        <div class="comment-section" id="comments-${id}">
+          ${comments.map((c, i) => `
+            <div class="comment">
+              <span><b>${c.username}</b>: ${c.text}</span>
+              <button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>
+            </div>
+          `).join("")}
+        </div>
+      `;
 
-    container.appendChild(div);
+      container.appendChild(div);
 
-    // Beğenme işlemi
-    div.querySelector(".like").addEventListener("click", async (e) => {
-      const vid = e.target.dataset.id;
-      const likeRef = doc(db, "analizler", vid, "likes", currentUserUID);
-      const dislikeRef = doc(db, "analizler", vid, "dislikes", currentUserUID);
-
-      const likeSnap = await getDoc(likeRef);
-      const dislikeSnap = await getDoc(dislikeRef);
-
-      if (likeSnap.exists()) {
-        // Beğeniyi kaldır
-        await deleteDoc(likeRef);
-      } else {
-        // Beğen
-        await setDoc(likeRef, { timestamp: Timestamp.now() });
-        if (dislikeSnap.exists()) await deleteDoc(dislikeRef);
-      }
-      loadVideos();
-    });
-
-    // Beğenmeme işlemi
-    div.querySelector(".dislike").addEventListener("click", async (e) => {
-      const vid = e.target.dataset.id;
-      const likeRef = doc(db, "analizler", vid, "likes", currentUserUID);
-      const dislikeRef = doc(db, "analizler", vid, "dislikes", currentUserUID);
-
-      const likeSnap = await getDoc(likeRef);
-      const dislikeSnap = await getDoc(dislikeRef);
-
-      if (dislikeSnap.exists()) {
-        // Beğenmeme kaldır
-        await deleteDoc(dislikeRef);
-      } else {
-        // Beğenmeme yap
-        await setDoc(dislikeRef, { timestamp: Timestamp.now() });
-        if (likeSnap.exists()) await deleteDoc(likeRef);
-      }
-      loadVideos();
-    });
-
-    // Düzenle butonu
-    div.querySelector(".edit-button").addEventListener("click", async () => {
-      const ref = doc(db, "analizler", id);
-      const snap = await getDoc(ref);
-      const data = snap.data();
-
-      const newTitle = prompt("Yeni başlık:", data.title);
-      const newDesc = prompt("Yeni açıklama:", data.description);
-
-      let newVisibility = data.visibility;
-      const visibilityChoice = prompt("Görünürlük seçin:\n1 = User (user/vip/admin görür)\n2 = VIP (vip/admin görür)", data.visibility === "all" ? "1" : "2");
-      if (visibilityChoice === "1") {
-        newVisibility = "all";
-      } else if (visibilityChoice === "2") {
-        newVisibility = "vip";
-      }
-
-      if (!newTitle || !newDesc || !newVisibility) return;
-
-      await updateDoc(ref, { 
-        title: newTitle,
-        description: newDesc,
-        visibility: newVisibility
-      });
-
-      alert("Güncellendi! Sayfa yenileniyor...");
-      loadVideos();
-    });
-
-    // Sil butonu
-    div.querySelector(".delete-button").addEventListener("click", async () => {
-      const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
-      if (!confirmed) return;
-      const path = div.querySelector(".delete-button").dataset.path;
-      const { error } = await supabase.storage.from("analizler").remove([path]);
-      if (error) {
-        alert("Supabase videosu silinemedi: " + error.message);
-        return;
-      }
-      await deleteDoc(doc(db, "analizler", id));
-      div.remove();
-    });
-
-    // Yorum silme butonları
-    div.querySelectorAll(".delete-comment").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const index = parseInt(btn.dataset.index);
+      // Düzenle butonu
+      div.querySelector(".edit-button").addEventListener("click", async () => {
         const ref = doc(db, "analizler", id);
         const snap = await getDoc(ref);
-        const updated = (snap.data().comments || []).filter((_, i) => i !== index);
-        await updateDoc(ref, { comments: updated });
+        const data = snap.data();
+
+        const newTitle = prompt("Yeni başlık:", data.title);
+        const newDesc = prompt("Yeni açıklama:", data.description);
+
+        let newVisibility = data.visibility;
+        const visibilityChoice = prompt("Görünürlük seçin:\n1 = User (user/vip/admin görür)\n2 = VIP (vip/admin görür)", data.visibility === "all" ? "1" : "2");
+        if (visibilityChoice === "1") {
+          newVisibility = "all";
+        } else if (visibilityChoice === "2") {
+          newVisibility = "vip";
+        }
+
+        if (!newTitle || !newDesc || !newVisibility) return;
+
+        await updateDoc(ref, { 
+          title: newTitle,
+          description: newDesc,
+          visibility: newVisibility
+        });
+
+        alert("Güncellendi! Sayfa yenileniyor...");
         loadVideos();
       });
-    });
+
+      // Sil butonu
+      div.querySelector(".delete-button").addEventListener("click", async () => {
+        const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
+        if (!confirmed) return;
+        const path = div.querySelector(".delete-button").dataset.path;
+        const { error } = await supabase.storage.from("analizler").remove([path]);
+        if (error) {
+          alert("Supabase videosu silinemedi: " + error.message);
+          return;
+        }
+        await deleteDoc(doc(db, "analizler", id));
+        div.remove();
+      });
+
+      // Yorum silme butonları
+      div.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = parseInt(btn.dataset.index);
+          const ref = doc(db, "analizler", id);
+          const snap = await getDoc(ref);
+          const updated = (snap.data().comments || []).filter((_, i) => i !== index);
+          await updateDoc(ref, { comments: updated });
+          loadVideos();
+        });
+      });
+    }
   });
 }
-
-loadVideos();
 
   // Arama
   document.getElementById("searchInput").addEventListener("input", async (e) => {
