@@ -229,6 +229,7 @@ function sanitizeFilename(filename) {
   return filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_.-]/g, "");
 }
 
+let currentUserUID = null;
 let currentUserRole = "user";
 
 onAuthStateChanged(auth, async (user) => {
