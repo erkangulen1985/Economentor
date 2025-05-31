@@ -179,6 +179,8 @@ async function loadTrainings() {
   });
 }
 
+let currentUsername = "";
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Lütfen giriş yapınız.");
@@ -187,6 +189,14 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const userId = user.uid;
+
+  // Kullanıcı bilgisi al, fullName çek
+  const userDoc = await getDoc(doc(db, "users", userId));
+  if (userDoc.exists()) {
+    currentUsername = userDoc.data().fullName || userDoc.data().username || userId;
+  } else {
+    currentUsername = userId;
+  }
 
   await loadTrainings();
   await updateRequestButtons(userId);
@@ -198,19 +208,18 @@ onAuthStateChanged(auth, async (user) => {
       const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
       const requestSnap = await getDoc(requestDocRef);
 
-      // Eğitim başlığını almak için trainings koleksiyonundan doc çek
       const trainingDoc = await getDoc(doc(db, "trainings", trainingId));
       const trainingTitle = trainingDoc.exists() ? trainingDoc.data().title : "Bilinmeyen Eğitim";
 
       if (requestSnap.exists()) {
-        // Talep varsa iptal et
+        // Talep iptal
         await deleteDoc(requestDocRef);
         btn.classList.remove("requested");
         btn.textContent = "Talep Et";
 
-        await notifyAdmins(`${user.displayName || userId} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
+        await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
       } else {
-        // Yeni talep ekle
+        // Yeni talep
         await setDoc(requestDocRef, {
           userId,
           trainingId,
@@ -221,7 +230,7 @@ onAuthStateChanged(auth, async (user) => {
 
         alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
 
-        await notifyAdmins(`${user.displayName || userId} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
+        await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
       }
     }
   });
