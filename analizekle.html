@@ -339,9 +339,6 @@ async function uploadVideo(visibility) {
   }
 }
 
-let currentUserUID = null;
-let currentUserRole = "user";
-
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
@@ -362,7 +359,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function loadVideos() {
-  if (!currentUserUID) return;  // Kullanıcı yoksa dur
+  if (!currentUserUID) return;  // Kullanıcı yoksa fonksiyonu durdur
 
   const container = document.getElementById("videosContainer");
   container.innerHTML = "";
@@ -410,7 +407,7 @@ async function loadVideos() {
 
       container.appendChild(div);
 
-      // Düzenle butonu
+      // Düzenle butonu eventi
       div.querySelector(".edit-button").addEventListener("click", async () => {
         const ref = doc(db, "analizler", id);
         const snap = await getDoc(ref);
@@ -439,7 +436,7 @@ async function loadVideos() {
         loadVideos();
       });
 
-      // Sil butonu
+      // Sil butonu eventi
       div.querySelector(".delete-button").addEventListener("click", async () => {
         const confirmed = confirm("Bu videoyu silmek istiyor musunuz?");
         if (!confirmed) return;
@@ -453,7 +450,7 @@ async function loadVideos() {
         div.remove();
       });
 
-      // Yorum silme butonları
+      // Yorum silme butonları eventleri
       div.querySelectorAll(".delete-comment").forEach(btn => {
         btn.addEventListener("click", async () => {
           const index = parseInt(btn.dataset.index);
