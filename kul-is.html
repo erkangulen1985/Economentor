@@ -219,10 +219,18 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, getDocs, doc, 
-    deleteDoc, onSnapshot, query, orderBy, updateDoc 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  deleteDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  updateDoc,
+  where
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, deleteUser, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -326,6 +334,40 @@ async function loadStatistics() {
 }
   
   loadStatistics();
+
+  async function loadTrainingRequests() {
+  const listContainer = document.getElementById("trainingRequestList");
+  listContainer.innerHTML = ""; // Temizle
+
+  // Eğitimleri çek
+  const trainingsSnapshot = await getDocs(collection(db, "trainings"));
+
+  if (trainingsSnapshot.empty) {
+    listContainer.innerHTML = "<li>Henüz eğitim bulunmamaktadır.</li>";
+    return;
+  }
+
+  for (const trainingDoc of trainingsSnapshot.docs) {
+    const trainingId = trainingDoc.id;
+    const trainingData = trainingDoc.data();
+    const title = trainingData.title || "Bilinmeyen Eğitim";
+
+    // Bu eğitimi talep edenlerin sayısı
+    const requestsQuery = query(
+      collection(db, "requests"),
+      where("trainingId", "==", trainingId)
+    );
+    const requestsSnapshot = await getDocs(requestsQuery);
+    const requestCount = requestsSnapshot.size;
+
+    // Listeye ekle
+    const li = document.createElement("li");
+    li.textContent = `${title} - Talep Sayısı: ${requestCount}`;
+    listContainer.appendChild(li);
+  }
+}
+
+loadTrainingRequests();
 
   // Kullanıcıyı listele ve sil
   async function loadUserList() {
@@ -438,38 +480,6 @@ async function loadCharts() {
       getDocs(collection(db, "analizler")),
       getDocs(collection(db, "posts"))
     ]);
-
-async function loadTrainingRequests() {
-  const listContainer = document.getElementById("trainingRequestList");
-  listContainer.innerHTML = ""; // Temizle
-
-  // Eğitimleri çek
-  const trainingsSnapshot = await getDocs(collection(db, "trainings"));
-
-  if (trainingsSnapshot.empty) {
-    listContainer.innerHTML = "<li>Henüz eğitim bulunmamaktadır.</li>";
-    return;
-  }
-
-  for (const trainingDoc of trainingsSnapshot.docs) {
-    const trainingId = trainingDoc.id;
-    const trainingData = trainingDoc.data();
-    const title = trainingData.title || "Bilinmeyen Eğitim";
-
-    // Bu eğitimi talep edenlerin sayısı
-    const requestsQuery = query(
-      collection(db, "requests"),
-      where("trainingId", "==", trainingId)
-    );
-    const requestsSnapshot = await getDocs(requestsQuery);
-    const requestCount = requestsSnapshot.size;
-
-    // Listeye ekle
-    const li = document.createElement("li");
-    li.textContent = `${title} - Talep Sayısı: ${requestCount}`;
-    listContainer.appendChild(li);
-  }
-}
 
     // 👤 KULLANICILAR (registrationDate üzerinden)
     userSnapshot.forEach(doc => {
