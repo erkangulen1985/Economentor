@@ -509,19 +509,6 @@ nav a:hover {
   <div class="post-container" id="postsContainer">
     <!-- Paylaşımlar burada görüntülenecek -->
   </div>
-
-<div class="post-image-wrapper">
-  <img src="${post.imageUrl}" alt="Resim" />
-  <div class="image-menu-button">⋮</div>
-  <div class="image-menu-content">
-    <a href="#" class="download-link" data-url="${post.imageUrl}">
-      <i class="fas fa-download"></i> İndir
-    </a>
-    <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">
-      <i class="fas fa-expand"></i> Tam Ekran
-    </a>
-  </div>
-</div>
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -646,13 +633,12 @@ async function loadPosts() {
     postElement.id = `post-${postDoc.id}`;
 
     const postTitle = post.title ? `<h3 class="post-title">${post.title}</h3>` : "";
-const postImage = post.imageUrl
-  ? `
+const postImage = post.imageUrl ? `
   <div class="post-image-wrapper">
     <img src="${post.imageUrl}" alt="Resim" />
     <div class="image-menu-button">⋮</div>
     <div class="image-menu-content">
-      <a href="#" onclick="downloadImage('${post.imageUrl}', 'image.jpg'); return false;">
+      <a href="#" class="download-link" data-url="${post.imageUrl}">
         <i class="fas fa-download"></i> İndir
       </a>
       <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">
@@ -660,8 +646,7 @@ const postImage = post.imageUrl
       </a>
     </div>
   </div>
-  `
-  : "";
+` : "";
     const postDescription = `<p>${post.description || ""}</p>`;
     const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
     const formattedDate = new Date(postDate).toLocaleString("tr-TR");
@@ -695,14 +680,14 @@ const postImage = post.imageUrl
     postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
     document.getElementById("postsContainer").appendChild(postElement);
 
-    // loadPosts fonksiyonunda, postElement oluşturduktan sonra
-postElement.querySelectorAll('.download-link').forEach(link => {
-  link.addEventListener('click', e => {
+const downloadLink = postElement.querySelector('.download-link');
+if(downloadLink) {
+  downloadLink.addEventListener('click', e => {
     e.preventDefault();
-    const url = link.dataset.url;
+    const url = downloadLink.dataset.url;
     downloadImage(url, 'image.jpg');
   });
-});
+}
 
     const wrapper = postElement.querySelector(".post-image-wrapper");
 if(wrapper){
