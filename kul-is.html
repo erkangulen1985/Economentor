@@ -144,6 +144,7 @@
     <div class="sidebar">
       <h2>Admin Paneli</h2>
       <a href="#dashboard">Genel Bakış</a>
+      <a href="#requests">Eğitim Talepleri</a>
       <a href="#users">Kullanıcı Yönetimi</a>
       <a href="#statistics">İstatistikler</a>
     </div>
@@ -167,6 +168,11 @@
         <p>Toplam Beğeni Sayısı: <span id="totalLikes">0</span></p>
         <p>Toplam Beğenmeme Sayısı: <span id="totalDislikes">0</span></p>
         <p>Toplam Yorum Sayısı: <span id="totalComments">0</span></p>
+      </div>
+
+      <div id="trainingRequests" style="margin-top:20px;">
+        <h4>Eğitim Talep Sayıları</h4>
+        <ul id="trainingRequestList" style="list-style: none; padding-left: 0;"></ul>
       </div>
 
       <!-- Kullanıcı Yönetimi -->
@@ -432,6 +438,38 @@ async function loadCharts() {
       getDocs(collection(db, "analizler")),
       getDocs(collection(db, "posts"))
     ]);
+
+async function loadTrainingRequests() {
+  const listContainer = document.getElementById("trainingRequestList");
+  listContainer.innerHTML = ""; // Temizle
+
+  // Eğitimleri çek
+  const trainingsSnapshot = await getDocs(collection(db, "trainings"));
+
+  if (trainingsSnapshot.empty) {
+    listContainer.innerHTML = "<li>Henüz eğitim bulunmamaktadır.</li>";
+    return;
+  }
+
+  for (const trainingDoc of trainingsSnapshot.docs) {
+    const trainingId = trainingDoc.id;
+    const trainingData = trainingDoc.data();
+    const title = trainingData.title || "Bilinmeyen Eğitim";
+
+    // Bu eğitimi talep edenlerin sayısı
+    const requestsQuery = query(
+      collection(db, "requests"),
+      where("trainingId", "==", trainingId)
+    );
+    const requestsSnapshot = await getDocs(requestsQuery);
+    const requestCount = requestsSnapshot.size;
+
+    // Listeye ekle
+    const li = document.createElement("li");
+    li.textContent = `${title} - Talep Sayısı: ${requestCount}`;
+    listContainer.appendChild(li);
+  }
+}
 
     // 👤 KULLANICILAR (registrationDate üzerinden)
     userSnapshot.forEach(doc => {
