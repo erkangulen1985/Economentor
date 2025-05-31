@@ -428,6 +428,8 @@ postElement.innerHTML = `
     <span>👎 ${post.dislikes || 0}</span>
     <span>💬 ${(post.comments || []).length}</span>
   </div>
+  <button onclick="showLikedUsers('${postId}')">Beğenenler</button>
+  <button onclick="showDislikedUsers('${postId}')">Beğenmeyenler</button>
   <div class="post-footer">
     <button onclick="deletePost('${postId}', '${post.imagePath || ""}')">Sil</button>
     <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
