@@ -475,9 +475,9 @@ div.innerHTML = `
             <div>
               <button class="edit-button" data-id="${id}">Düzenle</button>
               <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
+              <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
+              <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
             </div>
-            <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
-            <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
 
             <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
             <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
