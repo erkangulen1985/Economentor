@@ -112,7 +112,7 @@
             cursor: pointer;
         }
 
-        .announcement .btn-delete {
+.announcement .btn-delete {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -124,6 +124,19 @@
     top: 10px;
     right: 80px; /* Sil tuşunun solunda */
     background-color: orange;
+}
+
+.announcement > button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Düzenleme modundaki butonların kapsayıcısı için */
+.edit-buttons, /* btnDiv'e ekle bu class'ı */
+.edit-buttons button {
+    position: static !important;
+    margin-right: 10px;
 }
         
         .feedback {
@@ -446,11 +459,12 @@ window.editDuyuru = function(id, text) {
   cancelBtn.style.minWidth = "80px";
   cancelBtn.style.backgroundColor = "#f44336";
 
-  const btnDiv = document.createElement("div");
-  btnDiv.style.marginTop = "10px";
-  btnDiv.style.display = "flex";
-  btnDiv.style.justifyContent = "flex-start";
-  btnDiv.style.alignItems = "center";
+const btnDiv = document.createElement("div");
+btnDiv.className = "edit-buttons";
+btnDiv.style.marginTop = "10px";
+btnDiv.style.display = "flex";
+btnDiv.style.justifyContent = "flex-start";
+btnDiv.style.alignItems = "center";
 
   btnDiv.appendChild(saveBtn);
   btnDiv.appendChild(cancelBtn);
