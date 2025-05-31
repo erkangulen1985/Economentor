@@ -425,9 +425,15 @@ async function loadPosts() {
         <button onclick="deleteComment('${postId}', ${i})">❌</button>
       </div>
     `).join("");
+    
+const viewLikersBtn = postElement.querySelector(".view-likers");
+const viewDislikersBtn = postElement.querySelector(".view-dislikers");
 
+viewLikersBtn.addEventListener("click", () => showUserList(postId, "likes"));
+viewDislikersBtn.addEventListener("click", () => showUserList(postId, "dislikes"));
+    
 postElement.innerHTML = `
-  ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : ''} <!-- Sadece resim varsa görünsün -->
+  ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Resim">` : ''}
   <h3>${post.title}</h3>
   <p>${post.description}</p>
   <div class="post-footer">
@@ -440,20 +446,14 @@ postElement.innerHTML = `
     <button class="edit-button" onclick="editPost('${postId}')">Düzenle</button>
   </div>
   <div>
-  <button class="view-likers" data-id="${postDoc.id}">👍 Beğenenler</button>
-  <button class="view-dislikers" data-id="${postDoc.id}">👎 Beğenmeyenler</button>
+    <button class="view-likers" data-id="${postId}">👍 Beğenenler</button>
+    <button class="view-dislikers" data-id="${postId}">👎 Beğenmeyenler</button>
   </div>
   <div class="comment-section">
     <h4>Yorumlar</h4>
     ${comments || "<p>Yorum yok.</p>"}
   </div>
 `;
-
-const viewLikersBtn = postElement.querySelector(".view-likers");
-const viewDislikersBtn = postElement.querySelector(".view-dislikers");
-
-viewLikersBtn.addEventListener("click", () => showUserList(postId, "likes"));
-viewDislikersBtn.addEventListener("click", () => showUserList(postId, "dislikes"));
     postsContainer.appendChild(postElement);
   });
 }
