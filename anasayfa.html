@@ -510,16 +510,16 @@ nav a:hover {
     <!-- Paylaşımlar burada görüntülenecek -->
   </div>
 
-  <div class="post-image-wrapper">
-  <img src="FOTO_URL" alt="Resim" />
-  <div class="image-menu-button">⋮</div> <!-- üç nokta ikon -->
+<div class="post-image-wrapper">
+  <img src="${post.imageUrl}" alt="Resim" />
+  <div class="image-menu-button">⋮</div>
   <div class="image-menu-content">
-<a href="#" onclick="downloadImage('RESIM_URL', 'image.jpg'); return false;">
-  <i class="fas fa-download"></i> İndir
-</a>
-<a href="RESIM_URL" target="_blank" rel="noopener noreferrer">
-  <i class="fas fa-expand"></i> Tam Ekran
-</a>
+    <a href="#" class="download-link" data-url="${post.imageUrl}">
+      <i class="fas fa-download"></i> İndir
+    </a>
+    <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">
+      <i class="fas fa-expand"></i> Tam Ekran
+    </a>
   </div>
 </div>
 </div>
@@ -694,6 +694,15 @@ const postImage = post.imageUrl
 
     postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
     document.getElementById("postsContainer").appendChild(postElement);
+
+    // loadPosts fonksiyonunda, postElement oluşturduktan sonra
+postElement.querySelectorAll('.download-link').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const url = link.dataset.url;
+    downloadImage(url, 'image.jpg');
+  });
+});
 
     const wrapper = postElement.querySelector(".post-image-wrapper");
 if(wrapper){
