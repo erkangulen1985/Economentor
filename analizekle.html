@@ -476,6 +476,11 @@ div.innerHTML = `
               <button class="edit-button" data-id="${id}">Düzenle</button>
               <button class="delete-button" data-id="${id}" data-path="${data.videoPath}">Sil</button>
             </div>
+            <button class="show-likes" data-id="${id}">👍 Beğenenler</button>
+            <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
+
+            <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
+            <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
           </div>
           <div class="comment-section" id="comments-${id}">
             ${comments.map((c, i) => `
@@ -490,6 +495,41 @@ div.innerHTML = `
       }
     });
   });
+});
+
+async function getUsernames(uids) {
+  const usernames = [];
+  for (const uid of uids) {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) usernames.push(userDoc.data().username || "Anonim");
+  }
+  return usernames;
+}
+
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("show-likes")) {
+    const id = e.target.dataset.id;
+    const ref = doc(db, "analizler", id);
+    const snap = await getDoc(ref);
+    const likesUsers = snap.data().likesUsers || [];
+
+    const usernames = await getUsernames(likesUsers);
+    const likesListDiv = document.getElementById(`likes-list-${id}`);
+    likesListDiv.innerHTML = usernames.length > 0 ? usernames.join(", ") : "Henüz yok";
+    likesListDiv.style.display = likesListDiv.style.display === "none" ? "block" : "none";
+  }
+
+  if (e.target.classList.contains("show-dislikes")) {
+    const id = e.target.dataset.id;
+    const ref = doc(db, "analizler", id);
+    const snap = await getDoc(ref);
+    const dislikesUsers = snap.data().dislikesUsers || [];
+
+    const usernames = await getUsernames(dislikesUsers);
+    const dislikesListDiv = document.getElementById(`dislikes-list-${id}`);
+    dislikesListDiv.innerHTML = usernames.length > 0 ? usernames.join(", ") : "Henüz yok";
+    dislikesListDiv.style.display = dislikesListDiv.style.display === "none" ? "block" : "none";
+  }
 });
 </script>
 <script type="module" src="auth-guard.js"></script>
