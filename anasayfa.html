@@ -658,6 +658,25 @@ const postImage = post.imageUrl
     const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
     const formattedDate = new Date(postDate).toLocaleString("tr-TR");
 
+    const wrapper = postElement.querySelector(".post-image-wrapper");
+if(wrapper){
+  const menuBtn = wrapper.querySelector(".image-menu-button");
+  const menuContent = wrapper.querySelector(".image-menu-content");
+
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // click olayını dışarı yayma
+    const isVisible = menuContent.style.display === "flex";
+    // Önce tüm açık menüleri kapat
+    document.querySelectorAll(".image-menu-content").forEach(m => m.style.display = "none");
+    menuContent.style.display = isVisible ? "none" : "flex";
+  });
+
+  // Sayfaya herhangi bir yere tıklanınca menüyü kapat
+  document.addEventListener("click", () => {
+    menuContent.style.display = "none";
+  });
+}
+
     const postFooter = `
       <div class="video-footer">
         <div>
