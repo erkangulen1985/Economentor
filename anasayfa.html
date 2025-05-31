@@ -303,6 +303,7 @@ nav a:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 .comment button:hover {
@@ -409,22 +410,6 @@ nav a:hover {
 .image-menu-content a:hover {
   background-color: rgba(255,255,255,0.1);
 }
-
-.comment-input-wrapper {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.comment-input-wrapper input {
-  flex: 1;
-}
-
-.comment-input-wrapper button {
-  flex-shrink: 0;
-}
-
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
@@ -682,18 +667,16 @@ const postImage = post.imageUrl ? `
       </div>
     `;
 
-const commentSection = `
+    const commentSection = `
 <div class="comments-section">
   <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
   <div class="comment-panel" style="display: none;">
     <div class="comment-list"></div>
-    <div class="comment-input-wrapper">
-      <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
-      <button class="comment-button">Yorum Yap</button>
-    </div>
+    <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
+    <button class="comment-button">Yorum Yap</button>
   </div>
 </div>
-`;
+    `;
 
     postElement.innerHTML = postTitle + postImage + postDescription + postFooter + commentSection;
     document.getElementById("postsContainer").appendChild(postElement);
