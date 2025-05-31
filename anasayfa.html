@@ -580,18 +580,17 @@ async function loadPosts() {
     postElement.id = `post-${postDoc.id}`;
 
     const postTitle = post.title ? `<h3 class="post-title">${post.title}</h3>` : "";
-    const postImage = post.imageUrl 
-  ? `<img src="${post.imageUrl}" alt="Resim" style="max-width: 100%; height: auto; border-radius: 16px; display: block; margin: 0 auto;" />
-     <div style="text-align: center; margin-top: 8px;">
-       <a href="${post.imageUrl}" download target="_blank" rel="noopener noreferrer" style="
-         background-color: #3498db; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold;
-         transition: background-color 0.3s ease;
-       " 
-       onmouseover="this.style.backgroundColor='#2980b9'" 
-       onmouseout="this.style.backgroundColor='#3498db'">
-         📥 Fotoğrafı İndir
-       </a>
-     </div>`
+const postImage = post.imageUrl
+  ? `
+  <div class="post-image-wrapper">
+    <img src="${post.imageUrl}" alt="Resim" />
+    <div class="image-menu-button">⋮</div>
+    <div class="image-menu-content">
+      <a href="${post.imageUrl}" download target="_blank" rel="noopener noreferrer">📥 İndir</a>
+      <a href="${post.imageUrl}" target="_blank" rel="noopener noreferrer">🔍 Tam Ekran</a>
+    </div>
+  </div>
+  `
   : "";
     const postDescription = `<p>${post.description || ""}</p>`;
     const postDate = post.timestamp?.toDate?.() || new Date(post.timestamp);
