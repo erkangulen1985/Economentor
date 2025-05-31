@@ -312,7 +312,7 @@ usersList = usersSnap.docs.map(doc => ({
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
             .map((c, i) => `
               <div class="comment">
-                <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+                <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>
                 ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
               </div>
             `).join("")}
