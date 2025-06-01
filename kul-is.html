@@ -150,6 +150,7 @@
       <h2>Admin Paneli</h2>
       <a href="#dashboard">Genel Bakış</a>
       <a href="#trainingRequests">Eğitim Talepleri</a>
+      <a href="#notifiedUsers">Bildirim Alan Kullanıcılar</a>
       <a href="#users">Kullanıcı Yönetimi</a>
       <a href="#statistics">İstatistikler</a>
     </div>
@@ -180,6 +181,11 @@
         <ul id="trainingRequestList" style="list-style: none; padding-left: 0;"></ul>
       </div>
 
+      <div id="notifiedUsersList" style="margin-top: 20px;">
+        <h4>Bildirim Alan Kullanıcılar</h4>
+        <ul id="notifiedUsersUl" style="list-style-type: disc; padding-left: 20px;"></ul>
+      </div>
+ 
       <!-- Kullanıcı Yönetimi -->
       <div id="users" class="card">
         <h3>Kullanıcı Yönetimi</h3>
@@ -711,7 +717,20 @@ async function loadCharts() {
   }
 });
 
+const notifiedList = document.getElementById("notifiedUsersUl");
+notifiedList.innerHTML = ""; // Listeyi temizle
+
+users.forEach(docSnap => {
+  const data = docSnap.data();
+  if (data.fcmToken) {
+    const li = document.createElement("li");
+    li.textContent = data.fullName || data.username || "İsimsiz Kullanıcı";
+    notifiedList.appendChild(li);
+  }
+});
+
   loadUserList();
+  loadNotificationUsers();
   loadCharts();
 </script>
 <script type="module" src="auth-guard.js"></script>
