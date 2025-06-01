@@ -156,18 +156,22 @@
 .view-likers, .view-dislikers {
   margin-top: 15px;
   margin-right: 10px;
-  border-radius: 5px;
   padding: 8px 16px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
-  color: #333;
+  border-radius: 5px;
+  border: 1px solid black;     /* siyah kenarlık */
+  background-color: white;      /* beyaz arka plan */
+  color: black;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* hafif gölge */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .view-likers:hover, .view-dislikers:hover {
-  background-color: #e0e0e0;
+  background-color: #4CAF50;    /* yeşil arka plan */
+  color: white;                 /* yazı beyaz */
+  border-color: #4CAF50;        /* kenarlık da yeşil */
+  box-shadow: 0 0 10px rgba(76,175,80,0.7); /* yeşil glow efekti */
 }
 
 /* Sil butonunu diğerlerinden ayırmak için */
