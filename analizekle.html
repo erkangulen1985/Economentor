@@ -633,11 +633,6 @@ async function showUserList(postId, type) {
   const colRef = collection(db, "analizler", postId, type); // alt koleksiyonu al
   const snapshot = await getDocs(colRef);
 
-  if (snapshot.empty) {
-    alert(type === "likes" ? "Henüz beğenen yok." : "Henüz beğenmeyen yok.");
-    return;
-  }
-
   const usernames = [];
 
   for (const docSnap of snapshot.docs) {
@@ -655,7 +650,7 @@ async function showUserList(postId, type) {
   list.innerHTML = "";
 
   if (usernames.length === 0) {
-    list.innerHTML = "<li>Henüz kimse yok.</li>";
+    list.innerHTML = `<li style="padding: 10px; font-style: italic; color: #ccc;">Henüz ${type === "likes" ? "beğenen" : "beğenmeyen"} yok.</li>`;
   } else {
     usernames.forEach(name => {
       const li = document.createElement("li");
