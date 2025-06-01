@@ -571,22 +571,12 @@ async function getUsernames(uids) {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("show-likes")) {
     const id = e.target.dataset.id;
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const likesUsers = snap.data().likesUsers || [];
-
-    const usernames = await getUsernames(likesUsers);
-    // Burada kullanıcı listesini gösterme kodu yok
+    await showUserList(id, "likes");
   }
 
   if (e.target.classList.contains("show-dislikes")) {
     const id = e.target.dataset.id;
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const dislikesUsers = snap.data().dislikesUsers || [];
-
-    const usernames = await getUsernames(dislikesUsers);
-    // Burada kullanıcı listesini gösterme kodu yok
+    await showUserList(id, "dislikes");
   }
 });
 
