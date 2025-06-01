@@ -576,6 +576,8 @@ document.addEventListener("click", async (e) => {
     const likesUsers = snap.data().likesUsers || [];
 
     const usernames = await getUsernames(likesUsers);
+    // Burada kullanıcı listesini gösterme kodu yok
+  }
 
   if (e.target.classList.contains("show-dislikes")) {
     const id = e.target.dataset.id;
@@ -584,6 +586,8 @@ document.addEventListener("click", async (e) => {
     const dislikesUsers = snap.data().dislikesUsers || [];
 
     const usernames = await getUsernames(dislikesUsers);
+    // Burada kullanıcı listesini gösterme kodu yok
+  }
 });
 
 async function showUserList(postId, type) {
