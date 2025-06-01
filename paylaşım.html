@@ -232,6 +232,97 @@
     .comment button:hover {
       background-color: #c0392b;
     }
+
+    @media (max-width: 768px) {
+  .content {
+    padding: 10px;
+    width: 95%;
+  }
+
+  .upload-section, .history-section {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  header h1 {
+    font-size: 24px;
+    padding: 10px 5px;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    padding: 10px 5px;
+  }
+
+  nav a {
+    flex: 1 1 45%;
+    margin: 5px 0;
+    font-size: 14px;
+    padding: 8px 5px;
+    text-align: center;
+  }
+
+  .upload-section input[type="text"],
+  .upload-section textarea,
+  #searchInput {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .upload-section button {
+    font-size: 16px;
+    padding: 12px 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .history-section .post {
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .history-section .post img {
+    width: 100%;
+    height: auto;
+  }
+
+  .post-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .post-footer span {
+    font-size: 14px;
+    margin-right: 0;
+  }
+
+  .post-footer button,
+  .view-likers,
+  .view-dislikers {
+    width: 100%;
+    margin: 5px 0;
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .comment-section {
+    padding: 10px 5px;
+  }
+
+  .comment {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .comment button {
+    align-self: flex-end;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
   </style>
 </head>
 <body>
