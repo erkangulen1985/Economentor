@@ -629,20 +629,24 @@ document.addEventListener("click", async (e) => {
 });
 
 async function showUserList(postId, type) {
-  const ref = doc(db, "analizler", postId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return;
+  // type: "likes" veya "dislikes"
+  const colRef = collection(db, "analizler", postId, type); // alt koleksiyonu al
+  const snapshot = await getDocs(colRef);
 
-  let usersUids = [];
-  if (type === "likes") usersUids = snap.data().likesUsers || [];
-  else if (type === "dislikes") usersUids = snap.data().dislikesUsers || [];
+  if (snapshot.empty) {
+    alert(type === "likes" ? "Henüz beğenen yok." : "Henüz beğenmeyen yok.");
+    return;
+  }
 
   const usernames = [];
-  for (const uid of usersUids) {
+
+  for (const docSnap of snapshot.docs) {
+    const uid = docSnap.id;
     const userDoc = await getDoc(doc(db, "users", uid));
     usernames.push(userDoc.exists() ? userDoc.data().username : uid);
   }
 
+  // Modal pencerede göster
   const modal = document.getElementById("userListModal");
   const list = document.getElementById("userList");
   const title = document.getElementById("userListTitle");
