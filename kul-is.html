@@ -717,17 +717,25 @@ async function loadCharts() {
   }
 });
 
-const notifiedList = document.getElementById("notifiedUsersUl");
-notifiedList.innerHTML = ""; // Listeyi temizle
+async function loadNotificationUsers() {
+  const listElement = document.getElementById("notifiedUsersUl");
+  listElement.innerHTML = "";
 
-users.forEach(docSnap => {
-  const data = docSnap.data();
-  if (data.fcmToken) {
-    const li = document.createElement("li");
-    li.textContent = data.fullName || data.username || "İsimsiz Kullanıcı";
-    notifiedList.appendChild(li);
+  try {
+    const usersSnapshot = await getDocs(collection(db, "users")); // ❗ getDocs çağrısı burada yapılmalı
+    usersSnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data.fcmToken) {
+        const li = document.createElement("li");
+        li.textContent = data.fullName || data.username || "İsimsiz Kullanıcı";
+        listElement.appendChild(li);
+      }
+    });
+  } catch (err) {
+    console.error("Bildirim alan kullanıcılar yüklenemedi:", err);
+    listElement.innerHTML = "<li>Veri alınırken hata oluştu.</li>";
   }
-});
+}
 
   loadUserList();
   loadNotificationUsers();
