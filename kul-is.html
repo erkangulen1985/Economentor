@@ -399,7 +399,8 @@ async function loadTrainingRequests() {
       const requestData = requestDoc.data();
       const userId = requestData.userId;
       const userDoc = await getDoc(doc(db, "users", userId));
-      const fullName = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
+      const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
+      const fullName = fullNameRaw.toUpperCase();
 
       const userLi = document.createElement("li");
       userLi.style.marginBottom = "6px";
@@ -739,7 +740,8 @@ async function loadNotificationUsers() {
       const data = docSnap.data();
       if (data.fcmToken) {
         const li = document.createElement("li");
-        li.textContent = data.fullName || data.username || "İsimsiz Kullanıcı";
+        const name = data.fullName || data.username || "İsimsiz Kullanıcı";
+        li.textContent = name.toUpperCase();
         listElement.appendChild(li);
       }
     });
