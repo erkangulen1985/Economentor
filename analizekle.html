@@ -425,8 +425,6 @@ div.innerHTML = `
       <button class="show-dislikes" data-id="${id}">👎 Beğenmeyenler</button>
     </div>
   </div>
-  <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
-  <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
   <div class="comment-section" id="comments-${id}">
     ${comments.map((c, i) => `
       <div class="comment">
@@ -543,9 +541,6 @@ div.innerHTML = `
     </div>
   </div>
 
-  <div class="likes-list" id="likes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
-  <div class="dislikes-list" id="dislikes-list-${id}" style="display:none; margin-top:10px; background:#222; padding:10px; border-radius:6px; color:white;"></div>
-
   <div class="comment-section" id="comments-${id}">
     ${comments.map((c, i) => `
       <div class="comment">
@@ -634,6 +629,13 @@ async function showUserList(postId, type) {
 
   modal.style.display = "block";
 }
+
+window.addEventListener("click", (e) => {
+  const modal = document.getElementById("userListModal");
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+});
 
 </script>
 <script type="module" src="auth-guard.js"></script>
