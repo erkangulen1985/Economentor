@@ -493,8 +493,8 @@ div.innerHTML = `
             loadVideos();
 
             
-        div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
-        div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
+div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
+div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
           });
         });
       }
@@ -557,8 +557,8 @@ div.innerHTML = `
 `;
         container.appendChild(div);
 
-        div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
-        div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
+div.querySelector(".show-likes").addEventListener("click", () => showUserList(id, "likes"));
+div.querySelector(".show-dislikes").addEventListener("click", () => showUserList(id, "dislikes"));
       }
     });
   });
@@ -599,19 +599,19 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-  async function showUserList(postId, type) {
-  const listRef = collection(db, "analizler", postId, type); // type: 'likes' or 'dislikes'
-  const snap = await getDocs(listRef);
+async function showUserList(postId, type) {
+  const ref = doc(db, "analizler", postId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
 
-  const users = [];
-  for (const docSnap of snap.docs) {
-    const uid = docSnap.id;
+  let usersUids = [];
+  if (type === "likes") usersUids = snap.data().likesUsers || [];
+  else if (type === "dislikes") usersUids = snap.data().dislikesUsers || [];
+
+  const usernames = [];
+  for (const uid of usersUids) {
     const userDoc = await getDoc(doc(db, "users", uid));
-    if (userDoc.exists()) {
-      users.push(userDoc.data().username || uid);
-    } else {
-      users.push(uid);
-    }
+    usernames.push(userDoc.exists() ? userDoc.data().username : uid);
   }
 
   const modal = document.getElementById("userListModal");
@@ -619,12 +619,12 @@ document.addEventListener("click", async (e) => {
   const title = document.getElementById("userListTitle");
 
   title.textContent = type === "likes" ? "Beğenenler" : "Beğenmeyenler";
-
   list.innerHTML = "";
-  if (users.length === 0) {
+
+  if (usernames.length === 0) {
     list.innerHTML = "<li>Henüz kimse yok.</li>";
   } else {
-    users.forEach(name => {
+    usernames.forEach(name => {
       const li = document.createElement("li");
       li.textContent = name;
       li.style.padding = "6px 0";
@@ -632,7 +632,7 @@ document.addEventListener("click", async (e) => {
     });
   }
 
-  modal.style.display = "block";  // **Modalı görünür yap!**
+  modal.style.display = "block";
 }
 
 </script>
