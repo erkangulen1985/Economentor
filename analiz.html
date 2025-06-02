@@ -293,7 +293,7 @@ usersList = usersSnap.docs.map(doc => ({
     card.innerHTML = `
       <h2>${data.title}</h2>
       <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
-        Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP ve Admin" : "Herkese Açık (User/VIP/Admin)"}
+        Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
       </p>
       <video controls controlsList="nodownload" oncontextmenu="return false;" src="${data.videoUrl}"></video>
       <p class="description">${data.description || "Açıklama yok."}</p>
