@@ -252,22 +252,21 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });  
   
 // Tüm cihazlarda 3 saniye sonra kutuyu göster  
-setTimeout(() => {
-  // Eğer kullanıcı zaten PWA'da ise (Android, iOS, Safari vs. fark etmez), paneli asla gösterme
-  const isPWAInstalled =
-    window.matchMedia('(display-mode: standalone)').matches || 
-    window.navigator.standalone === true || // iOS Safari
-    document.referrer.startsWith('android-app://'); // Bazı Android cihazlarda PWA'dan açıldığında referrer böyle olur
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log("✅ beforeinstallprompt tetiklendi");
+  e.preventDefault();
+  deferredPrompt = e;
 
-  if (installBoxShown || isPWAInstalled) return; // Yüklenmişse gösterme
-
-  const promptBox = document.getElementById("installPrompt");
-  promptBox.style.display = "block";
-  setTimeout(() => {
-    promptBox.style.top = "0";
-  }, 300);
-  installBoxShown = true;
-}, 3000);
+  // Sadece burada göster
+  if (!installBoxShown) {
+    const promptBox = document.getElementById("installPrompt");
+    promptBox.style.display = "block";
+    setTimeout(() => {
+      promptBox.style.top = "0";
+    }, 300);
+    installBoxShown = true;
+  }
+});
   
 // Yükle butonuna tıklandığında  
 document.getElementById("installButton").addEventListener("click", async () => {
