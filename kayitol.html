@@ -231,6 +231,11 @@
   form.requestSubmit();            // Form yeniden gönderilir
 });
 
+  cancelBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+  formSubmitted = false;
+});
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
