@@ -74,6 +74,7 @@
   <h1>Duyurular</h1>
   <div id="announcementList"></div>
   <button class="home-btn" onclick="window.location.href='anasayfa.html'">Anasayfa</button>
+  <button class="home-btn" onclick="window.location.href='adminpanel.html'" id="adminBtn" style="display: none;">Admin Paneli</button>
 
   <div id="notificationPrompt" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#001f3d; color:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:1000; text-align:center;">
     <p>📢 Bildirim almak ister misiniz?</p>
@@ -251,6 +252,11 @@ onAuthStateChanged(auth, async (user) => {
     const savedModel = extractModelCode(savedDeviceInfo || "");
 
     const shouldRefreshToken = !savedToken;
+
+    
+    if (userData.role === "admin") {
+      document.getElementById("adminBtn").style.display = "block";
+    }
 
     if (shouldRefreshToken) {
       // Bildirim ayarlama mesajını göster ve promise döndür
