@@ -229,10 +229,6 @@ window.addEventListener("beforeunload", (event) => {
 });
     
 onAuthStateChanged(auth, async (user) => {
-  if (!isMobileDevice()) {
-    console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
-    return;
-  }
 
   if (!user) {
     console.log("🔒 Kullanıcı giriş yapmamış.");
@@ -244,6 +240,10 @@ onAuthStateChanged(auth, async (user) => {
     const userSnap = await getDoc(userRef);
     const userData = userSnap.exists() ? userSnap.data() : {};
 
+    if (userData.role === "admin") {
+      document.getElementById("adminBtn").style.display = "block";
+    }
+
     const currentDeviceInfo = navigator.userAgent;
     const savedToken = userData.fcmToken || null;
     const savedDeviceInfo = userData.deviceInfo || null;
@@ -253,9 +253,9 @@ onAuthStateChanged(auth, async (user) => {
 
     const shouldRefreshToken = !savedToken;
 
-    
-    if (userData.role === "admin") {
-      document.getElementById("adminBtn").style.display = "block";
+    if (!isMobileDevice()) {
+      console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
+      return;
     }
 
     if (shouldRefreshToken) {
