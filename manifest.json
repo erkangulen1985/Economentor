@@ -3,7 +3,7 @@
   "short_name": "Economentor",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#001f3d",
   "theme_color": "#001f3d",
   "orientation": "any",
