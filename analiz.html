@@ -651,5 +651,17 @@ function hideMentionSuggestions() {
     hideMentionSuggestions();  
   }  
 });  
-</script>  <script type="module" src="auth-guard.js"></script>  </body>  
+
+
+  document.addEventListener("touchstart", () => {
+    setTimeout(() => {
+      document.querySelectorAll("video").forEach(v => {
+        v.play().catch(() => {});
+      });
+    }, 200);
+  }, { once: true });
+
+</script>
+<script type="module" src="auth-guard.js"></script>  
+</body>  
 </html>
