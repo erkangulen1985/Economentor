@@ -250,12 +250,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();  
   deferredPrompt = e;  
 });  
-  
-// Tüm cihazlarda 3 saniye sonra kutuyu göster  
-window.addEventListener('beforeinstallprompt', (e) => {
-  console.log("✅ beforeinstallprompt tetiklendi");
-  e.preventDefault();
-  deferredPrompt = e;
 
   // Sadece burada göster
   if (!installBoxShown) {
@@ -300,6 +294,17 @@ document.getElementById("installButton").addEventListener("click", async () => {
     toggle.classList.toggle("fa-eye-slash");  
     toggle.classList.toggle("fa-eye");  
   });  
+
+window.addEventListener("load", () => {
+  if (isAppleDevice && !isInStandalone && !installBoxShown) {
+    const promptBox = document.getElementById("installPrompt");
+    promptBox.style.display = "block";
+    setTimeout(() => {
+      promptBox.style.top = "0";
+    }, 300);
+    installBoxShown = true;
+  }
+});
   </script>  
 </body>  
 </html> 
