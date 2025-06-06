@@ -207,6 +207,7 @@
         <a href="#" onclick="showContent('hakkinda-admin')">Hakkında Düzenle</a>
         <a href="#" onclick="showContent('karsilama-yazisi')">Karşılama Yazısı</a>
         <a href="#" onclick="showContent('dil-sik')">Dilek ve Şikayetler</a>
+        <a href="#" onclick="showContent('herkese-bildirim')">Herkese Bildirim</a>
         <a href="paylaşım.html">Paylaşımlar</a>
         <a href="mesaj.html">Mesajlar</a>
         <a href="profil.html">Profil</a>
@@ -292,6 +293,17 @@ if (section === 'duyuru-admin') {
     `;
     loadDuyurular();
 }
+
+    if (section === 'herkese-bildirim') {
+    container.innerHTML = `
+        <h3>Herkese Bildirim Gönder</h3>
+        <input type="text" id="notifTitle" placeholder="Bildirim Başlığı" style="width:100%;padding:10px;font-size:16px;border-radius:8px;margin-bottom:10px;">
+        <textarea id="notifBody" placeholder="Bildirim içeriği..." style="height:100px;"></textarea>
+        <button class="button-kaydet" onclick="sendGlobalNotification()">Gönder</button>
+        <p id="notifStatus" style="color: yellow; display: none;">Bildirimler gönderiliyor, lütfen bekleyin...</p>
+    `;
+}
+
 
             if (section === 'hakkinda-admin') {
                 const hakRef = doc(db, "site", "hakkinda");
@@ -534,6 +546,56 @@ window.toggleSidebar = function() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
+
+window.sendGlobalNotification = async function () {
+    const title = document.getElementById("notifTitle").value.trim();
+    const body = document.getElementById("notifBody").value.trim();
+    const status = document.getElementById("notifStatus");
+
+    if (!title || !body) return alert("Başlık ve içerik boş olamaz.");
+
+    status.style.display = "block";
+    isSending = true;
+
+    try {
+        const usersSnap = await getDocs(collection(db, "users"));
+
+        const promises = usersSnap.docs.map(async (userDoc) => {
+            const uid = userDoc.id;
+            const data = userDoc.data();
+            if (data.role === "admin") return; // admin'e gönderme
+
+            // Firestore'a kaydet
+            await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+                to: uid,
+                message: body,
+                postId: null,
+                timestamp: Timestamp.now(),
+                read: false
+            });
+
+            // FCM ile gönder
+            if (data.fcmToken) {
+                await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ uid, title, body, url: "https://economentor.netlify.app" })
+                });
+            }
+        });
+
+        await Promise.allSettled(promises);
+        alert("Bildirim başarıyla gönderildi.");
+    } catch (err) {
+        console.error("Bildirim gönderim hatası:", err);
+        alert("Bir hata oluştu.");
+    } finally {
+        status.style.display = "none";
+        isSending = false;
+    }
+};
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
