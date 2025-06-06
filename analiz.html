@@ -329,6 +329,7 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
   oncontextmenu="return false;"
   style="width: 100%; border-radius: 10px;"
 ></video>
+
     <p class="description">${data.description || "Açıklama yok."}</p>
     <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
     <div class="video-footer">
@@ -356,6 +357,21 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     </div>
   `;
 }
+
+setTimeout(() => {
+  const v = card.querySelector("video");
+  if (v) {
+    v.setAttribute("playsinline", "true");
+    v.setAttribute("webkit-playsinline", "true");
+    v.setAttribute("muted", "true");
+    v.setAttribute("autoplay", "true");
+    v.removeAttribute("controls"); // Başta controls yok
+    v.addEventListener("click", () => {
+      v.setAttribute("controls", "true"); // Tıklayınca controls gelir
+      v.play();
+    });
+  }
+}, 100);
     
     container.appendChild(card);
   });
@@ -646,21 +662,6 @@ function hideMentionSuggestions() {
     hideMentionSuggestions();
   }
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("video").forEach(video => {
-      video.setAttribute("playsinline", "true");
-      video.setAttribute("webkit-playsinline", "true");
-      video.setAttribute("muted", "true"); // autoplay için gerekli
-      video.setAttribute("autoplay", "true"); // bazen iOS'ta önce autoplay gerekiyor
-      video.removeAttribute("controls"); // kullanıcı başlatmadan oynamasını sağlamak için
-      video.addEventListener("click", () => {
-        video.setAttribute("controls", "true"); // tıklanınca kontroller gelsin
-        video.play();
-      });
-    });
-  });
-
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
