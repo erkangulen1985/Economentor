@@ -250,17 +250,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();  
   deferredPrompt = e;  
 });  
-
-  // Sadece burada göster
-  if (!installBoxShown) {
-    const promptBox = document.getElementById("installPrompt");
-    promptBox.style.display = "block";
-    setTimeout(() => {
-      promptBox.style.top = "0";
-    }, 300);
-    installBoxShown = true;
-  }
-});
   
 // Yükle butonuna tıklandığında  
 document.getElementById("installButton").addEventListener("click", async () => {
@@ -295,8 +284,13 @@ document.getElementById("installButton").addEventListener("click", async () => {
     toggle.classList.toggle("fa-eye");  
   });  
 
-window.addEventListener("load", () => {
-  if (isAppleDevice && !isInStandalone && !installBoxShown) {
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log("✅ beforeinstallprompt tetiklendi");
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // ✅ install kutusunu sadece bir kez göster
+  if (!installBoxShown) {
     const promptBox = document.getElementById("installPrompt");
     promptBox.style.display = "block";
     setTimeout(() => {
