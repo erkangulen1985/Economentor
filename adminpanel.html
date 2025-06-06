@@ -294,15 +294,15 @@ if (section === 'duyuru-admin') {
     loadDuyurular();
 }
 
-    if (section === 'herkese-bildirim') {
-    container.innerHTML = `
-        <h3>Herkese Bildirim Gönder</h3>
-        <input type="text" id="notifTitle" placeholder="Bildirim Başlığı" style="width:100%;padding:10px;font-size:16px;border-radius:8px;margin-bottom:10px;">
-        <textarea id="notifBody" placeholder="Bildirim içeriği..." style="height:100px;"></textarea>
-        <button class="button-kaydet" onclick="sendGlobalNotification()">Gönder</button>
-        <p id="notifStatus" style="color: yellow; display: none;">Bildirimler gönderiliyor, lütfen bekleyin...</p>
-    `;
-}
+container.innerHTML = `
+    <h3>Belirli Kullanıcıya Bildirim Gönder</h3>
+    <input type="text" id="notifUid" placeholder="Kullanıcı UID" style="width:100%;padding:10px;font-size:16px;border-radius:8px;margin-bottom:10px;">
+    <input type="text" id="notifTitle" placeholder="Bildirim Başlığı" style="width:100%;padding:10px;font-size:16px;border-radius:8px;margin-bottom:10px;">
+    <textarea id="notifBody" placeholder="Bildirim içeriği..." style="height:100px;"></textarea>
+    <button class="button-kaydet" onclick="sendNotificationToUid(document.getElementById('notifUid').value)">Gönder</button>
+    <p id="notifStatus" style="color: yellow; display: none;">Bildirim gönderiliyor...</p>
+`;
+
 
 
             if (section === 'hakkinda-admin') {
@@ -547,49 +547,56 @@ window.toggleSidebar = function() {
     sidebar.classList.toggle('open');
 }
 
-window.sendGlobalNotification = async function () {
+window.sendNotificationToUid = async function (uid) {
     const title = document.getElementById("notifTitle").value.trim();
     const body = document.getElementById("notifBody").value.trim();
     const status = document.getElementById("notifStatus");
 
     if (!title || !body) return alert("Başlık ve içerik boş olamaz.");
+    if (!uid) return alert("Kullanıcı UID'si eksik.");
 
     status.style.display = "block";
     isSending = true;
 
     try {
-        const usersSnap = await getDocs(collection(db, "users"));
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
 
-        const promises = usersSnap.docs.map(async (userDoc) => {
-            const uid = userDoc.id;
-            const data = userDoc.data();
-            if (data.role === "admin") return; // admin'e gönderme
+        if (!userSnap.exists()) {
+            alert("Kullanıcı bulunamadı.");
+            return;
+        }
 
-            // Firestore'a kaydet
-            await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-                to: uid,
-                message: body,
-                postId: null,
-                timestamp: Timestamp.now(),
-                read: false
-            });
+        const userData = userSnap.data();
 
-            // FCM ile gönder
-            if (data.fcmToken) {
-                await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ uid, title, body, url: "https://economentor.netlify.app" })
-                });
-            }
+        // Firestore bildirim
+        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+            to: uid,
+            message: body,
+            postId: null,
+            timestamp: Timestamp.now(),
+            read: false
         });
 
-        await Promise.allSettled(promises);
-        alert("Bildirim başarıyla gönderildi.");
+        // FCM bildirim
+        if (userData.fcmToken) {
+            await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    uid,
+                    title,
+                    body,
+                    url: "https://economentor.netlify.app"
+                })
+            });
+        }
+
+        alert(`Bildirim ${uid} kullanıcısına başarıyla gönderildi.`);
     } catch (err) {
-        console.error("Bildirim gönderim hatası:", err);
+        console.error("Bildirim hatası:", err);
         alert("Bir hata oluştu.");
     } finally {
         status.style.display = "none";
