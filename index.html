@@ -238,58 +238,28 @@ if ('serviceWorker' in navigator) {
     });  
 }  
   
-    // ✅ PWA Yükleme Kutusu  
-let isAppleDevice = /iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase());  
-let isInStandalone = (window.matchMedia('(display-mode: standalone)').matches) || ('standalone' in window.navigator && window.navigator.standalone);  
-let deferredPrompt = null;  
-let installBoxShown = false;  
-  
-// Yükle butonuna tıklandığında  
+// ✅ PWA Yükleme Kutusu
+let isAppleDevice = /iphone|ipad|ipod|macintosh/.test(navigator.userAgent.toLowerCase());
+let isInStandalone = (window.matchMedia('(display-mode: standalone)').matches) || ('standalone' in window.navigator && window.navigator.standalone);
+let deferredPrompt = null;
+let installBoxShown = false;
+
+// Yükle butonuna tıklanınca
 document.getElementById("installButton").addEventListener("click", async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        console.log("Yükleme sonucu:", result.outcome);
-        deferredPrompt = null;
-    document.getElementById("installPrompt").style.top = "-200px"; 
- 
-  } else if (isAppleDevice) {  
-    // Apple cihazlar için rehber  
-    alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);  
-    document.getElementById("installPrompt").style.top = "-200px";  
-
-  } else {  
-    // Hiçbir destek yoksa uyarı  
-    alert("Bu uygulama zaten yüklenmiş veya tarayıcınız bu özelliği desteklemiyor. Lütfen desteklenen bir cihaz veya tarayıcı kullanın. (Gizli sekme kullanmayınız.)");  
-    document.getElementById("installPrompt").style.top = "-200px";  
-  }  
-});  
-  
-  const toggle = document.getElementById("togglePassword");  
-  const password = document.getElementById("password");  
-  
-  toggle.addEventListener("click", () => {  
-    const type = password.type === "password" ? "text" : "password";  
-    password.type = type;  
-  
-    // İkonu değiştir  
-    toggle.classList.toggle("fa-eye-slash");  
-    toggle.classList.toggle("fa-eye");  
-  });  
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  console.log("✅ beforeinstallprompt tetiklendi");
-  e.preventDefault();
-  deferredPrompt = e;
-
-  // ✅ install kutusunu sadece bir kez göster
-  if (!installBoxShown) {
-    const promptBox = document.getElementById("installPrompt");
-    promptBox.style.display = "block";
-    setTimeout(() => {
-      promptBox.style.top = "0";
-    }, 300);
-    installBoxShown = true;
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    console.log("Yükleme sonucu:", result.outcome);
+    deferredPrompt = null;
+    document.getElementById("installPrompt").style.top = "-200px"; // ✅ Bu artık doğru yerde
+  } else if (isAppleDevice) {
+    // Apple cihazlar için rehber
+    alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
+    document.getElementById("installPrompt").style.top = "-200px";
+  } else {
+    // Desteklenmiyorsa uyarı
+    alert("Bu uygulama zaten yüklenmiş veya tarayıcınız bu özelliği desteklemiyor. (Gizli sekme kullanmayınız.)");
+    document.getElementById("installPrompt").style.top = "-200px";
   }
 });
   </script>  
