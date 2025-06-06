@@ -347,21 +347,6 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
   `;  
 }  
   
-setTimeout(() => {  
-  const v = card.querySelector("video");  
-  if (v) {  
-    v.setAttribute("playsinline", "true");  
-    v.setAttribute("webkit-playsinline", "true");  
-    v.setAttribute("muted", "true");  
-    v.setAttribute("autoplay", "true");  
-    v.removeAttribute("controls"); // Başta controls yok  
-    v.addEventListener("click", () => {  
-      v.setAttribute("controls", "true"); // Tıklayınca controls gelir  
-      v.play();  
-    });  
-  }  
-}, 100);  
-  
     container.appendChild(card);  
   });  
   
