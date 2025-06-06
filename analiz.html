@@ -306,18 +306,15 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">  
       Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}  
     </p>  
- <video  
-  src="${data.videoUrl}"  
-  autoplay  
-  muted  
-  playsinline  
-  webkit-playsinline  
-  controls  
-  preload="metadata"  
-  controlsList="nodownload"  
-  oncontextmenu="return false;"  
-  style="width: 100%; border-radius: 10px;"  
-></video>  
+ <video
+  src="..."
+  autoplay
+  muted
+  playsinline
+  webkit-playsinline
+  preload="metadata"
+  style="width: 100%; border-radius: 10px;"
+></video>
   
     <p class="description">${data.description || "Açıklama yok."}</p>  
     <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>  
@@ -637,18 +634,14 @@ function hideMentionSuggestions() {
   }  
 });  
 
-document.addEventListener("DOMContentLoaded", () => {
-  // iOS autoplay uyumluluğu için dokunma tetikleyicisi
-  const enableAutoplayOnTouch = () => {
-    document.querySelectorAll("video").forEach(video => {
-      video.muted = true;
-      video.play().catch(() => {}); // sessiz şekilde başlat
-    });
-    // Sadece ilk dokunuşta çalışacak şekilde kaldır
-    document.removeEventListener("touchstart", enableAutoplayOnTouch);
-  };
-  document.addEventListener("touchstart", enableAutoplayOnTouch, { once: true });
-});
+  document.addEventListener("touchstart", () => {
+    setTimeout(() => {
+      document.querySelectorAll("video").forEach(video => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    }, 200); // video DOM’a otursun diye gecikme
+  }, { once: true });
 
 </script>
 <script type="module" src="auth-guard.js"></script>  
