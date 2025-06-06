@@ -307,6 +307,24 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const prompt = document.getElementById("notificationPrompt");
+
+  if (!("Notification" in window)) {
+    console.warn("Tarayıcı Notification API desteklemiyor.");
+    prompt.style.display = "none";
+    return;
+  }
+
+  if (Notification.permission === "default") {
+    // Kullanıcı henüz izin vermemiş → göster
+    prompt.style.display = "block";
+  } else {
+    // Kullanıcı zaten izin vermiş ya da reddetmiş → gösterme
+    prompt.style.display = "none";
+  }
+});
+
 loadAnnouncements();
     
 </script>
