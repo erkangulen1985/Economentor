@@ -317,13 +317,14 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
       Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
     </p>
-    <video
+ <video
   src="${data.videoUrl}"
-  controls
+  autoplay
+  muted
   playsinline
   webkit-playsinline
+  controls
   preload="metadata"
-  muted
   controlsList="nodownload"
   oncontextmenu="return false;"
   style="width: 100%; border-radius: 10px;"
@@ -645,6 +646,20 @@ function hideMentionSuggestions() {
     hideMentionSuggestions();
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("video").forEach(video => {
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("webkit-playsinline", "true");
+      video.setAttribute("muted", "true"); // autoplay için gerekli
+      video.setAttribute("autoplay", "true"); // bazen iOS'ta önce autoplay gerekiyor
+      video.removeAttribute("controls"); // kullanıcı başlatmadan oynamasını sağlamak için
+      video.addEventListener("click", () => {
+        video.setAttribute("controls", "true"); // tıklanınca kontroller gelsin
+        video.play();
+      });
+    });
+  });
 
 </script>
 <script type="module" src="auth-guard.js"></script>
