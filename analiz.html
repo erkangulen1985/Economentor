@@ -306,17 +306,18 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">  
       Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}  
     </p>  
-<video
-  src="..."
-  autoplay
-  muted
-  playsinline
-  webkit-playsinline
-  controls
-  preload="metadata"
-  controlsList="nodownload"
-  oncontextmenu="return false;"
-></video>
+ <video  
+  src="${data.videoUrl}"  
+  autoplay  
+  muted  
+  playsinline  
+  webkit-playsinline  
+  controls  
+  preload="metadata"  
+  controlsList="nodownload"  
+  oncontextmenu="return false;"  
+  style="width: 100%; border-radius: 10px;"  
+></video>  
   
     <p class="description">${data.description || "Açıklama yok."}</p>  
     <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>  
@@ -345,6 +346,21 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     </div>  
   `;  
 }  
+  
+setTimeout(() => {  
+  const v = card.querySelector("video");  
+  if (v) {  
+    v.setAttribute("playsinline", "true");  
+    v.setAttribute("webkit-playsinline", "true");  
+    v.setAttribute("muted", "true");  
+    v.setAttribute("autoplay", "true");  
+    v.removeAttribute("controls"); // Başta controls yok  
+    v.addEventListener("click", () => {  
+      v.setAttribute("controls", "true"); // Tıklayınca controls gelir  
+      v.play();  
+    });  
+  }  
+}, 100);  
   
     container.appendChild(card);  
   });  
@@ -635,17 +651,5 @@ function hideMentionSuggestions() {
     hideMentionSuggestions();  
   }  
 });  
-
-  document.addEventListener("touchstart", () => {
-    setTimeout(() => {
-      document.querySelectorAll("video").forEach(video => {
-        video.muted = true;
-        video.play().catch(() => {});
-      });
-    }, 200); // video DOM’a otursun diye gecikme
-  }, { once: true });
-
-</script>
-<script type="module" src="auth-guard.js"></script>  
-</body>  
+</script>  <script type="module" src="auth-guard.js"></script>  </body>  
 </html>
