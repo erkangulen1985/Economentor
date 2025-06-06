@@ -319,16 +319,14 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     </p>
  <video
   src="${data.videoUrl}"
-  autoplay
-  muted
   playsinline
   webkit-playsinline
-  controls
+  muted
+  autoplay
   preload="metadata"
-  controlsList="nodownload"
-  oncontextmenu="return false;"
   style="width: 100%; border-radius: 10px;"
-></video>
+  onclick="this.setAttribute('controls', true); this.play();"
+/>
 
     <p class="description">${data.description || "Açıklama yok."}</p>
     <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
@@ -357,21 +355,6 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     </div>
   `;
 }
-
-setTimeout(() => {
-  const v = card.querySelector("video");
-  if (v) {
-    v.setAttribute("playsinline", "true");
-    v.setAttribute("webkit-playsinline", "true");
-    v.setAttribute("muted", "true");
-    v.setAttribute("autoplay", "true");
-    v.removeAttribute("controls"); // Başta controls yok
-    v.addEventListener("click", () => {
-      v.setAttribute("controls", "true"); // Tıklayınca controls gelir
-      v.play();
-    });
-  }
-}, 100);
     
     container.appendChild(card);
   });
@@ -662,6 +645,12 @@ function hideMentionSuggestions() {
     hideMentionSuggestions();
   }
 });
+
+document.addEventListener("touchstart", () => {
+  document.querySelectorAll("video").forEach(v => {
+    v.play().catch(() => {});
+  });
+}, { once: true });
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
