@@ -1,657 +1,655 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Economentor | Analizler</title>
-  <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <style>
-    /* Stil tanımlamaları */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('image2.png') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-    }
+<!DOCTYPE html>  <html lang="tr">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <meta name="apple-mobile-web-app-capable" content="yes">  
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
+  <title>Economentor | Analizler</title>  
+  <link rel="icon" href="image1.png" />  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />  
+  <style>  
+    /* Stil tanımlamaları */  
+    body {  
+      margin: 0;  
+      padding: 0;  
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+      background: url('image2.png') no-repeat center center fixed;  
+      background-size: cover;  
+      color: white;  
+    }  header {  
+  background-color: rgba(0, 0, 0, 0.8);  
+  padding: 20px;  
+  text-align: center;  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);  
+}  
 
-    header {
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
+header h1 {  
+  margin: 0;  
+  font-size: 36px;  
+  letter-spacing: 2px;  
+}  
 
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-      letter-spacing: 2px;
-    }
+nav {  
+  display: flex;  
+  justify-content: center;  
+  background-color: transparent;  
+  padding: 20px 0 10px;  
+}  
 
-    nav {
-      display: flex;
-      justify-content: center;
-      background-color: transparent;
-      padding: 20px 0 10px;
-    }
+nav a {  
+  background-color: rgba(0, 0, 0, 0.8);  
+  color: #fff;  
+  text-decoration: none;  
+  font-weight: bold;  
+  font-size: 16px;  
+  padding: 10px 20px;  
+  border-radius: 5px;  
+  transition: background 0.3s ease;  
+}  
 
-    nav a {
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 16px;
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: background 0.3s ease;
-    }
+nav a:hover {  
+  background-color: #4CAF50;  
+  color: white;  
+}  
 
-    nav a:hover {
-      background-color: #4CAF50;
-      color: white;
-    }
+.container {  
+  max-width: 1200px;  
+  margin: 40px auto;  
+  padding: 20px;  
+  background-color: rgba(0,0,0,0.7);  
+  border-radius: 10px;  
+}  
 
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: rgba(0,0,0,0.7);
-      border-radius: 10px;
-    }
+.video-card {  
+  background-color: #111;  
+  border-radius: 10px;  
+  margin-bottom: 40px;  
+  padding: 20px;  
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);  
+}  
 
-    .video-card {
-      background-color: #111;
-      border-radius: 10px;
-      margin-bottom: 40px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
+.video-card h2 {  
+  font-size: 24px;  
+  margin-bottom: 10px;  
+  color: #66ccff;  
+}  
 
-    .video-card h2 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #66ccff;
-    }
+video {  
+  width: 100%;  
+  border-radius: 10px;  
+  margin-bottom: 15px;  
+}  
 
-    video {
-      width: 100%;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
+.video-footer {  
+  display: flex;  
+  justify-content: space-between;  
+  align-items: center;  
+  color: #ccc;  
+}  
 
-    .video-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #ccc;
-    }
+.video-footer button {  
+  padding: 8px 14px;  
+  font-size: 15px;  
+  border: none;  
+  border-radius: 6px;  
+  cursor: pointer;  
+  transition: 0.3s;  
+}  
 
-    .video-footer button {
-      padding: 8px 14px;
-      font-size: 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+.like { background-color: #f39c12; color: white; }  
+.dislike { background-color: #e74c3c; color: white; }  
+.like:hover { background-color: #e67e22; }  
+.dislike:hover { background-color: #c0392b; }  
 
-    .like { background-color: #f39c12; color: white; }
-    .dislike { background-color: #e74c3c; color: white; }
-    .like:hover { background-color: #e67e22; }
-    .dislike:hover { background-color: #c0392b; }
+.comment-section {  
+  margin-top: 20px;  
+}  
 
-    .comment-section {
-      margin-top: 20px;
-    }
+.comment-section input {  
+  width: 100%;  
+  padding: 10px;  
+  font-size: 15px;  
+  border-radius: 5px;  
+  border: none;  
+  margin-bottom: 10px;  
+}  
 
-    .comment-section input {
-      width: 100%;
-      padding: 10px;
-      font-size: 15px;
-      border-radius: 5px;
-      border: none;
-      margin-bottom: 10px;
-    }
+.comment-section button {  
+  background-color: #3498db;  
+  border: none;  
+  padding: 8px 14px;  
+  border-radius: 6px;  
+  cursor: pointer;  
+  color: white;  
+}  
 
-    .comment-section button {
-      background-color: #3498db;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
-    }
+.comment {  
+  background-color: #333;  
+  margin-top: 10px;  
+  padding: 8px;  
+  border-radius: 5px;  
+  display: flex;  
+  justify-content: space-between;  
+  align-items: center;  
+  color: white;  
+}  
 
-    .comment {
-      background-color: #333;
-      margin-top: 10px;
-      padding: 8px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
+.comment-time {  
+  font-size: 12px;  
+  color: #bbb;  
+}  
 
-    .comment-time {
-      font-size: 12px;
-      color: #bbb;
-    }
+.commentList {  
+  margin-bottom: 15px;  
+}  
 
-    .commentList {
-      margin-bottom: 15px;
-    }
+.toggle-comments {  
+  background-color: #555;  
+  color: white;  
+  padding: 5px 10px;  
+  border: none;  
+  border-radius: 5px;  
+  cursor: pointer;  
+  margin-top: 10px;  
+}  
 
-    .toggle-comments {
-      background-color: #555;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .delete-comment {
-      background-color: #e74c3c;
-      border: none;
-      padding: 6px 10px;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+.delete-comment {  
+  background-color: #e74c3c;  
+  border: none;  
+  padding: 6px 10px;  
+  color: white;  
+  border-radius: 5px;  
+  cursor: pointer;  
+}
 
 .mention-suggestions {
-  position: absolute;
-  background-color: #111;
-  color: white;
-  border: 1px solid #444;
-  max-height: 150px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 9999;
-  border-radius: 6px;
-  font-size: 14px;
-  padding: 4px 0;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+position: absolute;
+background-color: #111;
+color: white;
+border: 1px solid #444;
+max-height: 150px;
+overflow-y: auto;
+overflow-x: hidden;
+z-index: 9999;
+border-radius: 6px;
+font-size: 14px;
+padding: 4px 0;
+box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
 .mention-suggestions div {
-  padding: 8px 12px;
-  cursor: pointer;
+padding: 8px 12px;
+cursor: pointer;
 }
 
 .mention-suggestions div:hover {
-  background-color: #333;
+background-color: #333;
 }
 
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>ECONOMENTOR | Analizler</h1>
-  </header>
-
-  <nav>
-    <a href="anasayfa.html">Anasayfa</a>
-  </nav>
-
-  <div class="container" id="videoContainer">
-    <p style="text-align:center;">Yükleniyor...</p>
-  </div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore, collection, getDocs, doc,
-  updateDoc, getDoc, arrayUnion, deleteDoc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-  authDomain: "economentor-8ddc4.firebaseapp.com",
-  projectId: "economentor-8ddc4",
-  storageBucket: "economentor-8ddc4.appspot.com",
-  messagingSenderId: "835370350520",
-  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-};
-
-const supabase = createClient(
-  "https://rvwsvhgihatxxhnbmouw.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
-);
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let usersList = [];
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "index.html";
-
-  const uid = user.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
-  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
-  const currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
-
-  const container = document.getElementById("videoContainer");
-  container.innerHTML = "";
-
-const usersSnap = await getDocs(collection(db, "users"));
-usersList = usersSnap.docs.map(doc => ({
-  uid: doc.id,
-  username: doc.data().username
-}));
+  </style>  
+</head>  
+<body>    <header>  
+    <h1>ECONOMENTOR | Analizler</h1>  
+  </header>    <nav>  
+    <a href="anasayfa.html">Anasayfa</a>  
+  </nav>    <div class="container" id="videoContainer">  
+    <p style="text-align:center;">Yükleniyor...</p>  
+  </div>  <script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";  
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";  
+import {  
+  getFirestore, collection, getDocs, doc,  
+  updateDoc, getDoc, arrayUnion, deleteDoc,  
+  setDoc  
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";  
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';  
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";  
+import { query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";  
   
-  // 🔥 Eğer kullanıcı 'user' rolünde ise VIP uyarısı göster
-  if (currentUserRole === "user") {
-    const warning = document.createElement("div");
-    warning.style.backgroundColor = "rgba(255,0,0,0.7)";
-    warning.style.color = "white";
-    warning.style.padding = "15px";
-    warning.style.marginBottom = "20px";
-    warning.style.borderRadius = "8px";
-    warning.style.textAlign = "center";
-    warning.innerHTML = "Henüz VIP değilsiniz. Lütfen VIP videolar için Temel Düzey Finans Eğitimi derslerini alınız.";
-    container.appendChild(warning);
-  }
-
-  const snapshot = await getDocs(collection(db, "analizler"));
-  const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp.seconds - a.data().timestamp.seconds);
-
-  sortedDocs.forEach(async (docSnap) => {
-    const data = docSnap.data();
-    const id = docSnap.id;
-    const comments = data.comments || [];
-
-    const videoVisibility = data.visibility || "all"; // eğer visibility eksikse default "all"
-
-    // 🔥 Filtre: Eğer user rolündeyse, sadece "all" videoları göster
- //   if (videoVisibility === "vip" && currentUserRole === "user") {
- //     return; // user, vip içeriği göremesin
- //   }
-
-    const likeRef = doc(db, "analizler", id, "likes", uid);
-    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-    const [likeSnap, dislikeSnap] = await Promise.all([
-      getDoc(likeRef),
-      getDoc(dislikeRef)
-    ]);
-
-    const card = document.createElement("div");
-    card.classList.add("video-card");
-
-if (videoVisibility === "vip" && currentUserRole === "user") {
-  // VIP ama kullanıcı sadece 'user' => BUĞULU GÖSTERİM
-  card.innerHTML = `
-    <h2>${data.title}</h2>
-    <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
-      Görünürlük: Sadece VIP
-    </p>
-    <div style="position: relative;">
-      <video style="filter: blur(8px); pointer-events: none;" muted src="${data.videoUrl}"></video>
-      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                  background-color: rgba(0,0,0,0.5); color: white;
-                  display: flex; align-items: center; justify-content: center;
-                  font-size: 20px; font-weight: bold; border-radius: 10px;">
-        🔒 Yalnızca VIP üyeler izleyebilir
-      </div>
-    </div>
-    <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-  `;
-} else {
-  // VIP değilse veya kullanıcı VIP ise => TAM GÖSTERİM
-  card.innerHTML = `
-    <h2>${data.title}</h2>
-    <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
-      Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
-    </p>
- <video
-  src="${data.videoUrl}"
-  playsinline
-  webkit-playsinline
-  muted
-  autoplay
-  preload="metadata"
-  style="width: 100%; border-radius: 10px;"
-  onclick="this.setAttribute('controls', true); this.play();"
-/>
-
-    <p class="description">${data.description || "Açıklama yok."}</p>
-    <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-    <div class="video-footer">
-      <div>
-        <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
-        <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
-      </div>
-      <div>
-        <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
-      </div>
-    </div>
-    <p style="margin-top:10px; font-size:14px; color:#bbb;">💬 Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>
-    <div class="comment-section" id="comments-${id}" style="display:none;">
-      <div class="commentList" id="commentList-${id}"></div>
-      ${comments
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-          </div>
-        `).join("")}
-      <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
-      <button class="commentBtn" data-id="${id}">Yorum Yap</button>
-    </div>
-  `;
-}
-    
-    container.appendChild(card);
-  });
-
-    // Beğeni
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("like-btn")) {
-      const id = e.target.dataset.id;
-      const ref = doc(db, "analizler", id);
-      const likeRef = doc(db, "analizler", id, "likes", uid);
-      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-      const snap = await getDoc(ref);
-      let likeCount = snap.data().likes || 0;
-      let dislikeCount = snap.data().dislikes || 0;
-      const likeExists = (await getDoc(likeRef)).exists();
-
-      if (likeExists) {
-        await deleteDoc(likeRef);
-        await updateDoc(ref, { likes: likeCount - 1 });
-        e.target.style.backgroundColor = "#f39c12";
-        e.target.querySelector(".like-count").innerText = likeCount - 1;
-      } else {
-        await setDoc(likeRef, {
-          uid,
-          timestamp: Timestamp.now()
-        });
-        await updateDoc(ref, { likes: likeCount + 1 });
-        e.target.style.backgroundColor = "#27ae60";
-        e.target.querySelector(".like-count").innerText = likeCount + 1;
-
-        // Eğer dislike varsa onu iptal et
-        const disSnap = await getDoc(dislikeRef);
-        if (disSnap.exists()) {
-          await deleteDoc(dislikeRef);
-          await updateDoc(ref, { dislikes: dislikeCount - 1 });
-          const disBtn = document.querySelector(`.dislike-btn[data-id="${id}"]`);
-          if (disBtn) {
-            disBtn.style.backgroundColor = "#e74c3c";
-            disBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
-          }
-        }
-      }
-    }
-  });
-
-  // Beğenmeme
-  document.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("dislike-btn")) {
-      const id = e.target.dataset.id;
-      const ref = doc(db, "analizler", id);
-      const likeRef = doc(db, "analizler", id, "likes", uid);
-      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);
-      const snap = await getDoc(ref);
-      let likeCount = snap.data().likes || 0;
-      let dislikeCount = snap.data().dislikes || 0;
-      const disExists = (await getDoc(dislikeRef)).exists();
-
-      if (disExists) {
-        await deleteDoc(dislikeRef);
-        await updateDoc(ref, { dislikes: dislikeCount - 1 });
-        e.target.style.backgroundColor = "#e74c3c";
-        e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;
-      } else {
-        await setDoc(dislikeRef, {
-          uid,
-          timestamp: Timestamp.now()
-        });
-        await updateDoc(ref, { dislikes: dislikeCount + 1 });
-        e.target.style.backgroundColor = "#c0392b";
-        e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;
-
-        // Eğer like varsa iptal et
-        const likeSnap = await getDoc(likeRef);
-        if (likeSnap.exists()) {
-          await deleteDoc(likeSnap.ref);
-          await updateDoc(ref, { likes: likeCount - 1 });
-          const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);
-          if (likeBtn) {
-            likeBtn.style.backgroundColor = "#f39c12";
-            likeBtn.querySelector(".like-count").innerText = likeCount - 1;
-          }
-        }
-      }
-    }
-  });
-
-  // Yorum yap
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("commentBtn")) {
-    const id = e.target.dataset.id;
-    const input = document.getElementById("input-" + id);
-    const text = input.value.trim();
-    if (!text) return;
-
-    const ref = doc(db, "analizler", id);
-    const comment = {
-      user: uid,
-      username,
-      text,
-      timestamp: new Date().toISOString()
-    };
-    await updateDoc(ref, {
-      comments: arrayUnion(comment)
-    });
-
-    // Bildirim için video başlığı
-    const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
-
-    // 🔔 1. Adminlere bildirim gönder (Firestore ve FCM)
-    const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
-    const adminsSnap = await getDocs(adminsQuery);
-
-    for (const adminDoc of adminsSnap.docs) {
-      const adminId = adminDoc.id;
-      if (adminId === uid) continue; // Yorum yapan adminse atla
-
-      const adminMessage = `${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.`;
-
-      // Firestore bildirimi
-      await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
-        to: adminId,
-        from: uid,
-        videoId: id,
-        message: adminMessage,
-        timestamp: Timestamp.now(),
-        read: false
-      });
-
-      // FCM bildirimi
-      try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid: adminId,
-            title: "\"Economentor\" 💬 Yeni Yorum",
-            body: adminMessage,
-            url: "https://economentor.netlify.app/analiz.html"
-          })
-        });
-      } catch (err) {
-        console.error("Admin FCM bildirimi başarısız:", err);
-      }
-    }
-
-    // 🔔 2. Eğer yorum @mention içeriyorsa, bahsedilen kullanıcıya bildirim gönderme
-    const mentions = text.match(/@(\w+[\.\w]*)/g);
-    for (const mention of mentions || []) {
-      const name = mention.substring(1).toLowerCase();
-      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
-      if (mentionedUser && mentionedUser.uid !== uid) {
-        const mentionMessage = `"${title}" başlıklı analizde sizden bahsedildi.`;
-
-        // Firestore bildirimi
-        await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
-          to: mentionedUser.uid,
-          from: uid,
-          videoId: id,
-          message: mentionMessage,
-          timestamp: Timestamp.now(),
-          read: false
-        });
-
-        // FCM bildirimi
-        try {
-          await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              uid: mentionedUser.uid,
-              title: "\"Economentor\" 🧠 Yeni Bahsetme!",
-              body: mentionMessage,
-              url: "https://economentor.netlify.app/analiz.html"
-            })
-          });
-        } catch (err) {
-          console.error("FCM gönderimi başarısız:", err);
-        }
-      }
-    }
-
-    // Yorum listesini güncelle
-    const list = document.getElementById("commentList-" + id);
-    const div = document.createElement("div");
-    div.classList.add("comment");
-    div.innerHTML = `
-      <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
-      <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>
-    `;
-    list.insertBefore(div, list.firstChild);
-    input.value = "";
-
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = list.children.length;
-  }
-});
-
-// Yorum sil
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("delete-comment")) {
-    const id = e.target.dataset.id;
-    const index = parseInt(e.target.dataset.index);
-    const ref = doc(db, "analizler", id);
-    const snap = await getDoc(ref);
-    const comments = snap.data().comments || [];
-    comments.splice(index, 1);
-    await updateDoc(ref, { comments });
-
-    const list = document.getElementById("commentList-" + id);
-    list.innerHTML = comments
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .map((c, i) => `
-        <div class="comment">
-          <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-          ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-        </div>
-      `).join("");
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = comments.length;
-  }
-});
-
-  // Yorumları göster/gizle
-  document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("toggle-comments")) {
-      const id = e.target.dataset.id;
-      const section = document.getElementById("comments-" + id);
-      section.style.display = section.style.display === "none" ? "block" : "none";
-      e.target.textContent = section.style.display === "block" ? "💬 Yorumları Gizle" : "💬 Yorumları Göster";
-    }
-  });
-});
-
-  let suggestionBox;
-
-function showMentionSuggestions(input, matches, start, end) {
-  hideMentionSuggestions();
-
-  suggestionBox = document.createElement("div");
-  suggestionBox.className = "mention-suggestions";
-
-  matches.forEach(user => {
-    const div = document.createElement("div");
-    div.textContent = user.username;
-    div.onclick = () => {
-      const before = input.value.slice(0, start);
-      const after = input.value.slice(end);
-      input.value = `${before}@${user.username} ${after}`;
-      input.focus();
-      hideMentionSuggestions();
-    };
-    suggestionBox.appendChild(div);
-  });
-
-  document.body.appendChild(suggestionBox);
-  const rect = input.getBoundingClientRect();
-  suggestionBox.style.left = rect.left + "px";
-  suggestionBox.style.top = rect.bottom + window.scrollY + "px";
-
-  // ✨ Genişlik input kadar olsun
-  suggestionBox.style.width = input.offsetWidth + "px";
-}
-
-function hideMentionSuggestions() {
-  if (suggestionBox) {
-    suggestionBox.remove();
-    suggestionBox = null;
-  }
-}
-
-  document.addEventListener("input", (e) => {
-  if (!e.target.id.startsWith("input-")) return;
-  const input = e.target;
-  const cursorPos = input.selectionStart;
-  const value = input.value;
-  const atIndex = value.lastIndexOf("@", cursorPos - 1);
-
-  if (atIndex >= 0) {
-    const search = value.substring(atIndex + 1, cursorPos).toLowerCase();
-    const matches = usersList.filter(u => u.username.toLowerCase().startsWith(search));
-
-    if (matches.length > 0) {
-      showMentionSuggestions(input, matches, atIndex, cursorPos);
-    } else {
-      hideMentionSuggestions();
-    }
-  } else {
-    hideMentionSuggestions();
-  }
-});
-
-document.addEventListener("touchstart", () => {
-  document.querySelectorAll("video").forEach(v => {
-    v.play().catch(() => {});
-  });
-}, { once: true });
-</script>
-<script type="module" src="auth-guard.js"></script>
-</body>
+const firebaseConfig = {  
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",  
+  authDomain: "economentor-8ddc4.firebaseapp.com",  
+  projectId: "economentor-8ddc4",  
+  storageBucket: "economentor-8ddc4.appspot.com",  
+  messagingSenderId: "835370350520",  
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"  
+};  
+  
+const supabase = createClient(  
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",  
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"  
+);  
+  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const db = getFirestore(app);  
+  
+let usersList = [];  
+  
+onAuthStateChanged(auth, async (user) => {  
+  if (!user) return location.href = "index.html";  
+  
+  const uid = user.uid;  
+  const userDoc = await getDoc(doc(db, "users", uid));  
+  const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";  
+  const currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";  
+  
+  const container = document.getElementById("videoContainer");  
+  container.innerHTML = "";  
+  
+const usersSnap = await getDocs(collection(db, "users"));  
+usersList = usersSnap.docs.map(doc => ({  
+  uid: doc.id,  
+  username: doc.data().username  
+}));  
+  
+  // 🔥 Eğer kullanıcı 'user' rolünde ise VIP uyarısı göster  
+  if (currentUserRole === "user") {  
+    const warning = document.createElement("div");  
+    warning.style.backgroundColor = "rgba(255,0,0,0.7)";  
+    warning.style.color = "white";  
+    warning.style.padding = "15px";  
+    warning.style.marginBottom = "20px";  
+    warning.style.borderRadius = "8px";  
+    warning.style.textAlign = "center";  
+    warning.innerHTML = "Henüz VIP değilsiniz. Lütfen VIP videolar için Temel Düzey Finans Eğitimi derslerini alınız.";  
+    container.appendChild(warning);  
+  }  
+  
+  const snapshot = await getDocs(collection(db, "analizler"));  
+  const sortedDocs = snapshot.docs.sort((a, b) => b.data().timestamp.seconds - a.data().timestamp.seconds);  
+  
+  sortedDocs.forEach(async (docSnap) => {  
+    const data = docSnap.data();  
+    const id = docSnap.id;  
+    const comments = data.comments || [];  
+  
+    const videoVisibility = data.visibility || "all"; // eğer visibility eksikse default "all"  
+  
+    // 🔥 Filtre: Eğer user rolündeyse, sadece "all" videoları göster  
+ //   if (videoVisibility === "vip" && currentUserRole === "user") {  
+ //     return; // user, vip içeriği göremesin  
+ //   }  
+  
+    const likeRef = doc(db, "analizler", id, "likes", uid);  
+    const dislikeRef = doc(db, "analizler", id, "dislikes", uid);  
+    const [likeSnap, dislikeSnap] = await Promise.all([  
+      getDoc(likeRef),  
+      getDoc(dislikeRef)  
+    ]);  
+  
+    const card = document.createElement("div");  
+    card.classList.add("video-card");  
+  
+if (videoVisibility === "vip" && currentUserRole === "user") {  
+  // VIP ama kullanıcı sadece 'user' => BUĞULU GÖSTERİM  
+  card.innerHTML = `  
+    <h2>${data.title}</h2>  
+    <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">  
+      Görünürlük: Sadece VIP  
+    </p>  
+    <div style="position: relative;">  
+      <video style="filter: blur(8px); pointer-events: none;" muted src="${data.videoUrl}"></video>  
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;  
+                  background-color: rgba(0,0,0,0.5); color: white;  
+                  display: flex; align-items: center; justify-content: center;  
+                  font-size: 20px; font-weight: bold; border-radius: 10px;">  
+        🔒 Yalnızca VIP üyeler izleyebilir  
+      </div>  
+    </div>  
+    <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>  
+  `;  
+} else {  
+  // VIP değilse veya kullanıcı VIP ise => TAM GÖSTERİM  
+  card.innerHTML = `  
+    <h2>${data.title}</h2>  
+    <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">  
+      Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}  
+    </p>  
+ <video  
+  src="${data.videoUrl}"  
+  autoplay  
+  muted  
+  playsinline  
+  webkit-playsinline  
+  controls  
+  preload="metadata"  
+  controlsList="nodownload"  
+  oncontextmenu="return false;"  
+  style="width: 100%; border-radius: 10px;"  
+></video>  
+  
+    <p class="description">${data.description || "Açıklama yok."}</p>  
+    <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>  
+    <div class="video-footer">  
+      <div>  
+        <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>  
+        <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>  
+      </div>  
+      <div>  
+        <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>  
+      </div>  
+    </div>  
+    <p style="margin-top:10px; font-size:14px; color:#bbb;">💬 Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>  
+    <div class="comment-section" id="comments-${id}" style="display:none;">  
+      <div class="commentList" id="commentList-${id}"></div>  
+      ${comments  
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))  
+        .map((c, i) => `  
+          <div class="comment">  
+            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>  
+            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}  
+          </div>  
+        `).join("")}  
+      <input id="input-${id}" placeholder="Yorumunuzu yazın..." />  
+      <button class="commentBtn" data-id="${id}">Yorum Yap</button>  
+    </div>  
+  `;  
+}  
+  
+setTimeout(() => {  
+  const v = card.querySelector("video");  
+  if (v) {  
+    v.setAttribute("playsinline", "true");  
+    v.setAttribute("webkit-playsinline", "true");  
+    v.setAttribute("muted", "true");  
+    v.setAttribute("autoplay", "true");  
+    v.removeAttribute("controls"); // Başta controls yok  
+    v.addEventListener("click", () => {  
+      v.setAttribute("controls", "true"); // Tıklayınca controls gelir  
+      v.play();  
+    });  
+  }  
+}, 100);  
+  
+    container.appendChild(card);  
+  });  
+  
+    // Beğeni  
+  document.addEventListener("click", async (e) => {  
+    if (e.target.classList.contains("like-btn")) {  
+      const id = e.target.dataset.id;  
+      const ref = doc(db, "analizler", id);  
+      const likeRef = doc(db, "analizler", id, "likes", uid);  
+      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);  
+      const snap = await getDoc(ref);  
+      let likeCount = snap.data().likes || 0;  
+      let dislikeCount = snap.data().dislikes || 0;  
+      const likeExists = (await getDoc(likeRef)).exists();  
+  
+      if (likeExists) {  
+        await deleteDoc(likeRef);  
+        await updateDoc(ref, { likes: likeCount - 1 });  
+        e.target.style.backgroundColor = "#f39c12";  
+        e.target.querySelector(".like-count").innerText = likeCount - 1;  
+      } else {  
+        await setDoc(likeRef, {  
+          uid,  
+          timestamp: Timestamp.now()  
+        });  
+        await updateDoc(ref, { likes: likeCount + 1 });  
+        e.target.style.backgroundColor = "#27ae60";  
+        e.target.querySelector(".like-count").innerText = likeCount + 1;  
+  
+        // Eğer dislike varsa onu iptal et  
+        const disSnap = await getDoc(dislikeRef);  
+        if (disSnap.exists()) {  
+          await deleteDoc(dislikeRef);  
+          await updateDoc(ref, { dislikes: dislikeCount - 1 });  
+          const disBtn = document.querySelector(`.dislike-btn[data-id="${id}"]`);  
+          if (disBtn) {  
+            disBtn.style.backgroundColor = "#e74c3c";  
+            disBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;  
+          }  
+        }  
+      }  
+    }  
+  });  
+  
+  // Beğenmeme  
+  document.addEventListener("click", async (e) => {  
+    if (e.target.classList.contains("dislike-btn")) {  
+      const id = e.target.dataset.id;  
+      const ref = doc(db, "analizler", id);  
+      const likeRef = doc(db, "analizler", id, "likes", uid);  
+      const dislikeRef = doc(db, "analizler", id, "dislikes", uid);  
+      const snap = await getDoc(ref);  
+      let likeCount = snap.data().likes || 0;  
+      let dislikeCount = snap.data().dislikes || 0;  
+      const disExists = (await getDoc(dislikeRef)).exists();  
+  
+      if (disExists) {  
+        await deleteDoc(dislikeRef);  
+        await updateDoc(ref, { dislikes: dislikeCount - 1 });  
+        e.target.style.backgroundColor = "#e74c3c";  
+        e.target.querySelector(".dislike-count").innerText = dislikeCount - 1;  
+      } else {  
+        await setDoc(dislikeRef, {  
+          uid,  
+          timestamp: Timestamp.now()  
+        });  
+        await updateDoc(ref, { dislikes: dislikeCount + 1 });  
+        e.target.style.backgroundColor = "#c0392b";  
+        e.target.querySelector(".dislike-count").innerText = dislikeCount + 1;  
+  
+        // Eğer like varsa iptal et  
+        const likeSnap = await getDoc(likeRef);  
+        if (likeSnap.exists()) {  
+          await deleteDoc(likeSnap.ref);  
+          await updateDoc(ref, { likes: likeCount - 1 });  
+          const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);  
+          if (likeBtn) {  
+            likeBtn.style.backgroundColor = "#f39c12";  
+            likeBtn.querySelector(".like-count").innerText = likeCount - 1;  
+          }  
+        }  
+      }  
+    }  
+  });  
+  
+  // Yorum yap  
+document.addEventListener("click", async (e) => {  
+  if (e.target.classList.contains("commentBtn")) {  
+    const id = e.target.dataset.id;  
+    const input = document.getElementById("input-" + id);  
+    const text = input.value.trim();  
+    if (!text) return;  
+  
+    const ref = doc(db, "analizler", id);  
+    const comment = {  
+      user: uid,  
+      username,  
+      text,  
+      timestamp: new Date().toISOString()  
+    };  
+    await updateDoc(ref, {  
+      comments: arrayUnion(comment)  
+    });  
+  
+    // Bildirim için video başlığı  
+    const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";  
+  
+    // 🔔 1. Adminlere bildirim gönder (Firestore ve FCM)  
+    const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));  
+    const adminsSnap = await getDocs(adminsQuery);  
+  
+    for (const adminDoc of adminsSnap.docs) {  
+      const adminId = adminDoc.id;  
+      if (adminId === uid) continue; // Yorum yapan adminse atla  
+  
+      const adminMessage = `${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.`;  
+  
+      // Firestore bildirimi  
+      await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {  
+        to: adminId,  
+        from: uid,  
+        videoId: id,  
+        message: adminMessage,  
+        timestamp: Timestamp.now(),  
+        read: false  
+      });  
+  
+      // FCM bildirimi  
+      try {  
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {  
+          method: "POST",  
+          headers: { "Content-Type": "application/json" },  
+          body: JSON.stringify({  
+            uid: adminId,  
+            title: "\"Economentor\" 💬 Yeni Yorum",  
+            body: adminMessage,  
+            url: "https://economentor.netlify.app/analiz.html"  
+          })  
+        });  
+      } catch (err) {  
+        console.error("Admin FCM bildirimi başarısız:", err);  
+      }  
+    }  
+  
+    // 🔔 2. Eğer yorum @mention içeriyorsa, bahsedilen kullanıcıya bildirim gönderme  
+    const mentions = text.match(/@(\w+[\.\w]*)/g);  
+    for (const mention of mentions || []) {  
+      const name = mention.substring(1).toLowerCase();  
+      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);  
+      if (mentionedUser && mentionedUser.uid !== uid) {  
+        const mentionMessage = `"${title}" başlıklı analizde sizden bahsedildi.`;  
+  
+        // Firestore bildirimi  
+        await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {  
+          to: mentionedUser.uid,  
+          from: uid,  
+          videoId: id,  
+          message: mentionMessage,  
+          timestamp: Timestamp.now(),  
+          read: false  
+        });  
+  
+        // FCM bildirimi  
+        try {  
+          await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {  
+            method: "POST",  
+            headers: { "Content-Type": "application/json" },  
+            body: JSON.stringify({  
+              uid: mentionedUser.uid,  
+              title: "\"Economentor\" 🧠 Yeni Bahsetme!",  
+              body: mentionMessage,  
+              url: "https://economentor.netlify.app/analiz.html"  
+            })  
+          });  
+        } catch (err) {  
+          console.error("FCM gönderimi başarısız:", err);  
+        }  
+      }  
+    }  
+  
+    // Yorum listesini güncelle  
+    const list = document.getElementById("commentList-" + id);  
+    const div = document.createElement("div");  
+    div.classList.add("comment");  
+    div.innerHTML = `  
+      <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>  
+      <button class="delete-comment" data-id="${id}" data-index="${list.children.length}">❌</button>  
+    `;  
+    list.insertBefore(div, list.firstChild);  
+    input.value = "";  
+  
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");  
+    if (countEl) countEl.textContent = list.children.length;  
+  }  
+});  
+  
+// Yorum sil  
+document.addEventListener("click", async (e) => {  
+  if (e.target.classList.contains("delete-comment")) {  
+    const id = e.target.dataset.id;  
+    const index = parseInt(e.target.dataset.index);  
+    const ref = doc(db, "analizler", id);  
+    const snap = await getDoc(ref);  
+    const comments = snap.data().comments || [];  
+    comments.splice(index, 1);  
+    await updateDoc(ref, { comments });  
+  
+    const list = document.getElementById("commentList-" + id);  
+    list.innerHTML = comments  
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))  
+      .map((c, i) => `  
+        <div class="comment">  
+          <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>  
+          ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}  
+        </div>  
+      `).join("");  
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");  
+    if (countEl) countEl.textContent = comments.length;  
+  }  
+});  
+  
+  // Yorumları göster/gizle  
+  document.addEventListener("click", (e) => {  
+    if (e.target.classList.contains("toggle-comments")) {  
+      const id = e.target.dataset.id;  
+      const section = document.getElementById("comments-" + id);  
+      section.style.display = section.style.display === "none" ? "block" : "none";  
+      e.target.textContent = section.style.display === "block" ? "💬 Yorumları Gizle" : "💬 Yorumları Göster";  
+    }  
+  });  
+});  
+  
+  let suggestionBox;  
+  
+function showMentionSuggestions(input, matches, start, end) {  
+  hideMentionSuggestions();  
+  
+  suggestionBox = document.createElement("div");  
+  suggestionBox.className = "mention-suggestions";  
+  
+  matches.forEach(user => {  
+    const div = document.createElement("div");  
+    div.textContent = user.username;  
+    div.onclick = () => {  
+      const before = input.value.slice(0, start);  
+      const after = input.value.slice(end);  
+      input.value = `${before}@${user.username} ${after}`;  
+      input.focus();  
+      hideMentionSuggestions();  
+    };  
+    suggestionBox.appendChild(div);  
+  });  
+  
+  document.body.appendChild(suggestionBox);  
+  const rect = input.getBoundingClientRect();  
+  suggestionBox.style.left = rect.left + "px";  
+  suggestionBox.style.top = rect.bottom + window.scrollY + "px";  
+  
+  // ✨ Genişlik input kadar olsun  
+  suggestionBox.style.width = input.offsetWidth + "px";  
+}  
+  
+function hideMentionSuggestions() {  
+  if (suggestionBox) {  
+    suggestionBox.remove();  
+    suggestionBox = null;  
+  }  
+}  
+  
+  document.addEventListener("input", (e) => {  
+  if (!e.target.id.startsWith("input-")) return;  
+  const input = e.target;  
+  const cursorPos = input.selectionStart;  
+  const value = input.value;  
+  const atIndex = value.lastIndexOf("@", cursorPos - 1);  
+  
+  if (atIndex >= 0) {  
+    const search = value.substring(atIndex + 1, cursorPos).toLowerCase();  
+    const matches = usersList.filter(u => u.username.toLowerCase().startsWith(search));  
+  
+    if (matches.length > 0) {  
+      showMentionSuggestions(input, matches, atIndex, cursorPos);  
+    } else {  
+      hideMentionSuggestions();  
+    }  
+  } else {  
+    hideMentionSuggestions();  
+  }  
+});  
+</script>  <script type="module" src="auth-guard.js"></script>  </body>  
 </html>
