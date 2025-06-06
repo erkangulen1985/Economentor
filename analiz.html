@@ -321,6 +321,8 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
   playsinline
   webkit-playsinline
   preload="metadata"
+  controlsList="nodownload"
+  oncontextmenu="return false;"
   style="width: 100%; border-radius: 10px;"
 ></video>
     <p class="description">${data.description || "Açıklama yok."}</p>
