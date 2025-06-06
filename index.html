@@ -244,13 +244,6 @@ let isInStandalone = (window.matchMedia('(display-mode: standalone)').matches) |
 let deferredPrompt = null;  
 let installBoxShown = false;  
   
-// Android/PC için beforeinstallprompt yakala  
-window.addEventListener('beforeinstallprompt', (e) => {  
-  console.log("✅ beforeinstallprompt tetiklendi");  
-  e.preventDefault();  
-  deferredPrompt = e;  
-});  
-  
 // Yükle butonuna tıklandığında  
 document.getElementById("installButton").addEventListener("click", async () => {
       if (deferredPrompt) {
