@@ -317,12 +317,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (Notification.permission === "default") {
-    // Kullanıcı henüz izin vermemiş → göster
     prompt.style.display = "block";
   } else {
-    // Kullanıcı zaten izin vermiş ya da reddetmiş → gösterme
     prompt.style.display = "none";
   }
+
+  // 🔒 Güvenli şekilde butonları burada bağla
+  document.getElementById("allowNotifications").addEventListener("click", async () => {
+    try {
+      const result = await Notification.requestPermission();
+      if (result === "granted") {
+        alert("Bildirim izni verildi ✅");
+      } else {
+        alert("Bildirim izni verilmedi ❌");
+      }
+      prompt.style.display = "none";
+    } catch (err) {
+      console.error("İzin alma hatası:", err);
+    }
+  });
+
+  document.getElementById("denyNotifications").addEventListener("click", () => {
+    prompt.style.display = "none";
+  });
 });
 
 loadAnnouncements();
