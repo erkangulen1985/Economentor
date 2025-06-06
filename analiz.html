@@ -306,14 +306,16 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">  
       Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}  
     </p>  
- <video
+<video
   src="..."
   autoplay
   muted
   playsinline
   webkit-playsinline
+  controls
   preload="metadata"
-  style="width: 100%; border-radius: 10px;"
+  controlsList="nodownload"
+  oncontextmenu="return false;"
 ></video>
   
     <p class="description">${data.description || "Açıklama yok."}</p>  
