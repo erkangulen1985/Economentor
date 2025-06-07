@@ -634,6 +634,48 @@ function hideMentionSuggestions() {
   }
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && !window.MSStream;
+  if (!isApple) return;
+
+  const testVideo = document.createElement("video");
+  testVideo.src = "https://economentor.netlify.app/test.mp4"; // test için kullanılacak geçerli bir video URL'i
+  testVideo.muted = true;
+  testVideo.playsInline = true;
+
+  try {
+    await testVideo.play();
+    console.log("✅ Video Safari'de sorunsuz oynatıldı.");
+  } catch (err) {
+    console.warn("❌ Video oynatılamıyor:", err);
+    const warning = document.createElement("div");
+    warning.style = `
+      background-color: rgba(255, 0, 0, 0.85);
+      color: white;
+      padding: 16px;
+      font-size: 14px;
+      font-family: sans-serif;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: 30px auto;
+      text-align: left;
+    `;
+    warning.innerHTML = `
+      <strong>⚠️ Apple cihazınızda video oynatımı başarısız.</strong><br><br>
+      Bu sorunun olası nedenleri:
+      <ul>
+        <li>Video codec'i uyumsuz (H.264 / AAC önerilir)</li>
+        <li>Renk profili uyumsuz (yuv420p önerilir)</li>
+        <li>FastStart (moov atomu başta değil)</li>
+        <li>Supabase <code>Content-Type</code> yanlış ayarlanmış olabilir</li>
+        <li>Tarayıcı otomatik oynatmayı engelliyor olabilir</li>
+      </ul>
+      Lütfen geliştiriciye haber veriniz veya videoyu farklı bir cihazda deneyiniz.
+    `;
+    document.body.prepend(warning);
+  }
+});
+
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
