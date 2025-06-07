@@ -353,39 +353,50 @@ document.addEventListener("DOMContentLoaded", () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   const supportsNotification = "Notification" in window;
 
-  // Bildirim desteği yoksa gösterme
+  // Bildirim özelliği yoksa boşuna gösterme
   if (!supportsNotification) {
     prompt.style.display = "none";
     return;
   }
 
-  // iOS dahil her cihazda göster
-  prompt.style.display = "block";
-
-  document.getElementById("allowNotifications").addEventListener("click", async () => {
-    if (isIOS && !isStandalone) {
-      alert("📱 Bildirim alabilmek için önce uygulamayı yüklemelisiniz.\nYükleme penceresini takip ederek kurulumu tamamlayın.");
+  // 🔥 Durum 1: Kullanıcı Safari tarayıcısında (PWA değil) → pencereyi göster, ama tıklayınca uygulamayı yükle uyarısı ver
+  if (isIOS && !isStandalone && Notification.permission === "default") {
+    prompt.style.display = "block";
+    document.getElementById("allowNotifications").onclick = () => {
+      alert("📱 Bildirim alabilmek için önce uygulamayı yüklemelisiniz.\nLütfen açılan yükleme penceresini takip edin.");
       prompt.style.display = "none";
-      return;
-    }
+    };
+    document.getElementById("denyNotifications").onclick = () => {
+      prompt.style.display = "none";
+    };
+    return;
+  }
 
-    try {
-      const result = await Notification.requestPermission();
-      if (result === "granted") {
-        alert("Bildirim izni verildi ✅");
-      } else {
-        alert("Bildirim izni verilmedi ❌");
+  // 🔥 Durum 2: Uygulama yüklendiyse ve hâlâ izin verilmemişse → pencereyi göster ve gerçek izin iste
+  if (isStandalone && Notification.permission === "default") {
+    prompt.style.display = "block";
+    document.getElementById("allowNotifications").onclick = async () => {
+      try {
+        const result = await Notification.requestPermission();
+        if (result === "granted") {
+          alert("Bildirim izni verildi ✅");
+          // Token alma işlemi burada başlatılabilir (opsiyonel)
+        } else {
+          alert("Bildirim izni verilmedi ❌");
+        }
+      } catch (err) {
+        console.error("İzin alma hatası:", err);
       }
-    } catch (err) {
-      console.error("İzin alma hatası:", err);
-    }
+      prompt.style.display = "none";
+    };
+    document.getElementById("denyNotifications").onclick = () => {
+      prompt.style.display = "none";
+    };
+    return;
+  }
 
-    prompt.style.display = "none";
-  });
-
-  document.getElementById("denyNotifications").addEventListener("click", () => {
-    prompt.style.display = "none";
-  });
+  // Diğer tüm durumlarda pencereyi gösterme
+  prompt.style.display = "none";
 });
 
 window.addEventListener("load", () => {
