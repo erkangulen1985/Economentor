@@ -371,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {  
       const result = await Notification.requestPermission();  
       if (result === "granted") {  
-        alert("Bildirim izni verildi(Bildirimleriniz ayarlanıyor/ayarlandı yazısı görmüyorsanız tekrar giriş yapınız.) ✅");  
+        alert("Bildirim izni verildi ✅\n(Bildirimleriniz ayarlanıyor/ayarlandı yazısı görmüyorsanız tekrar giriş yapınız.)");  
       } else {  
         alert("Bildirim izni verilmedi ❌");  
       }  
