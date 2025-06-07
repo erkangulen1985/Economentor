@@ -285,6 +285,19 @@ if ('serviceWorker' in navigator) {
       document.getElementById("installPrompt").style.top = "-200px";
     }
   });
+
+const togglePassword = document.getElementById("togglePassword");
+const passwordInput = document.getElementById("password");
+
+togglePassword.addEventListener("click", () => {
+  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+  passwordInput.setAttribute("type", type);
+
+  // Simgeyi değiştir
+  togglePassword.classList.toggle("fa-eye");
+  togglePassword.classList.toggle("fa-eye-slash");
+});
+
 </script>
 </body>  
 </html> 
