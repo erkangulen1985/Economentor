@@ -1,437 +1,391 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Economentor | Duyurular</title>
-  <link rel="icon" href="image1.png">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-image: url('image2.png');
-      background-size: cover;
-      background-position: center;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
-      backdrop-filter: brightness(0.6);
-    }
-    h1 {
-      font-size: clamp(20px, 5vw, 32px);
-      margin-bottom: 20px;
-      text-shadow: 1px 1px 5px black;
-    }
-    .announcement {
-      background-color: rgba(0, 0, 0, 0.7);
-      border-left: 6px solid #4CAF50;
-      padding: 20px;
-      margin: 15px 0;
-      width: 100%;
-      max-width: 600px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-    .announcement p {
-      margin: 0 0 10px;
-      font-size: clamp(14px, 4vw, 17px);
-      line-height: 1.5;
-    }
-    .date {
-      font-size: clamp(12px, 3vw, 14px);
-      color: #ccc;
-      text-align: right;
-    }
-    .home-btn {
-      display: flex;
-      justify-content: center;
-      background-color: transparent;
-      padding: 20px 0 10px;
-    }
+<!DOCTYPE html>  <html lang="tr">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Economentor | Duyurular</title>  
+  <link rel="icon" href="image1.png">  
+  <style>  
+    * { box-sizing: border-box; }  
+    body {  
+      margin: 0;  
+      padding: 0;  
+      font-family: Arial, sans-serif;  
+      background-image: url('image2.png');  
+      background-size: cover;  
+      background-position: center;  
+      color: #fff;  
+      min-height: 100vh;  
+      display: flex;  
+      flex-direction: column;  
+      align-items: center;  
+      padding: 40px 20px;  
+      backdrop-filter: brightness(0.6);  
+    }  
+    h1 {  
+      font-size: clamp(20px, 5vw, 32px);  
+      margin-bottom: 20px;  
+      text-shadow: 1px 1px 5px black;  
+    }  
+    .announcement {  
+      background-color: rgba(0, 0, 0, 0.7);  
+      border-left: 6px solid #4CAF50;  
+      padding: 20px;  
+      margin: 15px 0;  
+      width: 100%;  
+      max-width: 600px;  
+      border-radius: 10px;  
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);  
+      word-wrap: break-word;  
+      overflow-wrap: break-word;  
+    }  
+    .announcement p {  
+      margin: 0 0 10px;  
+      font-size: clamp(14px, 4vw, 17px);  
+      line-height: 1.5;  
+    }  
+    .date {  
+      font-size: clamp(12px, 3vw, 14px);  
+      color: #ccc;  
+      text-align: right;  
+    }  
+    .home-btn {  
+      display: flex;  
+      justify-content: center;  
+      background-color: transparent;  
+      padding: 20px 0 10px;  
+    }  nav {
 
-    nav {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  background-color: transparent;
-  padding: 20px 0 10px;
+display: flex;
+justify-content: center;
+gap: 10px;
+background-color: transparent;
+padding: 20px 0 10px;
 }
 
 nav a {
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 16px;
-  padding: 10px 20px;
-  border-radius: 5px;
-  transition: background 0.3s ease;
+background-color: rgba(0, 0, 0, 0.8);
+color: #fff;
+text-decoration: none;
+font-weight: bold;
+font-size: 16px;
+padding: 10px 20px;
+border-radius: 5px;
+transition: background 0.3s ease;
 }
 
 nav a:hover {
-  background-color: #4CAF50;
-  color: white;
+background-color: #4CAF50;
+color: white;
 }
-    .home-btn:hover { background-color: #45a049; }
+.home-btn:hover { background-color: #45a049; }
 
-    header {
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
+header {  
+  background-color: rgba(0, 0, 0, 0.8);  
+  padding: 20px;  
+  text-align: center;  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);  
+}  
 
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-      letter-spacing: 2px;
-    }
-    @media (max-width: 600px) {
-      body { padding: 20px 10px; }
-      .announcement { padding: 15px; }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-  <h1>ECONOMENTOR | DUYURULAR</h1>
-</header>
-<nav>
-  <a href="anasayfa.html">Anasayfa</a>
-  <a href="adminpanel.html" id="adminBtn" style="display: none;">Admin Paneli</a>
-</nav>
- <div id="iosNotificationInfo" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #001f3d; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px black; z-index: 10000; text-align: center;">
-    <p>🔔 Bildirim almak için önce uygulamayı yüklemeniz gerekiyor:</p>
-    <p><strong>Safari’de paylaş simgesine (📤) dokunun → “Ana Ekrana Ekle” seçeneğini seçin.</strong></p>
-  <div id="announcementList"></div>
-
-  <button onclick="this.parentElement.style.display='none'" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">Tamam</button>
-  </div>
-
-  <div id="notificationPrompt" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#001f3d; color:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:1000; text-align:center;">
-    <p>📢 Bildirim almak ister misiniz?</p>
-    <button id="allowNotifications" style="margin:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">İzin Ver</button>
-    <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>
-  </div>
-
-  <div id="fcmStatus" style="
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #001f3d;
-  color: white;
-  padding: 15px 25px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-  z-index: 10000;
-  font-size: 16px;
-  display: none;
-  text-align: center;
-  max-width: 90%;
-  ">
-  Bildirim durumu...
-</div>
-
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, getDoc, orderBy, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
-    import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.appspot.com",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-    const messaging = getMessaging(app);
-
-    function isMobileDevice() {
-     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    }
-    
-    async function loadAnnouncements() {
-      const announcementList = document.getElementById("announcementList");
-      const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        announcementList.innerHTML = "<p>Henüz duyuru bulunmamaktadır.</p>";
-        return;
-      }
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const div = document.createElement("div");
-        div.className = "announcement";
-        const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";
-        div.innerHTML = `<p style="white-space: pre-line;">${data.text}</p><div class="date">${date}</div>`;
-        announcementList.appendChild(div);
-      });
-    }
-
-function extractModelCode(userAgent) {
-  // Önce gerçek cihaz modelini arıyoruz
-  const patterns = [
-    /SM-[A-Z0-9]+/i,              // Samsung
-    /iPhone\s?[\w\d]*/i,          // iPhone
-    /Redmi\s?[\w\d ]*/i,          // Xiaomi Redmi
-    /Mi\s?[\w\d ]+/i,             // Xiaomi Mi
-    /POCO\s?[\w\d ]+/i,           // Xiaomi POCO
-    /Pixel\s?[\w\d ]*/i,          // Google Pixel
-    /OnePlus\s?[\w\d ]*/i,        // OnePlus
-    /HUAWEI\s?[\w\d ]*/i,         // Huawei
-    /HONOR\s?[\w\d ]*/i,          // Honor
-    /moto[\w\d ]*/i,              // Motorola
-    /Nokia\s?[\w\d ]*/i,          // Nokia
-    /OPPO\s?[\w\d ]*/i,           // OPPO
-    /Vivo\s?[\w\d ]*/i,           // Vivo
-    /Realme\s?[\w\d ]*/i          // Realme
-  ];
-
-  for (let pattern of patterns) {
-    const match = userAgent.match(pattern);
-    if (match && match[0].length >= 5) return match[0].trim();
-  }
-
-  // Eğer Android sürümü varsa ama model yoksa, sadece Android 10 gibi bir bilgi döndür
-  const androidVersion = userAgent.match(/Android\s\d+/i);
-  if (androidVersion) return androidVersion[0];
-
-  return "Bilinmiyor";
-}
-    
-function saveTokenToFirestore(uid, token) {
-  const userAgent = navigator.userAgent;
-  const modelCode = extractModelCode(userAgent);
-
-  const userRef = doc(db, "users", uid);
-  return setDoc(userRef, {
-    fcmToken: token,
-    deviceInfo: userAgent,
-    deviceModel: modelCode || "Bilinmiyor",
-    deviceModelSavedAt: serverTimestamp()  // ⏰ kayıt zamanı
-  }, { merge: true });
+header h1 {  
+  margin: 0;  
+  font-size: 36px;  
+  letter-spacing: 2px;  
+}  
+@media (max-width: 600px) {  
+  body { padding: 20px 10px; }  
+  .announcement { padding: 15px; }  
 }
 
-const fcmStatusDiv = document.getElementById("fcmStatus");
-
-let notificationSetupInProgress = false;
-let notificationSetupTimeout = null;
-
-function showSetupMessage() {
-  notificationSetupInProgress = true;
-  fcmStatusDiv.style.display = "block";
-  fcmStatusDiv.textContent = "Şu anda bildirimleriniz ayarlanıyor, lütfen bekleyiniz ve sayfadan ayrılmayınız...";
+  </style>  
+</head>  
+<body>    <header>  
+  <h1>ECONOMENTOR | DUYURULAR</h1>  
+</header>  
+<nav>  
+  <a href="anasayfa.html">Anasayfa</a>  
+  <a href="adminpanel.html" id="adminBtn" style="display: none;">Admin Paneli</a>  
+</nav>  
+  <div id="announcementList"></div>    <div id="iosNotificationInfo" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #001f3d; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px black; z-index: 10000; text-align: center;">  
+    <p>🔔 Bildirim almak için önce uygulamayı yüklemeniz gerekiyor:</p>  
+    <p><strong>Safari’de paylaş simgesine (📤) dokunun → “Ana Ekrana Ekle” seçeneğini seçin.</strong></p>  
+  <button onclick="this.parentElement.style.display='none'" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">Tamam</button>  
+  </div>    <div id="notificationPrompt" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#001f3d; color:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:1000; text-align:center;">  
+    <p>📢 Bildirim almak ister misiniz?</p>  
+    <button id="allowNotifications" style="margin:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">İzin Ver</button>  
+    <button id="denyNotifications" style="margin:10px; padding:10px 20px; background:red; color:white; border:none; border-radius:5px;">Hayır Teşekkürler</button>  
+  </div>    <div id="fcmStatus" style="  
+  position: fixed;  
+  top: 10px;  
+  left: 50%;  
+  transform: translateX(-50%);  
+  background: #001f3d;  
+  color: white;  
+  padding: 15px 25px;  
+  border-radius: 10px;  
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);  
+  z-index: 10000;  
+  font-size: 16px;  
+  display: none;  
+  text-align: center;  
+  max-width: 90%;  
+  ">  
+  Bildirim durumu...  
+</div>    <!-- Firebase SDK -->    <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";  
+    import { getFirestore, collection, getDocs, getDoc, orderBy, query, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";  
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";  
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";  
+    import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";  
   
-  // Minimum 3 saniye bekleme promise'i döndür
-  return new Promise(resolve => {
-    notificationSetupTimeout = setTimeout(() => {
-      resolve();
-    }, 3000);
-  });
-}
-
-function hideSetupMessage() {
-  fcmStatusDiv.style.display = "none";
-  notificationSetupInProgress = false;
-  if (notificationSetupTimeout) {
-    clearTimeout(notificationSetupTimeout);
-    notificationSetupTimeout = null;
-  }
-}
-
-window.addEventListener("beforeunload", (event) => {
-  if (notificationSetupInProgress) {
-    event.preventDefault();
-    event.returnValue = "Bildirim ayarlama işlemi tamamlanmadı, lütfen sayfadan ayrılmayınız.";
-    return event.returnValue;
-  }
-});
-    
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) {
-    console.log("🔒 Kullanıcı giriş yapmamış.");
-    return;
-  }
-
-  try {
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.exists() ? userSnap.data() : {};
-
-    if (userData.role === "admin") {
-      document.getElementById("adminBtn").style.display = "block";
-    }
-
-    const currentDeviceInfo = navigator.userAgent;
-    const savedToken = userData.fcmToken || null;
-    const savedDeviceInfo = userData.deviceInfo || null;
-
-    const currentModel = extractModelCode(currentDeviceInfo);
-    const savedModel = extractModelCode(savedDeviceInfo || "");
-
-    const shouldRefreshToken = !savedToken;
-
-    if (!isMobileDevice()) {
-      console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");
-      return;
-    }
-
-    if (shouldRefreshToken) {
-      // Bildirim ayarlama mesajını göster ve promise döndür
-      const minWaitPromise = showSetupMessage();
-
-      // Token al
-      const token = await getToken(messaging, {
-        vapidKey:"BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",
-      });
-
-      if (token) {
-        // Token'ı Firestore'a kaydet
-        await saveTokenToFirestore(user.uid, token);
-
-  // Firestore'a bildirim ayarlandı mesajını ekle
-  await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {
-    to: user.uid,
-    message: "Bildirimleriniz ayarlandı.(Eğer bildirimleriniz ayarlanırken kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)",
-    timestamp: serverTimestamp(),
-    read: false,
-    type: "notificationSetup"
-  });
-
-  // 3 saniyelik bekleme tamamlanana kadar bekle
-  await minWaitPromise;
-
-  // Kullanıcıya mesaj göster
-  fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu yazı kaybolduktan sonra anasayfaya dönebilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";
-
-  setTimeout(() => {
-    hideSetupMessage();
-  }, 7000);
-} else {
-        console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");
-        // Minimum beklemeyi tamamla ve mesajı gizle
-        await minWaitPromise;
-        hideSetupMessage();
-      }
-    } else {
-      console.log(
-        "📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı."
-      );
-      hideSetupMessage();
-    }
-  } catch (err) {
-    console.error("❌ Token kontrol hatası:", err);
-    hideSetupMessage();
-  }
-});
-
+    const firebaseConfig = {  
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",  
+      authDomain: "economentor-8ddc4.firebaseapp.com",  
+      projectId: "economentor-8ddc4",  
+      storageBucket: "economentor-8ddc4.appspot.com",  
+      messagingSenderId: "835370350520",  
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",  
+      measurementId: "G-FS3FMPYVPD"  
+    };  
+  
+    const app = initializeApp(firebaseConfig);  
+    const db = getFirestore(app);  
+    const auth = getAuth();  
+    const messaging = getMessaging(app);  
+  
+    function isMobileDevice() {  
+     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);  
+    }  
+  
+    async function loadAnnouncements() {  
+      const announcementList = document.getElementById("announcementList");  
+      const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));  
+      const querySnapshot = await getDocs(q);  
+  
+      if (querySnapshot.empty) {  
+        announcementList.innerHTML = "<p>Henüz duyuru bulunmamaktadır.</p>";  
+        return;  
+      }  
+  
+      querySnapshot.forEach((doc) => {  
+        const data = doc.data();  
+        const div = document.createElement("div");  
+        div.className = "announcement";  
+        const date = data.createdAt?.toDate?.().toLocaleString("tr-TR") || "Tarih yok";  
+        div.innerHTML = `<p style="white-space: pre-line;">${data.text}</p><div class="date">${date}</div>`;  
+        announcementList.appendChild(div);  
+      });  
+    }  
+  
+function extractModelCode(userAgent) {  
+  // Önce gerçek cihaz modelini arıyoruz  
+  const patterns = [  
+    /SM-[A-Z0-9]+/i,              // Samsung  
+    /iPhone\s?[\w\d]*/i,          // iPhone  
+    /Redmi\s?[\w\d ]*/i,          // Xiaomi Redmi  
+    /Mi\s?[\w\d ]+/i,             // Xiaomi Mi  
+    /POCO\s?[\w\d ]+/i,           // Xiaomi POCO  
+    /Pixel\s?[\w\d ]*/i,          // Google Pixel  
+    /OnePlus\s?[\w\d ]*/i,        // OnePlus  
+    /HUAWEI\s?[\w\d ]*/i,         // Huawei  
+    /HONOR\s?[\w\d ]*/i,          // Honor  
+    /moto[\w\d ]*/i,              // Motorola  
+    /Nokia\s?[\w\d ]*/i,          // Nokia  
+    /OPPO\s?[\w\d ]*/i,           // OPPO  
+    /Vivo\s?[\w\d ]*/i,           // Vivo  
+    /Realme\s?[\w\d ]*/i          // Realme  
+  ];  
+  
+  for (let pattern of patterns) {  
+    const match = userAgent.match(pattern);  
+    if (match && match[0].length >= 5) return match[0].trim();  
+  }  
+  
+  // Eğer Android sürümü varsa ama model yoksa, sadece Android 10 gibi bir bilgi döndür  
+  const androidVersion = userAgent.match(/Android\s\d+/i);  
+  if (androidVersion) return androidVersion[0];  
+  
+  return "Bilinmiyor";  
+}  
+  
+function saveTokenToFirestore(uid, token) {  
+  const userAgent = navigator.userAgent;  
+  const modelCode = extractModelCode(userAgent);  
+  
+  const userRef = doc(db, "users", uid);  
+  return setDoc(userRef, {  
+    fcmToken: token,  
+    deviceInfo: userAgent,  
+    deviceModel: modelCode || "Bilinmiyor",  
+    deviceModelSavedAt: serverTimestamp()  // ⏰ kayıt zamanı  
+  }, { merge: true });  
+}  
+  
+const fcmStatusDiv = document.getElementById("fcmStatus");  
+  
+let notificationSetupInProgress = false;  
+let notificationSetupTimeout = null;  
+  
+function showSetupMessage() {  
+  notificationSetupInProgress = true;  
+  fcmStatusDiv.style.display = "block";  
+  fcmStatusDiv.textContent = "Şu anda bildirimleriniz ayarlanıyor, lütfen bekleyiniz ve sayfadan ayrılmayınız...";  
+  
+  // Minimum 3 saniye bekleme promise'i döndür  
+  return new Promise(resolve => {  
+    notificationSetupTimeout = setTimeout(() => {  
+      resolve();  
+    }, 3000);  
+  });  
+}  
+  
+function hideSetupMessage() {  
+  fcmStatusDiv.style.display = "none";  
+  notificationSetupInProgress = false;  
+  if (notificationSetupTimeout) {  
+    clearTimeout(notificationSetupTimeout);  
+    notificationSetupTimeout = null;  
+  }  
+}  
+  
+window.addEventListener("beforeunload", (event) => {  
+  if (notificationSetupInProgress) {  
+    event.preventDefault();  
+    event.returnValue = "Bildirim ayarlama işlemi tamamlanmadı, lütfen sayfadan ayrılmayınız.";  
+    return event.returnValue;  
+  }  
+});  
+  
+onAuthStateChanged(auth, async (user) => {  
+  
+  if (!user) {  
+    console.log("🔒 Kullanıcı giriş yapmamış.");  
+    return;  
+  }  
+  
+  try {  
+    const userRef = doc(db, "users", user.uid);  
+    const userSnap = await getDoc(userRef);  
+    const userData = userSnap.exists() ? userSnap.data() : {};  
+  
+    if (userData.role === "admin") {  
+      document.getElementById("adminBtn").style.display = "block";  
+    }  
+  
+    const currentDeviceInfo = navigator.userAgent;  
+    const savedToken = userData.fcmToken || null;  
+    const savedDeviceInfo = userData.deviceInfo || null;  
+  
+    const currentModel = extractModelCode(currentDeviceInfo);  
+    const savedModel = extractModelCode(savedDeviceInfo || "");  
+  
+    const shouldRefreshToken = !savedToken;  
+  
+    if (!isMobileDevice()) {  
+      console.log("💻 Masaüstü tespit edildi — getToken çalıştırılmayacak.");  
+      return;  
+    }  
+  
+    if (shouldRefreshToken) {  
+      // Bildirim ayarlama mesajını göster ve promise döndür  
+      const minWaitPromise = showSetupMessage();  
+  
+      // Token al  
+      const token = await getToken(messaging, {  
+        vapidKey:"BI86xavyp_LEnQxJLOGmrzFBZx2ippyfunjDGgRAZaIvlOD0bKbb_S-pQq6Guo47nCdu623IBQIGw6lb9RgI68s",  
+      });  
+  
+      if (token) {  
+        // Token'ı Firestore'a kaydet  
+        await saveTokenToFirestore(user.uid, token);  
+  
+  // Firestore'a bildirim ayarlandı mesajını ekle  
+  await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {  
+    to: user.uid,  
+    message: "Bildirimleriniz ayarlandı.(Eğer bildirimleriniz ayarlanırken kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)",  
+    timestamp: serverTimestamp(),  
+    read: false,  
+    type: "notificationSetup"  
+  });  
+  
+  // 3 saniyelik bekleme tamamlanana kadar bekle  
+  await minWaitPromise;  
+  
+  // Kullanıcıya mesaj göster  
+  fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu yazı kaybolduktan sonra anasayfaya dönebilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";  
+  
+  setTimeout(() => {  
+    hideSetupMessage();  
+  }, 7000);  
+} else {  
+        console.warn("⚠️ Token alınamadı. Bildirim izni eksik olabilir.");  
+        // Minimum beklemeyi tamamla ve mesajı gizle  
+        await minWaitPromise;  
+        hideSetupMessage();  
+      }  
+    } else {  
+      console.log(  
+        "📭 Token zaten mevcut veya cihaz uyuşmuyor. Yeni token alınmadı."  
+      );  
+      hideSetupMessage();  
+    }  
+  } catch (err) {  
+    console.error("❌ Token kontrol hatası:", err);  
+    hideSetupMessage();  
+  }  
+});  
+  
 document.addEventListener("DOMContentLoaded", () => {
   const prompt = document.getElementById("notificationPrompt");
+  const iosInfo = document.getElementById("iosNotificationInfo");
+
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   const supportsNotification = "Notification" in window;
 
+  // Bildirim desteklenmiyorsa hiçbir pencereyi gösterme
   if (!supportsNotification) {
+    prompt.style.display = "none";
+    iosInfo.style.display = "none";
+    return;
+  }
+
+  // iOS + uygulama yüklenmemişse → sadece "uygulamayı yükleyin" yazısı göster
+  if (isIOS && !isStandalone && Notification.permission === "default") {
+    iosInfo.style.display = "block";
     prompt.style.display = "none";
     return;
   }
 
-  // iOS + Safari → Uygulama yüklenmediyse göster ama izin verme
-  if (isIOS && !isStandalone && Notification.permission === "default") {
-    prompt.style.display = "block";
-    document.getElementById("allowNotifications").onclick = () => {
-      alert("📱 Bildirim alabilmek için önce uygulamayı yüklemelisiniz.\nLütfen açılan yükleme penceresini takip edin.");
-      prompt.style.display = "none";
-    };
-    document.getElementById("denyNotifications").onclick = () => {
-      prompt.style.display = "none";
-    };
-    return;
-  }
-
-  // iOS + Uygulama kuruluysa ve hâlâ izin verilmemişse göster
+  // iOS + uygulama yüklü + henüz izin verilmemiş → izin penceresini göster
   if (isIOS && isStandalone && Notification.permission === "default") {
     prompt.style.display = "block";
-    document.getElementById("allowNotifications").onclick = async () => {
-      try {
-        const result = await Notification.requestPermission();
-        if (result === "granted") {
-          alert("Bildirim izni verildi ✅");
-        } else {
-          alert("Bildirim izni verilmedi ❌");
-        }
-      } catch (err) {
-        console.error("İzin alma hatası:", err);
-      }
-      prompt.style.display = "none";
-    };
-    document.getElementById("denyNotifications").onclick = () => {
-      prompt.style.display = "none";
-    };
+    iosInfo.style.display = "none";
     return;
   }
 
-  // 🟢 Android'de sadece ilk defa izin verilmediyse göster (PWA olup olmaması fark etmez)
-  const isAndroid = /android/i.test(navigator.userAgent);
+  // Android cihazlarda ilk sefer için göster
   if (isAndroid && Notification.permission === "default") {
     prompt.style.display = "block";
-    document.getElementById("allowNotifications").onclick = async () => {
-      try {
-        const result = await Notification.requestPermission();
-        if (result === "granted") {
-          alert("Bildirim izni verildi ✅");
-        } else {
-          alert("Bildirim izni verilmedi ❌");
-        }
-      } catch (err) {
-        console.error("İzin alma hatası:", err);
-      }
-      prompt.style.display = "none";
-    };
-    document.getElementById("denyNotifications").onclick = () => {
-      prompt.style.display = "none";
-    };
+    iosInfo.style.display = "none";
     return;
   }
 
-  // Diğer tüm durumlarda pencereyi gösterme
+  // Diğer tüm durumlarda hiçbir pencere gösterme
   prompt.style.display = "none";
+  iosInfo.style.display = "none";
 });
-
-window.addEventListener("load", () => {
-  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-  if (isIOS && !isStandalone) {
-    document.getElementById("iosNotificationInfo").style.display = "block";
-  }
-});
-
-loadAnnouncements();
-    
-</script>
-<script type="module" src="auth-guard.js"></script>
-</body>
-</html>
+  
+window.addEventListener("load", () => {  
+  const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());  
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;  
+  
+  if (isIOS && !isStandalone) {  
+    document.getElementById("iosNotificationInfo").style.display = "block";  
+  }  
+});  
+  
+loadAnnouncements();  
+  
+</script>  <script type="module" src="auth-guard.js"></script>  </body>  
+</html>burada android telefonlarda 2. Kez çıkmasına gerek yok ilk izinde zaten onaylanıyor
