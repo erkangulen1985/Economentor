@@ -353,13 +353,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   const supportsNotification = "Notification" in window;
 
-  // Bildirim özelliği yoksa boşuna gösterme
   if (!supportsNotification) {
     prompt.style.display = "none";
     return;
   }
 
-  // 🔥 Durum 1: Kullanıcı Safari tarayıcısında (PWA değil) → pencereyi göster, ama tıklayınca uygulamayı yükle uyarısı ver
+  // iOS + Safari → Uygulama yüklenmediyse göster ama izin verme
   if (isIOS && !isStandalone && Notification.permission === "default") {
     prompt.style.display = "block";
     document.getElementById("allowNotifications").onclick = () => {
@@ -372,15 +371,37 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // 🔥 Durum 2: Uygulama yüklendiyse ve hâlâ izin verilmemişse → pencereyi göster ve gerçek izin iste
-  if (isStandalone && Notification.permission === "default") {
+  // iOS + Uygulama kuruluysa ve hâlâ izin verilmemişse göster
+  if (isIOS && isStandalone && Notification.permission === "default") {
     prompt.style.display = "block";
     document.getElementById("allowNotifications").onclick = async () => {
       try {
         const result = await Notification.requestPermission();
         if (result === "granted") {
           alert("Bildirim izni verildi ✅");
-          // Token alma işlemi burada başlatılabilir (opsiyonel)
+        } else {
+          alert("Bildirim izni verilmedi ❌");
+        }
+      } catch (err) {
+        console.error("İzin alma hatası:", err);
+      }
+      prompt.style.display = "none";
+    };
+    document.getElementById("denyNotifications").onclick = () => {
+      prompt.style.display = "none";
+    };
+    return;
+  }
+
+  // 🟢 Android'de sadece ilk defa izin verilmediyse göster (PWA olup olmaması fark etmez)
+  const isAndroid = /android/i.test(navigator.userAgent);
+  if (isAndroid && Notification.permission === "default") {
+    prompt.style.display = "block";
+    document.getElementById("allowNotifications").onclick = async () => {
+      try {
+        const result = await Notification.requestPermission();
+        if (result === "granted") {
+          alert("Bildirim izni verildi ✅");
         } else {
           alert("Bildirim izni verilmedi ❌");
         }
