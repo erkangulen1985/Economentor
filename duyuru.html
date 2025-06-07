@@ -337,6 +337,8 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener("DOMContentLoaded", () => {
   const prompt = document.getElementById("notificationPrompt");
   const iosInfo = document.getElementById("iosNotificationInfo");
+  const allowBtn = document.getElementById("allowNotifications");
+  const denyBtn = document.getElementById("denyNotifications");
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isAndroid = /android/i.test(navigator.userAgent);
@@ -375,29 +377,26 @@ document.addEventListener("DOMContentLoaded", () => {
   prompt.style.display = "none";
   iosInfo.style.display = "none";
 
-// Bildirim izin verme ve reddetme tıklamaları:
-  const allowBtn = document.getElementById("allowNotifications");
-  const denyBtn = document.getElementById("denyNotifications");
-
+  // Buton olayları
   allowBtn.addEventListener("click", async () => {
     try {
       const result = await Notification.requestPermission();
       if (result === "granted") {
         alert("Bildirim izni verildi ✅");
-        // Dilersen burada getToken çağırabilirsin
+        // İsteğe bağlı olarak getToken işlemi burada yapılabilir
       } else {
         alert("Bildirim izni verilmedi ❌");
       }
     } catch (err) {
       console.error("Bildirim izni alma hatası:", err);
     }
-    document.getElementById("notificationPrompt").style.display = "none";
+    prompt.style.display = "none";
   });
 
   denyBtn.addEventListener("click", () => {
-    document.getElementById("notificationPrompt").style.display = "none";
+    prompt.style.display = "none";
   });
-}); 
+});
 
 window.addEventListener("load", () => {  
   const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());  
