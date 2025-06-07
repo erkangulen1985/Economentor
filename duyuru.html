@@ -316,8 +316,11 @@ onAuthStateChanged(auth, async (user) => {
 document.addEventListener("DOMContentLoaded", () => {
   const prompt = document.getElementById("notificationPrompt");
 
-  if (!("Notification" in window)) {
-    console.warn("Tarayıcı Notification API desteklemiyor.");
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const supportsNotification = "Notification" in window;
+
+  if (!isMobile || !supportsNotification) {
+    // ❌ Masaüstü ya da desteklemeyen cihaz → gösterme
     prompt.style.display = "none";
     return;
   }
@@ -328,7 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
     prompt.style.display = "none";
   }
 
-  // 🔒 Güvenli şekilde butonları burada bağla
   document.getElementById("allowNotifications").addEventListener("click", async () => {
     try {
       const result = await Notification.requestPermission();
