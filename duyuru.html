@@ -374,8 +374,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // Diğer tüm durumlarda hiçbir pencere gösterme
   prompt.style.display = "none";
   iosInfo.style.display = "none";
-});
-  
+
+// Bildirim izin verme ve reddetme tıklamaları:
+  const allowBtn = document.getElementById("allowNotifications");
+  const denyBtn = document.getElementById("denyNotifications");
+
+  allowBtn.addEventListener("click", async () => {
+    try {
+      const result = await Notification.requestPermission();
+      if (result === "granted") {
+        alert("Bildirim izni verildi ✅");
+        // Dilersen burada getToken çağırabilirsin
+      } else {
+        alert("Bildirim izni verilmedi ❌");
+      }
+    } catch (err) {
+      console.error("Bildirim izni alma hatası:", err);
+    }
+    document.getElementById("notificationPrompt").style.display = "none";
+  });
+
+  denyBtn.addEventListener("click", () => {
+    document.getElementById("notificationPrompt").style.display = "none";
+  });
+}); 
+
 window.addEventListener("load", () => {  
   const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());  
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;  
