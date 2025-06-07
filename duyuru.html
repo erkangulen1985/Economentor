@@ -334,69 +334,42 @@ onAuthStateChanged(auth, async (user) => {
   }  
 });  
   
-document.addEventListener("DOMContentLoaded", () => {
-  const prompt = document.getElementById("notificationPrompt");
-  const iosInfo = document.getElementById("iosNotificationInfo");
-  const allowBtn = document.getElementById("allowNotifications");
-  const denyBtn = document.getElementById("denyNotifications");
-
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  const supportsNotification = "Notification" in window;
-
-  // Bildirim desteklenmiyorsa hiçbir pencereyi gösterme
-  if (!supportsNotification) {
-    prompt.style.display = "none";
-    iosInfo.style.display = "none";
-    return;
-  }
-
-  // iOS + uygulama yüklenmemişse → sadece "uygulamayı yükleyin" yazısı göster
-  if (isIOS && !isStandalone && Notification.permission === "default") {
-    iosInfo.style.display = "block";
-    prompt.style.display = "none";
-    return;
-  }
-
-  // iOS + uygulama yüklü + henüz izin verilmemiş → izin penceresini göster
-  if (isIOS && isStandalone && Notification.permission === "default") {
-    prompt.style.display = "block";
-    iosInfo.style.display = "none";
-    return;
-  }
-
-  // Android cihazlarda ilk sefer için göster
-  if (isAndroid && Notification.permission === "default") {
-    prompt.style.display = "block";
-    iosInfo.style.display = "none";
-    return;
-  }
-
-  // Diğer tüm durumlarda hiçbir pencere gösterme
-  prompt.style.display = "none";
-  iosInfo.style.display = "none";
-
-  // Buton olayları
-  allowBtn.addEventListener("click", async () => {
-    try {
-      const result = await Notification.requestPermission();
-      if (result === "granted") {
-        alert("Bildirim izni verildi ✅");
-        // İsteğe bağlı olarak getToken işlemi burada yapılabilir
-      } else {
-        alert("Bildirim izni verilmedi ❌");
-      }
-    } catch (err) {
-      console.error("Bildirim izni alma hatası:", err);
-    }
-    prompt.style.display = "none";
-  });
-
-  denyBtn.addEventListener("click", () => {
-    prompt.style.display = "none";
-  });
-});
+document.addEventListener("DOMContentLoaded", () => {  
+  const prompt = document.getElementById("notificationPrompt");  
+  
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);  
+  const supportsNotification = "Notification" in window;  
+  
+  if (!isMobile || !supportsNotification) {  
+    // ❌ Masaüstü ya da desteklemeyen cihaz → gösterme  
+    prompt.style.display = "none";  
+    return;  
+  }  
+  
+  if (Notification.permission === "default") {  
+    prompt.style.display = "block";  
+  } else {  
+    prompt.style.display = "none";  
+  }  
+  
+  document.getElementById("allowNotifications").addEventListener("click", async () => {  
+    try {  
+      const result = await Notification.requestPermission();  
+      if (result === "granted") {  
+        alert("Bildirim izni verildi ✅");  
+      } else {  
+        alert("Bildirim izni verilmedi ❌");  
+      }  
+      prompt.style.display = "none";  
+    } catch (err) {  
+      console.error("İzin alma hatası:", err);  
+    }  
+  });  
+  
+  document.getElementById("denyNotifications").addEventListener("click", () => {  
+    prompt.style.display = "none";  
+  });  
+});  
 
 window.addEventListener("load", () => {  
   const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());  
