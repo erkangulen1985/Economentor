@@ -349,23 +349,26 @@ onAuthStateChanged(auth, async (user) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const prompt = document.getElementById("notificationPrompt");
-
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   const supportsNotification = "Notification" in window;
 
-  if (!isMobile || !supportsNotification) {
-    // ❌ Masaüstü ya da desteklemeyen cihaz → gösterme
+  // Bildirim desteği yoksa gösterme
+  if (!supportsNotification) {
     prompt.style.display = "none";
     return;
   }
 
-  if (Notification.permission === "default") {
-    prompt.style.display = "block";
-  } else {
-    prompt.style.display = "none";
-  }
+  // iOS dahil her cihazda göster
+  prompt.style.display = "block";
 
   document.getElementById("allowNotifications").addEventListener("click", async () => {
+    if (isIOS && !isStandalone) {
+      alert("📱 Bildirim alabilmek için önce uygulamayı yüklemelisiniz.\nYükleme penceresini takip ederek kurulumu tamamlayın.");
+      prompt.style.display = "none";
+      return;
+    }
+
     try {
       const result = await Notification.requestPermission();
       if (result === "granted") {
@@ -373,10 +376,11 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         alert("Bildirim izni verilmedi ❌");
       }
-      prompt.style.display = "none";
     } catch (err) {
       console.error("İzin alma hatası:", err);
     }
+
+    prompt.style.display = "none";
   });
 
   document.getElementById("denyNotifications").addEventListener("click", () => {
