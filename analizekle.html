@@ -6,8 +6,7 @@
   <title>Analiz Ekle | Economentor</title>
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-<style>
+  <style>
 html, body {
   height: 100%;
   margin: 0;
@@ -439,16 +438,13 @@ onAuthStateChanged(auth, async (user) => {
 
 async function uploadVideo(visibility) {
   const file = document.getElementById("videoFile").files[0];
-  const title = document.getElementById("videoTitle").value.trim();
-  const description = document.getElementById("videoDesc").value.trim();
+  const title = document.getElementById("videoTitle").value;
+  const description = document.getElementById("videoDesc").value;
   const loadingMsg = document.getElementById("loadingMsg");
   const userBtn = document.getElementById("userShareBtn");
   const vipBtn = document.getElementById("vipShareBtn");
 
-  if (!file || !title || !description) {
-    alert("Lütfen tüm alanları doldurun.");
-    return;
-  }
+  if (!file || !title || !description) return alert("Tüm alanları doldurun.");
 
   isSending = true;
   loadingMsg.style.display = "block";
@@ -456,40 +452,18 @@ async function uploadVideo(visibility) {
   vipBtn.disabled = true;
 
   try {
-    const formData = new FormData();
-    formData.append("video", file);
+    const safeFileName = sanitizeFilename(file.name);
+    const filePath = `analiz/${Date.now()}-${safeFileName}`;
+    const { error } = await supabase.storage.from("analizler").upload(filePath, file);
+    if (error) throw new Error("Video yüklenemedi: " + error.message);
 
-    // 1. FFmpeg sunucusunda dönüştürülebilir mi kontrol et
-    const checkRes = await fetch("https://ffmpeg-server-l5wn.onrender.com/check", {
-      method: "POST",
-      body: formData
-    });
+    const { data: { publicUrl } } = supabase.storage.from("analizler").getPublicUrl(filePath);
 
-    const checkResult = await checkRes.json();
-    if (!checkResult.success) {
-      throw new Error("Video dönüştürülemedi. Lütfen farklı bir dosya seçin.");
-    }
-
-    // 2. Supabase'e video yükle (JS SDK ile)
-    const sanitizedFilename = file.name.replace(/\s+/g, "_").replace(/[^\w.-]/gi, "");
-    const { data, error } = await supabase.storage
-      .from('analizler')
-      .upload(`processed/${sanitizedFilename}`, file, {
-        contentType: 'video/mp4'
-      });
-
-    if (error) throw new Error("Supabase'e yükleme hatası: " + error.message);
-
-    const { data: urlData } = supabase.storage
-      .from('analizler')
-      .getPublicUrl(`processed/${sanitizedFilename}`);
-
-    // 3. Firestore'a kayıt
     await addDoc(collection(db, "analizler"), {
       title,
       description,
-      videoUrl: urlData.publicUrl,
-      videoPath: data.path,
+      videoUrl: publicUrl,
+      videoPath: filePath,
       likes: 0,
       dislikes: 0,
       comments: [],
@@ -497,7 +471,6 @@ async function uploadVideo(visibility) {
       visibility: visibility
     });
 
-    // Bildirimleri hazırla
     const usersSnap = await getDocs(collection(db, "users"));
     const titleNotif = `"Economentor" 🎥 Yeni Analiz Videosu!`;
     const bodyNotif = `${title} eklendi.`;
@@ -514,39 +487,38 @@ async function uploadVideo(visibility) {
 
       if (!user.fcmToken || user.role === "admin" || !shouldNotify) return;
 
-//      try {
-//        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-//          to: uid,
-//          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-//          postId: null,
-//          timestamp: Timestamp.now(),
-//          read: false
-//        });
-//      } catch (err) {
-//        console.warn(`Firestore bildirimi başarısız (${uid})`, err);
-//      }
+      try {
+        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+          to: uid,
+          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+          postId: null,
+          timestamp: Timestamp.now(),
+          read: false
+        });
+      } catch (err) {
+        console.warn(`Firestore bildirimi başarısız (${uid})`, err);
+      }
 
-//      try {
-//        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-//          method: "POST",
-//          headers: { "Content-Type": "application/json" },
-//          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
-//        });
-//      } catch (err) {
-//        console.warn(`FCM bildirimi başarısız (${uid})`, err);
-//      }
-//    });
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
+        });
+      } catch (err) {
+        console.warn(`FCM bildirimi başarısız (${uid})`, err);
+      }
+    });
 
-//    await Promise.allSettled(notificationPromises);
-});
+    await Promise.allSettled(notificationPromises);
+
     alert("Video başarıyla yüklendi ve bildirimler gönderildi.");
     document.getElementById("videoFile").value = "";
     document.getElementById("videoTitle").value = "";
     document.getElementById("videoDesc").value = "";
     loadVideos();
-
   } catch (err) {
-    console.error("Yükleme hatası:", err);
+    console.error("Video gönderim hatası:", err);
     alert("Yükleme sırasında bir hata oluştu.");
   } finally {
     isSending = false;
