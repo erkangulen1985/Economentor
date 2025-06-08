@@ -421,7 +421,14 @@ window.saveDuyuru = async function () {
 };
 
 function escapeQuotes(str) {
-  return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+  return str
+    .replace(/\\/g, "\\\\") // ters slash (\) kaçışı
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '&quot;') // HTML güvenliği için
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 window.loadDuyurular = async function () {
