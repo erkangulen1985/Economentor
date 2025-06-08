@@ -498,30 +498,30 @@ async function uploadVideo(visibility) {
 
       if (!user.fcmToken || user.role === "admin" || !shouldNotify) return;
 
-      try {
+//      try {
 //        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
 //          to: uid,
 //          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
 //          postId: null,
 //          timestamp: Timestamp.now(),
 //          read: false
-        });
-      } catch (err) {
-        console.warn(`Firestore bildirimi başarısız (${uid})`, err);
-      }
+//        });
+//      } catch (err) {
+//        console.warn(`Firestore bildirimi başarısız (${uid})`, err);
+//      }
 
-      try {
+//      try {
 //        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
 //          method: "POST",
 //          headers: { "Content-Type": "application/json" },
 //          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
 //        });
-      } catch (err) {
-        console.warn(`FCM bildirimi başarısız (${uid})`, err);
-      }
-    });
+//      } catch (err) {
+//        console.warn(`FCM bildirimi başarısız (${uid})`, err);
+//      }
+//    });
 
-    await Promise.allSettled(notificationPromises);
+//    await Promise.allSettled(notificationPromises);
 
     alert("Video başarıyla yüklendi ve bildirimler gönderildi.");
     document.getElementById("videoFile").value = "";
