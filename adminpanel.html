@@ -455,7 +455,6 @@ window.editDuyuru = function(id, text) {
   if (!div) return;
 
   const rawText = div.getAttribute("data-text") || "";
-  const text = rawText.replace(/\\n/g, "\n"); // JSON güvenliği için
 
   const textarea = document.createElement("textarea");
   textarea.style.width = "100%";
