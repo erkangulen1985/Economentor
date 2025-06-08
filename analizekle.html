@@ -439,13 +439,16 @@ onAuthStateChanged(auth, async (user) => {
 
 async function uploadVideo(visibility) {
   const file = document.getElementById("videoFile").files[0];
-  const title = document.getElementById("videoTitle").value;
-  const description = document.getElementById("videoDesc").value;
+  const title = document.getElementById("videoTitle").value.trim();
+  const description = document.getElementById("videoDesc").value.trim();
   const loadingMsg = document.getElementById("loadingMsg");
   const userBtn = document.getElementById("userShareBtn");
   const vipBtn = document.getElementById("vipShareBtn");
 
-  if (!file || !title || !description) return alert("Tüm alanları doldurun.");
+  if (!file || !title || !description) {
+    alert("Lütfen tüm alanları doldurun.");
+    return;
+  }
 
   isSending = true;
   loadingMsg.style.display = "block";
@@ -454,18 +457,21 @@ async function uploadVideo(visibility) {
 
   try {
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("visibility", visibility);
+    formData.append("video", file); // sunucu tarafındaki `upload.single('video')` ile eşleşmeli
+    formData.append("visibility", visibility); // henüz ffmpeg-server'da kullanılmasa bile eklemek sorun olmaz
 
-    // ffmpeg sunucusuna gönder
+    // FFmpeg dönüştürme sunucusuna gönder
     const response = await fetch("https://ffmpeg-server-l5wn.onrender.com/upload", {
       method: "POST",
       body: formData
     });
 
+    if (!response.ok) throw new Error("Dönüştürme sunucusuna erişilemedi.");
+
     const result = await response.json();
-    if (!result || !result.publicUrl || !result.path) {
-      throw new Error("ffmpeg sunucusu geçerli bir yanıt döndürmedi.");
+
+    if (!result?.publicUrl || !result?.path) {
+      throw new Error("FFmpeg sunucusu geçerli bir yanıt döndürmedi.");
     }
 
     // Firestore'a kaydet
