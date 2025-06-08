@@ -6,7 +6,8 @@
   <title>Analiz Ekle | Economentor</title>
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
+
+<style>
 html, body {
   height: 100%;
   margin: 0;
@@ -498,23 +499,23 @@ async function uploadVideo(visibility) {
       if (!user.fcmToken || user.role === "admin" || !shouldNotify) return;
 
       try {
-        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
-          to: uid,
-          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
-          postId: null,
-          timestamp: Timestamp.now(),
-          read: false
+//        await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
+//          to: uid,
+//          message: `"${title}" adlı yeni bir analiz videosu yüklendi.`,
+//          postId: null,
+//          timestamp: Timestamp.now(),
+//          read: false
         });
       } catch (err) {
         console.warn(`Firestore bildirimi başarısız (${uid})`, err);
       }
 
       try {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
-        });
+//        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+//          method: "POST",
+//          headers: { "Content-Type": "application/json" },
+//          body: JSON.stringify({ uid, title: titleNotif, body: bodyNotif, url })
+//        });
       } catch (err) {
         console.warn(`FCM bildirimi başarısız (${uid})`, err);
       }
