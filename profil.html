@@ -222,6 +222,19 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "anasayfa.html";
   });
 
+    if (userDoc.exists() && userDoc.data().role === "admin") {
+    const adminBtn = document.createElement("button");
+    adminBtn.id = "adminBtn";
+    adminBtn.textContent = "Admin Paneli";
+    adminBtn.style.backgroundColor = "#f39c12";
+    adminBtn.style.marginTop = "10px";
+    adminBtn.style.fontWeight = "bold";
+    adminBtn.onclick = () => window.location.href = "adminpanel.html";
+
+    const homeBtn = document.getElementById("homeBtn");
+    homeBtn.insertAdjacentElement("afterend", adminBtn);
+  }
+
   // Bildirim cihazı bilgisi
   const deviceDisplay = document.getElementById("deviceInfoDisplay");
   const deleteDeviceBtn = document.getElementById("deleteDeviceInfoBtn");
