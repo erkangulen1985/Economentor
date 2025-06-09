@@ -504,6 +504,19 @@ function setLang(l) {
 }
 window.setLang = setLang;
 
+const adminPanelContainer = document.querySelector("header > div");
+
+getDoc(doc(db, "users", user.uid)).then(docSnap => {
+  if (docSnap.exists() && docSnap.data().role === "admin") {
+    const adminBtn = document.createElement("button");
+    adminBtn.className = "home-btn";
+    adminBtn.textContent = "Admin Paneli";
+    adminBtn.style.marginRight = "10px";
+    adminBtn.onclick = () => location.href = "adminpanel.html"; // Admin panel sayfanın adını buraya yaz
+    adminPanelContainer.insertBefore(adminBtn, adminPanelContainer.firstChild);
+  }
+});
+
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
