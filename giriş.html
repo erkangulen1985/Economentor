@@ -138,6 +138,32 @@
 #installPrompt #closeInstallPrompt:hover {
   color: #ccc;
 }
+
+.install-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 31, 61, 0.95);
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+.install-banner:hover {
+  background-color: #003366;
+}
+.install-banner i {
+  font-size: 16px;
+}
   
 @media screen and (max-width: 480px) {  
   .container {  
@@ -214,6 +240,12 @@
   <p>Bu uygulamayı yüklemek ister misiniz?</p>  
   <button id="installButton">Yükle</button>  
 </div> 
+
+<div id="manualInstallBanner" class="install-banner">
+  <i class="fa-solid fa-download"></i>
+  <span>Uygulamayı Yüklemek İçin Tıklayın</span>
+  <i class="fa-solid fa-arrow-down-long"></i>
+</div>
   
   <script type="module">  
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";  
@@ -332,6 +364,14 @@ togglePassword.addEventListener("click", () => {
   // Simgeyi değiştir
   togglePassword.classList.toggle("fa-eye");
   togglePassword.classList.toggle("fa-eye-slash");
+});
+
+document.getElementById("manualInstallBanner").addEventListener("click", () => {
+  const promptBox = document.getElementById("installPrompt");
+  promptBox.style.display = "block";
+  setTimeout(() => {
+    promptBox.style.top = "0";
+  }, 100);
 });
 
 document.getElementById("closeInstallPrompt").addEventListener("click", () => {
