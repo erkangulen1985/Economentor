@@ -92,99 +92,100 @@
     <h1>ECONOMENTOR | BİZE AİT</h1>
   </header>
 
-<nav>
-  <a href="anasayfa.html" id="homeBtn" style="display: none;">Anasayfa</a>
-  <a href="index.html" id="loginRedirectBtn" style="display: none;">Giriş Sayfasına Dön</a>
-</nav>
+  <nav>
+    <a href="anasayfa.html">Anasayfa</a>
+  </nav>
 
   <div class="container" id="documentContainer">
     <p style="text-align:center;">Yükleniyor...</p>
   </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4b7502997814d"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4b7502997814d"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const supabase = createClient(
+  "https://rvwsvhgihatxxhnbmouw.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
+);
 
-  const supabase = createClient(
-    "https://rvwsvhgihatxxhnbmouw.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI"
-  );
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return location.href = "index.html";
+
     const container = document.getElementById("documentContainer");
+    container.innerHTML = "";
 
-    onAuthStateChanged(auth, async (user) => {
-      // Butonları yönet
-      document.getElementById("homeBtn").style.display = user ? "inline-block" : "none";
-      document.getElementById("loginRedirectBtn").style.display = user ? "none" : "inline-block";
+    const snapshot = await getDocs(collection(db, "documents"));
+    const sortedDocs = snapshot.docs.sort((a, b) => {
+  const dateA = a.data().uploadDate ? new Date(a.data().uploadDate) : new Date(0);
+  const dateB = b.data().uploadDate ? new Date(b.data().uploadDate) : new Date(0);
+  return dateB - dateA;
+});
 
-      // Belgeleri yükle
-      container.innerHTML = "";
-      const snapshot = await getDocs(collection(db, "documents"));
 
-      const sortedDocs = snapshot.docs.sort((a, b) => {
-        const dateA = a.data().uploadDate ? new Date(a.data().uploadDate) : new Date(0);
-        const dateB = b.data().uploadDate ? new Date(b.data().uploadDate) : new Date(0);
-        return dateB - dateA;
-      });
+    if (sortedDocs.length === 0) {
+      container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
+      return;
+    }
 
-      if (sortedDocs.length === 0) {
-        container.innerHTML = "<p>Henüz belge bulunmamaktadır.</p>";
+    for (const docSnap of sortedDocs) {
+      const data = docSnap.data();
+
+      if (!data.filePath) {
+        console.error("filePath eksik:", data.title);
+        container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`;
+        continue;
+      }
+
+      const { data: publicUrlData, error } = supabase
+        .storage
+        .from('documents')
+        .getPublicUrl(data.filePath); // Replace yok! Direkt kullanıyoruz.
+
+      const publicURL = publicUrlData?.publicUrl;
+
+      if (error) {
+        console.error("Supabase dosya alma hatası:", error.message);
+        container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`;
         return;
       }
 
-      for (const docSnap of sortedDocs) {
-        const data = docSnap.data();
+if (publicURL) {
+  const belgeDiv = document.createElement("div");
+  belgeDiv.classList.add("document");
 
-        if (!data.filePath) {
-          console.error("filePath eksik:", data.title);
-          container.innerHTML += `<p>Belge için dosya yolu eksik: ${data.title}</p>`;
-          continue;
-        }
+  const belgeAlinmaTarihi = data.uploadDate 
+    ? new Date(data.uploadDate).toLocaleDateString('tr-TR') 
+    : "Tarih bulunamadı";
 
-        const { data: publicUrlData, error } = supabase.storage.from('documents').getPublicUrl(data.filePath);
-        const publicURL = publicUrlData?.publicUrl;
-
-        if (error) {
-          console.error("Supabase dosya alma hatası:", error.message);
-          container.innerHTML += `<p>Supabase dosya alma hatası: ${error.message}</p>`;
-          continue;
-        }
-
-        if (publicURL) {
-          const belgeDiv = document.createElement("div");
-          belgeDiv.classList.add("document");
-
-          const belgeAlinmaTarihi = data.uploadDate
-            ? new Date(data.uploadDate).toLocaleDateString('tr-TR')
-            : "Tarih bulunamadı";
-
-          belgeDiv.innerHTML = `
-            <h2>${data.title}</h2>
-            <img src="${publicURL}">
-            <p class="description">${data.description}</p>
-            <p>Belge Alınma Tarihi: ${belgeAlinmaTarihi}</p>
-          `;
-          container.appendChild(belgeDiv);
-        }
-      }
-    });
+  belgeDiv.innerHTML = `
+    <h2>${data.title}</h2>
+    <img src="${publicURL}">
+    <p class="description">${data.description}</p>
+    <p>Belge Alınma Tarihi: ${belgeAlinmaTarihi}</p>
+  `;
+  container.appendChild(belgeDiv);
+}
+    }
   });
+});
 </script>
+<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
