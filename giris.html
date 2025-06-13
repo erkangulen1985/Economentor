@@ -74,28 +74,31 @@
       margin-bottom: 20px;
     }
 
-    .auth-buttons {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
+  .auth-buttons {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
 
-    .auth-buttons a {
-      background-color: #3498db;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
+  .auth-buttons a {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    transition: background-color 0.3s ease, transform 0.2s;
+  }
 
-    .auth-buttons a:hover {
-      background-color: #2980b9;
-    }
+  .auth-buttons a:hover {
+    background-color: #66ccff;
+    color: black;
+    transform: translateY(-2px);
+  }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(15px); }
