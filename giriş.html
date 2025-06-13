@@ -315,18 +315,18 @@ if ('serviceWorker' in navigator) {
   let installBoxShown = false;
 
 window.addEventListener("load", () => {
-  const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
-                          window.navigator.standalone === true;
+const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true;
 
-  if (isAppleDevice && !isStandaloneNow && !installBoxShown) {
-    const promptBox = document.getElementById("installPrompt");
-    promptBox.style.display = "block";
-    setTimeout(() => {
-      promptBox.style.top = "0";
-      updateBannerVisibility();
-    }, 300);
-    installBoxShown = true;
-  }
+if (!isStandaloneNow && !installBoxShown) {
+  const promptBox = document.getElementById("installPrompt");
+  promptBox.style.display = "block";
+  setTimeout(() => {
+    promptBox.style.top = "0";
+    updateBannerVisibility();
+  }, 300);
+  installBoxShown = true;
+}
 
   updateBannerVisibility();
 });
