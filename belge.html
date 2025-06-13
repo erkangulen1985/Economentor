@@ -126,7 +126,6 @@ const db = getFirestore(app);
 
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return location.href = "index.html";
 
     const container = document.getElementById("documentContainer");
     container.innerHTML = "";
@@ -185,7 +184,13 @@ if (publicURL) {
     }
   });
 });
+  onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("homeBtn").style.display = "inline-block";
+  } else {
+    document.getElementById("loginRedirectBtn").style.display = "inline-block";
+  }
+});
 </script>
-<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
