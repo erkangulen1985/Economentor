@@ -203,7 +203,7 @@ onAuthStateChanged(auth, async (user) => {
 
   document.getElementById("trainingList").addEventListener("click", async (e) => {
     if (!user) {
-      alert("Lütfen önce kayıt olup daha sonra yeniden talep etme işlemini gerçekleştiriniz.");
+      alert("Lütfen önce hesabınıza giriş yapıp (henüz hesabınız bulunmuyorsa kayıt olup) daha sonra yeniden talep etme işlemini gerçekleştiriniz!");
       return;
     }
 
