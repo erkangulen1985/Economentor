@@ -108,6 +108,23 @@
   padding: 5px;  
   border-radius: 50%;  
 }  
+
+  .back-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 80%;
+}
+
+.back-button:hover {
+  background: #0056b3;
+}
   
 @media screen and (max-width: 480px) {  
   .container {  
@@ -142,6 +159,10 @@
     right: 30px;  
     padding: 4px;  
   }  
+  .back-button {
+    width: 90% !important;
+    font-size: 15px;
+  }
 }  
   
 </style>  
@@ -166,6 +187,7 @@
     <i id="togglePassword" class="fa-solid fa-eye-slash eye-icon"></i>  
   </div>  
       <button type="submit">Giriş Yap</button>  
+      <button onclick="window.location.href='index.html'" class="back-button">Giriş Sayfasına Dön</button>
       <div id="errorMsg" style="color: red;"></div>  
     </form>  
     <a class="link" href="şifremiunuttum.html">Şifremi Unuttum</a>  
