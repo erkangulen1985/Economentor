@@ -320,6 +320,7 @@ if ('serviceWorker' in navigator) {
       promptBox.style.display = "block";
       setTimeout(() => {
         promptBox.style.top = "0";
+        updateBannerVisibility();
       }, 300);
       installBoxShown = true;
     }
@@ -389,6 +390,7 @@ document.getElementById("manualInstallBanner").addEventListener("click", () => {
 
 document.getElementById("closeInstallPrompt").addEventListener("click", () => {
   document.getElementById("installPrompt").style.top = "-300px"; // Daha fazla yukarı it
+  updateBannerVisibility();
 });
 
 </script>
