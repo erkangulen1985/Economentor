@@ -13,19 +13,20 @@
       padding: 0;
     }
 
-body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Dikey ortalama */
-  align-items: center;     /* Yatay ortalama */
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url('image1-büyük.png') no-repeat center center fixed;
-  background-size: cover;
-  animation: gradientShift 15s ease infinite;
-  color: white;
-  margin: 0;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image1-büyük.png') no-repeat center center fixed;
+      background-size: cover;
+      animation: gradientShift 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
     
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
@@ -71,16 +72,18 @@ nav a:hover {
   border-bottom: 2px solid #fff;
 }
 
-.guest-container {
-  background: rgba(0, 0, 0, 0.85);
-  padding: 40px 30px;
-  max-width: 800px;
-  width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-  text-align: center;
-  animation: fadeIn 1.2s ease;
-}
+    .guest-container {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 40px 30px;
+      max-width: 800px;
+      margin: 80px auto;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      text-align: center;
+      animation: fadeIn 1.2s ease;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
 
     .guest-container h2 {
       font-size: clamp(22px, 5vw, 30px);
@@ -121,11 +124,21 @@ nav a:hover {
     }
 
 @media (max-width: 600px) {
-  .guest-container {
-    margin: 20px;
-    padding: 20px;
-  }
-
+.guest-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 40px 30px;
+  max-width: 800px;
+  width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  text-align: center;
+  animation: fadeIn 1.2s ease;
+}
+  
   .blue-button {
     width: 100%;
     text-align: center;
