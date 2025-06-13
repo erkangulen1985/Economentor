@@ -383,7 +383,7 @@ window.saveDuyuru = async function () {
             try {
                 await setDoc(doc(db, "notifications", `${uid}_${Date.now()}`), {
                     to: uid,
-                    message: `Yeni bir duyuru yayınlandı: "${text}"`,
+                    message: `Yeni bir duyuru yayınlandı, lütfen göz atmayı unutmayın.`,
                     postId: null,
                     timestamp: Timestamp.now(),
                     read: false
