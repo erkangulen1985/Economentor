@@ -118,21 +118,31 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @media (max-width: 600px) {
-      .guest-container {
-        margin: 40px 20px;
-        padding: 20px;
-      }
+@media (max-width: 600px) {
+  .guest-container {
+    margin: 40px 20px;
+    padding: 20px;
+  }
 
-      .blue-button {
-        width: 100%;
-        text-align: center;
-      }
-      nav a {
-        font-size: 14px;
-        padding: 10px;
-      }
-    }
+  .blue-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  nav a {
+    font-size: 14px;
+    padding: 10px 16px;
+    margin: 6px 0;
+    width: 90%; /* veya %100 */
+    text-align: center;
+  }
+}
   </style>
 </head>
 <body>
