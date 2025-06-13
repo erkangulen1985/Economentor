@@ -927,7 +927,7 @@ const senderName = currentUserDoc.exists() ? currentUserDoc.data().username : "B
 
 await createNotificationForUser(
   selectedFriendId,
-  `"${senderName}" size "${text}" içerikli bir mesaj gönderdi.`,
+  `"${senderName}" size bir mesaj gönderdi.`,
   null
 );
 
@@ -941,16 +941,16 @@ await createNotificationForUser(
         notificationTitle = "\"Economentor(Admin)\" 📩 Yeni mesaj!";
       }
 
-      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid: selectedFriendId,
-          title: notificationTitle,
-          body: text,
-          url: "https://economentor.netlify.app"
-        })
-      });
+await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    uid: selectedFriendId,
+    title: notificationTitle,
+    body: `${senderName}: ${text}`, // 🔔 Bu satır artık "Gönderen: mesaj" olacak
+    url: "https://economentor.netlify.app"
+  })
+});
     } catch (err) {
       console.error("Bildirim gönderme hatası:", err);
     }
