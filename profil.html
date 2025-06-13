@@ -158,7 +158,7 @@ input {
    <button id="deleteDeviceInfoBtn" class="danger" style="width: auto; margin-bottom: 10px;">Cihazı Sil</button>
 <p id="deviceNote" style="color: #ddd; font-size: 13px; margin-top: 10px;">
   * Yalnızca "1 mobil" cihazdan bildirim alabilirsiniz.<br>
-  * Bildirim cihazı eklemek için lütfen bildirimlerinizi açıp tekrar giriş yapın.
+  * Bildirim cihazı eklemek için lütfen bildirimlerinizi açıp tekrar kullanıcı girişi yapın.
 </p>
    </div>
     
@@ -258,7 +258,7 @@ onAuthStateChanged(auth, async (user) => {
         fcmToken: deleteField()
       });
 
-      alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar giriş yapınız.");
+      alert("📴 Bildirim cihazı silindi. Yeni bir cihaz kaydı için hesaptan çıkış yapıp yeni cihaz ile tekrar kullanıcı girişi yapınız.");
       deviceDisplay.innerText = "🔕 Kayıtlı bir cihaz bulunamadı.";
       deleteDeviceBtn.style.display = "none";
     } catch (err) {
@@ -325,7 +325,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       location.href = "index.html";
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
-        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+        alert("Lütfen tekrar kullanıcı girişi yapıp yeniden deneyiniz.");
       } else {
         alert("Silme işlemi başarısız: " + err.message);
       }
