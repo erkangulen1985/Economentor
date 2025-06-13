@@ -325,7 +325,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       location.href = "index.html";
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
-        alert("Lütfen tekrar kullanıcı girişi yapıp yeniden deneyiniz.");
+        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
       } else {
         alert("Silme işlemi başarısız: " + err.message);
       }
@@ -410,7 +410,7 @@ document.getElementById("updateEmailBtn").addEventListener("click", async () => 
     await updateEmail(user, newEmail);
 
     // ✅ E-posta doğrulama eklendi
-    alert("Lütfen tekrar giriş yapınız.");
+    alert("Lütfen tekrar kullanıcı girişi yapınız.");
     document.getElementById("newEmail").value = newEmail;
   } catch (err) {
     if (err.code === "auth/email-already-in-use") {
