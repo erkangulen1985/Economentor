@@ -113,9 +113,11 @@
 </head>
 <body>
   <header>Economentor | Eğitimler</header>
-  <nav>
-    <a href="anasayfa.html">Anasayfa</a>
-  </nav>
+  
+<nav>
+  <a href="anasayfa.html" id="homeBtn" style="display: none;">Anasayfa</a>
+  <a href="index.html" id="loginRedirectBtn" style="display: none;">Giriş Sayfasına Dön</a>
+</nav>
 
   <div class="container" id="trainingList">
     <!-- Eğitimler buraya yüklenecek -->
@@ -182,26 +184,29 @@ async function loadTrainings() {
 let currentUsername = "";
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("Lütfen giriş yapınız.");
-    location.href = "index.html";
-    return;
-  }
-
-  const userId = user.uid;
-
-  // Kullanıcı bilgisi al, fullName çek
-  const userDoc = await getDoc(doc(db, "users", userId));
-  if (userDoc.exists()) {
-    currentUsername = userDoc.data().fullName || userDoc.data().username || userId;
+  if (user) {
+    document.getElementById("homeBtn").style.display = "inline-block";
   } else {
-    currentUsername = userId;
+    document.getElementById("loginRedirectBtn").style.display = "inline-block";
   }
 
   await loadTrainings();
+
+  const userId = user?.uid || "anonymous";
+  const userDoc = user ? await getDoc(doc(db, "users", userId)) : null;
+
+  currentUsername = userDoc?.exists()
+    ? (userDoc.data().fullName || userDoc.data().username || userId)
+    : "Ziyaretçi";
+
   await updateRequestButtons(userId);
 
   document.getElementById("trainingList").addEventListener("click", async (e) => {
+    if (!user) {
+      alert("Talep göndermek için giriş yapmalısınız.");
+      return;
+    }
+
     if (e.target.classList.contains("request-btn")) {
       const btn = e.target;
       const trainingId = btn.dataset.trainingId;
@@ -212,14 +217,11 @@ onAuthStateChanged(auth, async (user) => {
       const trainingTitle = trainingDoc.exists() ? trainingDoc.data().title : "Bilinmeyen Eğitim";
 
       if (requestSnap.exists()) {
-        // Talep iptal
         await deleteDoc(requestDocRef);
         btn.classList.remove("requested");
         btn.textContent = "Talep Et";
-
         await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitim talebini iptal etti.`, trainingId, "cancel");
       } else {
-        // Yeni talep
         await setDoc(requestDocRef, {
           userId,
           trainingId,
@@ -227,14 +229,13 @@ onAuthStateChanged(auth, async (user) => {
         });
         btn.classList.add("requested");
         btn.textContent = "Talep Edildi";
-
-        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir. İyi günler!");
-
+        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir.");
         await notifyAdmins(`${currentUsername} adlı kullanıcı "${trainingTitle}" eğitimini talep etti.`, trainingId, "new");
       }
     }
   });
 });
+
 
 async function notifyAdmins(message, trainingId, type) {
   const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
