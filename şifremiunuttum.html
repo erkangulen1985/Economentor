@@ -176,7 +176,7 @@
                     if (storedEmail === email) {
                         await sendPasswordResetEmail(auth, email);
                         alert("Şifremi sıfırlama talebiniz başarıyla gönderildi. Lütfen e-postanızı kontrol edin.");
-                        window.location.href = "index.html"; // Giriş sayfasına yönlendirme
+                        window.location.href = "giriş.html"; // Giriş sayfasına yönlendirme
                     } else {
                         errorBox.innerText = "E-posta adresinizle eşleşen bir kullanıcı bulunamadı!";
                     }
