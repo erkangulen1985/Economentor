@@ -316,7 +316,7 @@ if ('serviceWorker' in navigator) {
 
 window.addEventListener("load", () => {
   const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
-                          (window.navigator.standalone === true);
+                          window.navigator.standalone === true;
 
   if (isAppleDevice && !isStandaloneNow && !installBoxShown) {
     const promptBox = document.getElementById("installPrompt");
@@ -328,14 +328,14 @@ window.addEventListener("load", () => {
     installBoxShown = true;
   }
 
-  updateBannerVisibility(); // uygulama yüklüyse banner'ı da sakla
+  updateBannerVisibility();
 });
 
 window.addEventListener("beforeinstallprompt", (e) => {
   const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
-                          (window.navigator.standalone === true);
+                          window.navigator.standalone === true;
 
-  if (isStandaloneNow) return; // uygulama zaten yüklü, hiç gösterme
+  if (isStandaloneNow) return;
 
   e.preventDefault();
   deferredPrompt = e;
