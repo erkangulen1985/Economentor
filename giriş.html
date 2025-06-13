@@ -334,6 +334,7 @@ if ('serviceWorker' in navigator) {
       promptBox.style.display = "block";
       setTimeout(() => {
         promptBox.style.top = "0";
+        updateBannerVisibility(); // Eklendi
       }, 300);
       installBoxShown = true;
     }
@@ -345,12 +346,15 @@ if ('serviceWorker' in navigator) {
       const result = await deferredPrompt.userChoice;
       deferredPrompt = null;
       document.getElementById("installPrompt").style.top = "-300px";
+      updateBannerVisibility();
     } else if (isAppleDevice) {
       alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
       document.getElementById("installPrompt").style.top = "-300px";
+      updateBannerVisibility();
     } else {
       alert("Tarayıcınız yüklemeyi desteklemiyor veya uygulama zaten yüklü.");
       document.getElementById("installPrompt").style.top = "-300px";
+      updateBannerVisibility();
     }
   });
 
@@ -366,11 +370,20 @@ togglePassword.addEventListener("click", () => {
   togglePassword.classList.toggle("fa-eye-slash");
 });
 
+function updateBannerVisibility() {
+  const promptBox = document.getElementById("installPrompt");
+  const banner = document.getElementById("manualInstallBanner");
+
+  const isVisible = promptBox.style.top === "0px";
+  banner.style.display = isVisible ? "none" : "flex";
+}
+
 document.getElementById("manualInstallBanner").addEventListener("click", () => {
   const promptBox = document.getElementById("installPrompt");
   promptBox.style.display = "block";
   setTimeout(() => {
     promptBox.style.top = "0";
+    updateBannerVisibility();
   }, 100);
 });
 
