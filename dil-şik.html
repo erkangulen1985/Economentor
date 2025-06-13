@@ -181,17 +181,22 @@ input::placeholder {
     let isGuest = false;
 
 onAuthStateChanged(auth, async (user) => {
+  const navLinks = document.getElementById("navLinks");
+
   if (user) {
     const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       currentUsername = docSnap.data().username || "Bilinmiyor";
     }
+
+    navLinks.innerHTML = `<a href="anasayfa.html">Anasayfa</a>`;
   } else {
     isGuest = true;
-    // Ziyaretçiyse ad/soyad ve e-posta alanlarını göster
     document.getElementById("nameField").style.display = "block";
     document.getElementById("emailField").style.display = "block";
+
+    navLinks.innerHTML = `<a href="index.html">Giriş Sayfasına Dön</a>`;
   }
 });
 
