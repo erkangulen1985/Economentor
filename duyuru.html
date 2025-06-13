@@ -122,7 +122,7 @@ header h1 {
   max-width: 90%;
   font-size: 16px;
 ">
-  <p style="margin: 0 0 10px;">🔔 Bildirim almak istiyorsanız önce uygulamayı yüklemeniz gerekiyor (Giriş sayfasına dönün)</p>
+  <p style="margin: 0 0 10px;">🔔 Bildirim almak istiyorsanız önce uygulamayı yüklemeniz gerekiyor (Kullanıcı girişi yaptığınız sayfaya dönün)</p>
   <button onclick="this.parentElement.style.display='none'" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px;">Tamam</button>
 </div>    <div id="notificationPrompt" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#001f3d; color:white; padding:20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.5); z-index:1000; text-align:center;">  
     <p>📢 Bildirim almak ister misiniz?</p>  
@@ -316,7 +316,7 @@ onAuthStateChanged(auth, async (user) => {
   // Firestore'a bildirim ayarlandı mesajını ekle  
   await setDoc(doc(db, "notifications", user.uid + "_notificationSetup"), {  
     to: user.uid,  
-    message: "Bildirimleriniz ayarlandı.(Eğer bildirimleriniz ayarlanırken kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)",  
+    message: "Bildirimleriniz ayarlandı.(Eğer bildirimleriniz ayarlanırken kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden kullanıcı girişi yapınız.)",  
     timestamp: serverTimestamp(),  
     read: false,  
     type: "notificationSetup"  
@@ -326,7 +326,7 @@ onAuthStateChanged(auth, async (user) => {
   await minWaitPromise;  
   
   // Kullanıcıya mesaj göster  
-  fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu yazı kaybolduktan sonra anasayfaya dönebilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden giriş sağlayınız.)";  
+  fcmStatusDiv.textContent = "Bildirimleriniz ayarlandı, bu yazı kaybolduktan sonra anasayfaya dönebilirsiniz.(Eğer şu anda kullandığınız cihaz bildirim almak istediğiniz cihaz değilse ayarlar üzerinden cihazınızı kaldırıp doğru cihaz ile yeniden kullanıcı girişi yapınız.)";  
   
   setTimeout(() => {  
     hideSetupMessage();  
