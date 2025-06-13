@@ -21,9 +21,19 @@ body {
   background-size: cover;
   animation: gradientShift 15s ease infinite;
   color: white;
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.wrapper {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 20px; /* header-nav-container arası boşluk */
+  text-align: center;
 }
     
     @keyframes gradientShift {
@@ -71,16 +81,7 @@ nav a:hover {
 }
 
 .guest-container {
-  background: rgba(0, 0, 0, 0.85);
-  padding: 40px 30px;
-  max-width: 800px;
-  margin: 120px auto 40px auto; /* Yukarıdan 120px boşluk */
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-  text-align: center;
-  animation: fadeIn 1.2s ease;
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
+  margin: 0 auto;
 }
 
     .guest-container h2 {
@@ -130,6 +131,17 @@ nav a:hover {
     }
 
 @media (max-width: 600px) {
+    body {
+    padding: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .wrapper {
+    margin-top: 40px;
+    gap: 10px;
+  }
+  
   .guest-container {
     margin: 40px 20px;
     padding: 20px;
@@ -159,18 +171,13 @@ nav a:hover {
   <a href="dil-şik.html"><i class="fas fa-comment-dots"></i> Dilek & Şikayet</a>
 </nav>
 
-<main class="main-content">
-  <div class="guest-container">
-    <h2>Gelişime Açılan Kapı: Economentor’a Hoş Geldiniz</h2>
-    <p style="margin-top: 10px; font-size: 17px; color: #ddd;">
-      İçeriklere ulaşmak ve daha fazlası için giriş yapın ya da kaydolun.
-    </p>
-    <div class="button-group">
-      <a href="giriş.html" class="blue-button"><i class="fas fa-sign-in-alt"></i> Giriş Yap</a>
-      <a href="kayitol.html" class="blue-button"><i class="fas fa-user-plus"></i> Kayıt Ol</a>
-    </div>
+<body>
+  <div class="wrapper">
+    <header>...</header>
+    <nav>...</nav>
+    <div class="guest-container">...</div>
   </div>
-</main>
+</body>
 
 </body>
 </html>
