@@ -13,20 +13,19 @@
       padding: 0;
     }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('image1-büyük.png') no-repeat center center fixed;
-      background-size: cover;
-      animation: gradientShift 15s ease infinite;
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      height: 100%;
-    }
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Dikey ortalama */
+  align-items: center;     /* Yatay ortalama */
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: url('image1-büyük.png') no-repeat center center fixed;
+  background-size: cover;
+  animation: gradientShift 15s ease infinite;
+  color: white;
+  margin: 0;
+}
     
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
