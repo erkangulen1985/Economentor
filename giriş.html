@@ -28,17 +28,18 @@
       z-index: -1;  
     }  
   
-    .container {  
-      position: relative;  
-      top: 50%;  
-      left: 50%;  
-      transform: translate(-50%, -50%);  
-      background: rgba(0, 0, 0, 0.7);  
-      padding: 30px;  
-      border-radius: 10px;  
-      text-align: center;  
-      width: 350px;  
-    }  
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 350px;
+  box-sizing: border-box;
+} 
   
     input, button {  
       width: 80%;  
@@ -110,13 +111,11 @@
 }  
   
 @media screen and (max-width: 480px) {  
-  .container {  
-    width: 90% !important;  
-    padding: 20px;  
-    transform: translate(-50%, -50%);  
-    left: 50%;  
-    top: 50%;  
-  }  
+  .container {
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+  }
   
   input, button {  
     width: 90% !important;  
