@@ -13,15 +13,21 @@
       padding: 0;
     }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('image1-büyük.png') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('image1-büyük.png') repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    animation: scrollBg 60s linear infinite;
+    color: white;
+  }
+
+  @keyframes scrollBg {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+  }
 
     header {
       background: rgba(0, 0, 0, 0.75);
