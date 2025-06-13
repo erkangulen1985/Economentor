@@ -25,6 +25,15 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.guest-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 140px); /* 140px tahmini header+nav yüksekliği */
+  padding: 20px;
+}
     
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
@@ -159,7 +168,7 @@ nav a:hover {
   <a href="dil-şik.html"><i class="fas fa-comment-dots"></i> Dilek & Şikayet</a>
 </nav>
 
-<main class="main-content">
+<div class="guest-wrapper">
   <div class="guest-container">
     <h2>Gelişime Açılan Kapı: Economentor’a Hoş Geldiniz</h2>
     <p style="margin-top: 10px; font-size: 17px; color: #ddd;">
@@ -170,7 +179,7 @@ nav a:hover {
       <a href="kayitol.html" class="blue-button"><i class="fas fa-user-plus"></i> Kayıt Ol</a>
     </div>
   </div>
-</main>
+</div>
 
 </body>
 </html>
