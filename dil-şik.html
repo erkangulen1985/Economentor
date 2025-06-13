@@ -169,92 +169,80 @@ textarea::placeholder {
         document.getElementById("nameField").style.display = "block";
         document.getElementById("emailField").style.display = "block";
       }
-
-window.submitFeedback = async function () {
-  const message = document.getElementById("message").value.trim();
-
-  let username = currentUsername;
-  if (!username) {
-    const name = document.getElementById("nameField").value.trim();
-    const email = document.getElementById("emailField").value.trim();
-
-    if (!name || !email || !message) {
-      alert("Lütfen tüm alanları doldurun.");
-      return;
-    }
-
-    // Ziyaretçi kullanıcı adı formatı
-    username = `${name} (${email})`;
-  } else {
-    if (!message) {
-      alert("Lütfen mesajınızı yazın.");
-      return;
-    }
-  }
-
-  const timestamp = new Date();
-  const readable = timestamp.toLocaleString("tr-TR");
-
-  await addDoc(collection(db, "feedback"), {
-    username,
-    message,
-    timestamp: serverTimestamp(),
-    readableTime: readable
-  });
-
-  // Adminleri çek
-  const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
-  const adminsSnap = await getDocs(adminsQuery);
-
-  // Adminlere bildirim gönder
-  for (const adminDoc of adminsSnap.docs) {
-    const adminId = adminDoc.id;
-    if (adminId === auth.currentUser.uid) continue; // Eğer admin kendisi ise atla
-
-// adminMessage tanımı:
-const adminMessage = `${username} adlı kullanıcı dilek-şikayette bulundu.`;
-
-// bildirim gönder kısmı:
-for (const adminDoc of adminsSnap.docs) {
-  const adminId = adminDoc.id;
-
-  // Ziyaretçiyse uid kontrolü atla
-  if (auth.currentUser && adminId === auth.currentUser.uid) continue;
-
-  // Bildirim Firestore
-  await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
-    to: adminId,
-    from: auth.currentUser ? auth.currentUser.uid : null,
-    message: adminMessage,
-    timestamp: serverTimestamp(),
-    read: false,
-    type: "feedback"
-  });
-
-  // FCM gönder
-  try {
-    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: adminId,
-        title: "\"Economentor\" 📝 Yeni Dilek-Şikayet!",
-        body: adminMessage,
-        url: "https://economentor.netlify.app/dilek-şikayet.html"
-      })
     });
-  } catch (err) {
-    console.error("Admin FCM bildirimi başarısız:", err);
-  }
-}
 
-  alert("Mesajınız gönderildi. Teşekkür ederiz!");
-  document.getElementById("message").value = "";
-  if (!currentUsername) {
-    document.getElementById("nameField").value = "";
-    document.getElementById("emailField").value = "";
-  }
-};
+  window.submitFeedback = async function () {
+    const message = document.getElementById("message").value.trim();
+
+    let username = currentUsername;
+    if (!username) {
+      const name = document.getElementById("nameField").value.trim();
+      const email = document.getElementById("emailField").value.trim();
+
+      if (!name || !email || !message) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+
+      username = `${name} (${email})`;
+    } else {
+      if (!message) {
+        alert("Lütfen mesajınızı yazın.");
+        return;
+      }
+    }
+
+    const timestamp = new Date();
+    const readable = timestamp.toLocaleString("tr-TR");
+
+    await addDoc(collection(db, "feedback"), {
+      username,
+      message,
+      timestamp: serverTimestamp(),
+      readableTime: readable
+    });
+
+    const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
+    const adminsSnap = await getDocs(adminsQuery);
+
+    for (const adminDoc of adminsSnap.docs) {
+      const adminId = adminDoc.id;
+      if (auth.currentUser && adminId === auth.currentUser.uid) continue;
+
+      const adminMessage = `${username} adlı kullanıcı dilek-şikayette bulundu.`;
+
+      await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+        to: adminId,
+        from: auth.currentUser ? auth.currentUser.uid : null,
+        message: adminMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        type: "feedback"
+      });
+
+      try {
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: adminId,
+            title: "\"Economentor\" 📝 Yeni Dilek-Şikayet!",
+            body: adminMessage,
+            url: "https://economentor.netlify.app/dilek-şikayet.html"
+          })
+        });
+      } catch (err) {
+        console.error("Admin FCM bildirimi başarısız:", err);
+      }
+    }
+
+    alert("Mesajınız gönderildi. Teşekkür ederiz!");
+    document.getElementById("message").value = "";
+    if (!currentUsername) {
+      document.getElementById("nameField").value = "";
+      document.getElementById("emailField").value = "";
+    }
+  };
 
 </script>
 </body>
