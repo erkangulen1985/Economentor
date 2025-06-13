@@ -375,18 +375,18 @@ function updateBannerVisibility() {
   const promptBox = document.getElementById("installPrompt");
   const banner = document.getElementById("manualInstallBanner");
 
-  const isVisible = promptBox.style.top === "0px";
-  banner.style.display = isVisible ? "none" : "flex";
-}
+  const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
+                          (window.navigator.standalone === true);
 
-document.getElementById("manualInstallBanner").addEventListener("click", () => {
-  const promptBox = document.getElementById("installPrompt");
-  promptBox.style.display = "block";
-  setTimeout(() => {
-    promptBox.style.top = "0";
-    updateBannerVisibility();
-  }, 100);
-});
+  const isVisible = promptBox.style.top === "0px";
+  
+  // 🔧 Yalnızca yüklenmemişse göster
+  if (isStandaloneNow) {
+    banner.style.display = "none";
+  } else {
+    banner.style.display = isVisible ? "none" : "flex";
+  }
+}
 
 document.getElementById("closeInstallPrompt").addEventListener("click", () => {
   document.getElementById("installPrompt").style.top = "-300px"; // Daha fazla yukarı it
