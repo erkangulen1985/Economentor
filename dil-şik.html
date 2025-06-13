@@ -174,7 +174,6 @@ onAuthStateChanged(auth, async (user) => {
 
 window.submitFeedback = async function () {
   const message = document.getElementById("message").value.trim();
-
   if (!message) {
     alert("Lütfen mesajınızı yazın.");
     return;
@@ -182,12 +181,18 @@ window.submitFeedback = async function () {
 
   let username;
 
-  if (isGuest) {
+  if (!auth.currentUser) {
     const name = document.getElementById("nameField").value.trim();
     const email = document.getElementById("emailField").value.trim();
 
+    // ✅ E-posta format kontrolü
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!name || !email) {
       alert("Lütfen ad-soyad ve e-posta bilgilerinizi girin.");
+      return;
+    }
+    if (!emailPattern.test(email)) {
+      alert("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
 
