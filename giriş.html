@@ -314,32 +314,42 @@ if ('serviceWorker' in navigator) {
   let deferredPrompt = null;
   let installBoxShown = false;
 
-  window.addEventListener("load", () => {
-    if (isAppleDevice && !isInStandalone && !installBoxShown) {
-      const promptBox = document.getElementById("installPrompt");
-      promptBox.style.display = "block";
-      setTimeout(() => {
-        promptBox.style.top = "0";
-        updateBannerVisibility();
-      }, 300);
-      installBoxShown = true;
-    }
-  });
+window.addEventListener("load", () => {
+  const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
+                          (window.navigator.standalone === true);
 
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
+  if (isAppleDevice && !isStandaloneNow && !installBoxShown) {
+    const promptBox = document.getElementById("installPrompt");
+    promptBox.style.display = "block";
+    setTimeout(() => {
+      promptBox.style.top = "0";
+      updateBannerVisibility();
+    }, 300);
+    installBoxShown = true;
+  }
 
-    if (!installBoxShown) {
-      const promptBox = document.getElementById("installPrompt");
-      promptBox.style.display = "block";
-      setTimeout(() => {
-        promptBox.style.top = "0";
-        updateBannerVisibility(); // Eklendi
-      }, 300);
-      installBoxShown = true;
-    }
-  });
+  updateBannerVisibility(); // uygulama yüklüyse banner'ı da sakla
+});
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches ||
+                          (window.navigator.standalone === true);
+
+  if (isStandaloneNow) return; // uygulama zaten yüklü, hiç gösterme
+
+  e.preventDefault();
+  deferredPrompt = e;
+
+  if (!installBoxShown) {
+    const promptBox = document.getElementById("installPrompt");
+    promptBox.style.display = "block";
+    setTimeout(() => {
+      promptBox.style.top = "0";
+      updateBannerVisibility();
+    }, 300);
+    installBoxShown = true;
+  }
+});
 
   document.getElementById("installButton").addEventListener("click", async () => {
     if (deferredPrompt) {
