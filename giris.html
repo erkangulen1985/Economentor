@@ -24,7 +24,10 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      height: 100%;
     }
+    
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -78,6 +81,8 @@ nav a:hover {
       box-shadow: 0 0 20px rgba(0,0,0,0.6);
       text-align: center;
       animation: fadeIn 1.2s ease;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
     }
 
     .guest-container h2 {
