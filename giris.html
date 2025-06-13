@@ -13,21 +13,23 @@
       padding: 0;
     }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url('image1-büyük.png')  no-repeat center top;
-  background-size: cover;
-  background-attachment: fixed;
-  animation: scrollBg 10s linear infinite alternate;
-  color: white;
-}
-
-@keyframes scrollBg {
-  0% { background-position: 0 0; }
-  100% { background-position: 100% 0; }
-}
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image1-büyük.png') no-repeat center center fixed;
+      background-size: cover;
+      animation: gradientShift 15s ease infinite;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
     header {
       background: rgba(0, 0, 0, 0.75);
