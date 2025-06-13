@@ -103,9 +103,10 @@
 
   <header>ECONOMENTOR | Hakkımızda</header>
 
-  <nav>
-    <a href="anasayfa.html" class="blue-button"><i class="fas fa-home"></i> Anasayfa</a>
-  </nav>
+<nav>
+  <a href="anasayfa.html" class="blue-button" id="homeBtn" style="display: none;"><i class="fas fa-home"></i> Anasayfa</a>
+  <a href="index.html" class="blue-button" id="loginRedirectBtn" style="display: none;"><i class="fas fa-sign-in-alt"></i> Giriş Sayfasına Dön</a>
+</nav>
   
   <div class="container">
     <div class="about-box">
@@ -144,6 +145,14 @@
     }
 
     loadAboutText();
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("homeBtn").style.display = "inline-block";
+  } else {
+    document.getElementById("loginRedirectBtn").style.display = "inline-block";
+  }
+});
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
