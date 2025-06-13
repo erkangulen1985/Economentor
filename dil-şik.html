@@ -127,7 +127,8 @@ textarea::placeholder {
   </nav>
 
   <div class="container">
-    <h2>Dilek & Şikayet Formu</h2>
+    <input type="text" id="nameField" placeholder="Ad Soyad" style="display:none; margin-bottom: 10px; padding: 10px; width: 100%; border-radius: 8px; font-size: 15px;"><br>
+    <input type="email" id="emailField" placeholder="E-posta" style="display:none; margin-bottom: 10px; padding: 10px; width: 100%; border-radius: 8px; font-size: 15px;"><br>
     <textarea id="message" placeholder="Lütfen mesajınızı buraya yazın..."></textarea><br>
     <button onclick="submitFeedback()">Gönder</button>
   </div>
@@ -163,23 +164,40 @@ textarea::placeholder {
         if (docSnap.exists()) {
           currentUsername = docSnap.data().username || "Bilinmiyor";
         }
+      } else {
+        // Ziyaretçiyse, ad/soyad ve e-posta alanlarını göster
+        document.getElementById("nameField").style.display = "block";
+        document.getElementById("emailField").style.display = "block";
       }
-    });
 
 window.submitFeedback = async function () {
   const message = document.getElementById("message").value.trim();
-  if (!message) {
-    alert("Lütfen mesajınızı yazın.");
-    return;
+
+  let username = currentUsername;
+  if (!username) {
+    const name = document.getElementById("nameField").value.trim();
+    const email = document.getElementById("emailField").value.trim();
+
+    if (!name || !email || !message) {
+      alert("Lütfen tüm alanları doldurun.");
+      return;
+    }
+
+    // Ziyaretçi kullanıcı adı formatı
+    username = `${name} (${email})`;
+  } else {
+    if (!message) {
+      alert("Lütfen mesajınızı yazın.");
+      return;
+    }
   }
 
   const timestamp = new Date();
   const readable = timestamp.toLocaleString("tr-TR");
 
-  // Feedback kaydı
   await addDoc(collection(db, "feedback"), {
-    username: currentUsername,
-    message: message,
+    username,
+    message,
     timestamp: serverTimestamp(),
     readableTime: readable
   });
@@ -193,10 +211,10 @@ window.submitFeedback = async function () {
     const adminId = adminDoc.id;
     if (adminId === auth.currentUser.uid) continue; // Eğer admin kendisi ise atla
 
-    const adminMessage = `${currentUsername} adlı kullanıcı dilek-şikayette bulundu.`;
+    const adminMessage = ${currentUsername} adlı kullanıcı dilek-şikayette bulundu.;
 
     // Firestore bildirim ekle
-    await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+    await setDoc(doc(db, "notifications", ${adminId}_${Date.now()}), {
       to: adminId,
       from: auth.currentUser.uid,
       message: adminMessage,
@@ -224,8 +242,12 @@ window.submitFeedback = async function () {
 
   alert("Mesajınız gönderildi. Teşekkür ederiz!");
   document.getElementById("message").value = "";
+  if (!currentUsername) {
+    document.getElementById("nameField").value = "";
+    document.getElementById("emailField").value = "";
+  }
 };
+
 </script>
-<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
