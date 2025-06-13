@@ -154,53 +154,57 @@ textarea::placeholder {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    let currentUsername = "";
+    let isGuest = false;
 
-    let currentUsername = "Bilinmiyor";
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      currentUsername = docSnap.data().username || "Bilinmiyor";
+    }
+  } else {
+    isGuest = true;
+    // Ziyaretçiyse ad/soyad ve e-posta alanlarını göster
+    document.getElementById("nameField").style.display = "block";
+    document.getElementById("emailField").style.display = "block";
+  }
+});
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          currentUsername = docSnap.data().username || "Bilinmiyor";
-        }
-      } else {
-        // Ziyaretçiyse, ad/soyad ve e-posta alanlarını göster
-        document.getElementById("nameField").style.display = "block";
-        document.getElementById("emailField").style.display = "block";
-      }
-    });
+window.submitFeedback = async function () {
+  const message = document.getElementById("message").value.trim();
 
-  window.submitFeedback = async function () {
-    const message = document.getElementById("message").value.trim();
+  if (!message) {
+    alert("Lütfen mesajınızı yazın.");
+    return;
+  }
 
-    let username = currentUsername;
-    if (!username) {
-      const name = document.getElementById("nameField").value.trim();
-      const email = document.getElementById("emailField").value.trim();
+  let username;
 
-      if (!name || !email || !message) {
-        alert("Lütfen tüm alanları doldurun.");
-        return;
-      }
+  if (isGuest) {
+    const name = document.getElementById("nameField").value.trim();
+    const email = document.getElementById("emailField").value.trim();
 
-      username = `${name} (${email})`;
-    } else {
-      if (!message) {
-        alert("Lütfen mesajınızı yazın.");
-        return;
-      }
+    if (!name || !email) {
+      alert("Lütfen ad-soyad ve e-posta bilgilerinizi girin.");
+      return;
     }
 
-    const timestamp = new Date();
-    const readable = timestamp.toLocaleString("tr-TR");
+    username = `${name} (${email})`;
+  } else {
+    username = currentUsername || "Bilinmiyor";
+  }
 
-    await addDoc(collection(db, "feedback"), {
-      username,
-      message,
-      timestamp: serverTimestamp(),
-      readableTime: readable
-    });
+  const timestamp = new Date();
+  const readable = timestamp.toLocaleString("tr-TR");
+
+  await addDoc(collection(db, "feedback"), {
+    username,
+    message,
+    timestamp: serverTimestamp(),
+    readableTime: readable
+  });
 
     const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
     const adminsSnap = await getDocs(adminsQuery);
