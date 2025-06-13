@@ -312,13 +312,13 @@ if ('serviceWorker' in navigator) {
       deferredPrompt.prompt();
       const result = await deferredPrompt.userChoice;
       deferredPrompt = null;
-      document.getElementById("installPrompt").style.top = "-200px";
+      document.getElementById("installPrompt").style.top = "-300px";
     } else if (isAppleDevice) {
       alert(`"Economentor" uygulamasını yüklemek için:\n\n1. Safari'de bu sayfayı açın.\n2. Alttaki paylaş (📤) simgesine dokunun.\n3. "Ana Ekrana Ekle" seçeneğini seçin.`);
-      document.getElementById("installPrompt").style.top = "-200px";
+      document.getElementById("installPrompt").style.top = "-300px";
     } else {
       alert("Tarayıcınız yüklemeyi desteklemiyor veya uygulama zaten yüklü.");
-      document.getElementById("installPrompt").style.top = "-200px";
+      document.getElementById("installPrompt").style.top = "-300px";
     }
   });
 
@@ -335,7 +335,7 @@ togglePassword.addEventListener("click", () => {
 });
 
 document.getElementById("closeInstallPrompt").addEventListener("click", () => {
-  document.getElementById("installPrompt").style.top = "-200px";
+  document.getElementById("installPrompt").style.top = "-300px"; // Daha fazla yukarı it
 });
 
 </script>
