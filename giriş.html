@@ -414,6 +414,11 @@ document.getElementById("manualInstallBanner").addEventListener("click", () => {
   }, 100);
 });
 
+document.getElementById("closeInstallPrompt").addEventListener("click", () => {
+  document.getElementById("installPrompt").style.top = "-300px"; // Daha fazla yukarı it
+  updateBannerVisibility();
+});
+
 </script>
 </body>  
 </html> 
