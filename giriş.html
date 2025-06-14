@@ -405,9 +405,13 @@ function updateBannerVisibility() {
   }
 }
 
-document.getElementById("closeInstallPrompt").addEventListener("click", () => {
-  document.getElementById("installPrompt").style.top = "-300px"; // Daha fazla yukarı it
-  updateBannerVisibility();
+document.getElementById("manualInstallBanner").addEventListener("click", () => {
+  const promptBox = document.getElementById("installPrompt");
+  promptBox.style.display = "block";
+  setTimeout(() => {
+    promptBox.style.top = "0";
+    updateBannerVisibility();
+  }, 100);
 });
 
 </script>
