@@ -140,23 +140,22 @@
 
 .login-button {
   display: inline-block;
-  background: linear-gradient(to right, #4e54c8, #8f94fb); /* Lacivert-Mor geçişli */
+  background: linear-gradient(to right, #0f2027, #2c5364); /* koyu lacivert-mavi */
   color: white;
   padding: 10px 24px;
-  border-radius: 30px; /* Kapsül görünüm */
+  border-radius: 30px;
   font-size: 15px;
   font-weight: bold;
-  margin-top: 16px;
+  margin-top: 20px;
   text-decoration: none;
   box-shadow: 0 3px 8px rgba(0,0,0,0.3);
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .login-button:hover {
-  background: linear-gradient(to right, #667eea, #764ba2);
+  background: linear-gradient(to right, #1c3c5a, #537895);
   transform: translateY(-2px);
 }
-
 
     @media (max-width: 480px) {
       body { flex-direction: column; justify-content: flex-start; padding: 40px 10px; }
@@ -197,7 +196,7 @@
 <input type="password" id="confirmPassword" placeholder="Şifre Tekrar" required>
       <button type="submit" id="registerBtn">Kayıt Ol</button>
       <a href="giriş.html" class="login-button">Giriş Yap</a>
-      <a href="index.html" class="link">Geri Dön</a>
+      <a href="index.html" class="link" style="margin-top: 40px;">Geri Dön</a>
     </form>
   </div>
 
