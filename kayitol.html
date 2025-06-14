@@ -292,61 +292,51 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  try {
-    // Kullanıcı adı kontrolü
-    const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
-    const querySnapshot = await getDocs(q);
+try {
+  // Kullanıcı adı kontrolü
+  const q = query(collection(db, "users"), where("username_lowercase", "==", usernameLower));
+  const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
-      errorBox.style.display = "block";
-      return;
-    }
-
-    // E-posta kontrolü (doğru yere taşındı!)
-    const emailQuery = query(collection(db, "users"), where("email", "==", email));
-    const emailSnapshot = await getDocs(emailQuery);
-
-    if (!emailSnapshot.empty) {
-      errorBox.innerText = "Bu e-posta adresi zaten kayıtlı.";
-      errorBox.style.display = "block";
-      return;
-    }
-
-    // Kayıt
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    await setDoc(doc(db, "users", user.uid), {
-      fullName,
-      dob,
-      username,
-      username_lowercase: usernameLower,
-      email,
-      registrationDate: Timestamp.fromDate(new Date()),
-      role: "user"
-    });
-
-    successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
-    successBox.style.display = "block";
-
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 2000);
-
-  } catch (error) {
-    let message = "Bilinmeyen hata!";
-    if (error.code === 'auth/email-already-in-use') {
-      message = "Bu e-posta adresi zaten kullanımda.";
-    } else if (error.code === 'auth/invalid-email') {
-      message = "Geçersiz e-posta adresi.";
-    } else if (error.code === 'auth/weak-password') {
-      message = "Şifre çok zayıf.";
-    }
-    errorBox.innerText = message;
+  if (!querySnapshot.empty) {
+    errorBox.innerText = "Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.";
     errorBox.style.display = "block";
+    return;
   }
-});
+
+  // 🔐 E-Posta ile kayıt denemesi
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+
+  // Firestore'a kaydetme
+  await setDoc(doc(db, "users", user.uid), {
+    fullName,
+    dob,
+    username,
+    username_lowercase: usernameLower,
+    email,
+    registrationDate: Timestamp.fromDate(new Date()),
+    role: "user"
+  });
+
+  successBox.innerText = "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.";
+  successBox.style.display = "block";
+
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 2000);
+
+} catch (error) {
+  let message = "Bilinmeyen hata!";
+  if (error.code === 'auth/email-already-in-use') {
+    message = "Bu e-posta adresi zaten kullanımda.";
+  } else if (error.code === 'auth/invalid-email') {
+    message = "Geçersiz e-posta adresi.";
+  } else if (error.code === 'auth/weak-password') {
+    message = "Şifre çok zayıf.";
+  }
+  errorBox.innerText = message;
+  errorBox.style.display = "block";
+}
 
 const togglePassword = document.getElementById("togglePassword");
 const passwordInput = document.getElementById("password");
