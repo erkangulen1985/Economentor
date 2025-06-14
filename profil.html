@@ -320,34 +320,27 @@ document.getElementById("deleteAccountBtn").addEventListener("click", async () =
 
   try {
     const user = auth.currentUser;
+    const uid = user.uid; // 🔐 UID'yi burada al
 
-    // 👇 Yeniden kimlik doğrulama önerilir (önceden yapılmadıysa)
-    const password = prompt("Lütfen şifrenizi girin:");
+    const password = prompt("Hesabınızı silmek için şifrenizi girin:");
     if (!password) return alert("İşlem iptal edildi.");
 
     const credential = EmailAuthProvider.credential(user.email, password);
     await reauthenticateWithCredential(user, credential);
 
-    // 1️⃣ Önce Authentication'dan sil
-    await deleteUser(user);
+    await deleteUser(user); // 1️⃣ Önce Authentication’dan sil
+    await deleteDoc(doc(db, "users", uid)); // 2️⃣ Sonra Firestore’dan sil
 
-    // 2️⃣ Başarıyla silindiyse Firestore'dan da sil
-    await deleteDoc(doc(db, "users", user.uid));
-
-    alert("Hesabınız tamamen silindi.");
+    alert("Hesabınız başarıyla silindi.");
     location.href = "index.html";
   } catch (error) {
-    // Firebase Auth silinemediyse → hiçbir şey silinmedi
     if (error.code === "auth/requires-recent-login") {
-      alert("🔒 Lütfen tekrar giriş yapıp yeniden deneyiniz.");
-    } else if (error.code === "auth/wrong-password") {
-      alert("❌ Girdiğiniz şifre hatalı.");
+      alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
     } else {
       alert("Silme işlemi başarısız: " + error.message);
     }
   }
 });
-
 
   // Şifre değiştir
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
