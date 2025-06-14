@@ -200,10 +200,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
-
+  currentUser = user;
   const uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
 
@@ -316,11 +317,16 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
   // Hesap sil
 document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    alert("Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.");
+    return;
+  }
+
   if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
 
   try {
-    await deleteDoc(doc(db, "users", auth.currentUser.uid));
-    await deleteUser(auth.currentUser);
+    await deleteDoc(doc(db, "users", currentUser.uid));
+    await deleteUser(currentUser);
     alert("Hesabınız silindi.");
     location.href = "index.html";
   } catch (err) {
