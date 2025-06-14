@@ -135,12 +135,12 @@
   cursor: pointer;
   color: white;
 }
+    
 #installPrompt #closeInstallPrompt:hover {
   color: #ccc;
 }
 
 .install-banner {
-  display: none;
   position: fixed;
   top: 0;
   left: 50%;
@@ -159,9 +159,15 @@
   gap: 8px;
   transition: background 0.3s;
 }
+
+  #manualInstallBanner {
+    display: none;
+  }
+    
 .install-banner:hover {
   background-color: #003366;
 }
+    
 .install-banner i {
   font-size: 16px;
 }
