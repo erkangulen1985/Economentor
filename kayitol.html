@@ -47,16 +47,6 @@
 
     input { background: #2a2a2a; color: white; }
 
-    button {
-      background: linear-gradient(to right, #6a11cb, #2575fc);
-      color: white; font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: linear-gradient(to right, #ffcc70, #6a11cb);
-    }
-
 #errorMsg {
   color: #fff;
   background: rgba(255, 0, 0, 0.3); /* kırmızı arka plan */
@@ -154,6 +144,25 @@
 
 .login-button:hover {
   background: linear-gradient(to right, #f57c00, #fdd835);
+  transform: translateY(-2px);
+}
+
+#registerBtn {
+  background: linear-gradient(to right, #2196F3, #0D47A1); /* Açık mavi → lacivert */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  width: 100%;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+#registerBtn:hover {
+  background: linear-gradient(to right, #1976D2, #0B3C91); /* Daha koyu mavi geçiş */
   transform: translateY(-2px);
 }
     
