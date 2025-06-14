@@ -138,6 +138,26 @@
     #cancelModalBtn { background: #ccc; color: #000; }
     #acceptModalBtn { background: #007bff; color: #fff; }
 
+.login-button {
+  display: inline-block;
+  background: linear-gradient(to right, #4e54c8, #8f94fb); /* Lacivert-Mor geçişli */
+  color: white;
+  padding: 10px 24px;
+  border-radius: 30px; /* Kapsül görünüm */
+  font-size: 15px;
+  font-weight: bold;
+  margin-top: 16px;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(to right, #667eea, #764ba2);
+  transform: translateY(-2px);
+}
+
+
     @media (max-width: 480px) {
       body { flex-direction: column; justify-content: flex-start; padding: 40px 10px; }
       .container { padding: 20px; }
@@ -176,7 +196,7 @@
 <label for="confirmPassword">Şifre Tekrar</label>
 <input type="password" id="confirmPassword" placeholder="Şifre Tekrar" required>
       <button type="submit" id="registerBtn">Kayıt Ol</button>
-      <a href="giriş.html" class="link">Giriş Yap</a>
+      <a href="giriş.html" class="login-button">Giriş Yap</a>
       <a href="index.html" class="link">Geri Dön</a>
     </form>
   </div>
