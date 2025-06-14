@@ -123,6 +123,10 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Gölge eklendi */
 }
 
+.back-button:hover {
+  background: #5a6268; /* Orijinalinden bir ton daha koyu */
+}
+
 #installPrompt #closeInstallPrompt {
   position: absolute;
   top: 6px;
@@ -167,6 +171,40 @@
     
 .install-banner i {
   font-size: 16px;
+}
+
+.login-button {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #f7971e, #ffd200);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(to right, #f57c00, #fdd835);
+}
+
+.signup-button {
+  background: linear-gradient(to right, #f9a825, #ff8f00);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
+}
+
+.signup-button:hover {
+  background: linear-gradient(to right, #f57c00, #ff6f00);
 }
   
 @media screen and (max-width: 480px) {  
@@ -229,18 +267,7 @@
                   background: #fff; color: #333; box-sizing: border-box;" />  
     <i id="togglePassword" class="fa-solid fa-eye-slash eye-icon"></i>  
   </div>  
-  <button type="submit" style="
-  width: 90%;
-  padding: 12px;
-  margin-bottom: 10px;
-  font-size: 16px;
-  border-radius: 6px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  box-sizing: border-box;
-">Giriş Yap</button>
+  <button type="submit" class="login-button">Giriş Yap</button>
       <button onclick="window.location.href='index.html'" class="back-button">Geri Dön</button>
       <div id="errorMsg" style="color: red;"></div>  
     </form>  
@@ -254,18 +281,8 @@
   color: white;
   letter-spacing: 0.5px;
 ">Henüz hesabınız yok mu?</p>
-  <button onclick="window.location.href='kayitol.html'" style="
-    background: linear-gradient(to right, #f9a825, #ff8f00);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    transition: background 0.3s ease;
-    margin-bottom: 10px;
-  ">Kayıt Ol</button>
+  <button onclick="window.location.href='kayitol.html'" class="signup-button">Kayıt Ol</button>
+
 </div>
   </div>  
   
