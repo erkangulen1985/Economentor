@@ -318,26 +318,41 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
   if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
 
-  try {
-    const user = auth.currentUser;
-    const uid = user.uid; // 🔐 UID'yi burada al
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Kullanıcı oturumu geçerli değil.");
+    return;
+  }
 
-    const password = prompt("Hesabınızı silmek için şifrenizi girin:");
+  try {
+    // 🔐 Önce reauthentication yap
+    const password = prompt("Lütfen şifrenizi girin:");
     if (!password) return alert("İşlem iptal edildi.");
 
     const credential = EmailAuthProvider.credential(user.email, password);
     await reauthenticateWithCredential(user, credential);
 
-    await deleteUser(user); // 1️⃣ Önce Authentication’dan sil
-    await deleteDoc(doc(db, "users", uid)); // 2️⃣ Sonra Firestore’dan sil
+    const uid = user.uid;
+
+    // ✅ Şifre doğruysa ve silinebilir durumdaysa:
+    // 1. Firestore’dan sil
+    await deleteDoc(doc(db, "users", uid));
+
+    // 2. Authentication’dan sil
+    await deleteUser(user);
 
     alert("Hesabınız başarıyla silindi.");
-    location.href = "index.html";
-  } catch (error) {
-    if (error.code === "auth/requires-recent-login") {
-      alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+    window.location.href = "index.html";
+
+  } catch (err) {
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+      alert("Şifre yanlış. Lütfen tekrar deneyiniz.");
+    } else if (err.code === "auth/requires-recent-login") {
+      alert("Güvenlik nedeniyle tekrar giriş yapmanız gerekiyor.");
+    } else if (err.code === "auth/too-many-requests") {
+      alert("Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.");
     } else {
-      alert("Silme işlemi başarısız: " + error.message);
+      alert("Hesap silme başarısız: " + err.message);
     }
   }
 });
