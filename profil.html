@@ -315,22 +315,22 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 });
 
   // Hesap sil
-  document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
-    if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
+document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
+  if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
 
-    try {
-      await deleteDoc(doc(db, "users", uid));
-      await deleteUser(user);
-      alert("Hesabınız silindi.");
-      location.href = "index.html";
-    } catch (err) {
-      if (err.code === "auth/requires-recent-login") {
-        alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
-      } else {
-        alert("Silme işlemi başarısız: " + err.message);
-      }
+  try {
+    await deleteDoc(doc(db, "users", auth.currentUser.uid));
+    await deleteUser(auth.currentUser);
+    alert("Hesabınız silindi.");
+    location.href = "index.html";
+  } catch (err) {
+    if (err.code === "auth/requires-recent-login") {
+      alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+    } else {
+      alert("Silme işlemi başarısız: " + err.message);
     }
-  });
+  }
+});
 
   // Şifre değiştir
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
