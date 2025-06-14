@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://economentor.netlify.app/sitemap.xml
