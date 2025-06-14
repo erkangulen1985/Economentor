@@ -317,23 +317,41 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
   // Hesap sil
 document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
-  if (!currentUser) {
-    alert("Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.");
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("Kullanıcı bulunamadı. Lütfen tekrar giriş yapınız.");
     return;
   }
 
-  if (!confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.")) return;
+  const confirmation = confirm("Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.");
+  if (!confirmation) return;
+
+  // 🔑 Şifre sorarak yeniden kimlik doğrulama
+  const password = prompt("Lütfen şifrenizi girin:");
+  if (!password) {
+    alert("İşlem iptal edildi.");
+    return;
+  }
 
   try {
-    await deleteDoc(doc(db, "users", currentUser.uid));
-    await deleteUser(currentUser);
-    alert("Hesabınız silindi.");
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential); // ✔️ Kimlik doğrulama
+
+    await deleteUser(user); // 🔥 Firebase Authentication'dan sil
+
+    await deleteDoc(doc(db, "users", user.uid)); // 🗑 Firestore’dan da sil
+
+    alert("Hesabınız başarıyla silindi.");
     location.href = "index.html";
-  } catch (err) {
-    if (err.code === "auth/requires-recent-login") {
-      alert("Lütfen tekrar giriş yapıp yeniden deneyiniz.");
+
+  } catch (error) {
+    if (error.code === "auth/wrong-password") {
+      alert("❌ Girilen şifre yanlış. Hesap silinmedi.");
+    } else if (error.code === "auth/requires-recent-login") {
+      alert("⚠️ Güvenlik nedeniyle yeniden giriş yapmanız gerekiyor.");
     } else {
-      alert("Silme işlemi başarısız: " + err.message);
+      alert("Silme işlemi başarısız: " + error.message);
     }
   }
 });
