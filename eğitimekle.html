@@ -254,15 +254,10 @@ window.deleteTraining = async function(docId, btn) {
       loadTrainings();
     });
 
-    window.deleteTraining = async function(docId, btn) {
-  if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
-  await deleteDoc(doc(db, "trainings", docId));
-  btn.closest(".training").remove();
-};
-
-let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken ekledik
+let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken
 let editDocId = '';      // Düzenlenen eğitim ID'si
 
+// Düzenleme işlemi
 window.editTraining = async function(docId, btn) {
   isEditMode = true;  // Düzenleme modunu aktif hale getiriyoruz
   editDocId = docId;  // Düzenlenen eğitim ID'sini saklıyoruz
@@ -293,43 +288,10 @@ window.editTraining = async function(docId, btn) {
   });
 
   bulletsDiv.appendChild(ul);
-
-  // Düzenlemeyi kaydetmek için save butonuna tıklanırsa:
-  document.getElementById("saveTrainingBtn").addEventListener("click", async () => {
-    const newTitle = document.getElementById("title").value.trim();
-    const newDescription = document.getElementById("description").value.trim();
-    const newBullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
-
-    if (!newTitle || !newDescription) {
-      alert("Lütfen başlık ve açıklama girin.");
-      return;
-    }
-
-    try {
-      // Düzenleme yapılacaksa, yeni bir kayıt eklenmemeli, sadece mevcut veri güncellenmeli
-      if (isEditMode) {
-        const trainingRef = doc(db, "trainings", editDocId); // Düzenlenen belgenin id'sini kullanarak
-        await updateDoc(trainingRef, {
-          title: newTitle,
-          description: newDescription,
-          bullets: newBullets,
-          // timestamp: new Date() // Buradaki tarih bilgisi eski halini koruyacak
-        });
-
-        alert("Eğitim başarıyla güncellendi.");
-        isEditMode = false; // Düzenleme işlemi tamamlandığında, edit modunu kapat
-        loadTrainings(); // Eğitimleri güncelledikten sonra yükle
-      }
-    } catch (err) {
-      alert("Hata: " + err.message);
-    }
-  });
 };
 
-// Yeni eğitim kaydetme fonksiyonu
+// Eğitim kaydetme fonksiyonu
 async function saveTraining() {
-  if (isEditMode) return; // Eğer düzenleme modunda isek, yeni eğitim kaydetmeye izin verme
-
   const title = document.getElementById("title").value.trim();
   const description = document.getElementById("description").value.trim();
   const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
@@ -340,18 +302,97 @@ async function saveTraining() {
   }
 
   try {
-    await addDoc(collection(db, "trainings"), {
-      title,
-      description,
-      bullets,
-      timestamp: new Date()
-    });
-    alert("Eğitim başarıyla kaydedildi.");
-    loadTrainings(); // Yeni eklenen eğitimi gör
+    if (isEditMode) {
+      // Eğer düzenleme modunda isek sadece güncelleme yapıyoruz
+      const trainingRef = doc(db, "trainings", editDocId); // Düzenlenen belgenin id'sini kullanarak
+      await updateDoc(trainingRef, {
+        title: title,
+        description: description,
+        bullets: bullets
+      });
+
+      alert("Eğitim başarıyla güncellendi.");
+      isEditMode = false; // Düzenleme işlemi tamamlandığında, edit modunu kapat
+      loadTrainings(); // Eğitimleri güncelledikten sonra yükle
+    } else {
+      // Yeni eğitim kaydetme
+      await addDoc(collection(db, "trainings"), {
+        title,
+        description,
+        bullets,
+        timestamp: new Date()
+      });
+      alert("Eğitim başarıyla kaydedildi.");
+      loadTrainings(); // Yeni eklenen eğitimi gör
+    }
   } catch (err) {
     alert("Hata: " + err.message);
   }
 }
+
+// Eğitimleri yüklemek için fonksiyon
+async function loadTrainings() {
+  const trainingList = document.getElementById("trainingList");
+  const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "training";
+    div.innerHTML = `
+      <h3>${data.title}</h3>
+      <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
+      <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
+      <div class="training-actions">
+        <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
+        <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
+      </div>
+    `;
+    trainingList.appendChild(div);
+  });
+}
+
+// Eğitim silme işlemi
+window.deleteTraining = async function(docId, btn) {
+  if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
+  await deleteDoc(doc(db, "trainings", docId));
+  btn.closest(".training").remove();
+};
+
+// Yeni madde eklemek için fonksiyon
+async function addBullet() {
+  const bulletText = document.getElementById('bulletText').value.trim();
+  if (!bulletText) return;
+
+  const bulletsDiv = document.getElementById('bullets');
+  const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
+  if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
+
+  const li = document.createElement('li');
+  li.textContent = bulletText;
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = "❌";
+  deleteBtn.className = "delete-bullet-btn";
+  deleteBtn.onclick = () => li.remove();
+
+  li.appendChild(deleteBtn);
+  ul.appendChild(li);
+
+  document.getElementById('bulletText').value = '';
+}
+
+// Sayfa yüklendiğinde gerekli event listener'ları ekleyelim
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("addBulletBtn").addEventListener("click", addBullet);
+  document.getElementById("bulletText").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addBullet();
+    }
+  });
+  document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
+  loadTrainings();
+});
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
