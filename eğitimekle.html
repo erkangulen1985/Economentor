@@ -310,8 +310,8 @@ window.editTraining = async function(docId, btn) {
       });
 
       alert("Eğitim başarıyla güncellendi.");
-      location.reload(); // Sayfayı yeniden yükle
-
+      // Sayfayı yeniden yükleme işlemini kaldırın, böylece yeni veriler güncellenmiş olacak.
+      loadTrainings(); // Eğitimleri yeniden yükleyin, böylece yeni bilgiler görünsün.
     } catch (err) {
       alert("Hata: " + err.message);
     }
