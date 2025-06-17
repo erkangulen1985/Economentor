@@ -251,18 +251,20 @@ window.editTraining = async function(docId, btn) {
 
 // Eğitim kaydetme fonksiyonu (Düzenleme ve yeni kayıt için)
 async function saveTraining() {
+  // HTML input elemanlarının değerlerini alıyoruz
   const title = document.getElementById("title").value.trim();
   const description = document.getElementById("description").value.trim();
   const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
 
+  // Başlık ve açıklama boşsa, uyarı veriyoruz
   if (!title || !description) {
     alert("Lütfen başlık ve açıklama girin.");
     return;
   }
 
   try {
+    // Eğer düzenleme modunda isek, sadece güncelleme yapıyoruz
     if (isEditMode) {
-      // Eğer düzenleme modunda isek sadece güncelleme yapıyoruz
       const trainingRef = doc(db, "trainings", editDocId); // Düzenlenen belgenin id'sini kullanarak
       await updateDoc(trainingRef, {
         title: title,
