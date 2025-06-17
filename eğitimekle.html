@@ -193,30 +193,6 @@ You said:
       document.getElementById('bulletText').value = '';
     }
 
-    async function saveTraining() {
-      const title = document.getElementById("title").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
-
-      if (!title || !description) {
-        alert("Lütfen başlık ve açıklama girin.");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, "trainings"), {
-          title,
-          description,
-          bullets,
-          timestamp: new Date()
-        });
-        alert("Eğitim başarıyla kaydedildi.");
-        location.reload();
-      } catch (err) {
-        alert("Hata: " + err.message);
-      }
-    }
-
     async function loadTrainings() {
       const trainingList = document.getElementById("trainingList");
       const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
@@ -290,6 +266,7 @@ window.editTraining = async function(docId, btn) {
   bulletsDiv.appendChild(ul);
 
   // Düzenlemeyi kaydetmek için save butonuna tıklanırsa:
+  document.getElementById("saveTrainingBtn").removeEventListener("click", saveTraining); // Önceden tanımlı olan saveTraining işlevini kaldır
   document.getElementById("saveTrainingBtn").addEventListener("click", async () => {
     const newTitle = document.getElementById("title").value.trim();
     const newDescription = document.getElementById("description").value.trim();
@@ -318,6 +295,31 @@ window.editTraining = async function(docId, btn) {
     }
   });
 };
+
+// Yeni eğitim kaydederken önceki kaydetme fonksiyonunu kullanacağız.
+async function saveTraining() {
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
+
+  if (!title || !description) {
+    alert("Lütfen başlık ve açıklama girin.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "trainings"), {
+      title,
+      description,
+      bullets,
+      timestamp: new Date()
+    });
+    alert("Eğitim başarıyla kaydedildi.");
+    location.reload();
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
+}
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
