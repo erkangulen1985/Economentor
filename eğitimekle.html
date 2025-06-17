@@ -288,9 +288,34 @@ window.editTraining = async function(docId, btn) {
 
   bulletsDiv.appendChild(ul);
 
-  // Eski eğitimi sil (yeniden kaydedilecek)
-  await deleteDoc(doc(db, "trainings", docId));
-  trainingDiv.remove();
+  // Eğitim verilerini kaydetmeye devam et
+  document.getElementById("saveTrainingBtn").addEventListener("click", async () => {
+    const newTitle = document.getElementById("title").value.trim();
+    const newDescription = document.getElementById("description").value.trim();
+    const newBullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
+
+    if (!newTitle || !newDescription) {
+      alert("Lütfen başlık ve açıklama girin.");
+      return;
+    }
+
+    try {
+      // Eski veriyi silmeden sadece güncelleme yap
+      const trainingRef = doc(db, "trainings", docId);
+      await updateDoc(trainingRef, {
+        title: newTitle,
+        description: newDescription,
+        bullets: newBullets,
+        timestamp: new Date()
+      });
+
+      alert("Eğitim başarıyla güncellendi.");
+      location.reload(); // Sayfayı yeniden yükle
+
+    } catch (err) {
+      alert("Hata: " + err.message);
+    }
+  });
 };
 </script>
 <script type="module" src="auth-guard.js"></script>
