@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -157,7 +157,6 @@
       getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -224,15 +223,15 @@
         const data = docSnap.data();
         const div = document.createElement("div");
         div.className = "training";
-        div.innerHTML = 
+        div.innerHTML = `
           <h3>${data.title}</h3>
           <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
-          <ul>${(data.bullets || []).map(b => <li>${b}</li>).join("")}</ul>
+          <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
           <div class="training-actions">
             <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
             <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
           </div>
-        ;
+        `;
         trainingList.appendChild(div);
       });
     }
@@ -311,8 +310,8 @@ window.editTraining = async function(docId, btn) {
       });
 
       alert("Eğitim başarıyla güncellendi.");
-      location.reload(); // Sayfayı yeniden yükle
-
+      // Sayfayı yeniden yükleme işlemini kaldırın, böylece yeni veriler güncellenmiş olacak.
+      loadTrainings(); // Eğitimleri yeniden yükleyin, böylece yeni bilgiler görünsün.
     } catch (err) {
       alert("Hata: " + err.message);
     }
