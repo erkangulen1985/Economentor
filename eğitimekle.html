@@ -222,15 +222,15 @@
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const div = document.createElement("div");
-        div.className = "training";
-        div.innerHTML = `
-          <h3>${data.title}</h3>
-          <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
-          <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
-          <div class="training-actions">
-            <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
-            <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
-          </div>
+<div class="training" data-timestamp="${data.timestamp}">
+  <h3>${data.title}</h3>
+  <p data-timestamp="${data.timestamp}">${(data.description || '').replace(/\n/g, '<br>')}</p>
+  <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
+  <div class="training-actions">
+    <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
+    <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
+  </div>
+</div>
         `;
         trainingList.appendChild(div);
       });
@@ -265,6 +265,7 @@ window.editTraining = async function(docId, btn) {
   const title = trainingDiv.querySelector("h3").textContent;
   const description = trainingDiv.querySelector("p").textContent;
   const bullets = Array.from(trainingDiv.querySelectorAll("li")).map(li => li.textContent.trim());
+  const timestamp = trainingDiv.querySelector("p").getAttribute("data-timestamp"); // Tarih bilgisini al
 
   // Formu doldur
   document.getElementById("title").value = title;
@@ -300,13 +301,13 @@ window.editTraining = async function(docId, btn) {
     }
 
     try {
-      // Eski veriyi silmeden sadece güncelleme yap
+      // Eski veriyi silmeden sadece güncelleme yap, tarihi değiştirme
       const trainingRef = doc(db, "trainings", docId);
       await updateDoc(trainingRef, {
         title: newTitle,
         description: newDescription,
         bullets: newBullets,
-        timestamp: new Date()
+        timestamp: timestamp  // Eski tarihi koruyarak güncelle
       });
 
       alert("Eğitim başarıyla güncellendi.");
@@ -317,6 +318,7 @@ window.editTraining = async function(docId, btn) {
     }
   });
 };
+
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
