@@ -310,12 +310,41 @@ window.editTraining = async function(docId, btn) {
       });
 
       alert("Eğitim başarıyla güncellendi.");
-      // Sayfayı yeniden yükleme işlemini kaldırın, böylece yeni veriler güncellenmiş olacak.
+      // Eğitimleri yeniden yükleyin, böylece yeni bilgiler görünsün.
       loadTrainings(); // Eğitimleri yeniden yükleyin, böylece yeni bilgiler görünsün.
     } catch (err) {
       alert("Hata: " + err.message);
     }
   });
+};
+
+window.saveTraining = async function() {
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
+
+  if (!title || !description) {
+    alert("Lütfen başlık ve açıklama girin.");
+    return;
+  }
+
+  try {
+    // Eğer düzenleme yapılmıyorsa (yani docId yoksa) yeni eğitim ekle
+    if (!window.isEditing) {
+      await addDoc(collection(db, "trainings"), {
+        title,
+        description,
+        bullets,
+        timestamp: new Date()
+      });
+      alert("Eğitim başarıyla kaydedildi.");
+    } else {
+      alert("Lütfen düzenlemeyi kaydedin.");
+    }
+    location.reload();
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
 };
 </script>
 <script type="module" src="auth-guard.js"></script>
