@@ -192,16 +192,6 @@
       document.getElementById('bulletText').value = '';
     }
 
-    async function saveTraining() {
-      const title = document.getElementById("title").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
-
-      if (!title || !description) {
-        alert("Lütfen başlık ve açıklama girin.");
-        return;
-      }
-
       try {
         await addDoc(collection(db, "trainings"), {
           title,
@@ -216,34 +206,38 @@
       }
     }
 
-    async function loadTrainings() {
-      const trainingList = document.getElementById("trainingList");
-      const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "training";
-        div.innerHTML = `
-          <h3>${data.title}</h3>
-          <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
-          <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
-          <div class="training-actions">
-            <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
-            <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
-          </div>
-        `;
-        trainingList.appendChild(div);
-      });
-    }
+let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken
+let editDocId = '';      // Düzenlenen eğitim ID'si
 
+// Eğitimleri yüklemek için fonksiyon
+async function loadTrainings() {
+  const trainingList = document.getElementById("trainingList");
+  trainingList.innerHTML = '';  // Yeni yükleme öncesi önceki listeleri temizle
+
+  const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "training";
+    div.innerHTML = `
+      <h3>${data.title}</h3>
+      <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
+      <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
+      <div class="training-actions">
+        <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
+        <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
+      </div>
+    `;
+    trainingList.appendChild(div);
+  });
+}
+
+// Eğitim silme işlemi
 window.deleteTraining = async function(docId, btn) {
   if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
   await deleteDoc(doc(db, "trainings", docId));
   btn.closest(".training").remove();
 };
-
-let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken
-let editDocId = '';      // Düzenlenen eğitim ID'si
 
 // Düzenleme işlemi
 window.editTraining = async function(docId, btn) {
@@ -259,7 +253,7 @@ window.editTraining = async function(docId, btn) {
   document.getElementById("title").value = title;
   document.getElementById("description").value = description;
   const bulletsDiv = document.getElementById("bullets");
-  bulletsDiv.innerHTML = '';
+  bulletsDiv.innerHTML = '';  // Önceki maddeleri temizle
   const ul = document.createElement('ul');
 
   bullets.forEach(b => {
@@ -278,7 +272,7 @@ window.editTraining = async function(docId, btn) {
   bulletsDiv.appendChild(ul);
 };
 
-// Eğitim kaydetme fonksiyonu
+// Eğitim kaydetme fonksiyonu (Düzenleme ve yeni kayıt için)
 async function saveTraining() {
   const title = document.getElementById("title").value.trim();
   const description = document.getElementById("description").value.trim();
@@ -318,34 +312,6 @@ async function saveTraining() {
   }
 }
 
-// Eğitimleri yüklemek için fonksiyon
-async function loadTrainings() {
-  const trainingList = document.getElementById("trainingList");
-  const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const div = document.createElement("div");
-    div.className = "training";
-    div.innerHTML = `
-      <h3>${data.title}</h3>
-      <p>${(data.description || '').replace(/\n/g, '<br>')}</p>
-      <ul>${(data.bullets || []).map(b => `<li>${b}</li>`).join("")}</ul>
-      <div class="training-actions">
-        <button onclick="window.editTraining('${docSnap.id}', this)">Düzenle</button>
-        <button onclick="deleteTraining('${docSnap.id}', this)">Sil</button>
-      </div>
-    `;
-    trainingList.appendChild(div);
-  });
-}
-
-// Eğitim silme işlemi
-window.deleteTraining = async function(docId, btn) {
-  if (!confirm("Bu eğitimi silmek istiyor musunuz?")) return;
-  await deleteDoc(doc(db, "trainings", docId));
-  btn.closest(".training").remove();
-};
-
 // Yeni madde eklemek için fonksiyon
 async function addBullet() {
   const bulletText = document.getElementById('bulletText').value.trim();
@@ -379,7 +345,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
   document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
-  loadTrainings();
+  loadTrainings();  // Eğitimleri sayfa yüklendiğinde yükle
 });
 </script>
 <script type="module" src="auth-guard.js"></script>
