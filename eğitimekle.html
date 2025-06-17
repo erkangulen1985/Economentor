@@ -288,7 +288,7 @@ window.editTraining = async function(docId, btn) {
 
   bulletsDiv.appendChild(ul);
 
-  // Eğitim verilerini kaydetmeye devam et
+  // Düzenlemeyi kaydetmek için save butonuna tıklanırsa:
   document.getElementById("saveTrainingBtn").addEventListener("click", async () => {
     const newTitle = document.getElementById("title").value.trim();
     const newDescription = document.getElementById("description").value.trim();
@@ -301,12 +301,12 @@ window.editTraining = async function(docId, btn) {
 
     try {
       // Eski veriyi silmeden sadece güncelleme yap
-      const trainingRef = doc(db, "trainings", docId);
+      const trainingRef = doc(db, "trainings", docId); // Mevcut eğitim belgesini al
       await updateDoc(trainingRef, {
         title: newTitle,
         description: newDescription,
         bullets: newBullets,
-        timestamp: new Date()
+        // timestamp: new Date() // Buradaki tarih bilgisi eski halini koruyacak
       });
 
       alert("Eğitim başarıyla güncellendi.");
