@@ -260,7 +260,13 @@ window.deleteTraining = async function(docId, btn) {
   btn.closest(".training").remove();
 };
 
+let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken ekledik
+let editDocId = '';      // Düzenlenen eğitim ID'si
+
 window.editTraining = async function(docId, btn) {
+  isEditMode = true;  // Düzenleme modunu aktif hale getiriyoruz
+  editDocId = docId;  // Düzenlenen eğitim ID'sini saklıyoruz
+
   const trainingDiv = btn.closest(".training");
   const title = trainingDiv.querySelector("h3").textContent;
   const description = trainingDiv.querySelector("p").textContent;
@@ -300,23 +306,52 @@ window.editTraining = async function(docId, btn) {
     }
 
     try {
-      // Eski veriyi silmeden sadece güncelleme yap
-      const trainingRef = doc(db, "trainings", docId); // Mevcut eğitim belgesini al
-      await updateDoc(trainingRef, {
-        title: newTitle,
-        description: newDescription,
-        bullets: newBullets,
-        // timestamp: new Date() // Buradaki tarih bilgisi eski halini koruyacak
-      });
+      // Düzenleme yapılacaksa, yeni bir kayıt eklenmemeli, sadece mevcut veri güncellenmeli
+      if (isEditMode) {
+        const trainingRef = doc(db, "trainings", editDocId); // Düzenlenen belgenin id'sini kullanarak
+        await updateDoc(trainingRef, {
+          title: newTitle,
+          description: newDescription,
+          bullets: newBullets,
+          // timestamp: new Date() // Buradaki tarih bilgisi eski halini koruyacak
+        });
 
-      alert("Eğitim başarıyla güncellendi.");
-      // Sayfayı yeniden yükleme işlemini kaldırın, böylece yeni veriler güncellenmiş olacak.
-      loadTrainings(); // Eğitimleri yeniden yükleyin, böylece yeni bilgiler görünsün.
+        alert("Eğitim başarıyla güncellendi.");
+        isEditMode = false; // Düzenleme işlemi tamamlandığında, edit modunu kapat
+        loadTrainings(); // Eğitimleri güncelledikten sonra yükle
+      }
     } catch (err) {
       alert("Hata: " + err.message);
     }
   });
 };
+
+// Yeni eğitim kaydetme fonksiyonu
+async function saveTraining() {
+  if (isEditMode) return; // Eğer düzenleme modunda isek, yeni eğitim kaydetmeye izin verme
+
+  const title = document.getElementById("title").value.trim();
+  const description = document.getElementById("description").value.trim();
+  const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
+
+  if (!title || !description) {
+    alert("Lütfen başlık ve açıklama girin.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "trainings"), {
+      title,
+      description,
+      bullets,
+      timestamp: new Date()
+    });
+    alert("Eğitim başarıyla kaydedildi.");
+    loadTrainings(); // Yeni eklenen eğitimi gör
+  } catch (err) {
+    alert("Hata: " + err.message);
+  }
+}
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
