@@ -242,18 +242,6 @@ window.deleteTraining = async function(docId, btn) {
   btn.closest(".training").remove();
 };
 
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("addBulletBtn").addEventListener("click", addBullet);
-      document.getElementById("bulletText").addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          addBullet();
-        }
-      });
-      document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
-      loadTrainings();
-    });
-
 let isEditMode = false;  // Düzenleme modunu kontrol etmek için yeni bir değişken
 let editDocId = '';      // Düzenlenen eğitim ID'si
 
