@@ -170,28 +170,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function addBullet() {
-      const bulletText = document.getElementById('bulletText').value.trim();
-      if (!bulletText) return;
-
-      const bulletsDiv = document.getElementById('bullets');
-      const ul = bulletsDiv.querySelector('ul') || document.createElement('ul');
-      if (!bulletsDiv.contains(ul)) bulletsDiv.appendChild(ul);
-
-      const li = document.createElement('li');
-      li.textContent = bulletText;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = "❌";
-      deleteBtn.className = "delete-bullet-btn";
-      deleteBtn.onclick = () => li.remove();
-
-      li.appendChild(deleteBtn);
-      ul.appendChild(li);
-
-      document.getElementById('bulletText').value = '';
-    }
-
       try {
         await addDoc(collection(db, "trainings"), {
           title,
