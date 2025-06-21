@@ -189,6 +189,20 @@
   background-color: #333;
 }
 
+.reply-comment-btn {
+  background-color: #444;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.reply-comment-btn:hover {
+  background-color: #666;
+}
+
   </style>
 </head>
 <body>
@@ -332,14 +346,17 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
     <p style="margin-top:10px; font-size:14px; color:#bbb;">💬 Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>
     <div class="comment-section" id="comments-${id}" style="display:none;">
       <div class="commentList" id="commentList-${id}"></div>
-      ${comments
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .map((c, i) => `
-          <div class="comment">
-            <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
-          </div>
-        `).join("")}
+${comments
+  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  .map((c, i) => `
+    <div class="comment">
+      <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+        ${c.user !== uid ? `<button class="reply-comment-btn" data-username="${c.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
+        ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+      </div>
+    </div>
+  `).join("")}
       <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
       <button class="commentBtn" data-id="${id}">Yorum Yap</button>
     </div>
@@ -675,6 +692,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       Lütfen geliştiriciye haber veriniz veya videoyu farklı bir cihazda deneyiniz.
     `;
     document.body.prepend(warning);
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("reply-comment-btn")) {
+    const username = e.target.dataset.username;
+    const postId = e.target.dataset.postid;
+    const input = document.getElementById(`input-${postId}`);
+    const mentionText = `@${username} | `;
+
+    if (!input.value.includes(mentionText)) {
+      input.value = mentionText + input.value.trim();
+    }
+
+    input.focus();
+    hideMentionSuggestions();
   }
 });
 
