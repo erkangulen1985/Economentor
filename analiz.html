@@ -653,26 +653,35 @@ async function postComment(id, videoData, el) {
 function renderComments(container, comments, userId, postId) {
   container.innerHTML = "";
   comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  comments.forEach((comment, index) => {
+  comments.forEach((comment) => {
     const el = document.createElement("div");
     el.className = "comment";
     const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
+
+    let buttonsHTML = "";
+    if (comment.user !== userId) {
+      buttonsHTML += `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>`;
+    }
+    if (comment.user === userId) {
+      buttonsHTML += `<button class="delete-comment" 
+        data-user="${comment.user}" 
+        data-time="${comment.timestamp}" 
+        data-text="${encodeURIComponent(comment.text)}"
+      >
+        <i class="fas fa-times" style="color:white;"></i>
+      </button>`;
+    }
+
     el.innerHTML = `
-  <div>
-    <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-    ${comment.text}
-  </div>
-  <div style="display: flex; gap: 6px; align-items: center;">
-    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
-${comment.user === userId ? `<button class="delete-comment" 
-  data-user="${comment.user}" 
-  data-time="${comment.timestamp}" 
-  data-text="${encodeURIComponent(comment.text)}"
->
-  <i class="fas fa-times" style="color:white;"></i>
-</button>
-  </div>
-`;
+      <div>
+        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+        ${comment.text}
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        ${buttonsHTML}
+      </div>
+    `;
+
     container.appendChild(el);
   });
 }
