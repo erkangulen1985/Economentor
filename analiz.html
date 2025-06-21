@@ -551,20 +551,22 @@ document.addEventListener("click", async (e) => {
     const snap = await getDoc(ref);
     const allComments = snap.data().comments || [];
 
-    // Yorumu timestamp'e göre sil
+    // Firestore'dan yorumu kaldır
     const updatedComments = allComments.filter(comment => comment.timestamp !== timestampToDelete);
     await updateDoc(ref, { comments: updatedComments });
 
-    // DOM'dan yorumu kaldır
-    const commentDiv = e.target.closest(".comment");
-    commentDiv.remove();
+    // Yorumu DOM'dan kaldır
+    const commentEl = e.target.closest(".comment");
+    const commentListEl = commentEl.parentElement;
+    commentEl.remove();
 
-    // 🔁 Şu satırda sadece .comment sınıfını say:
-    const list = document.getElementById("commentList-" + id);
-    const remaining = list.querySelectorAll(".comment").length;
-
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = remaining;
+    // Doğrudan video kartı içinde doğru yorum sayısını bul
+    const videoCardEl = commentEl.closest(".video-card");
+    const countEl = videoCardEl.querySelector(".comment-count");
+    if (countEl) {
+      const newCount = commentListEl.querySelectorAll(".comment").length;
+      countEl.textContent = newCount;
+    }
   }
 });
                 
