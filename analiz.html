@@ -453,7 +453,7 @@ document.addEventListener("click", async (e) => {
 
     // 🧠 Firestore'dan tekrar veriyi çek ve renderComments ile DOM'u güncelle
     const updatedSnap = await getDoc(ref);
-    const updatedComments = updatedSnap.data().comments || [];
+    const updatedComments = comments.filter(comment => String(comment.timestamp) !== String(timestampToDelete));
     renderComments(id, updatedComments, uid);
 
     input.value = "";
