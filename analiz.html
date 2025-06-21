@@ -650,7 +650,7 @@ async function postComment(id, videoData, el) {
   };
 
   await updateDoc(ref, { comments: arrayUnion(newComment) });
-  input.value = "";
+  input.style.height = "auto";
 
   // 🔁 Güncel yorumları tekrar yükle (silinenler geri gelmesin)
   const updatedSnap = await getDoc(ref);
@@ -763,7 +763,7 @@ function renderComments(container, comments, userId, postId) {
     el.innerHTML = `
       <div>
         <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-        ${comment.text}
+        ${comment.text.replace(/\n/g, "<br>")}
       </div>
       <div style="display: flex; gap: 6px; align-items: center;">
         ${buttonsHTML}
