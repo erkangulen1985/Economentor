@@ -702,15 +702,18 @@ document.addEventListener("click", async (e) => {
     renderComments(commentList, updated, auth.currentUser.uid, postId);
   }
 
-  if (e.target.classList.contains("reply-comment-btn")) {
-    const username = e.target.dataset.username;
-    const postId = e.target.dataset.postid;
-    const input = document.getElementById(`commentInput-${postId}`);
-    input.focus();
-    if (!input.value.includes(`@${username}`)) {
-      input.value += `@${username} | `;
-    }
+if (e.target.classList.contains("reply-comment-btn")) {
+  const username = e.target.dataset.username;
+  const postId = e.target.dataset.postid;
+  const input = document.getElementById(`commentInput-${postId}`);
+  input.focus();
+
+  const mentionText = `@${username} | `;
+
+  if (!input.value.startsWith(mentionText)) {
+    input.value = mentionText + input.value.replace(mentionText, "");
   }
+}
 });
 
 function addToggleCommentPanelEvents() {
