@@ -358,30 +358,36 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
   `;
 } else {
   // VIP değilse veya kullanıcı VIP ise => TAM GÖSTERİM
-  card.innerHTML = `
-    <h2>${data.title}</h2>
-    <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
-      Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
-    </p>
-    <video controls controlsList="nodownload" oncontextmenu="return false;" src="${data.videoUrl}"></video>
-    <p class="description">${data.description || "Açıklama yok."}</p>
-    <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-    <div class="video-footer">
-      <div>
-        <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
-        <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
-      </div>
+card.innerHTML = `
+  <h2>${data.title}</h2>
+  <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
+    Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
+  </p>
+  <video controls controlsList="nodownload" oncontextmenu="return false;" src="${data.videoUrl}"></video>
+  <p class="description">${data.description || "Açıklama yok."}</p>
+
+  <div class="video-footer">
+    <div>
+      <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
+      <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
     </div>
-    <div class="comment-count">💬 ${comments.length} yorum</div>
-    <div class="comments-section">
-  <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
-  <div class="comment-panel" style="display: none;">
-    <div class="comment-list"></div>
-    <input type="text" id="commentInput-${id}" placeholder="Yorumunuzu yapın" />
-    <button class="comment-button">Yorum Yap</button>
+    <div>
+      <span class="comment-count">💬 ${comments.length} yorum</span>
+    </div>
+    <div>
+      <span class="post-date">🕒 ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</span>
+    </div>
   </div>
-</div>
-  `;
+
+  <div class="comments-section">
+    <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
+    <div class="comment-panel" style="display: none;">
+      <div class="comment-list"></div>
+      <input type="text" id="commentInput-${id}" placeholder="Yorumunuzu yapın" />
+      <button class="comment-button">Yorum Yap</button>
+    </div>
+  </div>
+`;
 }
 
 const toggleBtn = card.querySelector(".toggle-panel-comments");
