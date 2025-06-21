@@ -272,11 +272,7 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
         <button class="like-btn" data-id="${id}" style="background-color:${likeSnap.exists() ? '#27ae60' : '#f39c12'}">👍 <span class="like-count">${data.likes || 0}</span></button>
         <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
       </div>
-      <div>
-        <button class="toggle-comments" data-id="${id}">💬 Yorumları Göster</button>
-      </div>
     </div>
-    <p style="margin-top:10px; font-size:14px; color:#bbb;">💬 Yorum Sayısı: <span class="comment-count">${comments.length}</span></p>
   `;
 }
     
