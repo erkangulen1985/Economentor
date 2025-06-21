@@ -431,65 +431,60 @@ nav a:hover {
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 10px;
-  }
-
-  .video-card {
-    padding: 15px;
-    margin-bottom: 25px;
-  }
-
-  .video-card h2 {
-    font-size: 20px;
-  }
-
-  video {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
+  .post img {
+    max-height: 300px;
   }
 
   .video-footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .video-footer button {
-    width: 100%;
-    font-size: 16px;
-  }
-
+  .comment-button,
   .toggle-comments,
-  .toggle-panel-comments,
-  .comment-button {
+  .like-btn,
+  .dislike-btn {
     width: 100%;
-    font-size: 16px;
-    margin-top: 10px;
+    font-size: 1rem;
   }
 
-  .comments-section input[type="text"] {
-    width: 100%;
-    font-size: 16px;
-    padding: 10px;
+  .post p {
+    font-size: 1rem;
+    line-height: 1.6;
   }
 
-  .comment {
-    flex-direction: column;
-    align-items: flex-start;
+  .content {
+    padding: 20px;
   }
 
-  .comment div {
-    max-width: 100%;
+  .post {
+    padding: 20px;
   }
 
   nav a {
     font-size: 14px;
-    padding: 8px 12px;
-    margin: 4px;
+    padding: 10px;
   }
-}
+  .comments-section input[type="text"],
+  .comments-section .comment-button {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0;
+  }
+
+  .comments-section .comment-button {
+    padding: 12px;
+    font-size: 16px;
+  }
+  .content-row {
+    flex-direction: column;
+  }
+  .welcome-box,
+  .notification-box {
+    flex: 1 1 100%;
+  }
 }
 </style>
 </head>
