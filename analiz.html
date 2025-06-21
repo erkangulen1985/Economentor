@@ -546,23 +546,25 @@ document.addEventListener("click", async (e) => {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const id = e.target.dataset.id;
-    const timestampToDelete = e.target.dataset.timestamp; // Bu değeri butona eklememiz lazım
+    const timestampToDelete = e.target.dataset.timestamp;
     const ref = doc(db, "analizler", id);
     const snap = await getDoc(ref);
     const allComments = snap.data().comments || [];
 
-    // timestamp ile eşleşen yorumu bul ve çıkar
+    // Yorumu timestamp'e göre sil
     const updatedComments = allComments.filter(comment => comment.timestamp !== timestampToDelete);
-
     await updateDoc(ref, { comments: updatedComments });
 
     // DOM'dan yorumu kaldır
-    e.target.closest(".comment").remove();
+    const commentDiv = e.target.closest(".comment");
+    commentDiv.remove();
 
-    // Yorum sayısını güncelle
+    // 🔁 Şu satırda sadece .comment sınıfını say:
     const list = document.getElementById("commentList-" + id);
+    const remaining = list.querySelectorAll(".comment").length;
+
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = list.querySelectorAll(".comment").length;
+    if (countEl) countEl.textContent = remaining;
   }
 });
                 
