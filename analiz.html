@@ -136,6 +136,79 @@
   background-color: #333;
 }
 
+.comments-section {
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid #666;
+}
+
+.comments-section input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-top: 15px;
+  border-radius: 6px;
+  border: none;
+}
+
+.comment {
+  background-color: #222;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.comment div {
+  max-width: 85%;
+  word-wrap: break-word;
+}
+
+.comment button {
+  background-color: #e74c3c;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.comment button:hover {
+  background-color: #c0392b;
+}
+
+.toggle-panel-comments {
+  background-color: #555;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.toggle-panel-comments:hover {
+  background-color: #666;
+}
+
+.reply-comment-btn {
+  background-color: #444;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.reply-comment-btn:hover {
+  background-color: #666;
+}
   </style>
 </head>
 <body>
@@ -288,6 +361,7 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
 }
     
     container.appendChild(card);
+    addToggleCommentPanelEvents();
   })
 });
 
@@ -592,6 +666,17 @@ document.addEventListener("click", async (e) => {
     }
   }
 });
+
+function addToggleCommentPanelEvents() {
+  document.querySelectorAll(".toggle-panel-comments").forEach((toggleBtn) => {
+    const panel = toggleBtn.nextElementSibling;
+    toggleBtn.addEventListener("click", () => {
+      const visible = panel.style.display === "block";
+      panel.style.display = visible ? "none" : "block";
+      toggleBtn.textContent = visible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
+    });
+  });
+}
   
 </script>
 </body>
