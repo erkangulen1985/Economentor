@@ -360,8 +360,19 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
   `;
 }
     
-    container.appendChild(card);
-    addToggleCommentPanelEvents();
+container.appendChild(card);
+
+// ✅ ŞUNLARI BURAYA EKLE:
+renderComments(card.querySelector(".comment-list"), comments, uid, id);
+
+const commentButton = card.querySelector(".comment-button");
+if (commentButton) {
+  commentButton.addEventListener("click", () => {
+    postComment(id, data, card);
+  });
+}
+
+addToggleCommentPanelEvents();
   })
 });
 
