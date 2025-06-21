@@ -692,11 +692,18 @@ function insertMention(username) {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const postId = e.target.closest(".video-card").getAttribute("data-id");
-    const index = parseInt(e.target.dataset.index);
+    const commentEl = e.target.closest(".comment");
+    const commentText = commentEl.querySelector("div").innerText;
+    const commentList = e.target.closest(".comment-panel").querySelector(".comment-list");
+    const allComments = Array.from(commentList.children).map(el => el.querySelector("div").innerText.trim());
+    const index = allComments.indexOf(commentText.trim());
+    const targetComment = data.comments[index];
     const ref = doc(db, "analizler", postId);
     const snap = await getDoc(ref);
     const data = snap.data();
-    const updated = (data.comments || []).filter((_, i) => i !== index);
+    const updated = (data.comments || []).filter(c =>
+      !(c.timestamp === targetComment.timestamp && c.user === targetComment.user && c.text === targetComment.text)
+    );
     await updateDoc(ref, { comments: updated });
 
     const commentList = e.target.closest(".comment-panel").querySelector(".comment-list");
