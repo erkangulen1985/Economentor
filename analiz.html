@@ -336,6 +336,7 @@ usersList = usersSnap.docs.map(doc => ({
 
     const card = document.createElement("div");
     card.classList.add("video-card");
+    card.setAttribute("data-id", id);
 
 if (videoVisibility === "vip" && currentUserRole === "user") {
   // VIP ama kullanıcı sadece 'user' => BUĞULU GÖSTERİM
