@@ -708,7 +708,7 @@ document.addEventListener("click", async (e) => {
     const input = document.getElementById(`commentInput-${postId}`);
     input.focus();
     if (!input.value.includes(`@${username}`)) {
-      input.value += `@${username} `;
+      input.value += `@${username} | `;
     }
   }
 });
