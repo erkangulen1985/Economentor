@@ -734,6 +734,24 @@ function addToggleCommentPanelEvents() {
     });
   });
 }
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("reply-comment-btn")) {
+    const username = e.target.dataset.username;
+    const postId = e.target.dataset.postid;
+    const input = document.getElementById(`commentInput-${postId}`);
+    if (!input) return;
+
+    input.focus();
+
+    const mentionText = `@${username} | `;
+
+    // Kullanıcının metni değiştirmesi durumuna karşı sadece en başa yaz
+    if (!input.value.startsWith(mentionText)) {
+      input.value = mentionText + input.value.replace(mentionText, "").trimStart();
+    }
+  }
+});
   
 </script>
 </body>
