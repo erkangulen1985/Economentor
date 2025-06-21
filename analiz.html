@@ -576,19 +576,21 @@ document.addEventListener("click", async (e) => {
     // Yine Firestore'dan tekrar çek (güncel hal)
     const updatedSnap = await getDoc(ref);
     const latestComments = updatedSnap.data().comments || [];
+    
+const list = document.getElementById("commentList-" + id);
+list.innerHTML = ""; // 💥 TEMİZLEME ADIMI
 
-    const list = document.getElementById("commentList-" + id);
-    list.innerHTML = latestComments
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .map(c => `
-        <div class="comment">
-          <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-          <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
-            ${c.user !== uid ? `<button class="reply-comment-btn" data-username="${c.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-timestamp="${c.timestamp}">❌</button>` : ""}
-          </div>
-        </div>
-      `).join("");
+list.innerHTML = latestComments
+  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  .map(c => `
+    <div class="comment">
+      <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+        ${c.user !== uid ? `<button class="reply-comment-btn" data-username="${c.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
+        ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-timestamp="${c.timestamp}">❌</button>` : ""}
+      </div>
+    </div>
+  `).join("");
 
     // Yorum sayısını güncelle
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
