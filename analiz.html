@@ -183,7 +183,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let usersList = [];
-let uid = null;
+let activeInput = null;
+let mentionBox = null;
+let uid = null; // uid global olmalı
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
@@ -274,6 +276,14 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
         <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
       </div>
     </div>
+    <div class="comments-section">
+  <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
+  <div class="comment-panel" style="display: none;">
+    <div class="comment-list"></div>
+    <input type="text" id="commentInput-${id}" placeholder="Yorumunuzu yapın" />
+    <button class="comment-button">Yorum Yap</button>
+  </div>
+</div>
   `;
 }
     
@@ -405,6 +415,184 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+async function loadUsers() {
+  const usersRef = collection(db, "users");
+  const usersSnap = await getDocs(usersRef);
+  usersList = usersSnap.docs.map(doc => ({
+    username: doc.data().username,
+    uid: doc.id
+  }));
+}
+  
+async function postComment(id, videoData, el) {
+  if (!usersList.length) await loadUsers();
+
+  const input = document.getElementById(`commentInput-${id}`);
+  const text = input.value.trim();
+  if (!text) return alert("Yorum boş olamaz.");
+
+  const ref = doc(db, "analizler", id);
+  const user = auth.currentUser;
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  const username = userSnap.exists() ? userSnap.data().username : "Kullanıcı";
+
+  const newComment = {
+    text,
+    user: user.uid,
+    username,
+    timestamp: new Date().toISOString()
+  };
+
+  await updateDoc(ref, { comments: arrayUnion(newComment) });
+  input.value = "";
+
+  // @mention tespiti
+  const mentions = text.match(/@([\w\.\-_]+)/g);
+  if (mentions) {
+    for (let mention of mentions) {
+      const name = mention.substring(1).toLowerCase();
+      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+
+      if (mentionedUser && mentionedUser.uid !== user.uid) {
+        const messageText = videoData.title
+          ? `“${videoData.title}” başlıklı analizde sizden bahsedildi.`
+          : `Bir analiz videosunda sizden bahsedildi.`;
+
+        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: mentionedUser.uid,
+            title: "\"Economentor\" 📝 Bahsedildiniz!",
+            body: messageText,
+            url: "https://economentor.netlify.app"
+          })
+        });
+
+        await createNotificationForUser(mentionedUser.uid, messageText, id);
+      }
+    }
+  }
+
+  // Güncelle ve yeniden render et
+  const updatedComments = [...(videoData.comments || []), newComment];
+  videoData.comments = updatedComments;
+  el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
+  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
+}
+
+function renderComments(container, comments, userId, postId) {
+  container.innerHTML = "";
+  comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  comments.forEach((comment, index) => {
+    const el = document.createElement("div");
+    el.className = "comment";
+    const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
+    el.innerHTML = `
+      <div>
+        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+        ${comment.text}
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
+        ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+async function createNotificationForUser(uid, message, postId = null) {
+  const docId = `${uid}_${Date.now()}`;
+  await setDoc(doc(db, "notifications", docId), {
+    to: uid,
+    message: message,
+    postId: postId,
+    timestamp: Timestamp.now(),
+    read: false
+  });
+}
+
+document.addEventListener("input", (e) => {
+  if (!e.target.id.startsWith("commentInput")) return;
+
+  activeInput = e.target;
+  const cursorPos = e.target.selectionStart;
+  const value = e.target.value.slice(0, cursorPos);
+  const match = value.match(/@(\w*)$/);
+
+  if (match) {
+    const term = match[1].toLowerCase();
+    const filtered = usersList.filter(u => u.username.toLowerCase().startsWith(term));
+    showMentionBox(filtered, e.target);
+  } else {
+    hideMentionBox();
+  }
+});
+
+function showMentionBox(filtered, inputElement) {
+  hideMentionBox();
+  mentionBox = document.createElement("div");
+  mentionBox.className = "mention-suggestions";
+
+  const rect = inputElement.getBoundingClientRect();
+  mentionBox.style.left = rect.left + "px";
+  mentionBox.style.top = (rect.bottom + window.scrollY) + "px";
+  mentionBox.style.width = rect.width + "px";
+
+  filtered.forEach(user => {
+    const div = document.createElement("div");
+    div.textContent = user.username;
+    div.addEventListener("click", () => insertMention(user.username));
+    mentionBox.appendChild(div);
+  });
+
+  document.body.appendChild(mentionBox);
+}
+
+function hideMentionBox() {
+  if (mentionBox) {
+    mentionBox.remove();
+    mentionBox = null;
+  }
+}
+
+function insertMention(username) {
+  const input = activeInput;
+  const cursorPos = input.selectionStart;
+  const value = input.value;
+  const before = value.slice(0, cursorPos).replace(/@(\w*)$/, `@${username}`);
+  const after = value.slice(cursorPos);
+  input.value = before + after;
+  input.focus();
+  hideMentionBox();
+}
+
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-comment")) {
+    const postId = e.target.closest(".video-card").getAttribute("data-id");
+    const index = parseInt(e.target.dataset.index);
+    const ref = doc(db, "analizler", postId);
+    const snap = await getDoc(ref);
+    const data = snap.data();
+    const updated = (data.comments || []).filter((_, i) => i !== index);
+    await updateDoc(ref, { comments: updated });
+
+    const commentList = e.target.closest(".comment-panel").querySelector(".comment-list");
+    renderComments(commentList, updated, auth.currentUser.uid, postId);
+  }
+
+  if (e.target.classList.contains("reply-comment-btn")) {
+    const username = e.target.dataset.username;
+    const postId = e.target.dataset.postid;
+    const input = document.getElementById(`commentInput-${postId}`);
+    input.focus();
+    if (!input.value.includes(`@${username}`)) {
+      input.value += `@${username} `;
+    }
+  }
+});
+  
 </script>
 </body>
 </html>
