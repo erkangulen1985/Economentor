@@ -705,8 +705,7 @@ document.addEventListener("click", async (e) => {
       !(c.timestamp === targetComment.timestamp && c.user === targetComment.user && c.text === targetComment.text)
     );
     await updateDoc(ref, { comments: updated });
-
-    const commentList = e.target.closest(".comment-panel").querySelector(".comment-list");
+    
     renderComments(commentList, updated, auth.currentUser.uid, postId);
   }
 
