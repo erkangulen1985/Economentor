@@ -561,17 +561,9 @@ document.addEventListener("click", async (e) => {
 
     const ref = doc(db, "analizler", id);
 
-    // Firestore'dan veriyi çek
-    const snap = await getDoc(ref);
-    let comments = snap.data().comments || [];
-
     // Yorumu çıkar
     const updatedComments = comments.filter(c => c.timestamp !== ts);
     await updateDoc(ref, { comments: updatedComments });
-
-    // Yine Firestore'dan tekrar çek (güncel hal)
-    const updatedSnap = await getDoc(ref);
-    const latestComments = updatedSnap.data().comments || [];
 
     const list = document.getElementById("commentList-" + id);
     list.innerHTML = latestComments
