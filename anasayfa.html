@@ -425,6 +425,22 @@ nav a:hover {
   background-color: #666;
 }
 
+.auto-expand-textarea {
+  width: 100%;
+  min-height: 40px;
+  overflow: hidden;
+  resize: none;
+  font-size: 16px;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  background-color: white;
+  color: black;
+  line-height: 1.4;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -686,7 +702,7 @@ const postImage = post.imageUrl ? `
   <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
   <div class="comment-panel" style="display: none;">
     <div class="comment-list"></div>
-    <input type="text" id="commentInput-${postDoc.id}" placeholder="Yorumunuzu yapın" />
+    <textarea id="commentInput-${id}" placeholder="Yorumunuzu yapın" class="auto-expand-textarea"></textarea>
     <button class="comment-button">Yorum Yap</button>
   </div>
 </div>
@@ -818,7 +834,7 @@ function renderComments(container, comments, userId, postId) {
     el.innerHTML = `
   <div>
     <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-    ${comment.text}
+    ${comment.text.replace(/\n/g, "<br>")}
   </div>
   <div style="display: flex; gap: 6px; align-items: center;">
     ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
@@ -917,6 +933,7 @@ async function postComment(id, post, el) {
 
   await updateDoc(ref, { comments: arrayUnion(newComment) });
   input.value = "";
+  input.style.height = "auto";
 
   const mentions = text.match(/@([\w\.\-_]+)/g);
   if (mentions) {
@@ -1100,6 +1117,13 @@ document.addEventListener("click", (e) => {
     if (!input.value.includes(`@${username} |`)) {
       input.value = `@${username} | `;
     }
+  }
+});
+
+document.addEventListener("input", function (e) {
+  if (e.target.classList.contains("auto-expand-textarea")) {
+    e.target.style.height = "auto";
+    e.target.style.height = (e.target.scrollHeight) + "px";
   }
 });
 
