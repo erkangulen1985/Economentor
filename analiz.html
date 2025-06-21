@@ -209,6 +209,28 @@
 .reply-comment-btn:hover {
   background-color: #666;
 }
+
+.comment-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+}
+
+.comment-button:hover {
+  background-color: #2980b9;
+}
+
+.comment-count {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #ccc;
+}
   </style>
 </head>
 <body>
@@ -349,6 +371,7 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
         <button class="dislike-btn" data-id="${id}" style="background-color:${dislikeSnap.exists() ? '#c0392b' : '#e74c3c'}">👎 <span class="dislike-count">${data.dislikes || 0}</span></button>
       </div>
     </div>
+    <div class="comment-count">💬 ${comments.length} yorum</div>
     <div class="comments-section">
   <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
   <div class="comment-panel" style="display: none;">
@@ -571,8 +594,10 @@ async function postComment(id, videoData, el) {
   // Güncelle ve yeniden render et
   const updatedComments = [...(videoData.comments || []), newComment];
   videoData.comments = updatedComments;
-  el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
-  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
+renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
+const yorumEtiketi = el.querySelector('.comment-count');
+if (yorumEtiketi) {
+  yorumEtiketi.textContent = `💬 ${updatedComments.length} yorum`;
 }
 
 function renderComments(container, comments, userId, postId) {
