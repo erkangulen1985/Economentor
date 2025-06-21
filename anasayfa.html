@@ -411,6 +411,20 @@ nav a:hover {
   background-color: rgba(255,255,255,0.1);
 }
 
+.reply-comment-btn {
+  background-color: #444;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.reply-comment-btn:hover {
+  background-color: #666;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
@@ -802,9 +816,15 @@ function renderComments(container, comments, userId) {
     el.className = "comment";
     const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     el.innerHTML = `
-      <div><b>${comment.username}</b> <small>(${dateStr})</small><br/>${comment.text}</div>
-      ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
-    `;
+  <div>
+    <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+    ${comment.text}
+  </div>
+  <div style="display: flex; gap: 6px; align-items: center;">
+    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
+    ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
+  </div>
+`;
     container.appendChild(el);
   });
 }
@@ -1063,6 +1083,21 @@ function downloadImage(url, filename) {
     })
     .catch(() => alert("Resim indirilemedi."));
 }
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("delete-noti-btn")) {
+    const id = e.target.getAttribute("data-id");
+    deleteDoc(doc(db, "notifications", id));
+  }
+
+  if (e.target.classList.contains("reply-comment-btn")) {
+    const username = e.target.dataset.username;
+    const postId = e.target.dataset.postid;
+    const input = document.getElementById(`commentInput-${postId}`);
+    input.focus();
+    input.value = `@${username} | `;
+  }
+});
 
 // Load user list once on load
 loadUsers();
