@@ -467,6 +467,13 @@ document.addEventListener("click", async (e) => {
       comments: arrayUnion(comment)
     });
 
+    // 👇 Yorum listesini güncelle
+    const updatedSnap = await getDoc(ref);
+    const updatedComments = updatedSnap.data().comments || [];
+    renderComments(id, updatedComments);
+
+    input.value = "";
+
     // Bildirim için video başlığı
     const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
 
@@ -558,43 +565,49 @@ list.insertBefore(div, list.firstChild);
   }
 });
 
+function renderComments(postId, comments) {
+  const list = document.getElementById("commentList-" + postId);
+  if (!list) return;
+
+  list.innerHTML = ""; // Önce tüm eski yorumları temizle
+
+  comments
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .forEach(c => {
+      const div = document.createElement("div");
+      div.className = "comment";
+      div.innerHTML = `
+        <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+          ${c.user !== uid ? `<button class="reply-comment-btn" data-username="${c.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
+          ${c.user === uid ? `<button class="delete-comment" data-id="${postId}" data-timestamp="${c.timestamp}">❌</button>` : ""}
+        </div>
+      `;
+      list.appendChild(div);
+    });
+
+  // Yorum sayısını güncelle
+  const countEl = document.querySelector(`[data-id="${postId}"]`).closest(".video-card").querySelector(".comment-count");
+  if (countEl) countEl.textContent = comments.length;
+}
+
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const id = e.target.dataset.id;
     const ts = e.target.dataset.timestamp;
 
     const ref = doc(db, "analizler", id);
-
-    // Firestore'dan veriyi çek
     const snap = await getDoc(ref);
-    let comments = snap.data().comments || [];
+    const comments = snap.data().comments || [];
 
-    // Yorumu çıkar
+    // Yorumları timestamp'e göre filtrele (silmek istediğimizi çıkar)
     const updatedComments = comments.filter(c => c.timestamp !== ts);
+
+    // Firestore'u güncelle
     await updateDoc(ref, { comments: updatedComments });
 
-    // Yine Firestore'dan tekrar çek (güncel hal)
-    const updatedSnap = await getDoc(ref);
-    const latestComments = updatedSnap.data().comments || [];
-    
-const list = document.getElementById("commentList-" + id);
-list.innerHTML = ""; // 💥 TEMİZLEME ADIMI
-
-list.innerHTML = latestComments
-  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-  .map(c => `
-    <div class="comment">
-      <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}): ${c.text}</span>
-      <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
-        ${c.user !== uid ? `<button class="reply-comment-btn" data-username="${c.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
-        ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-timestamp="${c.timestamp}">❌</button>` : ""}
-      </div>
-    </div>
-  `).join("");
-
-    // Yorum sayısını güncelle
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = latestComments.length;
+    // DOM'daki yorumları yeniden render et
+    renderComments(id, updatedComments);
   }
 });
 
