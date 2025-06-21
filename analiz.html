@@ -562,7 +562,7 @@ document.addEventListener("click", async (e) => {
     // Yorum sayısını güncelle
     const list = document.getElementById("commentList-" + id);
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = list.children.length;
+    if (countEl) countEl.textContent = list.querySelectorAll(".comment").length;
   }
 });
                 
