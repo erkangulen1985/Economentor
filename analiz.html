@@ -650,6 +650,7 @@ async function postComment(id, videoData, el) {
   };
 
   await updateDoc(ref, { comments: arrayUnion(newComment) });
+  input.value = "";
   input.style.height = "auto";
 
   // 🔁 Güncel yorumları tekrar yükle (silinenler geri gelmesin)
