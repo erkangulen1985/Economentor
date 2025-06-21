@@ -561,47 +561,90 @@ async function postComment(id, videoData, el) {
     timestamp: new Date().toISOString()
   };
 
-  // Yorum veritabanına eklenir
   await updateDoc(ref, { comments: arrayUnion(newComment) });
   input.value = "";
 
-  // 🔁 Yeni: Güncel yorumları tekrar yükle
+  // 🔁 Güncel yorumları tekrar yükle (silinenler geri gelmesin)
   const updatedSnap = await getDoc(ref);
   const updatedComments = updatedSnap.data().comments || [];
-
   videoData.comments = updatedComments;
 
-  // Arayüzü yeniden oluştur
+  // 🔄 Arayüzü güncelle
   renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
   const yorumEtiketi = el.querySelector('.comment-count');
   if (yorumEtiketi) {
     yorumEtiketi.textContent = `💬 ${updatedComments.length} yorum`;
   }
 
-  // @mention bildirimi
-  const mentions = text.match(/@([\w\.\-_]+)/g);
-  if (mentions) {
-    for (let mention of mentions) {
-      const name = mention.substring(1).toLowerCase();
-      const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+  // 🔔 Bildirim başlığı (video başlığı)
+  const title = el.querySelector("h2")?.innerText || "Bir analiz";
 
-      if (mentionedUser && mentionedUser.uid !== user.uid) {
-        const messageText = videoData.title
-          ? `“${videoData.title}” başlıklı analizde sizden bahsedildi.`
-          : `Bir analiz videosunda sizden bahsedildi.`;
+  // 🔔 Adminlere bildirim gönder
+  const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
+  const adminsSnap = await getDocs(adminsQuery);
 
+  for (const adminDoc of adminsSnap.docs) {
+    const adminId = adminDoc.id;
+    if (adminId === user.uid) continue;
+
+    const adminMessage = `${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.`;
+
+    await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+      to: adminId,
+      from: user.uid,
+      videoId: id,
+      message: adminMessage,
+      timestamp: Timestamp.now(),
+      read: false
+    });
+
+    try {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: adminId,
+          title: "\"Economentor\" 💬 Yeni Yorum",
+          body: adminMessage,
+          url: "https://economentor.netlify.app/analiz.html"
+        })
+      });
+    } catch (err) {
+      console.error("Admin FCM bildirimi başarısız:", err);
+    }
+  }
+
+  // 🔔 Bahsedilen kullanıcıya mention bildirimi gönder
+  const mentions = text.match(/@(\w+[\.\w]*)/g);
+  for (const mention of mentions || []) {
+    const name = mention.substring(1).toLowerCase();
+    const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
+
+    if (mentionedUser && mentionedUser.uid !== user.uid) {
+      const mentionMessage = `"${title}" başlıklı analizde sizden bahsedildi.`;
+
+      await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
+        to: mentionedUser.uid,
+        from: user.uid,
+        videoId: id,
+        message: mentionMessage,
+        timestamp: Timestamp.now(),
+        read: false
+      });
+
+      try {
         await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             uid: mentionedUser.uid,
-            title: "\"Economentor\" 📝 Bahsedildiniz!",
-            body: messageText,
-            url: "https://economentor.netlify.app"
+            title: "\"Economentor\" 🧠 Yeni Bahsetme!",
+            body: mentionMessage,
+            url: "https://economentor.netlify.app/analiz.html"
           })
         });
-
-        await createNotificationForUser(mentionedUser.uid, messageText, id);
+      } catch (err) {
+        console.error("FCM gönderimi başarısız:", err);
       }
     }
   }
