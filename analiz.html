@@ -337,7 +337,7 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
         .map((c, i) => `
           <div class="comment">
             <span><b>${c.username}</b> (${new Date(c.timestamp).toLocaleString()}):&nbsp;${c.text}</span>
-            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-index="${i}">❌</button>` : ""}
+            ${c.user === uid ? `<button class="delete-comment" data-id="${id}" data-timestamp="${c.timestamp}">❌</button>` : ""}
           </div>
         `).join("")}
       <input id="input-${id}" placeholder="Yorumunuzu yazın..." />
@@ -546,18 +546,17 @@ document.addEventListener("click", async (e) => {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const id = e.target.dataset.id;
-    const index = parseInt(e.target.dataset.index);
+    const timestampToDelete = e.target.dataset.timestamp; // Bu değeri butona eklememiz lazım
     const ref = doc(db, "analizler", id);
     const snap = await getDoc(ref);
-    const comments = snap.data().comments || [];
+    const allComments = snap.data().comments || [];
 
-    // Silinecek yorumu bul ve çıkar
-    const deleted = comments.splice(index, 1)[0];
+    // timestamp ile eşleşen yorumu bul ve çıkar
+    const updatedComments = allComments.filter(comment => comment.timestamp !== timestampToDelete);
 
-    // Yeni yorum dizisini Firestore'a kaydet
-    await updateDoc(ref, { comments });
+    await updateDoc(ref, { comments: updatedComments });
 
-    // Sadece DOM'dan o yorum div'ini sil
+    // DOM'dan yorumu kaldır
     e.target.closest(".comment").remove();
 
     // Yorum sayısını güncelle
