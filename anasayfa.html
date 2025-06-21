@@ -822,7 +822,7 @@ function renderComments(container, comments, userId, postId) {
   </div>
   <div style="display: flex; gap: 6px; align-items: center;">
     ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
-    ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
+    ${comment.user === userId ? `<button class="delete-comment" data-index="${index}"><i class="fas fa-times" style="color: white;"></i></button>` : ""}
   </div>
 `;
     container.appendChild(el);
