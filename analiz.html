@@ -238,21 +238,6 @@
   font-weight: bold;
 }
 
-.comment-textarea {
-  width: 100%;
-  min-height: 40px;
-  max-height: 150px;
-  padding: 12px;
-  font-size: 16px;
-  margin-top: 15px;
-  border-radius: 6px;
-  border: none;
-  resize: vertical;
-  background-color: #fff;
-  color: #000;
-  font-family: inherit;
-}
-
 @media (max-width: 768px) {
   .container {
     padding: 10px;
@@ -292,15 +277,12 @@
     margin-top: 10px;
   }
 
-  .comments-section textarea {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-top: 15px;
-  border-radius: 6px;
-  border: none;
-  resize: vertical;
-}
+  .comments-section input[type="text"] {
+    font-size: 16px;
+    padding: 10px;
+    width: 315px;
+    max-width: 100%;
+  }
 
   .comment {
     flex-direction: column;
@@ -426,7 +408,7 @@ usersList = usersSnap.docs.map(doc => ({
 
 if (videoVisibility === "vip" && currentUserRole === "user") {
   // VIP ama kullanıcı sadece 'user' => BUĞULU GÖSTERİM
-  card.innerHTML = `
+  card.innerHTML = 
     <h2>${data.title}</h2>
     <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
       Görünürlük: Sadece VIP
@@ -441,10 +423,10 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
       </div>
     </div>
     <p>Yüklenme Tarihi: ${new Date(data.timestamp.seconds * 1000).toLocaleString()}</p>
-  `;
+  ;
 } else {
   // VIP değilse veya kullanıcı VIP ise => TAM GÖSTERİM
-card.innerHTML = `
+card.innerHTML = 
   <h2>${data.title}</h2>
   <p style="font-size:14px; color:#ccc; margin-top:-10px; margin-bottom:10px;">
     Görünürlük: ${videoVisibility === "vip" ? "Sadece VIP" : "Herkese Açık (User/VIP)"}
@@ -469,11 +451,11 @@ card.innerHTML = `
     <button class="toggle-panel-comments" style="margin-bottom: 10px;">💬 Yorumları Göster</button>
     <div class="comment-panel" style="display: none;">
       <div class="comment-list"></div>
-      <textarea id="commentInput-${id}" placeholder="Yorumunuzu yapın" rows="2" style="resize: vertical;"></textarea>
+      <input type="text" id="commentInput-${id}" placeholder="Yorumunuzu yapın" />
       <button class="comment-button">Yorum Yap</button>
     </div>
   </div>
-`;
+;
 }
 
 const toggleBtn = card.querySelector(".toggle-panel-comments");
@@ -496,7 +478,9 @@ if (commentButton) {
     postComment(id, data, card);
   });
 }
-})
+
+addToggleCommentPanelEvents();
+  })
 });
 
     // Beğeni
@@ -530,7 +514,7 @@ if (commentButton) {
         if (disSnap.exists()) {
           await deleteDoc(dislikeRef);
           await updateDoc(ref, { dislikes: dislikeCount - 1 });
-          const disBtn = document.querySelector(`.dislike-btn[data-id="${id}"]`);
+          const disBtn = document.querySelector(.dislike-btn[data-id="${id}"]);
           if (disBtn) {
             disBtn.style.backgroundColor = "#e74c3c";
             disBtn.querySelector(".dislike-count").innerText = dislikeCount - 1;
@@ -571,7 +555,7 @@ if (commentButton) {
         if (likeSnap.exists()) {
           await deleteDoc(likeSnap.ref);
           await updateDoc(ref, { likes: likeCount - 1 });
-          const likeBtn = document.querySelector(`.like-btn[data-id="${id}"]`);
+          const likeBtn = document.querySelector(.like-btn[data-id="${id}"]);
           if (likeBtn) {
             likeBtn.style.backgroundColor = "#f39c12";
             likeBtn.querySelector(".like-count").innerText = likeCount - 1;
@@ -596,7 +580,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.warn("❌ Video oynatılamıyor:", err);
     const warning = document.createElement("div");
-    warning.style = `
+    warning.style = 
       background-color: rgba(255, 0, 0, 0.85);
       color: white;
       padding: 16px;
@@ -606,8 +590,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       max-width: 600px;
       margin: 30px auto;
       text-align: left;
-    `;
-    warning.innerHTML = `
+    ;
+    warning.innerHTML = 
       <strong>⚠️ Apple cihazınızda video oynatımı başarısız.</strong><br><br>
       Bu sorunun olası nedenleri:
       <ul>
@@ -618,7 +602,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <li>Tarayıcı otomatik oynatmayı engelliyor olabilir</li>
       </ul>
       Lütfen geliştiriciye haber veriniz veya videoyu farklı bir cihazda deneyiniz.
-    `;
+    ;
     document.body.prepend(warning);
   }
 });
@@ -635,7 +619,7 @@ async function loadUsers() {
 async function postComment(id, videoData, el) {
   if (!usersList.length) await loadUsers();
 
-  const input = document.getElementById(`commentInput-${id}`);
+  const input = document.getElementById(commentInput-${id});
   const text = input.value.trim();
   if (!text) return alert("Yorum boş olamaz.");
 
@@ -663,7 +647,7 @@ async function postComment(id, videoData, el) {
   renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
   const yorumEtiketi = el.querySelector('.comment-count');
   if (yorumEtiketi) {
-    yorumEtiketi.textContent = `💬 ${updatedComments.length} yorum`;
+    yorumEtiketi.textContent = 💬 ${updatedComments.length} yorum;
   }
 
   // 🔔 Bildirim başlığı (video başlığı)
@@ -677,9 +661,9 @@ async function postComment(id, videoData, el) {
     const adminId = adminDoc.id;
     if (adminId === user.uid) continue;
 
-    const adminMessage = `${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.`;
+    const adminMessage = ${username} adlı kullanıcı "${title}" başlıklı analize yorum yaptı.;
 
-    await setDoc(doc(db, "notifications", `${adminId}_${Date.now()}`), {
+    await setDoc(doc(db, "notifications", ${adminId}_${Date.now()}), {
       to: adminId,
       from: user.uid,
       videoId: id,
@@ -711,9 +695,9 @@ async function postComment(id, videoData, el) {
     const mentionedUser = usersList.find(u => u.username.toLowerCase() === name);
 
     if (mentionedUser && mentionedUser.uid !== user.uid) {
-      const mentionMessage = `"${title}" başlıklı analizde sizden bahsedildi.`;
+      const mentionMessage = "${title}" başlıklı analizde sizden bahsedildi.;
 
-      await setDoc(doc(db, "notifications", `${mentionedUser.uid}_${Date.now()}`), {
+      await setDoc(doc(db, "notifications", ${mentionedUser.uid}_${Date.now()}), {
         to: mentionedUser.uid,
         from: user.uid,
         videoId: id,
@@ -750,19 +734,19 @@ function renderComments(container, comments, userId, postId) {
 
     let buttonsHTML = "";
     if (comment.user !== userId) {
-      buttonsHTML += `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>`;
+      buttonsHTML += <button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>;
     }
     if (comment.user === userId) {
-      buttonsHTML += `<button class="delete-comment" 
+      buttonsHTML += <button class="delete-comment" 
         data-user="${comment.user}" 
         data-time="${comment.timestamp}" 
         data-text="${encodeURIComponent(comment.text)}"
       >
         <i class="fas fa-times" style="color:white;"></i>
-      </button>`;
+      </button>;
     }
 
-    el.innerHTML = `
+    el.innerHTML = 
       <div>
         <b>${comment.username}</b> <small>(${dateStr})</small><br/>
         ${comment.text}
@@ -770,14 +754,14 @@ function renderComments(container, comments, userId, postId) {
       <div style="display: flex; gap: 6px; align-items: center;">
         ${buttonsHTML}
       </div>
-    `;
+    ;
 
     container.appendChild(el);
   });
 }
 
 async function createNotificationForUser(uid, message, postId = null) {
-  const docId = `${uid}_${Date.now()}`;
+  const docId = ${uid}_${Date.now()};
   await setDoc(doc(db, "notifications", docId), {
     to: uid,
     message: message,
@@ -835,7 +819,7 @@ function insertMention(username) {
   const input = activeInput;
   const cursorPos = input.selectionStart;
   const value = input.value;
-  const before = value.slice(0, cursorPos).replace(/@(\w*)$/, `@${username}`);
+  const before = value.slice(0, cursorPos).replace(/@(\w*)$/, @${username});
   const after = value.slice(cursorPos);
   input.value = before + after;
   input.focus();
@@ -867,7 +851,7 @@ document.addEventListener("click", async (e) => {
 
     const yorumEtiketi = card.querySelector('.comment-count');
     if (yorumEtiketi) {
-      yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
+      yorumEtiketi.textContent = 💬 ${updated.length} yorum;
     }
   }
 });
@@ -887,12 +871,12 @@ document.addEventListener("click", (e) => {
   if (e.target.classList.contains("reply-comment-btn")) {
     const username = e.target.dataset.username;
     const postId = e.target.dataset.postid;
-    const input = document.getElementById(`commentInput-${postId}`);
+    const input = document.getElementById(commentInput-${postId});
     if (!input) return;
 
     input.focus();
 
-    const mentionText = `@${username} | `;
+    const mentionText = @${username} | ;
 
     // Kullanıcının metni değiştirmesi durumuna karşı sadece en başa yaz
     if (!input.value.startsWith(mentionText)) {
