@@ -210,18 +210,20 @@
   background-color: #666;
 }
 
-.comment button {
-  background-color: #e74c3c;
-  color: white !important; /* Bu satırı eklersen çarpı işareti beyaz olur */
-  padding: 6px 12px;
+.comment-button {
+  background-color: #3498db;
+  color: white;
   border: none;
-  border-radius: 5px;
+  padding: 10px 18px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background 0.3s ease;
 }
 
-.comment button:hover {
-  background-color: #c0392b;
-  color: white !important; /* Hover sırasında da beyaz kalsın */
+.comment-button:hover {
+  background-color: #2980b9;
 }
 
 .comment-count {
@@ -662,11 +664,12 @@ function renderComments(container, comments, userId, postId) {
   </div>
   <div style="display: flex; gap: 6px; align-items: center;">
     ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
-    ${comment.user === userId ? `<button class="delete-comment" 
-      data-user="${comment.user}" 
-      data-time="${comment.timestamp}" 
-      data-text="${encodeURIComponent(comment.text)}"
-    ">❌</button>` : ""}
+${comment.user === userId ? `<button class="delete-comment" 
+  data-user="${comment.user}" 
+  data-time="${comment.timestamp}" 
+  data-text="${encodeURIComponent(comment.text)}"
+  style="color:white;" 
+>❌</button>` : ""}
   </div>
 `;
     container.appendChild(el);
