@@ -610,15 +610,19 @@ function renderComments(container, comments, userId, postId) {
     el.className = "comment";
     const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
     el.innerHTML = `
-      <div>
-        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-        ${comment.text}
-      </div>
-      <div style="display: flex; gap: 6px; align-items: center;">
-        ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
-        ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
-      </div>
-    `;
+  <div>
+    <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+    ${comment.text}
+  </div>
+  <div style="display: flex; gap: 6px; align-items: center;">
+    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
+    ${comment.user === userId ? `<button class="delete-comment" 
+      data-user="${comment.user}" 
+      data-time="${comment.timestamp}" 
+      data-text="${encodeURIComponent(comment.text)}"
+    ">❌</button>` : ""}
+  </div>
+`;
     container.appendChild(el);
   });
 }
@@ -693,30 +697,25 @@ document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const card = e.target.closest(".video-card");
     const postId = card.querySelector(".like-btn").dataset.id;
-
-    const commentText = e.target.closest(".comment").innerText.trim();
     const commentList = card.querySelector(".comment-list");
+
+    // Yeni: Verileri doğrudan butonun dataset'inden al
+    const targetUser = e.target.dataset.user;
+    const targetTime = e.target.dataset.time;
+    const targetText = decodeURIComponent(e.target.dataset.text);
 
     const snap = await getDoc(doc(db, "analizler", postId));
     const currentData = snap.data();
     const currentComments = currentData.comments || [];
 
-    // Hangi yorumu sileceğimizi belirleyelim
-    const targetComment = currentComments.find(c => {
-      const fullText = `${c.username} (${new Date(c.timestamp).toLocaleString("tr-TR")})\n${c.text}`;
-      return commentText.includes(c.text) && commentText.includes(c.username);
-    });
-
-    if (!targetComment) return alert("Yorum bulunamadı.");
-
     const updated = currentComments.filter(c =>
-      !(c.timestamp === targetComment.timestamp && c.user === targetComment.user && c.text === targetComment.text)
+      !(c.timestamp === targetTime && c.user === targetUser && c.text === targetText)
     );
 
     await updateDoc(doc(db, "analizler", postId), { comments: updated });
 
-    // Arayüzü güncelle
     renderComments(commentList, updated, uid, postId);
+
     const yorumEtiketi = card.querySelector('.comment-count');
     if (yorumEtiketi) {
       yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
