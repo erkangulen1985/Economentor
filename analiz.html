@@ -359,6 +359,15 @@ if (videoVisibility === "vip" && currentUserRole === "user") {
 </div>
   `;
 }
+
+const toggleBtn = card.querySelector(".toggle-panel-comments");
+const commentPanel = card.querySelector(".comment-panel");
+
+toggleBtn.addEventListener("click", () => {
+  const isVisible = commentPanel.style.display === "block";
+  commentPanel.style.display = isVisible ? "none" : "block";
+  toggleBtn.textContent = isVisible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
+});
     
 container.appendChild(card);
 
