@@ -808,7 +808,7 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-function renderComments(container, comments, userId) {
+function renderComments(container, comments, userId, postId) {
   container.innerHTML = "";
   comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   comments.forEach((comment, index) => {
@@ -821,7 +821,7 @@ function renderComments(container, comments, userId) {
     ${comment.text}
   </div>
   <div style="display: flex; gap: 6px; align-items: center;">
-    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${id}">↩ Yanıtla</button>` : ""}
+    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
     ${comment.user === userId ? `<button class="delete-comment" data-index="${index}">❌</button>` : ""}
   </div>
 `;
@@ -1095,6 +1095,10 @@ document.addEventListener("click", (e) => {
     const postId = e.target.dataset.postid;
     const input = document.getElementById(`commentInput-${postId}`);
     input.focus();
+    input.value = `@${username} | `;
+  }
+
+  if (!input.value.includes(`@${username} |`)) {
     input.value = `@${username} | `;
   }
 });
