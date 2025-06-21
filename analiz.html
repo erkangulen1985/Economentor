@@ -542,7 +542,6 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// Yorum sil
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const id = e.target.dataset.id;
@@ -555,17 +554,17 @@ document.addEventListener("click", async (e) => {
     const updatedComments = allComments.filter(comment => comment.timestamp !== timestampToDelete);
     await updateDoc(ref, { comments: updatedComments });
 
-    // Yorumu DOM'dan kaldır
+    // DOM'dan yorumu kaldır
     const commentEl = e.target.closest(".comment");
+    const videoCardEl = commentEl.closest(".video-card");
     const commentListEl = commentEl.parentElement;
     commentEl.remove();
 
-    // Doğrudan video kartı içinde doğru yorum sayısını bul
-    const videoCardEl = commentEl.closest(".video-card");
+    // Yorum sayısını güncelle
     const countEl = videoCardEl.querySelector(".comment-count");
     if (countEl) {
-      const newCount = commentListEl.querySelectorAll(".comment").length;
-      countEl.textContent = newCount;
+      const currentCount = parseInt(countEl.textContent) || 0;
+      countEl.textContent = currentCount > 0 ? currentCount - 1 : 0;
     }
   }
 });
