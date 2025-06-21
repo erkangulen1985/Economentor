@@ -691,36 +691,37 @@ function insertMention(username) {
 
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
-    const postId = e.target.closest(".video-card").getAttribute("data-id");
-    const commentEl = e.target.closest(".comment");
-    const commentText = commentEl.querySelector("div").innerText;
-    const commentList = e.target.closest(".comment-panel").querySelector(".comment-list");
-    const allComments = Array.from(commentList.children).map(el => el.querySelector("div").innerText.trim());
-    const index = allComments.indexOf(commentText.trim());
-    const targetComment = data.comments[index];
-    const ref = doc(db, "analizler", postId);
-    const snap = await getDoc(ref);
-    const data = snap.data();
-    const updated = (data.comments || []).filter(c =>
+    const card = e.target.closest(".video-card");
+    const postId = card.querySelector(".like-btn").dataset.id;
+
+    const commentText = e.target.closest(".comment").innerText.trim();
+    const commentList = card.querySelector(".comment-list");
+
+    const snap = await getDoc(doc(db, "analizler", postId));
+    const currentData = snap.data();
+    const currentComments = currentData.comments || [];
+
+    // Hangi yorumu sileceğimizi belirleyelim
+    const targetComment = currentComments.find(c => {
+      const fullText = `${c.username} (${new Date(c.timestamp).toLocaleString("tr-TR")})\n${c.text}`;
+      return commentText.includes(c.text) && commentText.includes(c.username);
+    });
+
+    if (!targetComment) return alert("Yorum bulunamadı.");
+
+    const updated = currentComments.filter(c =>
       !(c.timestamp === targetComment.timestamp && c.user === targetComment.user && c.text === targetComment.text)
     );
-    await updateDoc(ref, { comments: updated });
-    
-    renderComments(commentList, updated, auth.currentUser.uid, postId);
+
+    await updateDoc(doc(db, "analizler", postId), { comments: updated });
+
+    // Arayüzü güncelle
+    renderComments(commentList, updated, uid, postId);
+    const yorumEtiketi = card.querySelector('.comment-count');
+    if (yorumEtiketi) {
+      yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
+    }
   }
-
-if (e.target.classList.contains("reply-comment-btn")) {
-  const username = e.target.dataset.username;
-  const postId = e.target.dataset.postid;
-  const input = document.getElementById(`commentInput-${postId}`);
-  input.focus();
-
-  const mentionText = `@${username} | `;
-
-  if (!input.value.startsWith(mentionText)) {
-    input.value = mentionText + input.value.replace(mentionText, "");
-  }
-}
 });
 
 function addToggleCommentPanelEvents() {
