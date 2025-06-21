@@ -550,14 +550,23 @@ document.addEventListener("click", async (e) => {
     const ref = doc(db, "analizler", id);
     const snap = await getDoc(ref);
     const comments = snap.data().comments || [];
-    comments.splice(index, 1);
+
+    // Silinecek yorumu bul ve çıkar
+    const deleted = comments.splice(index, 1)[0];
+
+    // Yeni yorum dizisini Firestore'a kaydet
     await updateDoc(ref, { comments });
-    
-    renderComments(id, comments, uid);
+
+    // Sadece DOM'dan o yorum div'ini sil
+    e.target.closest(".comment").remove();
+
+    // Yorum sayısını güncelle
+    const list = document.getElementById("commentList-" + id);
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+    if (countEl) countEl.textContent = list.children.length;
   }
 });
                 
-
   // Yorumları göster/gizle
   document.addEventListener("click", (e) => {
     if (e.target.classList.contains("toggle-comments")) {
