@@ -554,7 +554,7 @@ document.addEventListener("click", async (e) => {
     const allComments = snap.data().comments || [];
 
     // Firestore'dan yorumu kaldır
-    const updatedComments = allComments.filter(comment => comment.timestamp !== timestampToDelete);
+    const updatedComments = allComments.filter(c => String(c.timestamp) !== String(timestampToDelete));
     await updateDoc(ref, { comments: updatedComments });
 
     // DOM'dan yorumu kaldır
