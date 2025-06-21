@@ -446,10 +446,23 @@ document.addEventListener("click", async (e) => {
       text,
       timestamp: new Date().toISOString()
     };
+
     await updateDoc(ref, {
       comments: arrayUnion(comment)
     });
 
+    // 🧠 Firestore'dan tekrar veriyi çek ve renderComments ile DOM'u güncelle
+    const updatedSnap = await getDoc(ref);
+    const updatedComments = updatedSnap.data().comments || [];
+    renderComments(id, updatedComments, uid);
+
+    input.value = "";
+
+    // Yorum sayısını da güncelle
+    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
+    if (countEl) countEl.textContent = updatedComments.length;
+  }
+  
     // Bildirim için video başlığı
     const title = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector("h2")?.innerText || "Bir analiz";
 
@@ -524,20 +537,6 @@ document.addEventListener("click", async (e) => {
           console.error("FCM gönderimi başarısız:", err);
         }
       }
-    }
-
-    // Yorum listesini güncelle
-    const updatedSnap = await getDoc(ref);
-const updatedComments = updatedSnap.data().comments || [];
-renderComments(id, updatedComments, uid);
-
-// input'u temizle
-input.value = "";
-
-    const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) {
-      const currentCount = parseInt(countEl.textContent) || 0;
-      countEl.textContent = currentCount + 1;
     }
   }
 });
