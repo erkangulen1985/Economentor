@@ -544,14 +544,10 @@ document.addEventListener("click", async (e) => {
     }
 
     // Yorum listesini güncelle
-    const list = document.getElementById("commentList-" + id);
-const div = document.createElement("div");
-div.classList.add("comment");
-div.innerHTML = `
-  <span><b>${username}</b> (${new Date().toLocaleString()}): ${text}</span>
-  <button class="delete-comment" data-id="${id}" data-timestamp="${comment.timestamp}">❌</button>
-`;
-list.insertBefore(div, list.firstChild);
+// Yorumları yeniden getirip DOM’a sadece Firestore’dan gelenleri çiz
+const updatedSnap = await getDoc(ref);
+const updatedComments = updatedSnap.data().comments || [];
+renderComments(id, updatedComments);
 
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
     if (countEl) countEl.textContent = document.querySelectorAll(`#commentList-${id} .comment`).length;
