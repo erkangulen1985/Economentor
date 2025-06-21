@@ -448,7 +448,6 @@ ${comments
     }
   });
 
-  // Yorum yap
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("commentBtn")) {
     const id = e.target.dataset.id;
@@ -463,13 +462,17 @@ document.addEventListener("click", async (e) => {
       text,
       timestamp: new Date().toISOString()
     };
+
+    // Yorum Firestore'a ekleniyor
     await updateDoc(ref, {
       comments: arrayUnion(comment)
     });
 
-    // 👇 Yorum listesini güncelle
+    // Güncellenmiş yorumları yeniden al
     const updatedSnap = await getDoc(ref);
     const updatedComments = updatedSnap.data().comments || [];
+
+    // Listeyi DOM'a yaz
     renderComments(id, updatedComments);
 
     input.value = "";
@@ -569,7 +572,7 @@ function renderComments(postId, comments) {
   const list = document.getElementById("commentList-" + postId);
   if (!list) return;
 
-  list.innerHTML = ""; // Önce tüm eski yorumları temizle
+  list.innerHTML = ""; // Listeyi temizle
 
   comments
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -586,7 +589,6 @@ function renderComments(postId, comments) {
       list.appendChild(div);
     });
 
-  // Yorum sayısını güncelle
   const countEl = document.querySelector(`[data-id="${postId}"]`).closest(".video-card").querySelector(".comment-count");
   if (countEl) countEl.textContent = comments.length;
 }
@@ -600,13 +602,13 @@ document.addEventListener("click", async (e) => {
     const snap = await getDoc(ref);
     const comments = snap.data().comments || [];
 
-    // Yorumları timestamp'e göre filtrele (silmek istediğimizi çıkar)
+    // Sadece timestamp eşleşmeyeni bırak
     const updatedComments = comments.filter(c => c.timestamp !== ts);
 
     // Firestore'u güncelle
     await updateDoc(ref, { comments: updatedComments });
 
-    // DOM'daki yorumları yeniden render et
+    // DOM'u güncelle
     renderComments(id, updatedComments);
   }
 });
