@@ -602,13 +602,13 @@ document.addEventListener("click", async (e) => {
     const snap = await getDoc(ref);
     const comments = snap.data().comments || [];
 
-    // Sadece timestamp eşleşmeyeni bırak
+    // Yorumu timestamp'e göre filtrele
     const updatedComments = comments.filter(c => c.timestamp !== ts);
 
     // Firestore'u güncelle
     await updateDoc(ref, { comments: updatedComments });
 
-    // DOM'u güncelle
+    // DOM'daki yorumları temizle ve güncelle
     renderComments(id, updatedComments);
   }
 });
