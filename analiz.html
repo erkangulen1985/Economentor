@@ -563,16 +563,21 @@ document.addEventListener("click", async (e) => {
     const id = e.target.dataset.id;
     const ts = e.target.dataset.timestamp;
     const ref = doc(db, "analizler", id);
-    
-    const snap = await getDoc(ref);
-    const comments = snap.data().comments || [];
 
-    // TS eşleşmeyenleri filtrele
-    const updatedComments = comments.filter(c => c.timestamp !== ts);
+    // Firestore'dan son halini tekrar çek
+    const snapBefore = await getDoc(ref);
+    const allComments = snapBefore.data().comments || [];
+
+    const updatedComments = allComments.filter(c => c.timestamp !== ts);
     await updateDoc(ref, { comments: updatedComments });
 
+    // Tekrar snapshot al
+    const snapAfter = await getDoc(ref);
+    const refreshedComments = snapAfter.data().comments || [];
+
+    // DOM'u temizle ve yeniden yaz
     const list = document.getElementById("commentList-" + id);
-    list.innerHTML = updatedComments
+    list.innerHTML = refreshedComments
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       .map(c => `
         <div class="comment">
@@ -585,7 +590,7 @@ document.addEventListener("click", async (e) => {
       `).join("");
 
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = updatedComments.length;
+    if (countEl) countEl.textContent = refreshedComments.length;
   }
 });
 
