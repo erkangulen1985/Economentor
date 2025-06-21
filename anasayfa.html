@@ -833,16 +833,26 @@ function renderComments(container, comments, userId, postId) {
     const el = document.createElement("div");
     el.className = "comment";
     const dateStr = new Date(comment.timestamp).toLocaleString("tr-TR");
+
+    let buttonsHTML = "";
+    if (comment.user !== userId) {
+      buttonsHTML += `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>`;
+    }
+    if (comment.user === userId) {
+      buttonsHTML += `<button class="delete-comment" data-index="${index}">
+        <i class="fas fa-times" style="color:white;"></i>
+      </button>`;
+    }
+
     el.innerHTML = `
-  <div>
-    <b>${comment.username}</b> <small>(${dateStr})</small><br/>
-    ${comment.text.replace(/\n/g, "<br>")}
-  </div>
-  <div style="display: flex; gap: 6px; align-items: center;">
-    ${comment.user !== userId ? `<button class="reply-comment-btn" data-username="${comment.username}" data-postid="${postId}">↩ Yanıtla</button>` : ""}
-    ${comment.user === userId ? `<button class="delete-comment" data-index="${index}"><i class="fas fa-times" style="color: white;"></i></button>` : ""}
-  </div>
-`;
+      <div>
+        <b>${comment.username}</b> <small>(${dateStr})</small><br/>
+        ${comment.text.replace(/\n/g, "<br>")}
+      </div>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        ${buttonsHTML}
+      </div>
+    `;
     container.appendChild(el);
   });
 }
@@ -1113,11 +1123,12 @@ document.addEventListener("click", (e) => {
     const username = e.target.dataset.username;
     const postId = e.target.dataset.postid;
     const input = document.getElementById(`commentInput-${postId}`);
-    input.focus();
+    if (!input) return;
 
-    // Aynı mention zaten varsa tekrar ekleme
-    if (!input.value.includes(`@${username} |`)) {
-      input.value = `@${username} | `;
+    input.focus();
+    const mentionText = `@${username} | `;
+    if (!input.value.startsWith(mentionText)) {
+      input.value = mentionText + input.value.replace(mentionText, "").trimStart();
     }
   }
 });
