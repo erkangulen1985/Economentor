@@ -561,10 +561,24 @@ async function postComment(id, videoData, el) {
     timestamp: new Date().toISOString()
   };
 
+  // Yorum veritabanına eklenir
   await updateDoc(ref, { comments: arrayUnion(newComment) });
   input.value = "";
 
-  // @mention tespiti
+  // 🔁 Yeni: Güncel yorumları tekrar yükle
+  const updatedSnap = await getDoc(ref);
+  const updatedComments = updatedSnap.data().comments || [];
+
+  videoData.comments = updatedComments;
+
+  // Arayüzü yeniden oluştur
+  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
+  const yorumEtiketi = el.querySelector('.comment-count');
+  if (yorumEtiketi) {
+    yorumEtiketi.textContent = `💬 ${updatedComments.length} yorum`;
+  }
+
+  // @mention bildirimi
   const mentions = text.match(/@([\w\.\-_]+)/g);
   if (mentions) {
     for (let mention of mentions) {
@@ -591,15 +605,6 @@ async function postComment(id, videoData, el) {
       }
     }
   }
-
-  // Güncelle ve yeniden render et
-  const updatedComments = [...(videoData.comments || []), newComment];
-  videoData.comments = updatedComments;
-renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
-const yorumEtiketi = el.querySelector('.comment-count');
-if (yorumEtiketi) {
-  yorumEtiketi.textContent = `💬 ${updatedComments.length} yorum`;
-}
 }
 
 function renderComments(container, comments, userId, postId) {
