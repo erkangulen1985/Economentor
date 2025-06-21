@@ -544,26 +544,25 @@ document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const id = e.target.dataset.id;
     const timestampToDelete = e.target.dataset.timestamp;
+
     const ref = doc(db, "analizler", id);
     const snap = await getDoc(ref);
-    const allComments = snap.data().comments || [];
+    const comments = snap.data().comments || [];
 
-    // Firestore'dan yorumu kaldır
-    const updatedComments = allComments.filter(c => String(c.timestamp) !== String(timestampToDelete));
+    // ✅ Yorum silme işlemi (timestamp eşleşmesini tam yap)
+    const updatedComments = comments.filter(comment => comment.timestamp !== timestampToDelete);
+
+    // ✅ Firestore güncelle
     await updateDoc(ref, { comments: updatedComments });
 
-    // DOM'dan yorumu kaldır
+    // ✅ DOM'dan sil
     const commentEl = e.target.closest(".comment");
     const videoCardEl = commentEl.closest(".video-card");
-    const commentListEl = commentEl.parentElement;
     commentEl.remove();
 
-    // Yorum sayısını güncelle
+    // ✅ Yorum sayısını güncelle
     const countEl = videoCardEl.querySelector(".comment-count");
-    if (countEl) {
-      const currentCount = parseInt(countEl.textContent) || 0;
-      countEl.textContent = currentCount > 0 ? currentCount - 1 : 0;
-    }
+    if (countEl) countEl.textContent = updatedComments.length;
   }
 });
                 
