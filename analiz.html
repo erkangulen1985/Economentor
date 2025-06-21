@@ -183,11 +183,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let usersList = [];
+let uid = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return location.href = "index.html";
 
-  const uid = user.uid;
+  uid = user.uid;
   const userDoc = await getDoc(doc(db, "users", uid));
   const username = userDoc.exists() ? userDoc.data().username : "Kullanıcı";
   const currentUserRole = userDoc.exists() ? userDoc.data().role || "user" : "user";
