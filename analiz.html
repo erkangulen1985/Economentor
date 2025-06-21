@@ -668,8 +668,9 @@ ${comment.user === userId ? `<button class="delete-comment"
   data-user="${comment.user}" 
   data-time="${comment.timestamp}" 
   data-text="${encodeURIComponent(comment.text)}"
-  style="color:white;" 
->❌</button>` : ""}
+>
+  <i class="fas fa-times" style="color:white;"></i>
+</button>
   </div>
 `;
     container.appendChild(el);
