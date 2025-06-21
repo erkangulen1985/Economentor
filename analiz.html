@@ -538,7 +538,10 @@ document.addEventListener("click", async (e) => {
     input.value = "";
 
     const countEl = document.querySelector(`[data-id="${id}"]`).closest(".video-card").querySelector(".comment-count");
-    if (countEl) countEl.textContent = list.children.length;
+    if (countEl) {
+      const currentCount = parseInt(countEl.textContent) || 0;
+      countEl.textContent = currentCount + 1;
+    }
   }
 });
 
