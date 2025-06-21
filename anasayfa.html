@@ -286,14 +286,15 @@ nav a:hover {
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   color: white;
+  display: flex;
+  flex-direction: column; /* ✅ Yorum ve butonları alt alta koyar */
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.comment div {
-  max-width: 85%;
+.comment > div {
+  width: 100%;
   word-wrap: break-word;
 }
 
