@@ -738,7 +738,7 @@ if(wrapper){
     commentBtn.addEventListener("click", () => postComment(postDoc.id, post, postElement));
 
     const commentList = postElement.querySelector(".comment-list");
-    renderComments(commentList, post.comments || [], auth.currentUser.uid);
+    renderComments(commentList, post.comments || [], auth.currentUser.uid, postDoc.id);
 
 const toggleBtn = postElement.querySelector(".toggle-panel-comments");
 const panel = postElement.querySelector(".comment-panel");
@@ -958,7 +958,7 @@ async function postComment(id, post, el) {
   const updatedComments = [...(post.comments || []), newComment];
   post.comments = updatedComments;
   el.querySelector('.comments').textContent = `💬 ${updatedComments.length} yorum`;
-  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid);
+  renderComments(el.querySelector(".comment-list"), updatedComments, user.uid, id);
 
   // Adminlere yorum bildirimi gönder
 const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
