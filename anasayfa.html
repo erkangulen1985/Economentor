@@ -658,6 +658,7 @@ async function loadPosts() {
   const querySnapshot = await getDocs(q); 
 
   querySnapshot.forEach((postDoc) => {
+    const id = postDoc.id;
     const post = postDoc.data();
     const postElement = document.createElement("div");
     postElement.classList.add("post");
