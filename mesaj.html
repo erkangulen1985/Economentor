@@ -555,7 +555,6 @@ async function loadChatList(uid) {
   const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
   const lastMsg = lastMsgSnap.docs[0]?.data();
   const showNotification = lastMsg && !lastMsg.seenBy?.includes(uid) && lastMsg.sender !== uid;
-  const convoI = getConversationId(uid, user.id);
 
   if (showNotification) {
     const notif = document.createElement("div");
