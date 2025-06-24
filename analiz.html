@@ -853,8 +853,9 @@ function insertMention(username) {
 }
 
 document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("delete-comment")) {
-    const button = e.target;
+  const button = e.target.closest(".delete-comment"); // 👈 ÖNEMLİ DEĞİŞİKLİK
+
+  if (button) {
     const commentDiv = button.closest(".comment");
     const card = button.closest(".video-card");
     const postId = card.querySelector(".like-btn")?.dataset.id;
@@ -879,10 +880,8 @@ document.addEventListener("click", async (e) => {
 
       await updateDoc(doc(db, "analizler", postId), { comments: updated });
 
-      // Gerçekten silindiyse DOM'dan kaldır
       commentDiv.remove();
 
-      // Yorum sayısını güncelle
       const yorumEtiketi = card.querySelector('.comment-count');
       if (yorumEtiketi) {
         const sayi = parseInt(yorumEtiketi.textContent.match(/\d+/)?.[0] || "1");
@@ -890,11 +889,9 @@ document.addEventListener("click", async (e) => {
       }
     } catch (err) {
       alert("❌ Yorum silinemedi. Lütfen tekrar deneyin.");
-      console.error("Silme hatası:", err);
-      // Geri al: DOM'u eski haline getir
       commentDiv.style.opacity = "1";
       commentDiv.style.pointerEvents = "auto";
-      commentDiv.querySelector("div:last-child")?.remove(); // "Siliniyor..." yazısını kaldır
+      commentDiv.querySelector("div:last-child")?.remove();
     }
   }
 });
