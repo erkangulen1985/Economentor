@@ -548,8 +548,19 @@ async function loadChatList(uid) {
       username: doc.data().username || "Bilinmeyen",
       lastMessage: doc.data().lastMessage || "",
       timestamp: doc.data().lastMessageTimestamp || 0,
-      hasNew: doc.data().inboxHasNew || false
-    }));
+      // Kullanıcıyı ekrana bastıktan sonra ayrı kontrol:
+  const convoId = getConversationId(uid, user.id);
+  const messagesCol = collection(db, "conversations", convoId, "messages");
+  const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
+  const lastMsg = lastMsgSnap.docs[0]?.data();
+  const showNotification = lastMsg && !lastMsg.seenBy?.includes(uid) && lastMsg.sender !== uid;
+
+  if (showNotification) {
+    const notif = document.createElement("div");
+    notif.className = "notification";
+    div.appendChild(notif);
+  }
+}));
 
   users.sort((a, b) => b.timestamp - a.timestamp); // Son mesaj zamanına göre sırala
 
@@ -790,9 +801,6 @@ function setupLoadMoreButton(messagesCol) {
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
     };
   }
-    await updateDoc(doc(db, "users", currentUser.uid), {
-    inboxHasNew: false
-  });
 }
 
 async function buildMessageDiv(msg) {
