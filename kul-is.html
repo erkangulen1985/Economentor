@@ -288,6 +288,9 @@ let adminCount = 0;
 let vipCount = 0;
 let userCount = 0;
 
+totalLikes += data.likes || 0;
+totalDislikes += data.dislikes || 0;
+
 users.forEach(userDoc => {
   const role = (userDoc.data().role || "user").toLowerCase();
   if (role === "admin") adminCount++;
@@ -339,8 +342,6 @@ for (const [id, val] of Object.entries(stats)) {
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
         ]);
-        totalLikes += likesSnap.size;
-        totalDislikes += dislikesSnap.size;
       } catch (e) {
         console.warn("analiz alt koleksiyonları alınamadı:", e);
       }
