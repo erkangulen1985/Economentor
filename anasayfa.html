@@ -934,7 +934,6 @@ async function dislikePost(id, post, el) {
 async function postComment(id, post, el) {
   if (!usersList.length) {
     console.log("usersList boştu, yeniden yükleniyor...");
-    await loadUsers();
   }
 
   const input = document.getElementById(`commentInput-${id}`);
