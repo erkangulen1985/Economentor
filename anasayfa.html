@@ -775,17 +775,34 @@ toggleBtn.addEventListener("click", () => {
   toggleBtn.textContent = visible ? "💬 Yorumları Göster" : "💬 Yorumları Gizle";
 });
 
-    commentList.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("delete-comment")) {
-        const index = parseInt(e.target.dataset.index);
-        const updated = (post.comments || []).filter((_, i) => i !== index);
-        await updateDoc(doc(db, "posts", postDoc.id), { comments: updated });
-        post.comments = updated;
-        renderComments(commentList, updated, auth.currentUser.uid);
-        const yorumEtiketi = postElement.querySelector('.comments');
-        if (yorumEtiketi) yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
-      }
-    });
+commentList.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".delete-comment"); // 🔥 En önemli satır
+  if (!btn) return;
+
+  const index = parseInt(btn.dataset.index);
+  const commentDiv = btn.closest(".comment");
+
+  commentDiv.style.opacity = "0.4";
+  commentDiv.style.pointerEvents = "none";
+  commentDiv.innerHTML += `<div style="color:yellow; font-size:14px; margin-top:5px;">Siliniyor...</div>`;
+
+  try {
+    const updated = (post.comments || []).filter((_, i) => i !== index);
+    await updateDoc(doc(db, "posts", postDoc.id), { comments: updated });
+    post.comments = updated;
+
+    // Arayüzü güncelle
+    renderComments(commentList, updated, auth.currentUser.uid, postDoc.id);
+
+    const yorumEtiketi = postElement.querySelector('.comments');
+    if (yorumEtiketi) yorumEtiketi.textContent = `💬 ${updated.length} yorum`;
+
+  } catch (err) {
+    alert("Yorum silinemedi: " + err.message);
+    commentDiv.style.opacity = "1";
+    commentDiv.style.pointerEvents = "auto";
+  }
+});
   });
 }
 
