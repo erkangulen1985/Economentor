@@ -279,6 +279,26 @@ async function loadStatistics() {
     const feedbacks = await getDocs(collection(db, "feedback"));
     const documents = await getDocs(collection(db, "documents"));
 
+let totalLikes = 0;
+let totalDislikes = 0;
+let totalComments = 0;
+let notificationTokenCount = 0;
+
+let adminCount = 0;
+let vipCount = 0;
+let userCount = 0;
+
+users.forEach(userDoc => {
+  const role = (userDoc.data().role || "user").toLowerCase();
+  if (role === "admin") adminCount++;
+  else if (role === "vip") vipCount++;
+  else userCount++;
+  if (userDoc.data().fcmToken) {
+    notificationTokenCount++;
+  }
+});
+
+// ✅ stats objesini burada oluştur
 const stats = {
   totalUsers: users.size,
   totalAdmins: adminCount,
@@ -301,26 +321,6 @@ for (const [id, val] of Object.entries(stats)) {
     document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     document.getElementById("totalDocuments").textContent = documents.size;
-
-    let totalLikes = 0;
-    let totalDislikes = 0;
-    let totalComments = 0;
-    let notificationTokenCount = 0;
-
-    // 👥 Role göre sayaçlar
-    let adminCount = 0;
-    let vipCount = 0;
-    let userCount = 0;
-
-    users.forEach(userDoc => {
-      const role = (userDoc.data().role || "user").toLowerCase();
-      if (role === "admin") adminCount++;
-      else if (role === "vip") vipCount++;
-      else userCount++;
-      if (userDoc.data().fcmToken) {
-      notificationTokenCount++;
-      }
-    });
     
     // 👥 Sayıları Dashboard'a ekle
     document.getElementById("totalAdmins").textContent = adminCount;
