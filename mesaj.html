@@ -541,68 +541,33 @@ async function loadChatList(uid) {
   const list = document.getElementById("chatItems");
   list.innerHTML = "";
 
-  const allItems = [];
+  const users = usersSnap.docs
+    .filter(doc => doc.id !== uid)
+    .map(doc => ({
+      id: doc.id,
+      username: doc.data().username || "Bilinmeyen",
+      lastMessage: doc.data().lastMessage || "",
+      timestamp: doc.data().lastMessageTimestamp || 0,
+      hasNew: doc.data().inboxHasNew || false
+    }));
 
-const leftSpacer = document.createElement("div");
-leftSpacer.style.minWidth = "10px";
-leftSpacer.style.height = "1px";
-leftSpacer.style.flexShrink = "0";
-leftSpacer.className = "chat-start-spacer"; // varsa mobilde stil için
-  
-  for (const docSnap of usersSnap.docs) {
-    const userId = docSnap.id;
-    if (userId === uid) continue;
+  users.sort((a, b) => b.timestamp - a.timestamp); // Son mesaj zamanına göre sırala
 
-    const username = docSnap.data().username || "Bilinmeyen";
-    const convoId = getConversationId(uid, userId);
-    const messagesCol = collection(db, "conversations", convoId, "messages");
-
-    const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
-
-list.appendChild(leftSpacer);
-    
-    let lastMsg = "", hasNew = false;
-    if (!lastMsgSnap.empty) {
-      const msg = lastMsgSnap.docs[0].data();
-      lastMsg = msg.text || "";
-      hasNew = !msg.seenBy?.includes(uid);
-    }
-
+  users.forEach(user => {
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${username}</strong><div class="last-message">${lastMsg}</div>`;
-
-    if (hasNew) {
+    div.innerHTML = `<strong>${user.username}</strong><div class="last-message">${user.lastMessage}</div>`;
+    if (user.hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
       div.appendChild(notif);
     }
-
-    div.onclick = () => openChat(userId, div);
-
-    allItems.push({ element: div, hasNew, username: username.toLowerCase() });
-  }
-  
-  allItems.sort((a, b) => {
-    if (a.hasNew && !b.hasNew) return -1;
-    if (!a.hasNew && b.hasNew) return 1;
-    return a.username.localeCompare(b.username);
+    div.onclick = () => openChat(user.id, div);
+    list.appendChild(div);
   });
-  
-  allItems.forEach(item => list.appendChild(item.element));
 
   scrollChatListToStart();
-  
   filterChatList();
-
-  if (window.innerWidth <= 770) {
-  setTimeout(() => {
-    const chatItemsDiv = document.getElementById("chatItems");
-    if (chatItemsDiv) {
-      chatItemsDiv.scrollLeft = 0; // Sıfırla
-    }
-  }, 300); // DOM otursun diye küçük gecikme
-}
 }
 
 async function openChat(fid, el) {
@@ -825,6 +790,9 @@ function setupLoadMoreButton(messagesCol) {
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
     };
   }
+    await updateDoc(doc(db, "users", currentUser.uid), {
+    inboxHasNew: false
+  });
 }
 
 async function buildMessageDiv(msg) {
@@ -918,8 +886,17 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
       seenBy: []
     };
     await addDoc(msgCol, msg);
+    // 1. Mesajı alıcı için güncelle
     await updateDoc(doc(db, "users", selectedFriendId), {
+      lastMessage: text,
+      lastMessageTimestamp: Date.now(),
       inboxHasNew: true
+    });
+
+    // 2. Aynı mesajı gönderen için de güncelle
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      lastMessage: text,
+      lastMessageTimestamp: Date.now(),
     });
 
 const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
