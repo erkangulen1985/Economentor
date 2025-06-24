@@ -359,10 +359,6 @@ for (const [id, val] of Object.entries(stats)) {
           getDocs(collection(ref, "comments")),
         ]);
 
-totalLikes += data.likes || 0;
-totalDislikes += data.dislikes || 0;
-totalComments += (data.comments || []).length;
-
       } catch (e) {
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
