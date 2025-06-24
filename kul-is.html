@@ -288,9 +288,6 @@ let adminCount = 0;
 let vipCount = 0;
 let userCount = 0;
 
-totalLikes += data.likes || 0;
-totalDislikes += data.dislikes || 0;
-
 users.forEach(userDoc => {
   const role = (userDoc.data().role || "user").toLowerCase();
   if (role === "admin") adminCount++;
