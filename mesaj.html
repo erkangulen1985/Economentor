@@ -549,13 +549,14 @@ async function loadChatList(uid) {
       lastMessage: doc.data().lastMessage || "",
       timestamp: doc.data().lastMessageTimestamp || 0,
   }));
-// Kullanıcıyı ekrana bastıktan sonra ayrı kontrol:
+
+  // Kullanıcıyı ekrana bastıktan sonra ayrı kontrol:
   const convoI = getConversationId(uid, user.id);
   const messagesCol = collection(db, "conversations", convoId, "messages");
   const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
   const lastMsg = lastMsgSnap.docs[0]?.data();
   const showNotification = lastMsg && !lastMsg.seenBy?.includes(uid) && lastMsg.sender !== uid;
-
+  
   if (showNotification) {
     const notif = document.createElement("div");
     notif.className = "notification";
