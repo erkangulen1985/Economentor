@@ -339,6 +339,10 @@ for (const [id, val] of Object.entries(stats)) {
           getDocs(collection(ref, "likes")),
           getDocs(collection(ref, "dislikes")),
         ]);
+        
+    totalLikes += likesSnap.size;
+    totalDislikes += dislikesSnap.size;
+        
       } catch (e) {
         console.warn("analiz alt koleksiyonları alınamadı:", e);
       }
@@ -357,6 +361,9 @@ for (const [id, val] of Object.entries(stats)) {
           getDocs(collection(ref, "comments")),
         ]);
 
+    totalLikes += likesSnap.size;
+    totalDislikes += dislikesSnap.size;
+        
       } catch (e) {
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
