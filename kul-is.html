@@ -279,7 +279,25 @@ async function loadStatistics() {
     const feedbacks = await getDocs(collection(db, "feedback"));
     const documents = await getDocs(collection(db, "documents"));
 
-    document.getElementById("totalUsers").textContent = users.size;
+const stats = {
+  totalUsers: users.size,
+  totalAdmins: adminCount,
+  totalVIPs: vipCount,
+  totalNormalUsers: userCount,
+  totalNotificationUsers: notificationTokenCount,
+  totalContents: analizler.size + fotolar.size,
+  totalDocuments: documents.size,
+  totalFeedbacks: feedbacks.size,
+  totalLikes,
+  totalDislikes,
+  totalComments
+};
+
+for (const [id, val] of Object.entries(stats)) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
     document.getElementById("totalContents").textContent = analizler.size + fotolar.size;
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     document.getElementById("totalDocuments").textContent = documents.size;
@@ -341,9 +359,10 @@ async function loadStatistics() {
           getDocs(collection(ref, "comments")),
         ]);
 
-        totalLikes += likesSnap.size;
-        totalDislikes += dislikesSnap.size;
-        totalComments += commentsSnap.size;
+totalLikes += data.likes || 0;
+totalDislikes += data.dislikes || 0;
+totalComments += (data.comments || []).length;
+
       } catch (e) {
         console.warn("post alt koleksiyonları alınamadı:", e);
       }
@@ -737,6 +756,17 @@ function renderUserList(userArray) {
     container.appendChild(row);
   });
 }
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      loadCharts();  // sadece görünce yükle
+      observer.disconnect(); // bir kez yeter
+    }
+  });
+}, { threshold: 0.3 });
+
+observer.observe(document.getElementById("statistics"));
 
   loadUserList();
   loadNotificationUsers();
