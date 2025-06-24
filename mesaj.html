@@ -551,6 +551,7 @@ async function loadChatList(uid) {
   }));
 
   // Kullanıcıyı ekrana bastıktan sonra ayrı kontrol:
+  const convoId = getConversationId(uid, user.id);
   const messagesCol = collection(db, "conversations", convoId, "messages");
   const lastMsgSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
   const lastMsg = lastMsgSnap.docs[0]?.data();
