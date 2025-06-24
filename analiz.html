@@ -855,26 +855,19 @@ function insertMention(username) {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-comment")) {
     const button = e.target;
+    const commentDiv = button.closest(".comment");
     const card = button.closest(".video-card");
-    const postId = card.querySelector(".like-btn").dataset.id;
-    const commentList = card.querySelector(".comment-list");
+    const postId = card.querySelector(".like-btn")?.dataset.id;
 
     const targetUser = button.dataset.user;
     const targetTime = button.dataset.time;
     const targetText = decodeURIComponent(button.dataset.text);
 
-    // 1. 🧠 Anında DOM’dan yorumu kaldır
-    const commentDiv = button.closest(".comment");
-    if (commentDiv) commentDiv.remove();
+    // Yorumu geçici olarak silinmiş gibi göster
+    commentDiv.style.opacity = "0.4";
+    commentDiv.style.pointerEvents = "none";
+    commentDiv.innerHTML += `<div style="color:yellow; font-size:14px; margin-top:5px;">Siliniyor...</div>`;
 
-    // 2. 🧠 Yorum sayısını azalt
-    const yorumEtiketi = card.querySelector('.comment-count');
-    if (yorumEtiketi) {
-      const sayi = parseInt(yorumEtiketi.textContent.match(/\d+/)?.[0] || "1");
-      yorumEtiketi.textContent = `💬 ${Math.max(0, sayi - 1)} yorum`;
-    }
-
-    // 3. ⚙️ Firestore'dan güncelle (arka planda)
     try {
       const snap = await getDoc(doc(db, "analizler", postId));
       const currentData = snap.data();
@@ -885,9 +878,23 @@ document.addEventListener("click", async (e) => {
       );
 
       await updateDoc(doc(db, "analizler", postId), { comments: updated });
+
+      // Gerçekten silindiyse DOM'dan kaldır
+      commentDiv.remove();
+
+      // Yorum sayısını güncelle
+      const yorumEtiketi = card.querySelector('.comment-count');
+      if (yorumEtiketi) {
+        const sayi = parseInt(yorumEtiketi.textContent.match(/\d+/)?.[0] || "1");
+        yorumEtiketi.textContent = `💬 ${Math.max(0, sayi - 1)} yorum`;
+      }
     } catch (err) {
-      alert("Yorum veritabanından silinemedi. Sayfayı yenileyin.");
-      console.error("Veritabanı silme hatası:", err);
+      alert("❌ Yorum silinemedi. Lütfen tekrar deneyin.");
+      console.error("Silme hatası:", err);
+      // Geri al: DOM'u eski haline getir
+      commentDiv.style.opacity = "1";
+      commentDiv.style.pointerEvents = "auto";
+      commentDiv.querySelector("div:last-child")?.remove(); // "Siliniyor..." yazısını kaldır
     }
   }
 });
