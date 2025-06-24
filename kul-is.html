@@ -283,6 +283,7 @@ async function loadStatistics() {
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     document.getElementById("totalDocuments").textContent = documents.size;
 
+    let cachedUsers = [];
     let totalLikes = 0;
     let totalDislikes = 0;
     let totalComments = 0;
@@ -438,66 +439,30 @@ document.getElementById("trainingRequestList").addEventListener("click", async (
 // Sayfa açılırken çağır
 loadTrainingRequests();
 
-  // Kullanıcıyı listele ve sil
-  async function loadUserList() {
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = ""; // İlk olarak tabloyu temizle
-
-    try {
-      const users = await getDocs(collection(db, "users"));
-      users.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement("tr");
-row.innerHTML = `
-  <td>${data.username || "-"}</td>
-  <td>${data.fullName || "-"}</td>
-  <td>${docSnap.id}</td>
-  <td>
-    <select class="roleSelect" data-uid="${docSnap.id}">
-      <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
-      <option value="vip" ${data.role === "vip" ? "selected" : ""}>VIP</option>
-      <option value="user" ${!data.role || data.role === "user" ? "selected" : ""}>Normal</option>
-    </select>
-  </td>
-  <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-`;
-        userContainer.appendChild(row);
-      });
-    } catch (error) {
-      console.error("Kullanıcı verileri çekilemedi: ", error);
-    }
-  }
-
-  // Arama inputu
-  document.getElementById("searchInput").addEventListener("input", async (e) => {
-    const keyword = e.target.value.toLowerCase();
-    const userContainer = document.getElementById("userTableBody");
-    userContainer.innerHTML = "";
+async function loadUserList() {
+  const userContainer = document.getElementById("userTableBody");
+  userContainer.innerHTML = "";
+  try {
     const users = await getDocs(collection(db, "users"));
-    users.forEach(docSnap => {
-      const data = docSnap.data();
-      const username = (data.username || "").toLowerCase();
-      const fullName = (data.fullName || "").toLowerCase();
-      const uid = docSnap.id.toLowerCase();
-      if (username.includes(keyword) || fullName.includes(keyword) || uid.includes(keyword)) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-  <td>${data.username || "-"}</td>
-  <td>${data.fullName || "-"}</td>
-  <td>${docSnap.id}</td>
-  <td>
-    <select class="roleSelect" data-uid="${docSnap.id}">
-      <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
-      <option value="vip" ${data.role === "vip" ? "selected" : ""}>VIP</option>
-      <option value="user" ${!data.role || data.role === "user" ? "selected" : ""}>Normal</option>
-    </select>
-  </td>
-  <td><button class="deleteBtn" data-uid="${docSnap.id}">Sil</button></td>
-`;
-        userContainer.appendChild(row);
-      }
-    });
-  });
+    cachedUsers = users.docs.map(docSnap => ({
+      uid: docSnap.id,
+      ...docSnap.data()
+    }));
+    renderUserList(cachedUsers);
+  } catch (error) {
+    console.error("Kullanıcılar alınamadı:", error);
+  }
+}
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  const q = e.target.value.toLowerCase();
+  const filtered = cachedUsers.filter(u =>
+    (u.username || "").toLowerCase().includes(q) ||
+    (u.fullName || "").toLowerCase().includes(q) ||
+    (u.uid || "").toLowerCase().includes(q)
+  );
+  renderUserList(filtered);
+});
 
   // Silme işlemi
   document.addEventListener("click", async (e) => {
@@ -749,6 +714,28 @@ async function loadNotificationUsers() {
     console.error("Bildirim alan kullanıcılar yüklenemedi:", err);
     listElement.innerHTML = "<li>Veri alınırken hata oluştu.</li>";
   }
+}
+
+function renderUserList(userArray) {
+  const container = document.getElementById("userTableBody");
+  container.innerHTML = "";
+  userArray.forEach(data => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${data.username || "-"}</td>
+      <td>${data.fullName || "-"}</td>
+      <td>${data.uid}</td>
+      <td>
+        <select class="roleSelect" data-uid="${data.uid}">
+          <option value="admin" ${data.role === "admin" ? "selected" : ""}>Admin</option>
+          <option value="vip" ${data.role === "vip" ? "selected" : ""}>VIP</option>
+          <option value="user" ${!data.role || data.role === "user" ? "selected" : ""}>Normal</option>
+        </select>
+      </td>
+      <td><button class="deleteBtn" data-uid="${data.uid}">Sil</button></td>
+    `;
+    container.appendChild(row);
+  });
 }
 
   loadUserList();
