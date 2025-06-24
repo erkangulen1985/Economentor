@@ -269,6 +269,7 @@ import {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
+  let cachedUsers = [];
 
 async function loadStatistics() {
   try {
@@ -283,7 +284,6 @@ async function loadStatistics() {
     document.getElementById("totalFeedbacks").textContent = feedbacks.size;
     document.getElementById("totalDocuments").textContent = documents.size;
 
-    let cachedUsers = [];
     let totalLikes = 0;
     let totalDislikes = 0;
     let totalComments = 0;
