@@ -834,10 +834,10 @@ async function buildMessageDiv(msg) {
 
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
-  // Görüldü kontrolü
 let seenClass = "";
 let seenLabel = "";
 
+// Eğer mesajı gönderen kişi bizsek, mesajın görülüp görülmediğine bakacağız
 if (msg.sender === currentUser.uid) {
   if (msg.seenBy?.includes(selectedFriendId)) {
     seenLabel = lang === "tr" ? "Görüldü" : "Seen";  // "Görüldü" olarak etiket gösterilecek
