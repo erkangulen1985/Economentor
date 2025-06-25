@@ -495,7 +495,7 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = t[lang].sentAt + ": " + formatTimestamp(ts);
+    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
   });
 }
 
@@ -508,7 +508,7 @@ window.setLang = setLang;
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
 }
 
 function getConversationId(uid1, uid2) {
@@ -641,28 +641,29 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     const senderDoc = await getDoc(doc(db, "users", senderId));
     const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
 
-if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
-  loadedMessageIds.add(msg.id);
-  const div = await buildMessageDiv(msg);
-  document.getElementById("messageArea").appendChild(div);
+    // 🔹 Yeni mesaj eklendiyse
+    if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      document.getElementById("messageArea").appendChild(div);
 
-  // Mesajı görüp görmediğini kontrol et
-  if (!msg.seenBy?.includes(currentUser.uid) && msg.sender !== currentUser.uid) {
-    const convoId = getConversationId(currentUser.uid, selectedFriendId);
-    // Mesaj alıcı tarafından göründü
-    await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-      seenBy: arrayUnion(currentUser.uid) // Görülen mesajı ekle
-    });
+      // Mesajı görüp görmediğini kontrol et
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        const convoId = getConversationId(currentUser.uid, selectedFriendId);
+        // Mesaj alıcı tarafından göründü
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid) // Görülen mesajı ekle
+        });
 
-    // Görülme durumunu anında değiştir
-    const seenStatusDiv = div.querySelector(".seen-status");
-    if (seenStatusDiv) {
-      seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
-      seenStatusDiv.classList.remove("pending");
-      seenStatusDiv.classList.add("active");
+        // Görülme durumunu anında değiştir
+        const seenStatusDiv = div.querySelector(".seen-status");
+        if (seenStatusDiv) {
+          seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
+          seenStatusDiv.classList.remove("pending");
+          seenStatusDiv.classList.add("active");
+        }
+      }
     }
-  }
-}
 
     // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
