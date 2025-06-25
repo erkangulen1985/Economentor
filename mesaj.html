@@ -647,26 +647,21 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       const div = await buildMessageDiv(msg);
       document.getElementById("messageArea").appendChild(div);
 
-      // Eğer mesaj karşı taraf tarafından görülmediyse, görüldü olarak işaretle
+      // Eğer mesajı görmediyse, "Görülmedi" durumu devam etsin
       if (!msg.seenBy?.includes(currentUser.uid)) {
         const convoId = getConversationId(currentUser.uid, selectedFriendId);
+        // Mesajı görmeden önce ekleme yapmıyoruz
         await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
           seenBy: arrayUnion(currentUser.uid) // Alıcının `uid`'sini ekle
         });
 
-        // Görüldü durumunu anında güncelle
+        // Görüldü durumunu anında değiştir
         const seenStatusDiv = div.querySelector(".seen-status");
         if (seenStatusDiv) {
           seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
           seenStatusDiv.classList.remove("pending");
           seenStatusDiv.classList.add("active");
         }
-      }
-
-      if (isFromMe || isFromFriend) {
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
       }
     }
 
@@ -709,7 +704,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
         }
       });
     }
-
+    
     // 🗑️ Mesaj silindiyse
     if (change.type === "removed") {
       const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
