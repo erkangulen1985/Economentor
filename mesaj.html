@@ -837,21 +837,19 @@ async function buildMessageDiv(msg) {
   // Görüldü kontrolü
 let seenClass = "";
 let seenLabel = "";
-if (msg.sender === currentUser.uid) {
-  seenLabel = lang === "tr" ? "Görüldü" : "Seen";
-
-  if (msg.seenBy?.includes(selectedFriendId)) {
-    seenClass = "active";
-  } else {
-    seenClass = "pending";
-  }
+if (msg.seenBy?.includes(currentUser.uid)) {
+  seenLabel = "Görüldü";
+  seenClass = "active"; // Mavi renge dönüştür
+} else {
+  seenLabel = "Görülmedi";
+  seenClass = "pending"; // Gri renk olacak
 }
 
 div.innerHTML = `
   <div class="sender-label">${senderName}</div>
   <div class="msg-text">${msg.text}</div>
   <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
+  <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>
 `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
