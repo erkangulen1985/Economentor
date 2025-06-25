@@ -335,7 +335,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
       timestamp: new Date()      // Paylaşılma zamanı
     };
 
-    // Verilerin eksik olmadığını kontrol et
+    // Eksik veri kontrolü
     if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
       throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
     }
