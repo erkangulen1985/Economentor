@@ -183,7 +183,8 @@ async function loadTrainings() {
     const t = docSnap.data();
     const el = document.createElement("div");
     el.className = "training";
-
+    let buttonHTML = "";
+    
 if (t.targetRole === "vip" && currentUserRole === "user") {
   buttonHTML = `
     <button class="request-btn not-allowed" disabled>Talep Edilemez</button>
@@ -285,20 +286,20 @@ async function notifyAdmins(message, trainingId, type) {
       read: false
     });
 
-    try {
-      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid: adminId,
-          title: "\"Economentor\" Eğitim Talebi",
-          body: message,
-          url: "https://economentor.netlify.app/egitimler.html"
-        })
-      });
-    } catch (err) {
-      console.error("Admin FCM bildirimi başarısız:", err);
-    }
+//    try {
+//      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+//        method: "POST",
+//        headers: { "Content-Type": "application/json" },
+//        body: JSON.stringify({
+//          uid: adminId,
+//          title: "\"Economentor\" Eğitim Talebi",
+//          body: message,
+//          url: "https://economentor.netlify.app/egitimler.html"
+//        })
+//      });
+//    } catch (err) {
+//      console.error("Admin FCM bildirimi başarısız:", err);
+//    }
   }
 }
 
