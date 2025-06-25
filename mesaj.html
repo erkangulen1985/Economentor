@@ -697,12 +697,15 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
             msgDiv.appendChild(seenDiv);
           }
 
+          // Eğer mesaj görüldüyse
           if (updatedMsg.seenBy?.includes(selectedFriendId)) {
             seenDiv.classList.remove("pending");
             seenDiv.classList.add("active"); // Mavi renk - Görüldü
+            seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // "Görüldü" metnini anında değiştir
           } else {
             seenDiv.classList.remove("active");
             seenDiv.classList.add("pending"); // Gri renk - Görülmedi
+            seenDiv.innerText = lang === "tr" ? "Görülmedi" : "Unseen"; // "Görülmedi" metnini anında değiştir
           }
         }
       }
