@@ -838,7 +838,7 @@ async function buildMessageDiv(msg) {
 let seenClass = "";
 let seenLabel = "";
 if (msg.sender === currentUser.uid) {
-  seenLabel = lang === "tr" ? "Görüldü" : "Seen";
+  seenLabel = lang === "tr" ? "Görülmedi" : "Unseen";
 
   if (msg.seenBy?.includes(selectedFriendId)) {
     seenClass = "active";
