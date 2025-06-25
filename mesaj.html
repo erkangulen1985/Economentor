@@ -836,23 +836,29 @@ async function buildMessageDiv(msg) {
 
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
-// Görüldü durumu kontrolü
-let seenClass = "";
-let seenLabel = "";
-if (msg.seenBy?.includes(currentUser.uid)) {
-  seenLabel = "Görüldü";
-  seenClass = "active"; // Mavi renge dönüştür
-} else {
-  seenLabel = "Görülmedi";
-  seenClass = "pending"; // Gri renk olacak
-}
+  // Görüldü kontrolü
+  let seenClass = "";
+  let seenLabel = "";
+  if (isMine) {
+    if (msg.seenBy?.includes(currentUser.uid)) {
+      seenLabel = "Görüldü";
+      seenClass = "active"; // Mavi renge dönüştür
+    } else {
+      seenLabel = "Görülmedi";
+      seenClass = "pending"; // Gri renk olacak
+    }
+  } else {
+    // Karşı tarafın mesajında, sadece karşı tarafın mesajına göre durum güncellenir
+    seenLabel = msg.seenBy?.includes(currentUser.uid) ? "Görüldü" : "Görülmedi";
+    seenClass = msg.seenBy?.includes(currentUser.uid) ? "active" : "pending";
+  }
 
-div.innerHTML = `
-  <div class="sender-label">${senderName}</div>
-  <div class="msg-text">${msg.text}</div>
-  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>
-`;
+  div.innerHTML = `
+    <div class="sender-label">${senderName}</div>
+    <div class="msg-text">${msg.text}</div>
+    <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+    <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>
+  `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
   if (isMine) {
