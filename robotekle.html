@@ -231,35 +231,6 @@
     // Seçilen kullanıcılar listesi
     let selectedUsers = [];
 
-    function selectUser(user) {
-      if (!selectedUsers.includes(user)) {
-        selectedUsers.push(user);
-        updateSelectedUserList();
-      }
-    }
-
-    // Seçilen kullanıcıları güncelle
-    function updateSelectedUserList() {
-      const selectedUserList = document.getElementById("selectedUserList");
-      selectedUserList.innerHTML = "";
-      
-      selectedUsers.forEach((user, index) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = user.fullName;
-        const removeButton = document.createElement("button");
-        removeButton.textContent = "Sil";
-        removeButton.onclick = () => removeUser(index);
-        listItem.appendChild(removeButton);
-        selectedUserList.appendChild(listItem);
-      });
-    }
-
-    // Kullanıcıyı listeden sil
-    function removeUser(index) {
-      selectedUsers.splice(index, 1);
-      updateSelectedUserList();
-    }
-
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
