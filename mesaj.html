@@ -647,100 +647,86 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       const div = await buildMessageDiv(msg);
       document.getElementById("messageArea").appendChild(div);
 
-    if (window.innerWidth <= 770) {
-      setTimeout(() => {
-        const chatList = document.querySelector(".chatItems");
-        if (chatList) {
-          chatList.scrollTo({ left: 0, behavior: "smooth" });
+      // Eğer mesaj karşı taraf tarafından görülmediyse, görüldü olarak işaretle
+      if (!msg.seenBy?.includes(currentUser.uid)) {
+        const convoId = getConversationId(currentUser.uid, selectedFriendId);
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid) // Alıcının `uid`'sini ekle
+        });
+
+        // Görüldü durumunu anında güncelle
+        const seenStatusDiv = div.querySelector(".seen-status");
+        if (seenStatusDiv) {
+          seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
+          seenStatusDiv.classList.remove("pending");
+          seenStatusDiv.classList.add("active");
         }
-      }, 100); // DOM güncellenene kadar 100ms bekle
-    }
+      }
 
       if (isFromMe || isFromFriend) {
         setTimeout(() => {
           scrollToBottom();
         }, 100);
-            if (window.innerWidth <= 770) {
-      setTimeout(() => {
-        const chatList = document.querySelector(".chatItems");
-      }, 100); // DOM güncellenene kadar 100ms bekle
-    }
-      }
-
-const chatItems = document.querySelectorAll(".chat-item");
-chatItems.forEach(item => {
-  const nameEl = item.querySelector("strong");
-  if (nameEl && nameEl.innerText === senderName) {
-    const preview = item.querySelector(".last-message");
-    if (preview) preview.innerText = msg.text;
-    item.parentNode.prepend(item); // 🔼 En üste al
-  }
-});
-      
-    if (!msg.seenBy?.includes(currentUser.uid)) {
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid)
-        });
       }
     }
 
     // ✏️ Mesaj düzenlendiyse
-if (change.type === "modified") {
-  const updatedMsg = change.doc.data();
-  const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-  if (msgDiv) {
-    msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+    if (change.type === "modified") {
+      const updatedMsg = change.doc.data();
+      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+      if (msgDiv) {
+        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
 
-    // GÖRÜLDÜ durumu için güncelleme
-    if (updatedMsg.sender === currentUser.uid) {
-      let seenDiv = msgDiv.querySelector(".seen-status");
+        // GÖRÜLDÜ durumu için güncelleme
+        if (updatedMsg.sender === currentUser.uid) {
+          let seenDiv = msgDiv.querySelector(".seen-status");
 
-      if (!seenDiv) {
-        seenDiv = document.createElement("div");
-        seenDiv.classList.add("seen-status");
-        seenDiv.setAttribute("data-msgid", updatedMsg.id);
-        seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
-        msgDiv.appendChild(seenDiv);
+          if (!seenDiv) {
+            seenDiv = document.createElement("div");
+            seenDiv.classList.add("seen-status");
+            seenDiv.setAttribute("data-msgid", updatedMsg.id);
+            seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
+            msgDiv.appendChild(seenDiv);
+          }
+
+          if (updatedMsg.seenBy?.includes(selectedFriendId)) {
+            seenDiv.classList.remove("pending");
+            seenDiv.classList.add("active");
+          } else {
+            seenDiv.classList.remove("active");
+            seenDiv.classList.add("pending");
+          }
+        }
       }
 
-      if (updatedMsg.seenBy?.includes(selectedFriendId)) {
-        seenDiv.classList.remove("pending");
-        seenDiv.classList.add("active");
-      } else {
-        seenDiv.classList.remove("active");
-        seenDiv.classList.add("pending");
-      }
+      // Chat list "önizleme" güncellemesi
+      const chatItems = document.querySelectorAll(".chat-item");
+      chatItems.forEach(item => {
+        const nameEl = item.querySelector("strong");
+        if (nameEl && nameEl.innerText === senderName) {
+          const preview = item.querySelector(".last-message");
+          if (preview) preview.innerText = updatedMsg.text;
+        }
+      });
     }
-  }
-
-  // Chat list "önizleme" güncellemesi
-  const chatItems = document.querySelectorAll(".chat-item");
-  chatItems.forEach(item => {
-    const nameEl = item.querySelector("strong");
-    if (nameEl && nameEl.innerText === senderName) {
-      const preview = item.querySelector(".last-message");
-      if (preview) preview.innerText = updatedMsg.text;
-    }
-  });
-}
 
     // 🗑️ Mesaj silindiyse
     if (change.type === "removed") {
       const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (msgDiv) msgDiv.remove();
 
-// 🧹 Mesajlar silindiyse ve artık hiç mesaj kalmadıysa, lastMessage bilgisini temizle
-const allMsgsSnap = await getDocs(query(messagesCol, limit(1)));
-if (allMsgsSnap.empty) {
-  await updateDoc(doc(db, "users", currentUser.uid), {
-    lastMessage: "",
-    lastMessageTimestamp: 0
-  });
-  await updateDoc(doc(db, "users", senderId), {
-    lastMessage: "",
-    lastMessageTimestamp: 0
-  });
-}
+      // 🧹 Mesajlar silindiyse ve artık hiç mesaj kalmadıysa, lastMessage bilgisini temizle
+      const allMsgsSnap = await getDocs(query(messagesCol, limit(1)));
+      if (allMsgsSnap.empty) {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          lastMessage: "",
+          lastMessageTimestamp: 0
+        });
+        await updateDoc(doc(db, "users", senderId), {
+          lastMessage: "",
+          lastMessageTimestamp: 0
+        });
+      }
 
       try {
         const convoId = getConversationId(currentUser.uid, senderId);
@@ -762,7 +748,7 @@ if (allMsgsSnap.empty) {
         console.warn("Chat list güncellemesi (removed) başarısız:", e);
       }
     }  
-    scrollToBottom
+    scrollToBottom();
   });
 });
 
