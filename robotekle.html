@@ -352,30 +352,38 @@ document.getElementById("uploadButton").addEventListener("click", async function
   }
 });
 
-    // Geçmişte paylaşılan dosyaları yükle
-    async function loadSharedFiles() {
-      const sharedFilesList = document.getElementById("sharedFilesList");
-      sharedFilesList.innerHTML = ""; // Önceki listeleri temizle
+// Geçmişte paylaşılan dosyaları yükle
+async function loadSharedFiles() {
+  const sharedFilesList = document.getElementById("sharedFilesList");
+  sharedFilesList.innerHTML = ""; // Önceki listeleri temizle
 
-      const sharedFilesSnap = await getDocs(collection(db, "sharedFiles"));
-      sharedFilesSnap.forEach(docSnap => {
-        const sharedFile = docSnap.data();
+  const sharedFilesSnap = await getDocs(collection(db, "sharedFiles"));
+  sharedFilesSnap.forEach(docSnap => {
+    const sharedFile = docSnap.data();
 
-        const listItem = document.createElement("li");
-        listItem.textContent = `Dosya: ${sharedFile.fileUrl}`;
-        const removeButton = document.createElement("button");
-        removeButton.textContent = "Sil";
-        removeButton.onclick = () => deleteSharedFile(docSnap.id);
-        listItem.appendChild(removeButton);
-        sharedFilesList.appendChild(listItem);
-      });
-    }
+    const listItem = document.createElement("li");
+    listItem.textContent = `Dosya: ${sharedFile.fileUrl}`;
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Sil";
+    removeButton.onclick = () => deleteSharedFile(docSnap.id);
+    listItem.appendChild(removeButton);
+    sharedFilesList.appendChild(listItem);
+  });
+}
 
-    // Paylaşılan dosyayı sil
-    async function deleteSharedFile(fileId) {
-      await deleteDoc(doc(db, "sharedFiles", fileId));
-      loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
-    }
+// Paylaşılan dosyayı sil
+async function deleteSharedFile(fileId) {
+  await deleteDoc(doc(db, "sharedFiles", fileId));
+  loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
+}
+
+// sanitizeFilename fonksiyonu
+function sanitizeFilename(filename) {
+  return filename
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
+    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
+}
 
     // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
     loadSharedFiles();
