@@ -259,10 +259,12 @@ button.send-btn:hover,
 
 .seen-status.pending {
   color: #999; /* Gri - Henüz karşı taraf sayfayı açmadı */
+  content: "Görülmedi"; /* Görülmedi yazısı */
 }
 
 .seen-status.active {
-  color: #1e90ff; /* Koyu asil mavi - Görüldü */
+  color: #1e90ff; /* Koyu mavi - Görüldü */
+  content: "Görüldü"; /* Görüldü yazısı */
 }
     
 @media (max-width: 770px) {
@@ -835,24 +837,22 @@ async function buildMessageDiv(msg) {
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
   // Görüldü kontrolü
-let seenClass = "";
-let seenLabel = "";
-if (msg.sender === currentUser.uid) {
-  seenLabel = lang === "tr" ? "Görüldü" : "Seen";
-
-  if (msg.seenBy?.includes(selectedFriendId)) {
-    seenClass = "active";
+  let seenClass = "";
+  let seenLabel = lang === "tr" ? "Görülmedi" : "Not Seen";
+  
+  if (msg.seenBy?.includes(currentUser.uid)) {
+    seenClass = "active"; // Görüldü durumu
+    seenLabel = lang === "tr" ? "Görüldü" : "Seen"; // Mesaj görüldü
   } else {
-    seenClass = "pending";
+    seenClass = "pending"; // Görülmedi durumu
   }
-}
 
-div.innerHTML = `
-  <div class="sender-label">${senderName}</div>
-  <div class="msg-text">${msg.text}</div>
-  <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
-`;
+  div.innerHTML = `
+    <div class="sender-label">${senderName}</div>
+    <div class="msg-text">${msg.text}</div>
+    <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
+    ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
+  `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
   if (isMine) {
@@ -1065,51 +1065,54 @@ window.addEventListener("load", () => {
 });
 
 async function setupGlobalMessageWatcher(myUid) {
+  // Tüm kullanıcıları alıyoruz
   const usersSnap = await getDocs(collection(db, "users"));
+  
   usersSnap.forEach(otherUserDoc => {
     const otherUid = otherUserDoc.id;
-    if (otherUid === myUid) return;
+    if (otherUid === myUid) return;  // Kendini dinlememek için kontrol ekliyoruz
 
-    const convoId = getConversationId(myUid, otherUid);
-    const messagesCol = collection(db, "conversations", convoId, "messages");
+    const convoId = getConversationId(myUid, otherUid); // Konuşma ID'si
+    const messagesCol = collection(db, "conversations", convoId, "messages"); // Mesajlar koleksiyonu
 
+    // Mesajları dinlemeye başlıyoruz
     onSnapshot(
-      query(messagesCol, orderBy("timestamp", "desc"), limit(1)),
-      snapshot => {
-        if (snapshot.empty) return;
-        const msgDoc = snapshot.docs[0];
-        const msg = msgDoc.data();
-        const chatItems = document.querySelectorAll(".chat-item");
+      query(messagesCol, orderBy("timestamp", "desc"), limit(1)), // Son mesajı alıyoruz
+      async snapshot => {
+        if (snapshot.empty) return;  // Eğer yeni mesaj yoksa, çık
 
-        // Sohbet zaten chatlist'te varsa
+        const msgDoc = snapshot.docs[0];  // İlk mesajı alıyoruz
+        const msg = msgDoc.data();  // Mesaj verisini alıyoruz
+        
+        const chatItems = document.querySelectorAll(".chat-item");  // Sohbet listesinde bulunan tüm öğeleri alıyoruz
+
+        // Sohbet listesinde ilgili kullanıcının bulunduğu öğeyi buluyoruz
         chatItems.forEach(item => {
-          const name = item.querySelector("strong")?.innerText?.trim().toLowerCase();
-          if (name === (otherUserDoc.data().username || "").toLowerCase()) {
+          const nameEl = item.querySelector("strong")?.innerText?.trim().toLowerCase();
+          
+          if (nameEl === (otherUserDoc.data().username || "").toLowerCase()) {
             const preview = item.querySelector(".last-message");
-            if (preview) preview.innerText = msg.text || "";
+            if (preview) preview.innerText = msg.text || ""; // Mesaj önizlemesini güncelliyoruz
 
-            // Eğer mesaj henüz görülmediyse ve mesaj karşıdan geldiyse
-if (
-  !msg.seenBy?.includes(myUid) &&
-  msg.sender !== myUid &&
-  selectedFriendId !== otherUid
-) {
-  if (!item.querySelector(".notification")) {
-    const notif = document.createElement("div");
-    notif.className = "notification";
-    item.appendChild(notif);
-  }
-}
+            // Eğer mesaj karşıdan geldiyse ve henüz görülmediyse
+            if (
+              !msg.seenBy?.includes(myUid) && // Eğer bu kullanıcı mesajı görmediyse
+              msg.sender !== myUid &&  // Eğer mesajı gönderen kişi benim değilse
+              selectedFriendId !== otherUid  // Eğer şu anda bu sohbet açık değilse
+            ) {
+              // Bildirim ekliyoruz
+              if (!item.querySelector(".notification")) {
+                const notif = document.createElement("div");
+                notif.className = "notification";  // Bildirim için küçük kırmızı daire ekliyoruz
+                item.appendChild(notif);
+              }
+            }
 
-            // Chatlist'te en üste taşı
+            // Sohbet öğesini en üste taşıyoruz
             const chatList = document.getElementById("chatItems");
             if (chatList && item.parentNode === chatList) {
-              chatList.prepend(item);
+              chatList.prepend(item); // Sohbeti listenin başına alıyoruz
             }
-              const chatItems = document.getElementById("chatItems");
-            if (window.innerWidth <= 770 && chatItems) {
-               chatItems.scrollTo({ left: 0, behavior: "smooth" });
-  }
           }
         });
       }
