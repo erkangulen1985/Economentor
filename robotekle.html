@@ -1,1 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Economentor | Robot Ekle</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Buradaki stil, mevcut sitenizin stiline uyumlu olacak şekilde ayarlanabilir */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #333;
+    }
 
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: 2px;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .upload-section {
+      width: 80%;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .upload-section input[type="file"],
+    .upload-section input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .upload-section button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .upload-section button:hover {
+      background-color: #45a049;
+    }
+
+    .user-list {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .user-list li {
+      padding: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 8px;
+      cursor: pointer;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+
+    .user-list li:hover {
+      background-color: #e0e0e0;
+    }
+
+    .footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Economentor | Robot Ekle</h1>
+  </header>
+
+  <div class="content">
+    <div class="upload-section">
+      <h2>Yeni Robot Paylaş</h2>
+      <input type="file" id="fileUpload" accept=".rar" />
+      <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
+      <ul id="userList" class="user-list"></ul>
+      <button id="uploadButton">Paylaş</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.firebasestorage.app",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+      measurementId: "G-FS3FMPYVPD"
+    };
+
+    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Arama ve kullanıcı listeleme
+    document.getElementById("searchInput").addEventListener("input", searchUsers);
+
+    async function searchUsers() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const usersSnap = await getDocs(collection(db, "users"));
+      const userList = document.getElementById("userList");
+
+      userList.innerHTML = "";
+      usersSnap.forEach((userDoc) => {
+        const userData = userDoc.data();
+        const userName = userData.username || '';
+        
+        if (userName.toLowerCase().includes(searchTerm)) {
+          const listItem = document.createElement("li");
+          listItem.textContent = userName;
+          listItem.onclick = () => selectUser(userData);
+          userList.appendChild(listItem);
+        }
+      });
+    }
+
+    // Kullanıcı seçme
+    let selectedUser = null;
+
+    function selectUser(user) {
+      selectedUser = user;
+      alert(`Seçilen kullanıcı: ${user.username}`);
+    }
+
+    // Dosya yükleme
+    document.getElementById("uploadButton").addEventListener("click", async function() {
+      const file = document.getElementById("fileUpload").files[0];
+      if (!file) {
+        alert("Lütfen bir dosya seçin.");
+        return;
+      }
+
+      if (!selectedUser) {
+        alert("Lütfen bir kullanıcı seçin.");
+        return;
+      }
+
+      try {
+        // Dosyayı Supabase'e yükleyelim
+        const fileName = `${Date.now()}-${file.name}`;
+        const { error } = await supabase.storage.from('robotlar').upload(fileName, file);
+        if (error) throw error;
+
+        // Dosya URL'ini alalım
+        const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${fileName}`;
+
+        // Kullanıcıya bildirim gönderme
+        await setDoc(doc(db, "notifications", selectedUser.uid), {
+          message: `"${file.name}" dosyası sizlere paylaşıldı.`,
+          timestamp: new Date()
+        });
+
+        alert("Dosya başarıyla yüklendi ve kullanıcıya bildirildi!");
+      } catch (err) {
+        console.error("Dosya yüklenirken hata:", err);
+        alert("Dosya yüklenirken bir hata oluştu.");
+      }
+    });
+  </script>
+</body>
+</html>
