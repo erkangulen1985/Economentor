@@ -207,6 +207,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+    import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -322,13 +324,14 @@ async function searchUsers() {
   });
 }
 
-function selectUser(uid) {
-  // Kullanıcıyı logla
+// selectUser function where you fetch user data by UID
+async function selectUser(uid) {
   console.log("Seçilen Kullanıcı ID:", uid);  // Kullanıcı ID'sini log'la
 
   // Firestore'dan UID ile kullanıcıyı alalım
-  const userRef = doc(db, "users", uid);  // users/{uid} şeklinde kullanıcıyı çekiyoruz
-  getDoc(userRef).then((docSnap) => {
+  const userRef = doc(db, "users", uid);  // users/{uid} şeklinde kullanıcıyı çek
+  try {
+    const docSnap = await getDoc(userRef);  // getDoc ile kullanıcı bilgilerini alıyoruz
     if (docSnap.exists()) {
       const userData = docSnap.data();
       console.log("Seçilen Kullanıcı Bilgileri:", userData);  // Kullanıcı bilgilerini logla
@@ -342,9 +345,9 @@ function selectUser(uid) {
     } else {
       console.log("Kullanıcı bulunamadı!");
     }
-  }).catch((error) => {
+  } catch (error) {
     console.error("Kullanıcı bilgisi alınırken hata:", error);
-  });
+  }
 }
 
 // Seçilen kullanıcıları güncelle
