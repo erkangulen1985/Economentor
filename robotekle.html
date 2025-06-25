@@ -279,14 +279,6 @@
       updateSelectedUserList();
     }
 
-    // sanitizeFilename fonksiyonu
-    function sanitizeFilename(filename) {
-      return filename
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
-        .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
-    }
-
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
