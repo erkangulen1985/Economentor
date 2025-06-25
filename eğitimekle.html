@@ -307,6 +307,7 @@ window.editTraining = async function(docId, btn) {
   currentDocId = docId; // Düzenlenen eğitimin ID'sini al
 
   // Kaydet butonuna tıklandığında düzenleme kaydedilir
+  document.getElementById("saveTrainingBtn").addEventListener("click", saveTraining);
 };
 
 // Eğitim kaydetme fonksiyonu
@@ -320,14 +321,6 @@ async function saveTraining() {
     alert("Lütfen başlık ve açıklama girin.");
     return;
   }
-
-  await addDoc(collection(db, "trainings"), {
-    title,
-    description,
-    bullets,
-    targetRole: selectedRole,
-    timestamp: new Date()
-  });
 
   try {
     if (isEditing && currentDocId) {
@@ -344,12 +337,13 @@ async function saveTraining() {
       currentDocId = null; // id sıfırlanır
     } else {
       // Yeni eğitim eklemek için normal işlem
-      await addDoc(collection(db, "trainings"), {
-        title: title,
-        description: description,
-        bullets: bullets,
-        timestamp: new Date()
-      });
+        await addDoc(collection(db, "trainings"), {
+          title,
+          description,
+          bullets,
+          targetRole: selectedRole,
+          timestamp: new Date()
+        });
       alert("Eğitim başarıyla kaydedildi.");
     }
     location.reload();
