@@ -320,10 +320,9 @@ async function searchUsers() {
   });
 }
 
-// Kullanıcıyı seçtiğimizde Firestore'dan veriyi alıyoruz
 function selectUser(user) {
-  // Kullanıcıyı logla
-  console.log("Seçilen Kullanıcı:", user);  // Kullanıcıyı log'la
+  // Kullanıcı verisini logla
+  console.log("Seçilen Kullanıcı:", user);  // Kullanıcı nesnesini log'la
 
   // Eğer uid yoksa, hata mesajı ver
   if (!user || !user.uid) {
