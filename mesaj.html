@@ -693,16 +693,16 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
             seenDiv = document.createElement("div");
             seenDiv.classList.add("seen-status");
             seenDiv.setAttribute("data-msgid", updatedMsg.id);
-            seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
+            seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Varsayılan olarak "Görüldü"
             msgDiv.appendChild(seenDiv);
           }
 
           if (updatedMsg.seenBy?.includes(selectedFriendId)) {
             seenDiv.classList.remove("pending");
-            seenDiv.classList.add("active"); // Mavi renk
+            seenDiv.classList.add("active"); // Mavi renk - Görüldü
           } else {
             seenDiv.classList.remove("active");
-            seenDiv.classList.add("pending"); // Gri renk
+            seenDiv.classList.add("pending"); // Gri renk - Görülmedi
           }
         }
       }
