@@ -306,6 +306,9 @@ async function notifyAdmins(message, trainingId, type) {
 async function updateRequestButtons(userId) {
   const buttons = document.querySelectorAll(".request-btn");
   for (const btn of buttons) {
+    // Eğer zaten "Talep Edilemez" butonuysa atla
+    if (btn.classList.contains("not-allowed")) continue;
+
     const trainingId = btn.dataset.trainingId;
     const requestDocRef = doc(db, "requests", userId + "_" + trainingId);
     const requestSnap = await getDoc(requestDocRef);
@@ -318,6 +321,7 @@ async function updateRequestButtons(userId) {
     }
   }
 }
+
 </script>
 </body>
 </html>
