@@ -1,3 +1,4 @@
+You said:
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -495,7 +496,7 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
+    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
   });
 }
 
@@ -508,7 +509,7 @@ window.setLang = setLang;
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
 }
 
 function getConversationId(uid1, uid2) {
@@ -570,7 +571,7 @@ async function loadChatList(uid) {
   users.forEach(user => {
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = `<strong>${user.username}</strong><div class="last-message">${user.lastMessage}</div>`;
+    div.innerHTML = <strong>${user.username}</strong><div class="last-message">${user.lastMessage}</div>;
     if (user.hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
@@ -635,18 +636,22 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
   snapshot.docChanges().forEach(async (change) => {
     const msg = { id: change.doc.id, ...change.doc.data() };
 
-    // Yeni mesaj geldiğinde (change.type === "added"), sadece mesajları ekleyelim
+    const isFromMe = msg.sender === currentUser.uid;
+    const isFromFriend = msg.sender === selectedFriendId;
+    const senderId = isFromMe ? selectedFriendId : msg.sender;
+    const senderDoc = await getDoc(doc(db, "users", senderId));
+    const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
+
+    // 🔹 Yeni mesaj eklendiyse
     if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
       loadedMessageIds.add(msg.id);
-
       const div = await buildMessageDiv(msg);
       document.getElementById("messageArea").appendChild(div);
 
-      // Görüldü durumu yalnızca karşı tarafın mesajı için geçerli olmalı
-      if (msg.sender !== currentUser.uid && !msg.seenBy?.includes(currentUser.uid)) {
+      // Mesajı görüp görmediğini kontrol et
+      if (!msg.seenBy?.includes(currentUser.uid)) {
         const convoId = getConversationId(currentUser.uid, selectedFriendId);
-        
-        // Mesajı alıcı tarafından göründü
+        // Mesaj alıcı tarafından göründü
         await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
           seenBy: arrayUnion(currentUser.uid) // Görülen mesajı ekle
         });
@@ -661,10 +666,10 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       }
     }
 
-    // Mesaj düzenlendiyse
+    // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
       const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+      const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
       if (msgDiv) {
         msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
 
@@ -690,7 +695,57 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
           }
         }
       }
+
+      // Chat list "önizleme" güncellemesi
+      const chatItems = document.querySelectorAll(".chat-item");
+      chatItems.forEach(item => {
+        const nameEl = item.querySelector("strong");
+        if (nameEl && nameEl.innerText === senderName) {
+          const preview = item.querySelector(".last-message");
+          if (preview) preview.innerText = updatedMsg.text;
+        }
+      });
     }
+    
+    // 🗑️ Mesaj silindiyse
+    if (change.type === "removed") {
+      const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
+      if (msgDiv) msgDiv.remove();
+
+      // 🧹 Mesajlar silindiyse ve artık hiç mesaj kalmadıysa, lastMessage bilgisini temizle
+      const allMsgsSnap = await getDocs(query(messagesCol, limit(1)));
+      if (allMsgsSnap.empty) {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          lastMessage: "",
+          lastMessageTimestamp: 0
+        });
+        await updateDoc(doc(db, "users", senderId), {
+          lastMessage: "",
+          lastMessageTimestamp: 0
+        });
+      }
+
+      try {
+        const convoId = getConversationId(currentUser.uid, senderId);
+        const messagesCol = collection(db, "conversations", convoId, "messages");
+
+        const lastSnap = await getDocs(query(messagesCol, orderBy("timestamp", "desc"), limit(1)));
+        const lastText = lastSnap.empty ? "" : lastSnap.docs[0].data().text;
+
+        const chatItems = document.querySelectorAll(".chat-item");
+        chatItems.forEach(item => {
+          const nameEl = item.querySelector("strong");
+          if (nameEl && nameEl.innerText === senderName) {
+            const preview = item.querySelector(".last-message");
+            if (preview) preview.innerText = lastText;
+            item.parentNode.prepend(item); // Silindikten sonra da üste al
+          }
+        });
+      } catch (e) {
+        console.warn("Chat list güncellemesi (removed) başarısız:", e);
+      }
+    }  
+    scrollToBottom();
   });
 });
 
@@ -762,7 +817,7 @@ async function buildMessageDiv(msg) {
 
   div.setAttribute("data-sender-name", senderName);
 
-  const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
+  const timeStr = ${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)};
 
   // Görüldü kontrolü
   let seenClass = "";
@@ -775,12 +830,12 @@ async function buildMessageDiv(msg) {
     seenClass = "pending"; // Görülmedi durumu
   }
 
-  div.innerHTML = `
+  div.innerHTML = 
     <div class="sender-label">${senderName}</div>
     <div class="msg-text">${msg.text}</div>
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-    ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
-  `;
+    ${seenLabel ? <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div> : ""}
+  ;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
   if (isMine) {
@@ -801,7 +856,7 @@ async function buildMessageDiv(msg) {
     deleteBtn.onclick = async () => {
       if (confirm("Mesaj silinsin mi?")) {
         await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
-        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
+        const divToRemove = document.querySelector(.message[data-id="${msg.id}"]);
         if (divToRemove) divToRemove.remove();
       }
     };
@@ -825,7 +880,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 
   if (editId) {
     await updateDoc(doc(msgCol, editId), { text });
-    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
+    const msgDiv = document.querySelector(.message[data-id="${editId}"]);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
   } else {
@@ -854,7 +909,7 @@ const senderName = currentUserDoc.exists() ? currentUserDoc.data().username : "B
 
 await createNotificationForUser(
   selectedFriendId,
-  `"${senderName}" size bir mesaj gönderdi.`,
+  "${senderName}" size bir mesaj gönderdi.,
   null
 );
 
@@ -874,7 +929,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
   body: JSON.stringify({
     uid: selectedFriendId,
     title: notificationTitle,
-    body: `${senderName}: ${text}`, // 🔔 Bu satır artık "Gönderen: mesaj" olacak
+    body: ${senderName}: ${text}, // 🔔 Bu satır artık "Gönderen: mesaj" olacak
     url: "https://economentor.netlify.app"
   })
 });
@@ -887,7 +942,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
 window.goHome = () => location.href = "anasayfa.html";
 
 async function createNotificationForUser(uid, message, postId = null) {
-  const docId = `${uid}_${Date.now()}`;
+  const docId = ${uid}_${Date.now()};
   await setDoc(doc(db, "notifications", docId), {
     to: uid,
     message: message,
