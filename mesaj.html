@@ -727,6 +727,19 @@ if (change.type === "modified") {
       const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (msgDiv) msgDiv.remove();
 
+// 🧹 Mesajlar silindiyse ve artık hiç mesaj kalmadıysa, lastMessage bilgisini temizle
+const allMsgsSnap = await getDocs(query(messagesCol, limit(1)));
+if (allMsgsSnap.empty) {
+  await updateDoc(doc(db, "users", currentUser.uid), {
+    lastMessage: "",
+    lastMessageTimestamp: 0
+  });
+  await updateDoc(doc(db, "users", senderId), {
+    lastMessage: "",
+    lastMessageTimestamp: 0
+  });
+}
+
       try {
         const convoId = getConversationId(currentUser.uid, senderId);
         const messagesCol = collection(db, "conversations", convoId, "messages");
