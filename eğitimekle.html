@@ -142,6 +142,9 @@
       <input type="text" id="bulletText" placeholder="Madde ekle">
       <button id="addBulletBtn">Ekle</button>
     </div>
+    <h3>Hedef Kitle</h3>
+    <label><input type="radio" name="targetRole" value="user" checked> User (Herkese Açık)</label><br>
+    <label><input type="radio" name="targetRole" value="vip"> VIP ve Admin</label>
     <button id="saveTrainingBtn">Kaydet</button>
   </div>
 
@@ -197,6 +200,12 @@
       const snapshot = await getDocs(query(collection(db, "trainings"), orderBy("timestamp", "asc")));
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
+
+    if (
+      (data.targetRole === "vip" && currentUserRole === "user") || // VIP ise ve user rolündeyse, gösterme
+      (!["user", "vip", "admin"].includes(currentUserRole))        // Geçerli rol yoksa, gösterme
+    ) return;
+
         const div = document.createElement("div");
         div.className = "training";
         div.innerHTML = `
@@ -282,11 +291,20 @@ async function saveTraining() {
   const title = document.getElementById("title").value.trim();
   const description = document.getElementById("description").value.trim();
   const bullets = Array.from(document.querySelectorAll("#bullets li")).map(li => li.firstChild.textContent.trim());
+  const selectedRole = document.querySelector('input[name="targetRole"]:checked')?.value;
 
   if (!title || !description) {
     alert("Lütfen başlık ve açıklama girin.");
     return;
   }
+
+  await addDoc(collection(db, "trainings"), {
+    title,
+    description,
+    bullets,
+    targetRole: selectedRole,
+    timestamp: new Date()
+  });
 
   try {
     if (isEditing && currentDocId) {
