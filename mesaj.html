@@ -495,7 +495,7 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
+    msg.querySelector(".timestamp").innerText = `${t[lang].sentAt}: ${formatTimestamp(ts)}`;
   });
 }
 
@@ -508,7 +508,7 @@ window.setLang = setLang;
 
 function formatTimestamp(ts) {
   const d = new Date(Number(ts));
-  return ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')};
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function getConversationId(uid1, uid2) {
@@ -570,7 +570,7 @@ async function loadChatList(uid) {
   users.forEach(user => {
     const div = document.createElement("div");
     div.className = "chat-item";
-    div.innerHTML = <strong>${user.username}</strong><div class="last-message">${user.lastMessage}</div>;
+    div.innerHTML = `<strong>${user.username}</strong><div class="last-message">${user.lastMessage}</div>`;
     if (user.hasNew) {
       const notif = document.createElement("div");
       notif.className = "notification";
@@ -647,15 +647,15 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
       const div = await buildMessageDiv(msg);
       document.getElementById("messageArea").appendChild(div);
 
-      // Mesajı görüp görmediğini kontrol et
+      // Eğer mesajı görmediyse, "Görülmedi" durumu devam etsin
       if (!msg.seenBy?.includes(currentUser.uid)) {
         const convoId = getConversationId(currentUser.uid, selectedFriendId);
-        // Mesaj alıcı tarafından göründü
+        // Mesajı görmeden önce ekleme yapmıyoruz
         await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid) // Görülen mesajı ekle
+          seenBy: arrayUnion(currentUser.uid) // Alıcının `uid`'sini ekle
         });
 
-        // Görülme durumunu anında değiştir
+        // Görüldü durumunu anında değiştir
         const seenStatusDiv = div.querySelector(".seen-status");
         if (seenStatusDiv) {
           seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
@@ -668,11 +668,11 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     // ✏️ Mesaj düzenlendiyse
     if (change.type === "modified") {
       const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
+      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (msgDiv) {
         msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
 
-        // Görüldü durumu için güncelleme
+        // GÖRÜLDÜ durumu için güncelleme
         if (updatedMsg.sender === currentUser.uid) {
           let seenDiv = msgDiv.querySelector(".seen-status");
 
@@ -684,7 +684,6 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
             msgDiv.appendChild(seenDiv);
           }
 
-          // Görülen mesajın durumu
           if (updatedMsg.seenBy?.includes(selectedFriendId)) {
             seenDiv.classList.remove("pending");
             seenDiv.classList.add("active");
@@ -708,7 +707,7 @@ unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), asyn
     
     // 🗑️ Mesaj silindiyse
     if (change.type === "removed") {
-      const msgDiv = document.querySelector(.message[data-id="${msg.id}"]);
+      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
       if (msgDiv) msgDiv.remove();
 
       // 🧹 Mesajlar silindiyse ve artık hiç mesaj kalmadıysa, lastMessage bilgisini temizle
@@ -816,7 +815,7 @@ async function buildMessageDiv(msg) {
 
   div.setAttribute("data-sender-name", senderName);
 
-  const timeStr = ${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)};
+  const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
   // Görüldü kontrolü
   let seenClass = "";
@@ -829,12 +828,12 @@ async function buildMessageDiv(msg) {
     seenClass = "pending"; // Görülmedi durumu
   }
 
-  div.innerHTML = 
+  div.innerHTML = `
     <div class="sender-label">${senderName}</div>
     <div class="msg-text">${msg.text}</div>
     <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-    ${seenLabel ? <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div> : ""}
-  ;
+    ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
+  `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
   if (isMine) {
@@ -855,7 +854,7 @@ async function buildMessageDiv(msg) {
     deleteBtn.onclick = async () => {
       if (confirm("Mesaj silinsin mi?")) {
         await deleteDoc(doc(db, "conversations", convoId, "messages", msg.id));
-        const divToRemove = document.querySelector(.message[data-id="${msg.id}"]);
+        const divToRemove = document.querySelector(`.message[data-id="${msg.id}"]`);
         if (divToRemove) divToRemove.remove();
       }
     };
@@ -879,7 +878,7 @@ document.getElementById("sendBtn").addEventListener("click", async () => {
 
   if (editId) {
     await updateDoc(doc(msgCol, editId), { text });
-    const msgDiv = document.querySelector(.message[data-id="${editId}"]);
+    const msgDiv = document.querySelector(`.message[data-id="${editId}"]`);
     if (msgDiv) msgDiv.querySelector(".msg-text").innerText = text;
     delete input.dataset.editing;
   } else {
@@ -908,7 +907,7 @@ const senderName = currentUserDoc.exists() ? currentUserDoc.data().username : "B
 
 await createNotificationForUser(
   selectedFriendId,
-  "${senderName}" size bir mesaj gönderdi.,
+  `"${senderName}" size bir mesaj gönderdi.`,
   null
 );
 
@@ -928,7 +927,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
   body: JSON.stringify({
     uid: selectedFriendId,
     title: notificationTitle,
-    body: ${senderName}: ${text}, // 🔔 Bu satır artık "Gönderen: mesaj" olacak
+    body: `${senderName}: ${text}`, // 🔔 Bu satır artık "Gönderen: mesaj" olacak
     url: "https://economentor.netlify.app"
   })
 });
@@ -941,7 +940,7 @@ await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
 window.goHome = () => location.href = "anasayfa.html";
 
 async function createNotificationForUser(uid, message, postId = null) {
-  const docId = ${uid}_${Date.now()};
+  const docId = `${uid}_${Date.now()}`;
   await setDoc(doc(db, "notifications", docId), {
     to: uid,
     message: message,
