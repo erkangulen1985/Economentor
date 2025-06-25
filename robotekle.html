@@ -126,6 +126,48 @@
       width: 100%;
     }
 
+    .shared-files {
+      margin-top: 40px;
+      width: 80%;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .shared-files h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .shared-files ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .shared-files li {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+
+    .shared-files li button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+      float: right;
+    }
+
+    .shared-files li button:hover {
+      background-color: #c0392b;
+    }
+
   </style>
 </head>
 <body>
@@ -148,6 +190,12 @@
       <h3>Seçilen Kullanıcılar:</h3>
       <ul id="selectedUserList"></ul>
       <button id="uploadButton">Paylaş</button>
+    </div>
+    
+    <!-- Geçmişte Paylaşılan Dosyaların Listeleneceği Alan -->
+    <div class="shared-files">
+      <h3>Geçmişte Paylaşılan Dosyalar</h3>
+      <ul id="sharedFilesList"></ul>
     </div>
   </div>
 
@@ -261,13 +309,48 @@
           });
         });
 
+        // Paylaşılan dosya kaydını Firestore'a ekleyelim
+        await setDoc(doc(db, "sharedFiles", fileName), {
+          fileUrl,
+          sharedWith: selectedUsers.map(user => user.uid),
+          timestamp: new Date()
+        });
+
         alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
+        loadSharedFiles(); // Yüklenen dosyaları tekrar yükleyelim
       } catch (err) {
         console.error("Dosya yüklenirken hata:", err);
         alert("Dosya yüklenirken bir hata oluştu.");
       }
     });
+
+    // Geçmişte paylaşılan dosyaları yükle
+    async function loadSharedFiles() {
+      const sharedFilesList = document.getElementById("sharedFilesList");
+      sharedFilesList.innerHTML = ""; // Önceki listeleri temizle
+
+      const sharedFilesSnap = await getDocs(collection(db, "sharedFiles"));
+      sharedFilesSnap.forEach(docSnap => {
+        const sharedFile = docSnap.data();
+
+        const listItem = document.createElement("li");
+        listItem.textContent = `Dosya: ${sharedFile.fileUrl}`;
+        const removeButton = document.createElement("button");
+        removeButton.textContent = "Sil";
+        removeButton.onclick = () => deleteSharedFile(docSnap.id);
+        listItem.appendChild(removeButton);
+        sharedFilesList.appendChild(listItem);
+      });
+    }
+
+    // Paylaşılan dosyayı sil
+    async function deleteSharedFile(fileId) {
+      await deleteDoc(doc(db, "sharedFiles", fileId));
+      loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
+    }
+
+    // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
+    loadSharedFiles();
   </script>
 </body>
-<script type="module" src="auth-guard.js"></script>
 </html>
