@@ -298,30 +298,29 @@ document.getElementById("uploadButton").addEventListener("click", async function
   }
 });
 
-// Kullanıcıları Firestore'dan arama ve seçme
+// Kullanıcıları Firestore'dan arama ve listeleme
 async function searchUsers() {
   const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-  const usersSnap = await getDocs(collection(db, "users")); // users koleksiyonunu doğru şekilde alıyoruz
+  const usersSnap = await getDocs(collection(db, "users")); // Firestore'dan tüm kullanıcıları alıyoruz
   const userList = document.getElementById("userList");
 
-  userList.innerHTML = "";
-  usersSnap.forEach((userDoc) => {
-    const userData = userDoc.data();
-    const fullName = userData.fullName || '';
+  userList.innerHTML = ""; // Eski listeyi temizliyoruz
 
-    // Kullanıcıyı search term ile karşılaştırıp listeye ekliyoruz
+  usersSnap.forEach((userDoc) => {
+    const userData = userDoc.data();  // Kullanıcı verisini alıyoruz
+    const fullName = userData.fullName || ''; // Kullanıcı ismini alıyoruz
+
+    // Eğer ismi arama terimiyle eşleşiyorsa listeye ekliyoruz
     if (fullName.toLowerCase().includes(searchTerm)) {
       const listItem = document.createElement("li");
-      listItem.textContent = fullName;
-      listItem.onclick = () => selectUser(userData); // Kullanıcıyı seç
-      userList.appendChild(listItem);
+      listItem.textContent = fullName; // Kullanıcı adını listeye ekliyoruz
+      listItem.onclick = () => selectUser(userData); // Kullanıcıyı seçmek için fonksiyonu çağırıyoruz
+      userList.appendChild(listItem); // Listeye ekliyoruz
     }
   });
 }
 
-// Seçilen kullanıcılar listesi
-let selectedUsers = [];
-
+// Kullanıcıyı seçtiğimizde Firestore'dan veriyi alıyoruz
 function selectUser(user) {
   // Kullanıcıyı logla
   console.log("Seçilen Kullanıcı:", user);  // Kullanıcıyı log'la
@@ -361,7 +360,7 @@ function updateSelectedUserList() {
 
   selectedUsers.forEach((user, index) => {
     const listItem = document.createElement("li");
-    listItem.textContent = user.fullName;
+    listItem.textContent = user.fullName;  // Kullanıcıyı listeye ekliyoruz
     const removeButton = document.createElement("button");
     removeButton.textContent = "Sil";
     removeButton.onclick = () => removeUser(index);
