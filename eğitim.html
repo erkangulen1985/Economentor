@@ -168,6 +168,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const trainingRef = collection(db, "trainings");
 
+let currentUserRole = "user"; // varsayılan rol
+
 async function loadTrainings() {
   const list = document.getElementById("trainingList");
   list.innerHTML = "";  // Temizle
@@ -213,8 +215,6 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     document.getElementById("loginRedirectBtn").style.display = "inline-block";
   }
-
-  let currentUserRole = "user"; // varsayılan rol
 
 if (user) {
   const userDoc = await getDoc(doc(db, "users", user.uid));
