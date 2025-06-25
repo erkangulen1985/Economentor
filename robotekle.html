@@ -297,20 +297,23 @@ document.getElementById("uploadButton").addEventListener("click", async function
 
   try {
     // Dosya adı oluştur
-    const fileName = `${Date.now()}-${file.name}`;
-    
-    // Dosya adını temizle (isteğe bağlı, dosya ismi güvenli olmalı)
-    const safeFileName = sanitizeFilename(fileName);
+// Dosya adı oluştur
+const fileName = `${Date.now()}-${file.name}`;
+// Dosya adını temizle (isteğe bağlı, dosya ismi güvenli olmalı)
+const safeFileName = sanitizeFilename(fileName);
 
-    // Supabase'e dosya yükle
-    const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
-    
-    if (error) {
-      throw new Error(`Dosya yüklenemedi: ${error.message}`);
-    }
+// Supabase'e dosya yükle
+const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
 
-    // Dosya URL'ini al
-    const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
+if (error) {
+  throw new Error(`Dosya yüklenemedi: ${error.message}`);
+}
+
+// Dosya URL'ini al
+const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
+
+// Burada dosya URL'inin doğru alındığını kontrol edelim
+console.log("Dosya URL'si: ", fileUrl);
 
     // Kullanıcıya bildirim gönder
     selectedUsers.forEach(async (user) => {
@@ -331,6 +334,8 @@ document.getElementById("uploadButton").addEventListener("click", async function
     if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
       throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
     }
+    
+    console.log("File Data: ", fileData);
 
     // Veriyi Firestore'a ekle
     await setDoc(doc(db, "sharedFiles", safeFileName), fileData);
