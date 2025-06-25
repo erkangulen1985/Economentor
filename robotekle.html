@@ -136,7 +136,7 @@
 
   <nav>
     <a href="adminpanel.html">Yönetici Paneli</a> <!-- Yönetici Paneline Yönlendiren Link -->
-    <a href="robot.html">Robot Ekle</a>
+    <a href="robotekle.html">Robot Ekle</a>
   </nav>
 
   <div class="content">
@@ -145,6 +145,8 @@
       <input type="file" id="fileUpload" accept=".rar" />
       <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
       <ul id="userList" class="user-list"></ul>
+      <h3>Seçilen Kullanıcılar:</h3>
+      <ul id="selectedUserList"></ul>
       <button id="uploadButton">Paylaş</button>
     </div>
   </div>
@@ -186,23 +188,47 @@
       userList.innerHTML = "";
       usersSnap.forEach((userDoc) => {
         const userData = userDoc.data();
-        const userName = userData.username || '';
-        
-        if (userName.toLowerCase().includes(searchTerm)) {
+        const fullName = userData.fullName || '';
+
+        if (fullName.toLowerCase().includes(searchTerm)) {
           const listItem = document.createElement("li");
-          listItem.textContent = userName;
+          listItem.textContent = fullName;
           listItem.onclick = () => selectUser(userData);
           userList.appendChild(listItem);
         }
       });
     }
 
-    // Kullanıcı seçme
-    let selectedUser = null;
+    // Seçilen kullanıcılar listesi
+    let selectedUsers = [];
 
     function selectUser(user) {
-      selectedUser = user;
-      alert(`Seçilen kullanıcı: ${user.username}`);
+      if (!selectedUsers.includes(user)) {
+        selectedUsers.push(user);
+        updateSelectedUserList();
+      }
+    }
+
+    // Seçilen kullanıcıları güncelle
+    function updateSelectedUserList() {
+      const selectedUserList = document.getElementById("selectedUserList");
+      selectedUserList.innerHTML = "";
+      
+      selectedUsers.forEach((user, index) => {
+        const listItem = document.createElement("li");
+        listItem.textContent = user.fullName;
+        const removeButton = document.createElement("button");
+        removeButton.textContent = "Sil";
+        removeButton.onclick = () => removeUser(index);
+        listItem.appendChild(removeButton);
+        selectedUserList.appendChild(listItem);
+      });
+    }
+
+    // Kullanıcıyı listeden sil
+    function removeUser(index) {
+      selectedUsers.splice(index, 1);
+      updateSelectedUserList();
     }
 
     // Dosya yükleme
@@ -213,8 +239,8 @@
         return;
       }
 
-      if (!selectedUser) {
-        alert("Lütfen bir kullanıcı seçin.");
+      if (selectedUsers.length === 0) {
+        alert("Lütfen en az bir kullanıcı seçin.");
         return;
       }
 
@@ -228,12 +254,14 @@
         const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${fileName}`;
 
         // Kullanıcıya bildirim gönderme
-        await setDoc(doc(db, "notifications", selectedUser.uid), {
-          message: `"${file.name}" dosyası sizlere paylaşıldı.`,
-          timestamp: new Date()
+        selectedUsers.forEach(async (user) => {
+          await setDoc(doc(db, "notifications", user.uid), {
+            message: `"${file.name}" dosyası sizlere paylaşıldı.`,
+            timestamp: new Date()
+          });
         });
 
-        alert("Dosya başarıyla yüklendi ve kullanıcıya bildirildi!");
+        alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
       } catch (err) {
         console.error("Dosya yüklenirken hata:", err);
         alert("Dosya yüklenirken bir hata oluştu.");
