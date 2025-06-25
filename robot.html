@@ -1,1 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Economentor | Robot</title>
+  <link rel="icon" href="image1.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
 
+    header {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      text-align: center;
+      font-size: 32px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: transparent;
+      padding: 20px 0 10px;
+    }
+
+    nav a {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <header>Economentor | Robot</header>
+  
+<nav>
+  <a href="anasayfa.html" id="homeBtn" style="display: none;">Anasayfa</a>
+</nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  setDoc,
+  deleteDoc,
+  getDoc,
+  addDoc,
+  Timestamp,
+  where
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+  authDomain: "economentor-8ddc4.firebaseapp.com",
+  projectId: "economentor-8ddc4",
+  storageBucket: "economentor-8ddc4.appspot.com",
+  messagingSenderId: "835370350520",
+  appId: "1:835370350520:web:d9bb275eb4d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+</script>
+</body>
+</html>
