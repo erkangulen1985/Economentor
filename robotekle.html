@@ -33,6 +33,27 @@
       letter-spacing: 2px;
     }
 
+    /* Navigation Menu */
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 15px 0;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
+
     .content {
       flex-grow: 1;
       padding: 20px;
@@ -112,6 +133,15 @@
   <header>
     <h1>Economentor | Robot Ekle</h1>
   </header>
+
+  <nav>
+    <a href="anasayfa.html">Ana Sayfa</a>
+    <a href="eğitimekle.html">Eğitim Ekle</a>
+    <a href="belgeekle.html">Belge Ekle</a>
+    <a href="adminpanel.html">Yönetici Paneli</a> <!-- Yönetici Paneline Yönlendiren Link -->
+    <a href="analizekle.html">Analiz Ekle</a>
+    <a href="robotekle.html">Robot Ekle</a>
+  </nav>
 
   <div class="content">
     <div class="upload-section">
