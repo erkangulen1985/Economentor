@@ -279,7 +279,6 @@
       updateSelectedUserList();
     }
 
-// Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
   
@@ -313,7 +312,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
     console.log("Dosya URL'si: ", fileUrl);  // Dosya URL'sini kontrol et
 
     // Seçilen kullanıcılar
-    console.log("Seçilen Kullanıcılar: ", selectedUsers);  // Seçilen kullanıcıları kontrol et
+    console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user.uid));  // Seçilen kullanıcıları kontrol et
 
     // Kullanıcıya bildirim gönder
     selectedUsers.forEach(async (user) => {
