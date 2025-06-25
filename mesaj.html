@@ -837,13 +837,14 @@ async function buildMessageDiv(msg) {
   // Görüldü kontrolü
 let seenClass = "";
 let seenLabel = "";
-if (msg.sender === currentUser.uid) {
-  seenLabel = lang === "tr" ? "Görülmedi" : "Unseen";
 
+if (msg.sender === currentUser.uid) {
   if (msg.seenBy?.includes(selectedFriendId)) {
-    seenClass = "active";
+    seenLabel = lang === "tr" ? "Görüldü" : "Seen";  // "Görüldü" olarak etiket gösterilecek
+    seenClass = "active";  // Mavi renkte olacak
   } else {
-    seenClass = "pending";
+    seenLabel = lang === "tr" ? "Görülmedi" : "Unseen";  // "Görülmedi" olarak etiket gösterilecek
+    seenClass = "pending";  // Gri renkte olacak
   }
 }
 
