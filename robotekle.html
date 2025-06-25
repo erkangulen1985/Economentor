@@ -287,62 +287,70 @@
         .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
     }
 
-    // Dosya yükleme işlemi
-    document.getElementById("uploadButton").addEventListener("click", async function() {
-      const file = document.getElementById("fileUpload").files[0];
-      
-      // Dosya seçilmemişse hata göster
-      if (!file) {
-        alert("Lütfen bir dosya seçin.");
-        return;
-      }
+// Dosya yükleme işlemi
+document.getElementById("uploadButton").addEventListener("click", async function() {
+  const file = document.getElementById("fileUpload").files[0];
+  
+  // Dosya seçilmemişse hata göster
+  if (!file) {
+    alert("Lütfen bir dosya seçin.");
+    return;
+  }
 
-      // Seçilen kullanıcılar yoksa hata göster
-      if (selectedUsers.length === 0) {
-        alert("Lütfen en az bir kullanıcı seçin.");
-        return;
-      }
+  // Seçilen kullanıcılar yoksa hata göster
+  if (selectedUsers.length === 0) {
+    alert("Lütfen en az bir kullanıcı seçin.");
+    return;
+  }
 
-      try {
-        // Dosya adı oluştur
-        const fileName = `${Date.now()}-${file.name}`;
-        
-        // Dosya adını temizle (isteğe bağlı, dosya ismi güvenli olmalı)
-        const safeFileName = sanitizeFilename(fileName);
+  try {
+    // Dosya adı oluştur
+    const fileName = `${Date.now()}-${file.name}`;
+    
+    // Dosya adını temizle (isteğe bağlı, dosya ismi güvenli olmalı)
+    const safeFileName = sanitizeFilename(fileName);
 
-        // Supabase'e dosya yükle
-        const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
-        
-        if (error) {
-          throw new Error(`Dosya yüklenemedi: ${error.message}`);
-        }
+    // Supabase'e dosya yükle
+    const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
+    
+    if (error) {
+      throw new Error(`Dosya yüklenemedi: ${error.message}`);
+    }
 
-        // Dosya URL'ini al
-        const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
+    // Dosya URL'ini al
+    const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
 
-        // Kullanıcıya bildirim gönder
-        selectedUsers.forEach(async (user) => {
-          await setDoc(doc(db, "notifications", user.uid), {
-            message: `"${file.name}" dosyası sizlere paylaşıldı.`,
-            timestamp: new Date()
-          });
-        });
-
-        // Paylaşılan dosya kaydını Firestore'a ekleyelim
-        await setDoc(doc(db, "sharedFiles", safeFileName), {
-          fileUrl,
-          sharedWith: selectedUsers.map(user => user.uid),
-          timestamp: new Date()
-        });
-
-        alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
-        loadSharedFiles(); // Yüklenen dosyaları tekrar yükle
-
-      } catch (err) {
-        console.error("Dosya yüklenirken hata:", err);
-        alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
-      }
+    // Kullanıcıya bildirim gönder
+    selectedUsers.forEach(async (user) => {
+      await setDoc(doc(db, "notifications", user.uid), {
+        message: `"${file.name}" dosyası sizlere paylaşıldı.`,
+        timestamp: new Date()
+      });
     });
+
+    // Paylaşılan dosya kaydını Firestore'a ekleyelim
+    const fileData = {
+      fileUrl: fileUrl,          // Dosyanın URL'si
+      sharedWith: selectedUsers.map(user => user.uid),  // Paylaşılan kullanıcılar
+      timestamp: new Date()      // Paylaşılma zamanı
+    };
+
+    // Verilerin eksik olmadığını kontrol et
+    if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
+      throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
+    }
+
+    // Veriyi Firestore'a ekle
+    await setDoc(doc(db, "sharedFiles", safeFileName), fileData);
+
+    alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
+    loadSharedFiles(); // Yüklenen dosyaları tekrar yükle
+
+  } catch (err) {
+    console.error("Dosya yüklenirken hata:", err);
+    alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
+  }
+});
 
     // Geçmişte paylaşılan dosyaları yükle
     async function loadSharedFiles() {
