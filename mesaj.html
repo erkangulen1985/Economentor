@@ -259,12 +259,10 @@ button.send-btn:hover,
 
 .seen-status.pending {
   color: #999; /* Gri - Henüz karşı taraf sayfayı açmadı */
-  content: "Görülmedi";
 }
 
 .seen-status.active {
-  color: #1e90ff; /* Koyu mavi - Görüldü */
-  content: "Görüldü";
+  color: #1e90ff; /* Koyu asil mavi - Görüldü */
 }
     
 @media (max-width: 770px) {
@@ -631,109 +629,58 @@ async function openChat(fid, el) {
     }
   }
   
-async function openChat(fid, el) {
-  selectedFriendId = fid;
-  const area = document.getElementById("messageArea");
-  area.innerHTML = ""; // Mesajları temizle
+unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
+  snapshot.docChanges().forEach(async (change) => {
+    const msg = { id: change.doc.id, ...change.doc.data() };
 
-  loadedMessageIds.clear(); // Yüklenen mesaj ID'lerini temizle
-  firstVisible = null; // İlk görülen mesajı sıfırla
+    const isFromMe = msg.sender === currentUser.uid;
+    const isFromFriend = msg.sender === selectedFriendId;
+    const senderId = isFromMe ? selectedFriendId : msg.sender;
+    const senderDoc = await getDoc(doc(db, "users", senderId));
+    const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
 
-  if (unsubMessages) unsubMessages(); // Önceki mesajlardan aboneliği iptal et
+    // 🔹 Yeni mesaj eklendiyse
+    if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
+      loadedMessageIds.add(msg.id);
+      const div = await buildMessageDiv(msg);
+      document.getElementById("messageArea").appendChild(div);
 
-  // Diğer tüm sohbetlerden aktifliği kaldır
-  document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
-  
-  // Eğer bildirim varsa, kaldır
-  const notif = el.querySelector(".notification");
-  if (notif) notif.remove(); 
-  el.classList.add("active"); // Bu sohbeti aktif yap
-
-  const convoId = getConversationId(currentUser.uid, fid);
-  const messagesCol = collection(db, "conversations", convoId, "messages");
-
-  // Sohbeti açtığınızda eski mesajları alıyoruz
-  const snap = await getDocs(query(messagesCol, orderBy("timestamp", "desc")));
-  const messages = [];
-  snap.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
-
-  // Eski mesajları chat penceresine ekle
-  for (const msg of messages.reverse()) {
-    const div = await buildMessageDiv(msg);
-    area.appendChild(div);
-    loadedMessageIds.add(msg.id); // Yüklenen mesaj ID'sini kaydet
-  }
-
-  firstVisible = snap.docs[0]; // İlk görülen mesajı ayarla
-
-  // Sayfanın en altına kaydır
-  area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
-
-  // "Eski mesajları yükle" butonunu kur
-  setupLoadMoreButton(messagesCol);
-
-  // Mesajları 'görüldü' olarak işaretle
-  for (const msg of messages) {
-    if (!msg.seenBy?.includes(currentUser.uid)) {
-      await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-        seenBy: arrayUnion(currentUser.uid) // 'seenBy' alanına currentUser.uid'yi ekle
-      });
+    if (window.innerWidth <= 770) {
+      setTimeout(() => {
+        const chatList = document.querySelector(".chatItems");
+        if (chatList) {
+          chatList.scrollTo({ left: 0, behavior: "smooth" });
+        }
+      }, 100); // DOM güncellenene kadar 100ms bekle
     }
+
+      if (isFromMe || isFromFriend) {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+            if (window.innerWidth <= 770) {
+      setTimeout(() => {
+        const chatList = document.querySelector(".chatItems");
+      }, 100); // DOM güncellenene kadar 100ms bekle
+    }
+      }
+
+const chatItems = document.querySelectorAll(".chat-item");
+chatItems.forEach(item => {
+  const nameEl = item.querySelector("strong");
+  if (nameEl && nameEl.innerText === senderName) {
+    const preview = item.querySelector(".last-message");
+    if (preview) preview.innerText = msg.text;
+    item.parentNode.prepend(item); // 🔼 En üste al
   }
-
-  // Mesajlara yeni gelenleri izlemek için gerçek zamanlı bir izleyici kur
-  unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-    snapshot.docChanges().forEach(async (change) => {
-      const msg = { id: change.doc.id, ...change.doc.data() };
-
-      const isFromMe = msg.sender === currentUser.uid;
-      const isFromFriend = msg.sender === selectedFriendId;
-      const senderId = isFromMe ? selectedFriendId : msg.sender;
-      const senderDoc = await getDoc(doc(db, "users", senderId));
-      const senderName = senderDoc.exists() ? senderDoc.data().username : "Bilinmeyen";
-
-      // 🔹 Yeni mesaj eklenmişse
-      if (change.type === "added" && !loadedMessageIds.has(msg.id)) {
-        loadedMessageIds.add(msg.id);
-
-        // Eğer mesajda 'görüldü' durumu yoksa, güncelle
-        if (msg.sender !== currentUser.uid && !msg.seenBy?.includes(currentUser.uid)) {
-          await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-            seenBy: arrayUnion(currentUser.uid) // Görüldü durumunu ekle
-          });
-        }
-
-        const div = await buildMessageDiv(msg);
-        document.getElementById("messageArea").appendChild(div);
-        
-        // Mobilde chat listesine kaydır
-        if (window.innerWidth <= 770) {
-          setTimeout(() => {
-            const chatList = document.querySelector(".chatItems");
-            if (chatList) {
-              chatList.scrollTo({ left: 0, behavior: "smooth" });
-            }
-          }, 100); // DOM güncellenene kadar 100ms bekle
-        }
-
-        // Yeni mesaj geldiyse, sayfayı en alta kaydır
-        if (isFromMe || isFromFriend) {
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
-        }
-
-        // Chat listesinde "önizleme" güncellemesi
-        const chatItems = document.querySelectorAll(".chat-item");
-        chatItems.forEach(item => {
-          const nameEl = item.querySelector("strong");
-          if (nameEl && nameEl.innerText === senderName) {
-            const preview = item.querySelector(".last-message");
-            if (preview) preview.innerText = msg.text;
-            item.parentNode.prepend(item); // Mesajı en üste al
-          }
+});
+      
+    if (!msg.seenBy?.includes(currentUser.uid)) {
+        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+          seenBy: arrayUnion(currentUser.uid)
         });
       }
+    }
 
     // ✏️ Mesaj düzenlendiyse
 if (change.type === "modified") {
@@ -814,10 +761,8 @@ if (allMsgsSnap.empty) {
       }
     }  
     scrollToBottom
-   });
   });
- }
-}
+});
 
 if (window.innerWidth <= 770) {
   scrollToFirstChatItem();
@@ -870,10 +815,11 @@ function setupLoadMoreButton(messagesCol) {
     area.lastElementChild?.scrollIntoView({ behavior: "smooth" });
     };
   }
+}
 
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
-  const isMine = msg.sender === currentUser.uid;  
+  const isMine = msg.sender === currentUser.uid;
   div.className = "message" + (isMine ? " you" : "");
   div.setAttribute("data-id", msg.id);
   div.setAttribute("data-timestamp", msg.timestamp);
@@ -889,27 +835,23 @@ async function buildMessageDiv(msg) {
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
   // Görüldü kontrolü
-  let seenClass = "";
-  let seenLabel = "";
-  if (isMine) {
-    if (msg.seenBy?.includes(currentUser.uid)) {
-      seenLabel = "Görüldü";
-      seenClass = "active"; // Mavi renge dönüştür
-    } else {
-      seenLabel = "Görülmedi";
-      seenClass = "pending"; // Gri renk olacak
-    }
+let seenClass = "";
+let seenLabel = "";
+if (msg.sender === currentUser.uid) {
+  seenLabel = lang === "tr" ? "Görüldü" : "Seen";
+
+  if (msg.seenBy?.includes(selectedFriendId)) {
+    seenClass = "active";
   } else {
-    // Karşı tarafın mesajında, sadece karşı tarafın mesajına göre durum güncellenir
-    seenLabel = msg.seenBy?.includes(currentUser.uid) ? "Görüldü" : "Görülmedi";
-    seenClass = msg.seenBy?.includes(currentUser.uid) ? "active" : "pending";
+    seenClass = "pending";
   }
+}
 
 div.innerHTML = `
   <div class="sender-label">${senderName}</div>
   <div class="msg-text">${msg.text}</div>
   <div class="timestamp">${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}</div>
-  <div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>
+  ${seenLabel ? `<div class="seen-status ${seenClass}" data-msgid="${msg.id}">${seenLabel}</div>` : ""}
 `;
 
   // ✏️ ve 🗑️ butonları (sen yazdıysan)
