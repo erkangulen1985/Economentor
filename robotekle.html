@@ -323,6 +323,16 @@ async function searchUsers() {
 let selectedUsers = [];
 
 function selectUser(user) {
+  // Kullanıcıyı logla
+  console.log("Seçilen Kullanıcı:", user);  // Kullanıcıyı log'la
+
+  // Eğer uid yoksa, hata mesajı ver
+  if (!user || !user.uid) {
+    console.error("Kullanıcı verisi geçersiz veya uid eksik:", user);
+    alert("Geçersiz kullanıcı verisi.");
+    return;
+  }
+
   // Firestore'dan UID ile kullanıcıyı alalım
   const userRef = doc(db, "users", user.uid);  // Firestore'dan uid'ye göre kullanıcıyı çek
   getDoc(userRef).then((docSnap) => {
