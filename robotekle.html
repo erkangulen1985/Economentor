@@ -228,25 +228,6 @@
     // Arama ve kullanıcı listeleme
     document.getElementById("searchInput").addEventListener("input", searchUsers);
 
-    async function searchUsers() {
-      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-      const usersSnap = await getDocs(collection(db, "users"));
-      const userList = document.getElementById("userList");
-
-      userList.innerHTML = "";
-      usersSnap.forEach((userDoc) => {
-        const userData = userDoc.data();
-        const fullName = userData.fullName || '';
-
-        if (fullName.toLowerCase().includes(searchTerm)) {
-          const listItem = document.createElement("li");
-          listItem.textContent = fullName;
-          listItem.onclick = () => selectUser(userData);
-          userList.appendChild(listItem);
-        }
-      });
-    }
-
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
