@@ -251,7 +251,7 @@
     let selectedUsers = [];
 
     function selectUser(user) {
-      if (!selectedUsers.includes(user)) {
+      if (!selectedUsers.includes(user) && user.uid) {
         selectedUsers.push(user);
         updateSelectedUserList();
       }
