@@ -873,8 +873,6 @@ function setupLoadMoreButton(messagesCol) {
 async function buildMessageDiv(msg) {
   const div = document.createElement("div");
   const isMine = msg.sender === currentUser.uid;  
-  const seenClass = msg.seenBy?.includes(currentUser.uid) ? "active" : "pending";
-  const seenLabel = msg.seenBy?.includes(currentUser.uid) ? "Görüldü" : "Görülmedi";
   div.className = "message" + (isMine ? " you" : "");
   div.setAttribute("data-id", msg.id);
   div.setAttribute("data-timestamp", msg.timestamp);
