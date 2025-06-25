@@ -259,10 +259,12 @@ button.send-btn:hover,
 
 .seen-status.pending {
   color: #999; /* Gri - Henüz karşı taraf sayfayı açmadı */
+  content: "Görülmedi";
 }
 
 .seen-status.active {
-  color: #1e90ff; /* Koyu asil mavi - Görüldü */
+  color: #1e90ff; /* Koyu mavi - Görüldü */
+  content: "Görüldü";
 }
     
 @media (max-width: 770px) {
@@ -834,7 +836,7 @@ async function buildMessageDiv(msg) {
 
   const timeStr = `${t[lang].sentAt}: ${formatTimestamp(msg.timestamp)}`;
 
-  // Görüldü kontrolü
+// Görüldü durumu kontrolü
 let seenClass = "";
 let seenLabel = "";
 if (msg.seenBy?.includes(currentUser.uid)) {
