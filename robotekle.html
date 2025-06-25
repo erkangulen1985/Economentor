@@ -324,7 +324,8 @@ async function searchUsers() {
   });
 }
 
-// selectUser function where you fetch user data by UID
+let selectedUsers = [];
+
 async function selectUser(uid) {
   console.log("Seçilen Kullanıcı ID:", uid);  // Kullanıcı ID'sini log'la
 
@@ -350,26 +351,26 @@ async function selectUser(uid) {
   }
 }
 
-// Seçilen kullanıcıları güncelle
+// Function to update the list of selected users on the UI
 function updateSelectedUserList() {
   const selectedUserList = document.getElementById("selectedUserList");
-  selectedUserList.innerHTML = "";
+  selectedUserList.innerHTML = "";  // Clear the current list
 
   selectedUsers.forEach((user, index) => {
     const listItem = document.createElement("li");
-    listItem.textContent = user.fullName;  // Kullanıcıyı listeye ekliyoruz
+    listItem.textContent = user.fullName;
     const removeButton = document.createElement("button");
     removeButton.textContent = "Sil";
-    removeButton.onclick = () => removeUser(index);
+    removeButton.onclick = () => removeUser(index);  // Remove user from selected list
     listItem.appendChild(removeButton);
     selectedUserList.appendChild(listItem);
   });
 }
 
-// Kullanıcıyı listeden sil
+// Function to remove a user from the selected list
 function removeUser(index) {
-  selectedUsers.splice(index, 1);
-  updateSelectedUserList();
+  selectedUsers.splice(index, 1);  // Remove the user at the given index
+  updateSelectedUserList();  // Update the displayed list
 }
 
 // sanitizeFilename fonksiyonu
