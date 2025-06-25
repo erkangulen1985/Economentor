@@ -298,41 +298,36 @@ document.getElementById("uploadButton").addEventListener("click", async function
   }
 });
 
-// Kullanıcıları Firestore'dan arama ve listeleme
 async function searchUsers() {
   const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-  const usersSnap = await getDocs(collection(db, "users")); // Firestore'dan tüm kullanıcıları alıyoruz
+  const usersSnap = await getDocs(collection(db, "users"));
   const userList = document.getElementById("userList");
 
   userList.innerHTML = ""; // Eski listeyi temizliyoruz
 
   usersSnap.forEach((userDoc) => {
     const userData = userDoc.data();  // Kullanıcı verisini alıyoruz
-    const fullName = userData.fullName || ''; // Kullanıcı ismini alıyoruz
+    const fullName = userData.fullName || '';  // Kullanıcı ismini alıyoruz
 
-    // Eğer ismi arama terimiyle eşleşiyorsa listeye ekliyoruz
+    console.log("userData:", userData);  // Burada userData'yı log'layarak kontrol ediyoruz
+    console.log("userData.uid:", userData.uid);  // Burada userData.uid'yi loglayarak kontrol ediyoruz
+
+    // Kullanıcı adı ile arama yapıyoruz
     if (fullName.toLowerCase().includes(searchTerm)) {
       const listItem = document.createElement("li");
-      listItem.textContent = fullName; // Kullanıcı adını listeye ekliyoruz
-      listItem.onclick = () => selectUser(userData); // Kullanıcıyı seçmek için fonksiyonu çağırıyoruz
+      listItem.textContent = fullName;  // Kullanıcı adını listeye ekliyoruz
+      listItem.onclick = () => selectUser(userDoc.id); // Kullanıcıyı uid'si ile seçiyoruz
       userList.appendChild(listItem); // Listeye ekliyoruz
     }
   });
 }
 
-function selectUser(user) {
-  // Kullanıcı verisini logla
-  console.log("Seçilen Kullanıcı:", user);  // Kullanıcı nesnesini log'la
-
-  // Eğer uid yoksa, hata mesajı ver
-  if (!user || !user.uid) {
-    console.error("Kullanıcı verisi geçersiz veya uid eksik:", user);
-    alert("Geçersiz kullanıcı verisi.");
-    return;
-  }
+function selectUser(uid) {
+  // Kullanıcıyı logla
+  console.log("Seçilen Kullanıcı ID:", uid);  // Kullanıcı ID'sini log'la
 
   // Firestore'dan UID ile kullanıcıyı alalım
-  const userRef = doc(db, "users", user.uid);  // Firestore'dan uid'ye göre kullanıcıyı çek
+  const userRef = doc(db, "users", uid);  // users/{uid} şeklinde kullanıcıyı çekiyoruz
   getDoc(userRef).then((docSnap) => {
     if (docSnap.exists()) {
       const userData = docSnap.data();
