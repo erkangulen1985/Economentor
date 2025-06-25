@@ -186,7 +186,31 @@ nav a:hover {
       <a href="kayitol.html" class="blue-button"><i class="fas fa-user-plus"></i> Kayıt Ol</a>
     </div>
   </div>
-</div>
+      <div style="margin-top: 40px;">
+      <img src="https://erkangulen1985.github.io/qrcode.png" alt="QR Kod" style="max-width: 200px; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
 
+      <div class="button-group" style="margin-top: 20px;">
+        <a href="https://kullaniciadi.github.io/qrcode.png" download="economentor-qrcode.png" class="blue-button">
+          <i class="fas fa-download"></i> QR Kod İndir
+        </a>
+        <button onclick="paylasQR()" class="blue-button" style="cursor: pointer;">
+          <i class="fas fa-share-alt"></i> Paylaş
+        </button>
+      </div>
+    </div>
+</div>
+<script>
+  function paylasQR() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Economentor QR Kodu',
+        text: 'Economentor platformuna hızlı erişim için QR kodu tarayın.',
+        url: 'https://erkangulen1985.github.io/qrcode.png'
+      }).catch((error) => console.log('Paylaşım iptal edildi veya başarısız oldu:', error));
+    } else {
+      alert('Tarayıcınız bu paylaşım özelliğini desteklemiyor.');
+    }
+  }
+</script>
 </body>
 </html>
