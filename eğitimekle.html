@@ -160,6 +160,8 @@
       getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -172,6 +174,28 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    let currentUserRole = null;
+
+    const auth = getAuth();
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        currentUserRole = userSnap.data().role || "user";
+      } else {
+        currentUserRole = "user"; // varsayılan
+      }
+    } catch (err) {
+      console.error("Rol bilgisi alınamadı:", err.message);
+      currentUserRole = "user"; // yedek
+    }
+    loadTrainings(); // kullanıcı ve rol bilgisi geldikten sonra çalıştır
+  }
+});
 
     async function addBullet() {
       const bulletText = document.getElementById('bulletText').value.trim();
