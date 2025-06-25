@@ -495,7 +495,7 @@ function updateTexts() {
     const ts = msg.dataset.timestamp;
     const sender = isYou ? t[lang].you : msg.dataset.senderName || "";
     msg.querySelector(".sender-label").innerText = sender;
-    msg.querySelector(".timestamp").innerText = ${t[lang].sentAt}: ${formatTimestamp(ts)};
+    msg.querySelector(".timestamp").innerText = t[lang].sentAt + ": " + formatTimestamp(ts);
   });
 }
 
