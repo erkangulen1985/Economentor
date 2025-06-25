@@ -304,12 +304,16 @@ document.getElementById("uploadButton").addEventListener("click", async function
     const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
 
     if (error) {
+      console.error("Supabase yükleme hatası:", error);
       throw new Error(`Dosya yüklenemedi: ${error.message}`);
     }
 
     // Dosya URL'ini al
     const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
-    console.log("Dosya URL'si: ", fileUrl);
+    console.log("Dosya URL'si: ", fileUrl);  // Dosya URL'sini kontrol et
+
+    // Seçilen kullanıcılar
+    console.log("Seçilen Kullanıcılar: ", selectedUsers);  // Seçilen kullanıcıları kontrol et
 
     // Kullanıcıya bildirim gönder
     selectedUsers.forEach(async (user) => {
@@ -331,7 +335,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
       throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
     }
 
-    console.log("File Data: ", fileData);
+    console.log("File Data: ", fileData);  // FileData'nın doğru olduğunu kontrol et
 
     // Veriyi Firestore'a kaydedelim
     await setDoc(doc(db, "uploadedFiles", safeFileName), fileData);
