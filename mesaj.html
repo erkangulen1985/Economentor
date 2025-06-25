@@ -631,64 +631,64 @@ async function openChat(fid, el) {
     }
   }
   
-unsubMessages = onSnapshot(query(messagesCol, orderBy("timestamp", "asc")), async (snapshot) => {
-  snapshot.docChanges().forEach(async (change) => {
-    const msg = { id: change.doc.id, ...change.doc.data() };
+// Mesajları dinlemek için setup edilen unsubMessages fonksiyonu
+async function setupGlobalMessageWatcher(myUid) {
+  // Tüm kullanıcıları alıyoruz
+  const usersSnap = await getDocs(collection(db, "users"));
+  
+  usersSnap.forEach(otherUserDoc => {
+    const otherUid = otherUserDoc.id;
+    if (otherUid === myUid) return;  // Kendini dinlememek için kontrol ekliyoruz
 
-    const isFromMe = msg.sender === currentUser.uid;
-    const isFromFriend = msg.sender === selectedFriendId;
+    const convoId = getConversationId(myUid, otherUid); // Konuşma ID'si
+    const messagesCol = collection(db, "conversations", convoId, "messages"); // Mesajlar koleksiyonu
 
-    // Eğer bu mesajı gönderen ben değilsem, bu mesajı görmek zorundayım
-    if (!isFromMe) {
-      const seenStatusDiv = document.querySelector(`.message[data-id="${msg.id}"] .seen-status`);
+    // Mesajları dinlemeye başlıyoruz
+    unsubMessages = onSnapshot(
+      query(messagesCol, orderBy("timestamp", "asc")), // Mesajları zaman sırasına göre sıralıyoruz
+      async snapshot => {
+        if (snapshot.empty) return;  // Eğer yeni mesaj yoksa, çık
 
-      // Eğer alıcı mesajı görmediyse ve hala görüldü durumu aktif değilse, güncelle
-      if (change.type === "added" && !msg.seenBy?.includes(currentUser.uid)) {
-        // Görülmedi durumu devam etsin
-        await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
-          seenBy: arrayUnion(currentUser.uid) // Alıcının `uid`'sini ekle
+        snapshot.docChanges().forEach(async (change) => {
+          const msg = { id: change.doc.id, ...change.doc.data() };
+          
+          // Yeni mesaj eklenmişse
+          if (change.type === "added") {
+            // Eğer mesaj benim gönderdiğim mesajsa, UI'ye anında ekle
+            const div = await buildMessageDiv(msg);
+            document.getElementById("messageArea").appendChild(div);
+            scrollToBottom(); // Sayfa en alta kaydırılacak
+
+            // Eğer bu mesajı ben göndermediyssem (yani karşı taraftan geldiyse)
+            if (msg.sender !== myUid) {
+              // Mesaj görülmediyse "Görülmedi" olarak işaretle
+              if (!msg.seenBy?.includes(myUid)) {
+                await updateDoc(doc(db, "conversations", convoId, "messages", msg.id), {
+                  seenBy: arrayUnion(myUid) // Alıcıyı "seenBy" listesine ekle
+                });
+              }
+            }
+          }
+
+          // Mesaj değişikliği varsa (örneğin: mesaj düzenlendi)
+          if (change.type === "modified") {
+            const updatedMsg = change.doc.data();
+            const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+            if (msgDiv) {
+              msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
+            }
+          }
+
+          // Mesaj silindiyse
+          if (change.type === "removed") {
+            const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
+            if (msgDiv) msgDiv.remove();
+          }
         });
-
-        // Görüldü durumu anında değiştir
-        if (seenStatusDiv) {
-          seenStatusDiv.innerText = lang === "tr" ? "Görüldü" : "Seen"; // Yazıyı "Görüldü" olarak güncelle
-          seenStatusDiv.classList.remove("pending");
-          seenStatusDiv.classList.add("active");
-        }
       }
-    }
-
-    // Diğer mesaj değişiklikleri (düzenleme ve silme işlemleri)
-    if (change.type === "modified") {
-      const updatedMsg = change.doc.data();
-      const msgDiv = document.querySelector(`.message[data-id="${msg.id}"]`);
-      if (msgDiv) {
-        msgDiv.querySelector(".msg-text").innerText = updatedMsg.text;
-
-        // GÖRÜLDÜ durumu için güncelleme
-        if (updatedMsg.sender === currentUser.uid) {
-          let seenDiv = msgDiv.querySelector(".seen-status");
-
-          if (!seenDiv) {
-            seenDiv = document.createElement("div");
-            seenDiv.classList.add("seen-status");
-            seenDiv.setAttribute("data-msgid", updatedMsg.id);
-            seenDiv.innerText = lang === "tr" ? "Görüldü" : "Seen";
-            msgDiv.appendChild(seenDiv);
-          }
-
-          if (updatedMsg.seenBy?.includes(selectedFriendId)) {
-            seenDiv.classList.remove("pending");
-            seenDiv.classList.add("active");
-          } else {
-            seenDiv.classList.remove("active");
-            seenDiv.classList.add("pending");
-          }
-        }
-      }
-    }
+    );
   });
-});
+}
 
 if (window.innerWidth <= 770) {
   scrollToFirstChatItem();
