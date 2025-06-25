@@ -279,9 +279,10 @@
       updateSelectedUserList();
     }
 
+// Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
-  
+
   // Dosya seçilmemişse hata göster
   if (!file) {
     alert("Lütfen bir dosya seçin.");
@@ -312,7 +313,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
     console.log("Dosya URL'si: ", fileUrl);  // Dosya URL'sini kontrol et
 
     // Seçilen kullanıcılar
-    console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user.uid));  // Seçilen kullanıcıları kontrol et
+    console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // Seçilen kullanıcıları kontrol et
 
     // Kullanıcıya bildirim gönder
     selectedUsers.forEach(async (user) => {
@@ -329,12 +330,12 @@ document.getElementById("uploadButton").addEventListener("click", async function
       timestamp: new Date()            // Paylaşılma zamanı
     };
 
+    console.log("File Data:", fileData);  // FileData'nın doğru olduğunu kontrol et
+
     // Eksik veri kontrolü
     if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
       throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
     }
-
-    console.log("File Data: ", fileData);  // FileData'nın doğru olduğunu kontrol et
 
     // Veriyi Firestore'a kaydedelim
     await setDoc(doc(db, "uploadedFiles", safeFileName), fileData);
@@ -347,6 +348,81 @@ document.getElementById("uploadButton").addEventListener("click", async function
     alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
   }
 });
+
+// Kullanıcıları Firestore'dan arama ve seçme
+async function searchUsers() {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  const usersSnap = await getDocs(collection(db, "users"));
+  const userList = document.getElementById("userList");
+
+  userList.innerHTML = "";
+  usersSnap.forEach((userDoc) => {
+    const userData = userDoc.data();
+    const fullName = userData.fullName || '';
+
+    if (fullName.toLowerCase().includes(searchTerm)) {
+      const listItem = document.createElement("li");
+      listItem.textContent = fullName;
+      listItem.onclick = () => selectUser(userData); // Kullanıcıyı seç
+      userList.appendChild(listItem);
+    }
+  });
+}
+
+// Seçilen kullanıcılar listesi
+let selectedUsers = [];
+
+function selectUser(user) {
+  // Firestore'dan UID ile kullanıcıyı alalım
+  const userRef = doc(db, "users", user.uid);  // Firestore'dan uid'ye göre kullanıcıyı çek
+  getDoc(userRef).then((docSnap) => {
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      console.log("Seçilen Kullanıcı Bilgileri:", userData);  // Kullanıcı bilgilerini logla
+
+      // Kullanıcıyı dizideki mevcut verilerle karşılaştırıp ekleyelim
+      if (!selectedUsers.includes(userData)) {
+        selectedUsers.push(userData);  // Doğru kullanıcı bilgilerini ekle
+        console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // UID'leri kontrol et
+        updateSelectedUserList();  // Kullanıcı listesini güncelle
+      }
+    } else {
+      console.log("Kullanıcı bulunamadı!");
+    }
+  }).catch((error) => {
+    console.error("Kullanıcı bilgisi alınırken hata:", error);
+  });
+}
+
+// Seçilen kullanıcıları güncelle
+function updateSelectedUserList() {
+  const selectedUserList = document.getElementById("selectedUserList");
+  selectedUserList.innerHTML = "";
+
+  selectedUsers.forEach((user, index) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = user.fullName;
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Sil";
+    removeButton.onclick = () => removeUser(index);
+    listItem.appendChild(removeButton);
+    selectedUserList.appendChild(listItem);
+  });
+}
+
+// Kullanıcıyı listeden sil
+function removeUser(index) {
+  selectedUsers.splice(index, 1);
+  updateSelectedUserList();
+}
+
+// sanitizeFilename fonksiyonu
+function sanitizeFilename(filename) {
+  return filename
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
+    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
+}
 
 // Geçmişte paylaşılan dosyaları yükle
 async function loadSharedFiles() {
@@ -371,14 +447,6 @@ async function loadSharedFiles() {
 async function deleteSharedFile(fileId) {
   await deleteDoc(doc(db, "uploadedFiles", fileId));
   loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
-}
-
-// sanitizeFilename fonksiyonu
-function sanitizeFilename(filename) {
-  return filename
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
-    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
 }
 
     // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
