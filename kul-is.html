@@ -773,17 +773,19 @@ async function loadRobotRequests() {
     return;
   }
 
-  // Tüm robot taleplerini tek seferde çekelim (requests koleksiyonundan)
   const requestsSnapshot = await getDocs(collection(db, "requests"));
-
-  // Talepleri robotId bazında grupla
+  
+  // Talepleri robot.robotId bazında grupla
   const requestsByRobotId = {};
   requestsSnapshot.docs.forEach(doc => {
     const data = doc.data();
-    if (!requestsByRobotId[data.robotId]) {
-      requestsByRobotId[data.robotId] = [];
+    const robotIdInRequest = data.robot?.robotId;
+    if (!robotIdInRequest) return; // robot bilgisi yoksa atla
+
+    if (!requestsByRobotId[robotIdInRequest]) {
+      requestsByRobotId[robotIdInRequest] = [];
     }
-    requestsByRobotId[data.robotId].push({ id: doc.id, data });
+    requestsByRobotId[robotIdInRequest].push({ id: doc.id, data });
   });
 
   for (const robotDoc of robotsSnapshot.docs) {
@@ -803,7 +805,7 @@ async function loadRobotRequests() {
     ul.style.paddingLeft = "15px";
 
     for (const req of requestsForRobot) {
-      const userId = req.data.userId;
+      const userId = req.data.uid; // burada kullanıcı uid'si var
       const userDoc = await getDoc(doc(db, "users", userId));
       const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
       const fullName = fullNameRaw.toUpperCase();
@@ -824,14 +826,14 @@ async function loadRobotRequests() {
   }
 }
 
-// Robot talep iptal butonu tıklama işlemi
+// Talep iptal butonu tıklama işlemi
 document.getElementById("robotRequestList").addEventListener("click", async (e) => {
   if (e.target.tagName === "BUTTON" && e.target.dataset.requestId) {
     const requestId = e.target.dataset.requestId;
     if (!confirm("Bu robot talebini iptal etmek istediğinize emin misiniz?")) return;
 
     try {
-      await deleteDoc(doc(db, "robotRequests", requestId));
+      await deleteDoc(doc(db, "requests", requestId)); // Burada collection db, "requests" olmalı
       alert("Robot talebi başarıyla iptal edildi.");
       await loadRobotRequests(); // Listeyi yenile
     } catch (err) {
