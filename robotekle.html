@@ -434,30 +434,23 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       read: false
     });
 
-    try {
-      const tokenSnap = await getDoc(doc(db, "fcmTokens", uid));  // ✅ tokenSnap olarak tanımla
-      if (tokenSnap.exists()) {
-        const token = tokenSnap.data().token;
-
-        const response = await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid: uid,
-            token: token, // ✅ Eksik olan eklendi
-            title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
-            body: notificationMessage,
-            url: "https://economentor.netlify.app"
-          })
-        });
-
-        const result = await response.json();
-        console.log("FCM yanıtı:", result);
-
-      } else {
-        console.log(`FCM token yok (UID: ${uid}) — sadece Firestore bildirimi gönderildi.`);
-      }
-    } catch (error) {
+      // FCM bildirimi
+  try {
+    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uid: uid,
+        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
+        body: notificationMessage,
+        url: "https://economentor.netlify.app"
+      })
+    });
+  } catch (err) {
+    console.error("FCM bildirimi başarısız:", err);
+  }
+}
+} catch (error) {
       console.error(`FCM bildirimi hatası (UID: ${uid}):`, error);
     }
   }
