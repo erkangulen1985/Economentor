@@ -540,70 +540,89 @@ document.getElementById("publishRobotButton").addEventListener("click", async ()
 });
 
 let editingId = null; // Düzenlenen robotun id'si
-
+    
 async function loadPublishedRobots() {
   const list = document.getElementById("publishedRobotsList");
   list.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "publishedRobots"));
-  const robots = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+  try {
+    const snap = await getDocs(collection(db, "publishedRobots"));
+    const robots = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
 
-  robots.sort((a, b) => b.timestamp?.toDate?.() - a.timestamp?.toDate?.());
+    // Tarihe göre sıralama (Firestore Timestamp veya Date objesi olabilir)
+    robots.sort((a, b) => {
+      const aTime = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : new Date(a.timestamp).getTime();
+      const bTime = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : new Date(b.timestamp).getTime();
+      return bTime - aTime;
+    });
 
-  for (const robot of robots) {
-    const li = document.createElement("li");
+    for (const robot of robots) {
+      const li = document.createElement("li");
 
-    if (editingId === robot.id) {
-      // Düzenleme modu: input ve textarea göster
-      li.innerHTML = `
-        <input id="editTitle" type="text" value="${robot.title}" style="width: 100%; padding: 5px; font-size: 16px;" />
-        <textarea id="editDescription" style="width: 100%; padding: 5px; font-size: 16px; margin-top: 5px;" rows="4">${robot.description}</textarea>
-        <button id="saveBtn">Kaydet</button>
-        <button id="cancelBtn">İptal</button>
-      `;
+      if (editingId === robot.id) {
+        // Düzenleme modu
+        li.innerHTML = `
+          <input id="editTitle" type="text" value="${robot.title}" style="width: 100%; padding: 5px; font-size: 16px;" />
+          <textarea id="editDescription" style="width: 100%; padding: 5px; font-size: 16px; margin-top: 5px;" rows="4">${robot.description}</textarea>
+          <button id="saveBtn">Kaydet</button>
+          <button id="cancelBtn">İptal</button>
+        `;
 
-      li.querySelector("#saveBtn").onclick = async () => {
-        const newTitle = li.querySelector("#editTitle").value.trim();
-        const newDesc = li.querySelector("#editDescription").value.trim();
-        if (!newTitle || !newDesc) {
-          alert("Lütfen başlık ve açıklama girin.");
-          return;
-        }
-        await updateDoc(doc(db, "publishedRobots", robot.id), {
-          title: newTitle,
-          description: newDesc,
-          timestamp: new Date()
-        });
-        editingId = null;
-        loadPublishedRobots();
-      };
+        li.querySelector("#saveBtn").onclick = async () => {
+          const newTitle = li.querySelector("#editTitle").value.trim();
+          const newDesc = li.querySelector("#editDescription").value.trim();
+          if (!newTitle || !newDesc) {
+            alert("Lütfen başlık ve açıklama girin.");
+            return;
+          }
+          try {
+            await updateDoc(doc(db, "publishedRobots", robot.id), {
+              title: newTitle,
+              description: newDesc,
+              timestamp: new Date()
+            });
+            editingId = null;
+            loadPublishedRobots();
+          } catch (error) {
+            console.error("Robot güncellenirken hata:", error);
+            alert("Güncellenirken hata oluştu.");
+          }
+        };
 
-      li.querySelector("#cancelBtn").onclick = () => {
-        editingId = null;
-        loadPublishedRobots();
-      };
-
-    } else {
-      // Normal gösterim
-      li.innerHTML = `
-        <strong>${robot.title}</strong>
-        <span class="description">${robot.description.replace(/\n/g, "<br>")}</span>
-        <button class="editBtn">Düzenle</button>
-        <button class="delete deleteBtn">Sil</button>
-      `;
-      li.querySelector(".editBtn").onclick = () => {
-        editingId = robot.id;
-        loadPublishedRobots();
-      };
-      li.querySelector(".deleteBtn").onclick = async () => {
-        if (confirm("Bu robotu silmek istediğinizden emin misiniz?")) {
-          await deleteDoc(doc(db, "publishedRobots", robot.id));
+        li.querySelector("#cancelBtn").onclick = () => {
+          editingId = null;
           loadPublishedRobots();
-        }
-      };
-    }
+        };
 
-    list.appendChild(li);
+      } else {
+        // Normal gösterim
+        li.innerHTML = `
+          <strong>${robot.title}</strong>
+          <span class="description">${robot.description.replace(/\n/g, "<br>")}</span>
+          <button class="editBtn">Düzenle</button>
+          <button class="delete deleteBtn">Sil</button>
+        `;
+        li.querySelector(".editBtn").onclick = () => {
+          editingId = robot.id;
+          loadPublishedRobots();
+        };
+        li.querySelector(".deleteBtn").onclick = async () => {
+          if (confirm("Bu robotu silmek istediğinizden emin misiniz?")) {
+            try {
+              await deleteDoc(doc(db, "publishedRobots", robot.id));
+              loadPublishedRobots();
+            } catch (error) {
+              console.error("Robot silinirken hata:", error);
+              alert("Silme işlemi sırasında hata oluştu.");
+            }
+          }
+        };
+      }
+
+      list.appendChild(li);
+    }
+  } catch (error) {
+    console.error("Yayınlanmış robotlar yüklenirken hata:", error);
   }
 }
     
