@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Economentor | Robot Ekle</title>
+  <title>Economentor | RAR Dosyası Paylaş</title>
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* Genel Tasarım */
     body {
       margin: 0;
       padding: 0;
@@ -62,7 +61,6 @@
       flex-direction: column;
     }
 
-    /* Robot Ekle Formu */
     .form-container {
       width: 80%;
       background-color: #fff;
@@ -80,7 +78,10 @@
       color: #333;
     }
 
-    .form-container input[type="text"], .form-container textarea {
+    .form-container input[type="file"], 
+    .form-container input[type="text"],
+    .form-container select, 
+    .form-container button {
       width: 100%;
       padding: 12px;
       margin-bottom: 20px;
@@ -89,24 +90,62 @@
       border-radius: 5px;
     }
 
-    .form-container input[type="file"] {
-      margin-bottom: 15px;
-    }
-
     .form-container button {
-      width: 100%;
-      padding: 12px 20px;
       background-color: #4CAF50;
       color: white;
-      border: none;
       cursor: pointer;
-      font-size: 16px;
-      border-radius: 5px;
       transition: background-color 0.3s;
     }
 
     .form-container button:hover {
       background-color: #45a049;
+    }
+
+    .selected-users {
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .selected-users ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .selected-users li {
+      display: flex;
+      justify-content: space-between;
+      background-color: #e0e0e0;
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .selected-users button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+
+    .selected-users button:hover {
+      background-color: #d32f2f;
+    }
+
+    /* Search Input Styling */
+    .search-container {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
     }
 
     .footer {
@@ -120,44 +159,10 @@
     }
 
     @media (max-width: 768px) {
-      header, nav, .content, .container {
-        width: 100% !important;
-        max-width: none !important;
-        padding-left: 10px;
-        padding-right: 10px;
-        margin: 0 auto;
-        box-sizing: border-box;
-      }
-
       .form-container {
         width: 100%;
         padding: 15px;
         margin-bottom: 20px;
-      }
-
-      header h1 {
-        font-size: 24px;
-        padding: 10px 5px;
-      }
-
-      nav a {
-        flex: 1 1 45%;
-        margin: 5px 0;
-        font-size: 14px;
-        padding: 8px 5px;
-        text-align: center;
-      }
-
-      .form-container input[type="text"], .form-container textarea {
-        font-size: 14px;
-        padding: 8px;
-      }
-
-      .form-container button {
-        font-size: 16px;
-        padding: 12px 10px;
-        width: 100%;
-        box-sizing: border-box;
       }
     }
   </style>
@@ -165,7 +170,7 @@
 <body>
 
   <header>
-    <h1>Economentor | Robot Ekle</h1>
+    <h1>Economentor | RAR Dosyası Paylaş</h1>
   </header>
 
   <nav>
@@ -174,13 +179,26 @@
   </nav>
 
   <div class="content">
-    <!-- Robot Ekleme Formu -->
+    <!-- RAR Dosyası Paylaşım Formu -->
     <div class="form-container">
-      <h2>Yeni Robot Paylaş</h2>
-      <input type="file" id="robotImage" accept="image/*">
-      <input type="text" id="robotName" placeholder="Robot Adı">
-      <textarea id="robotDescription" placeholder="Robot Açıklaması" rows="5"></textarea>
-      <button id="submitRobot">Robotu Paylaş</button>
+      <h2>RAR Dosyası Paylaş</h2>
+      <input type="file" id="fileInput" accept=".rar" />
+      <input type="text" id="fileName" placeholder="Dosya Adı Girin" />
+      
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Kişi Ara..." />
+      </div>
+
+      <select id="userSelect" multiple size="5">
+        <!-- Kullanıcılar Burada Listelenecek -->
+      </select>
+
+      <div class="selected-users">
+        <h3>Seçilen Kişiler</h3>
+        <ul id="selectedUsersList"></ul>
+      </div>
+
+      <button onclick="shareFile()">Dosyayı Paylaş</button>
     </div>
   </div>
 
@@ -190,8 +208,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
+    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -203,47 +220,101 @@
       measurementId: "G-FS3FMPYVPD"
     };
 
-    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    document.getElementById("submitRobot").addEventListener("click", async function() {
-      const robotName = document.getElementById("robotName").value;
-      const robotDescription = document.getElementById("robotDescription").value;
-      const robotImage = document.getElementById("robotImage").files[0];
+    // Kullanıcılar için örnek veritabanı listesi
+    let users = [];
 
-      if (!robotName || !robotDescription || !robotImage) {
-        alert("Lütfen robot adı, açıklaması ve resmini girin!");
+    // Kullanıcıları yükle
+    async function loadUsers() {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      users = querySnapshot.docs.map(doc => {
+        const user = doc.data();
+        user.id = doc.id;
+        return user;
+      });
+
+      const userSelect = document.getElementById("userSelect");
+      users.forEach(user => {
+        const option = document.createElement("option");
+        option.value = user.id;
+        option.textContent = user.username;
+        userSelect.appendChild(option);
+      });
+    }
+
+    // Arama kutusunda kullanıcı arama
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const searchTerm = this.value.toLowerCase();
+      const filteredUsers = users.filter(user =>
+        user.username.toLowerCase().includes(searchTerm)
+      );
+
+      const userSelect = document.getElementById("userSelect");
+      userSelect.innerHTML = ''; // Eski listeyi temizle
+      filteredUsers.forEach(user => {
+        const option = document.createElement("option");
+        option.value = user.id;
+        option.textContent = user.username;
+        userSelect.appendChild(option);
+      });
+    });
+
+    // Seçilen kullanıcıları listele
+    let selectedUsers = [];
+
+    document.getElementById("userSelect").addEventListener("change", function () {
+      const selectedOptions = Array.from(this.selectedOptions);
+      selectedUsers = selectedOptions.map(option => option.value);
+      updateSelectedUsersList();
+    });
+
+    // Seçilen kullanıcıları listele
+    function updateSelectedUsersList() {
+      const selectedUsersList = document.getElementById("selectedUsersList");
+      selectedUsersList.innerHTML = ''; // Eski listeyi temizle
+      selectedUsers.forEach((userId, index) => {
+        const li = document.createElement("li");
+        li.textContent = users.find(user => user.id === userId).username;
+        
+        const removeButton = document.createElement("button");
+        removeButton.textContent = "Sil";
+        removeButton.onclick = () => {
+          selectedUsers.splice(index, 1); // Seçilen kullanıcıyı listeden çıkar
+          updateSelectedUsersList();
+        };
+
+        li.appendChild(removeButton);
+        selectedUsersList.appendChild(li);
+      });
+    }
+
+    // Paylaşma işlemi
+    async function shareFile() {
+      const file = document.getElementById('fileInput').files[0];
+      const fileName = document.getElementById('fileName').value;
+      if (!file || !fileName || selectedUsers.length === 0) {
+        alert("Lütfen bir dosya seçin, dosya adı girin ve kullanıcı seçin.");
         return;
       }
 
-      try {
-        // Robot görselini Supabase'e yükle
-        const { error } = await supabase
-          .storage
-          .from('robots')
-          .upload(`robot_images/${Date.now()}_${robotImage.name}`, robotImage);
+      // Dosya veritabanına ekleme
+      const fileRef = collection(db, 'file_shares');
+      await setDoc(doc(fileRef), {
+        file_name: fileName,
+        file_url: "dosya linki buraya eklenecek",
+        users: selectedUsers,
+        timestamp: new Date()
+      });
 
-        if (error) {
-          throw new Error(error.message);
-        }
+      alert("Dosya başarıyla paylaşıldı.");
+    }
 
-        // Firestore'a robot bilgilerini ekle
-        await addDoc(collection(db, "robots"), {
-          name: robotName,
-          description: robotDescription,
-          image: `robot_images/${Date.now()}_${robotImage.name}`,
-          timestamp: new Date()
-        });
-
-        alert("Robot başarıyla paylaşıldı.");
-      } catch (err) {
-        console.error("Robot eklerken hata:", err);
-        alert("Bir hata oluştu.");
-      }
-    });
+    // Sayfa yüklendiğinde kullanıcıları yükle
+    window.onload = () => {
+      loadUsers();
+    };
   </script>
 </body>
 </html>
