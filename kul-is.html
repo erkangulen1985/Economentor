@@ -767,41 +767,43 @@ async function loadRobotRequests() {
   const listContainer = document.getElementById("robotRequestList");
   listContainer.innerHTML = ""; // Temizle
 
-  // Robotları çek
   const robotsSnapshot = await getDocs(collection(db, "robots"));
-
   if (robotsSnapshot.empty) {
     listContainer.innerHTML = "<li>Henüz robot bulunmamaktadır.</li>";
     return;
   }
+
+  // Tüm robot taleplerini tek seferde çekelim (request koleksiyonundan)
+  const requestsSnapshot = await getDocs(collection(db, "request"));
+
+  // Talepleri robotId bazında grupla
+  const requestsByRobotId = {};
+  requestsSnapshot.docs.forEach(doc => {
+    const data = doc.data();
+    if (!requestsByRobotId[data.robotId]) {
+      requestsByRobotId[data.robotId] = [];
+    }
+    requestsByRobotId[data.robotId].push({ id: doc.id, data });
+  });
 
   for (const robotDoc of robotsSnapshot.docs) {
     const robotId = robotDoc.id;
     const robotData = robotDoc.data();
     const title = robotData.name || "Bilinmeyen Robot";
 
-    // Bu robota ait talepleri çek (örnek koleksiyon: "robotRequests", alan: "robotId")
-    const requestsQuery = query(
-      collection(db, "robotRequests"),
-      where("robotId", "==", robotId)
-    );
-    const requestsSnapshot = await getDocs(requestsQuery);
+    const requestsForRobot = requestsByRobotId[robotId] || [];
+    if (requestsForRobot.length === 0) continue; // Talep yoksa atla
 
-    if (requestsSnapshot.empty) continue; // Talep yoksa gösterme
-
-    // Robot başlığı ve talep sayısı
     const li = document.createElement("li");
     li.style.marginBottom = "15px";
-    li.innerHTML = `<strong>${title}</strong> - Talep Sayısı: ${requestsSnapshot.size}`;
+    li.innerHTML = `<strong>${title}</strong> - Talep Sayısı: ${requestsForRobot.length}`;
 
-    // Talep edenlerin listesi
     const ul = document.createElement("ul");
     ul.style.listStyle = "none";
     ul.style.paddingLeft = "15px";
 
-    for (const requestDoc of requestsSnapshot.docs) {
-      const requestData = requestDoc.data();
-      const userId = requestData.userId;
+    for (const req of requestsForRobot) {
+      const userId = req.data.userId;
       const userDoc = await getDoc(doc(db, "users", userId));
       const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
       const fullName = fullNameRaw.toUpperCase();
@@ -811,7 +813,7 @@ async function loadRobotRequests() {
 
       userLi.innerHTML = `
         ${fullName} 
-        <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${requestDoc.id}" title="Talebi İptal Et">&#10006;</button>
+        <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${req.id}" title="Talebi İptal Et">&#10006;</button>
       `;
 
       ul.appendChild(userLi);
