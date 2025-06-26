@@ -264,6 +264,8 @@
     <ul id="publishedRobotsList"></ul>
   </div>
 
+<div class="content">
+
   <!-- Yeni Robot Paylaş -->
   <div class="upload-section" style="max-width: 700px; width: 100%;">
     <h2>Yeni Robot Paylaş</h2>
@@ -744,7 +746,9 @@ function showPublishedRobotOptions() {
 }
 
 // Input'a yazarken filtreleme için
-fileNameInput.addEventListener("input", () => {
+fileNameInput.addEventListener("focus", () => {
+  showPublishedRobotOptions(); // Tıklanınca direkt aç
+});
   const val = fileNameInput.value.toLowerCase();
   publishedRobotsDropdown.innerHTML = "";
   const filtered = publishedRobots.filter(r => r.title.toLowerCase().includes(val));
