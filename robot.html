@@ -7,47 +7,89 @@
   <link rel="icon" href="image1.png" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #fff;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('image2.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
     }
+
+    header {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      text-align: center;
+      font-size: 32px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
     .container {
       max-width: 1000px;
-      margin: auto;
-      padding: 30px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
-    .robot-card {
-      background: rgba(255, 255, 255, 0.1);
+
+    .robot {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
       border-left: 4px solid #4CAF50;
       border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
     }
-    .robot-card h3 {
-      margin: 0 0 10px;
-      font-size: 22px;
+
+    .robot h3 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #FFFFFF;
     }
-    .robot-card p {
-      margin: 0 0 15px;
-      white-space: pre-line;
+
+    .robot p {
+      font-size: 16px;
+      line-height: 1.6;
     }
-    .buttons {
-      display: flex;
-      gap: 10px;
-    }
-    .robot-btn {
-      padding: 8px 16px;
+
+    .download-btn {
+      background-color: #3498db;
+      color: white;
       border: none;
       border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 16px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
     }
-    .request-btn { background: #3498db; color: white; }
-    .request-btn.requested { background: #27ae60; }
-    .download-btn { background: #f39c12; color: white; }
+
+    .download-btn:hover {
+      background-color: #2980b9;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: transparent;
+      padding: 20px 0 10px;
+    }
+
+    nav a {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+      margin: 0 5px;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
   </style>
 </head>
 <body>
