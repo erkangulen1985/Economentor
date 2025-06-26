@@ -535,7 +535,7 @@ document.getElementById("publishRobotButton").addEventListener("click", async ()
     loadPublishedRobots();
   } catch (error) {
     console.error("Robot yayınlama hatası:", error);
-    alert("Yayınlanırken bir hata oluştu.");
+    alert("Yayınlanırken bir hata oluştu: " + error.message);
   }
 });
 
