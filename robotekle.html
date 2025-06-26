@@ -560,12 +560,12 @@ document.getElementById("publishRobotButton").addEventListener("click", async ()
 
   try {
     const id = `robot-${Date.now()}`;
-    await setDoc(doc(db, "publishedRobots", id), robotData);
-    alert("Robot başarıyla yayınlandı!");
-    document.getElementById("robotTitle").value = "";
-    document.getElementById("robotDescription").value = "";
-    loadPublishedRobots();
-    fetchPublishedRobotsForSelection();
+await setDoc(doc(db, "publishedRobots", id), robotData);
+alert("Robot başarıyla yayınlandı!");
+document.getElementById("robotTitle").value = "";
+document.getElementById("robotDescription").value = "";
+loadPublishedRobots();
+fetchPublishedRobotsForSelection()
   } catch (error) {
     console.error("Robot yayınlama hatası:", error);
     alert("Yayınlanırken bir hata oluştu: " + error.message);
