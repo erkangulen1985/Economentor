@@ -425,6 +425,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
 async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
     const notificationMessage = `${sharerName} sizinle "${robotTitle}" adlı robotu paylaştı.`;
+    const token = tokenDoc.data().token;
 
     const docId = `${uid}_${Date.now()}`;
     await setDoc(doc(db, "notifications", docId), {
@@ -443,6 +444,7 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             uid: uid,
+            token: token,
             title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
             body: notificationMessage,
             url: "https://economentor.netlify.app"
