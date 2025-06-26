@@ -366,17 +366,27 @@ function setupRequestListeners(userId) {
   const noBtn = document.getElementById("confirmNo");
 
   buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      // Sadece "not-allowed" olmayanlar için modal göster
+    btn.addEventListener("click", async () => {
       if (btn.classList.contains("not-allowed")) return;
 
       const robotId = btn.dataset.robotId;
       const robotTitle = window.robotTitleMap?.[robotId] || "Robot";
 
-      // Bilgileri geçici olarak sakla
-      pendingRequest = { btn, robotId, robotTitle };
+      const requestRef = doc(db, "requests", `${userId}_${robotId}`);
+      const requestSnap = await getDoc(requestRef);
 
-      // Modalı göster
+      if (requestSnap.exists()) {
+        // ❌ Talep zaten varsa → doğrudan iptal et
+        await deleteDoc(requestRef);
+        btn.classList.remove("requested");
+        btn.textContent = "Talep Et";
+        alert("Talebiniz iptal edildi.");
+        await notifyAdmins(`${robotTitle} adlı robot ${currentUserName} tarafından talep iptal edildi.`, null, "request_cancel");
+        return;
+      }
+
+      // ✅ İlk kez talep ediliyorsa → modal aç
+      pendingRequest = { btn, robotId, robotTitle };
       modal.style.display = "flex";
     });
   });
@@ -389,25 +399,17 @@ function setupRequestListeners(userId) {
     pendingRequest = null;
 
     const requestRef = doc(db, "requests", `${userId}_${robotId}`);
-    const requestSnap = await getDoc(requestRef);
 
-    if (requestSnap.exists()) {
-      await deleteDoc(requestRef);
-      btn.classList.remove("requested");
-      btn.textContent = "Talep Et";
-      alert("Talebiniz iptal edildi.");
-      await notifyAdmins(`${robotTitle} adlı robot ${currentUserName} tarafından talep iptal edildi.`, null, "request_cancel");
-    } else {
-      await setDoc(requestRef, {
-        userId,
-        robotId,
-        requestedAt: Timestamp.now(),
-      });
-      btn.classList.add("requested");
-      btn.textContent = "Talep Edildi";
-      alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir.");
-      await notifyAdmins(`${robotTitle} adlı robot ${currentUserName} tarafından talep edildi.`, null, "request_create");
-    }
+    await setDoc(requestRef, {
+      userId,
+      robotId,
+      requestedAt: Timestamp.now(),
+    });
+
+    btn.classList.add("requested");
+    btn.textContent = "Talep Edildi";
+    alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir.");
+    await notifyAdmins(`${robotTitle} adlı robot ${currentUserName} tarafından talep edildi.`, null, "request_create");
   });
 
   noBtn.addEventListener("click", () => {
