@@ -424,7 +424,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
 // 📢 Bildirim gönderme fonksiyonu
 async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
-    const notificationMessage = `ECONOMENTOR sizinle "${robotTitle}" adlı robotu paylaştı.`;
+    const notificationMessage = `ECONOMENTOR sizinle "${robotTitle}" adlı robotu paylaştı.(Eğer indirmiş olduğunuz robotun otomatik olarak başlattığı kurulum yolu siz çalıştırdığınızda hata verirse lütfen ideal programının kurulu olduğu doğru yolu bulup içindeki ChartSistem klasörünü seçerek kurulumunuzu gerçekleştiriniz!!!)`;
 
     const docId = `${uid}_${Date.now()}`;
     await setDoc(doc(db, "notifications", docId), {
@@ -441,7 +441,7 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         uid: uid,
-        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı(Eğer indirmiş olduğunuz robotun otomatik olarak başlattığı kurulum yolu siz çalıştırdığınızda hata verirse lütfen ideal programının kurulu olduğu doğru yolu bulup içindeki ChartSistem klasörünü seçerek kurulumunuzu gerçekleştiriniz!!!)",
+        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı(Lütfen "Robot" sayfasını ve "Anasayfa üzerindeki size düşen bildirimi kontrol edin!!!")",
         body: notificationMessage,
         url: "https://economentor.netlify.app"
       })
