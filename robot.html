@@ -229,6 +229,9 @@ async function loadRobots(userId, currentUserRole) {
   const robotList = document.getElementById("robotList");
   robotList.innerHTML = "";
 
+  // Robot başlıklarını saklamak için nesne oluştur
+  window.robotTitleMap = {};
+
   const q = query(collection(db, "publishedRobots"), orderBy("timestamp", "desc"));
   const snapshot = await getDocs(q);
 
@@ -242,6 +245,9 @@ async function loadRobots(userId, currentUserRole) {
   for (const docSnap of snapshot.docs) {
     const r = docSnap.data();
     const robotId = docSnap.id;
+
+    // Robot başlığını kaydet
+    window.robotTitleMap[robotId] = r.title;
 
     const requestRef = doc(db, "requests", `${userId}_${robotId}`);
     const requestSnap = await getDoc(requestRef);
