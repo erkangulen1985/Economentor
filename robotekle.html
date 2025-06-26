@@ -3,178 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Economentor | Paylaşım</title>
+  <title>Economentor | Robot Ekle</title>
   <link rel="icon" href="image1.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<style>
-  /* Genel Tasarım */
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f1f1f1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    color: #333;
-  }
+  <style>
+    /* Genel Tasarım */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #333;
+    }
 
-  header {
-    background-color: #4CAF50;
-    color: white;
-    padding: 20px 0;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
 
-  header h1 {
-    margin: 0;
-    font-size: 36px;
-  }
-
-  nav {
-    display: flex;
-    justify-content: space-around;
-    background-color: #333;
-    padding: 15px 0;
-  }
-
-  nav a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 10px;
-  }
-
-  .footer {
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-  }
-
-  /* Form Container */
-  .form-container {
-    padding: 20px;
-    background: #fff;
-    margin: 20px auto;
-    max-width: 500px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .form-container input, .form-container textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-
-  .form-container button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-
-  .form-container button:hover {
-    background-color: #45a049;
-  }
-
-  /* Paylaşılan Dosya ve Robot Listesi */
-  .file-list, .robot-list {
-    margin-top: 20px;
-    padding: 10px;
-    background: #f9f9f9;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-
-  .list-item {
-    margin: 5px 0;
-    padding: 8px;
-    background: #e0e0e0;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .list-item button {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-  }
-
-  .list-item button:hover {
-    background-color: #d32f2f;
-  }
-
-  /* Mobil uyumluluk */
-  @media (max-width: 768px) {
-    .form-container {
-      max-width: 100%;
-      padding: 10px;
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: 2px;
     }
 
     nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 15px 0;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 10px;
+      transition: background 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #4CAF50;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       flex-direction: column;
     }
 
-    .footer {
-      position: static;
+    /* Robot Ekle Formu */
+    .form-container {
+      width: 80%;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 30px;
+      max-width: 800px;
     }
-  }
-</style>
+
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .form-container input[type="text"], .form-container textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .form-container input[type="file"] {
+      margin-bottom: 15px;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 12px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .form-container button:hover {
+      background-color: #45a049;
+    }
+
+    .footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      header, nav, .content, .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+
+      .form-container {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      header h1 {
+        font-size: 24px;
+        padding: 10px 5px;
+      }
+
+      nav a {
+        flex: 1 1 45%;
+        margin: 5px 0;
+        font-size: 14px;
+        padding: 8px 5px;
+        text-align: center;
+      }
+
+      .form-container input[type="text"], .form-container textarea {
+        font-size: 14px;
+        padding: 8px;
+      }
+
+      .form-container button {
+        font-size: 16px;
+        padding: 12px 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
+  </style>
 </head>
 <body>
 
   <header>
-    <h1>Economentor | Paylaşım</h1>
+    <h1>Economentor | Robot Ekle</h1>
   </header>
 
   <nav>
-    <a href="adminpanel.html">Yönetici Paneli</a>
-    <a href="robot.html">Robot Sayfası</a>
+    <a href="adminpanel.html">Yönetici Paneline Dön</a>
+    <a href="anasayfa.html">Ana Sayfa</a>
   </nav>
 
-  <!-- Dosya Paylaşım Formu -->
-  <div class="form-container">
-    <h2>RAR Dosyası Paylaş</h2>
-    <input type="file" id="fileInput" />
-    <select id="userSelect" multiple>
-      <!-- Kişiler Burada Gösterilecek -->
-    </select>
-    <button onclick="shareFile()">Dosya Paylaş</button>
-  </div>
-
-  <!-- Paylaşılan Dosyalar -->
-  <div class="file-list">
-    <h3>Paylaşılan Dosyalar</h3>
-    <div id="sharedFiles"></div>
-  </div>
-
-  <!-- Robot Paylaşım Formu -->
-  <div class="form-container">
-    <h2>Robot Paylaş</h2>
-    <input type="text" id="robotName" placeholder="Robot Adı" />
-    <textarea id="robotDesc" placeholder="Robot Açıklaması"></textarea>
-    <button onclick="shareRobot()">Robot Paylaş</button>
-  </div>
-
-  <!-- Paylaşılan Robotlar -->
-  <div class="robot-list">
-    <h3>Paylaşılan Robotlar</h3>
-    <div id="sharedRobots"></div>
+  <div class="content">
+    <!-- Robot Ekleme Formu -->
+    <div class="form-container">
+      <h2>Yeni Robot Paylaş</h2>
+      <input type="file" id="robotImage" accept="image/*">
+      <input type="text" id="robotName" placeholder="Robot Adı">
+      <textarea id="robotDescription" placeholder="Robot Açıklaması" rows="5"></textarea>
+      <button id="submitRobot">Robotu Paylaş</button>
+    </div>
   </div>
 
   <div class="footer">
@@ -183,7 +190,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
 
     const firebaseConfig = {
@@ -196,102 +203,47 @@
       measurementId: "G-FS3FMPYVPD"
     };
 
+    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function shareFile() {
-  const file = document.getElementById('fileInput').files[0];
-  const userSelect = document.getElementById('userSelect');
-  const selectedUsers = Array.from(userSelect.selectedOptions).map(option => option.value);
-  
-  // Firebase Storage'da dosya yükleme
-  const storageRef = firebase.storage().ref('uploads/' + file.name);
-  await storageRef.put(file);
-  const fileURL = await storageRef.getDownloadURL();
+    document.getElementById("submitRobot").addEventListener("click", async function() {
+      const robotName = document.getElementById("robotName").value;
+      const robotDescription = document.getElementById("robotDescription").value;
+      const robotImage = document.getElementById("robotImage").files[0];
 
-  // Firestore'a dosya bilgisi ekleme
-  selectedUsers.forEach(async (user) => {
-    const fileShareRef = collection(db, 'file_shares');
-    await setDoc(doc(fileShareRef), {
-      file_name: file.name,
-      file_url: fileURL,
-      from_user: 'currentUser',  // Burada dinamik bir kullanıcı bilgisi ekleyebilirsiniz
-      to_user: user,
-      timestamp: new Date()
+      if (!robotName || !robotDescription || !robotImage) {
+        alert("Lütfen robot adı, açıklaması ve resmini girin!");
+        return;
+      }
+
+      try {
+        // Robot görselini Supabase'e yükle
+        const { error } = await supabase
+          .storage
+          .from('robots')
+          .upload(`robot_images/${Date.now()}_${robotImage.name}`, robotImage);
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Firestore'a robot bilgilerini ekle
+        await addDoc(collection(db, "robots"), {
+          name: robotName,
+          description: robotDescription,
+          image: `robot_images/${Date.now()}_${robotImage.name}`,
+          timestamp: new Date()
+        });
+
+        alert("Robot başarıyla paylaşıldı.");
+      } catch (err) {
+        console.error("Robot eklerken hata:", err);
+        alert("Bir hata oluştu.");
+      }
     });
-  });
-
-  loadSharedFiles();  // Paylaşılan dosyaları yeniden yükle
-}
-
-
-    // Paylaşılan Dosyaları Yükle
-    async function loadSharedFiles() {
-      const sharedFilesContainer = document.getElementById('sharedFiles');
-      sharedFilesContainer.innerHTML = '';  // Önceki içerikleri temizle
-      const querySnapshot = await getDocs(collection(db, 'file_shares'));
-      querySnapshot.forEach(doc => {
-        const file = doc.data();
-        const div = document.createElement('div');
-        div.classList.add('list-item');
-        div.innerHTML = `
-          <span>${file.file_name} (${file.to_user})</span>
-          <button onclick="deleteSharedFile('${doc.id}')">Sil</button>
-        `;
-        sharedFilesContainer.appendChild(div);
-      });
-    }
-
-    // Paylaşılan Dosyayı Sil
-    async function deleteSharedFile(id) {
-      await deleteDoc(doc(db, 'file_shares', id));
-      loadSharedFiles();  // Dosya silindikten sonra yeniden yükle
-    }
-
-    // Robot Paylaşımı
-    async function shareRobot() {
-      const robotName = document.getElementById('robotName').value;
-      const robotDesc = document.getElementById('robotDesc').value;
-
-      const robotRef = collection(db, 'robots');
-      await setDoc(doc(robotRef), {
-        name: robotName,
-        description: robotDesc,
-        timestamp: new Date()
-      });
-
-      loadSharedRobots();  // Paylaşılan robotları yükle
-    }
-
-    // Paylaşılan Robotları Yükle
-    async function loadSharedRobots() {
-      const sharedRobotsContainer = document.getElementById('sharedRobots');
-      sharedRobotsContainer.innerHTML = '';  // Önceki içerikleri temizle
-      const querySnapshot = await getDocs(collection(db, 'robots'));
-      querySnapshot.forEach(doc => {
-        const robot = doc.data();
-        const div = document.createElement('div');
-        div.classList.add('list-item');
-        div.innerHTML = `
-          <span>${robot.name}: ${robot.description}</span>
-          <button onclick="deleteSharedRobot('${doc.id}')">Sil</button>
-        `;
-        sharedRobotsContainer.appendChild(div);
-      });
-    }
-
-    // Paylaşılan Robotu Sil
-    async function deleteSharedRobot(id) {
-      await deleteDoc(doc(db, 'robots', id));
-      loadSharedRobots();  // Robot silindikten sonra yeniden yükle
-    }
-
-    // Sayfa yüklendiğinde paylaşılan dosyaları ve robotları yükle
-    window.onload = () => {
-      loadSharedFiles();
-      loadSharedRobots();
-    }
   </script>
-
 </body>
 </html>
