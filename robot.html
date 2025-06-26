@@ -141,10 +141,20 @@
 
 .robot-card .buttons {
   display: flex;
-  justify-content: space-between; /* solda uyarı, sağda buton */
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
   margin-top: 10px;
+  gap: 10px;
+}
+
+.buttons .left-side {
+  flex-grow: 1; /* Uyarı metni varsa genişlesin */
+  color: #ff9999;
+  font-style: italic;
+}
+
+.buttons .right-side button {
+  margin-left: 10px; /* Butonlar arası boşluk */
 }
   </style>
 </head>
@@ -249,17 +259,23 @@ async function loadRobots(userId, currentUserRole) {
       downloadButton = `<button class="robot-btn download-btn" data-url="${fileUrl}" data-docid="${fileDocId}" data-robot-id="${robotId}">İndir</button>`;
     }
 
-let requestButtonHTML = "";
+let leftSideHTML = "";
+let rightSideHTML = "";
+
+// İndir butonu varsa sağ tarafa ekle
+if (isShared) {
+  rightSideHTML += `<button class="robot-btn download-btn" data-url="${fileUrl}" data-docid="${fileDocId}" data-robot-id="${robotId}">İndir</button>`;
+}
 
 if (currentUserRole === "user") {
-  requestButtonHTML = `
-    <p class="warning-text">Bu robotları talep edebilmek için öncelikle "Temel Düzey Finans Eğitimi" almanız gerekmektedir.</p>
-    <button class="robot-btn request-btn not-allowed" disabled>Talep Edilemez</button>
-  `;
+  // Solda uyarı, sağda talep edilemez butonu
+  leftSideHTML = `<p class="warning-text">Bu robotları talep edebilmek için öncelikle "Temel Düzey Finans Eğitimi" almanız gerekmektedir.</p>`;
+  rightSideHTML += `<button class="robot-btn request-btn not-allowed" disabled>Talep Edilemez</button>`;
 } else {
-  requestButtonHTML = `
+  // Yetkili ise sadece sağda talep et butonu
+  rightSideHTML += `
     <button class="robot-btn request-btn ${alreadyRequested ? "requested" : ""}"
-            data-robot-id="${robotId}">
+      data-robot-id="${robotId}">
       ${alreadyRequested ? "Talep Edildi" : "Talep Et"}
     </button>
   `;
@@ -269,8 +285,8 @@ div.innerHTML = `
   <h3>${r.title}</h3>
   <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
   <div class="buttons">
-    ${downloadButton}
-    ${requestButtonHTML}
+    <div class="left-side">${leftSideHTML}</div>
+    <div class="right-side">${rightSideHTML}</div>
   </div>
   <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
 `;
