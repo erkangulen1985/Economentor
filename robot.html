@@ -303,28 +303,30 @@ function setupDownloadListeners(userId) {
       const robotId = btn.dataset.robotId;
 
       try {
-        // Windows dizinine indirme denemesi
-        const anchor = document.createElement("a");
-        anchor.href = fileUrl;
-        anchor.download = "C:\\iDeal\\ChartSistem\\" + fileUrl.split("/").pop();
-        anchor.click();
+  // Windows dizinine indirme denemesi
+  const anchor = document.createElement("a");
+  anchor.href = fileUrl;
+  anchor.download = "C:\\iDeal\\ChartSistem\\" + fileUrl.split("/").pop();
+  anchor.click();
 
-        // Supabase'den sil
-        const filePath = fileUrl.split("/").slice(-1)[0]; // dosya ismi
-        await supabase.storage.from("robotlar").remove([filePath]);
+  // Supabase'den silme
+  const fullPath = new URL(fileUrl).pathname.split("/").slice(3).join("/");
+  const { error } = await supabase.storage.from("robotlar").remove([fullPath]);
 
-        // Firestore'dan sil
-        await deleteDoc(doc(db, "uploadedFiles", fileDocId));
+  if (error) throw error;
 
-        // UI'dan indir butonunu kaldır
-        btn.remove();
+  // Firestore'dan sil
+  await deleteDoc(doc(db, "uploadedFiles", fileDocId));
 
-        alert("Dosya başarıyla indirildi ve paylaşılan bilgiler kaldırıldı.");
+  // UI'dan indir butonunu kaldır
+  btn.remove();
 
-      } catch (err) {
-        console.error("İndirme sırasında hata:", err);
-        alert("Dosya indirilemedi veya silme işlemi başarısız oldu.");
-      }
+  alert("Dosya başarıyla indirildi ve paylaşılan bilgiler kaldırıldı.");
+
+} catch (err) {
+  console.error("İndirme sırasında hata:", err);
+  alert("Dosya indirilemedi veya silme işlemi başarısız oldu.");
+}
     });
   });
 }
