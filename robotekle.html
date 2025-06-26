@@ -434,22 +434,22 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       read: false
     });
 
-      // FCM bildirimi
-  try {
-    await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: uid,
-        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
-        body: notificationMessage,
-        url: "https://economentor.netlify.app"
-      })
-    });
-  } catch (err) {
-    console.error("FCM bildirimi başarısız:", err);
+    // FCM bildirimi
+    try {
+      await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: uid,
+          title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
+          body: `${notificationMessage}\n\n📂 NOT: Eğer indirmiş olduğunuz robotun otomatik olarak başlattığı kurulum yolu siz çalıştırdığınızda hata verirse, lütfen iDeal programının kurulu olduğu doğru yolu bulup içindeki 'ChartSistem' klasörünü seçerek kurulumu manuel olarak tamamlayınız.`,
+          url: "https://economentor.netlify.app"
+        })
+      });
+    } catch (err) {
+      console.error("FCM bildirimi başarısız:", err);
+    }
   }
- }
 }
 
 async function searchUsers() {
