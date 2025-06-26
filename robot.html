@@ -298,7 +298,6 @@ div.innerHTML = `
   setupDownloadListeners(userId);
 }
 
-
 async function notifyAdmins(message, trainingId, type) {
   const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
   const adminsSnap = await getDocs(adminsQuery);
@@ -332,6 +331,48 @@ async function notifyAdmins(message, trainingId, type) {
       console.error("Admin FCM bildirimi başarısız:", err);
     }
   }
+}
+
+function setupRequestListeners(userId) {
+  const buttons = document.querySelectorAll(".request-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const robotId = btn.dataset.robotId;
+
+      // Robotun adını alabilmek için, robot başlıklarını bir yerde tutalım
+      // (loadRobots fonksiyonunda robot bilgilerini global bir değişkene atabiliriz)
+      const robotTitle = window.robotTitleMap?.[robotId] || "Robot";
+
+      const userName = currentUser.displayName || currentUser.email || "Bir kullanıcı";
+
+      const requestRef = doc(db, "requests", `${userId}_${robotId}`);
+      const requestSnap = await getDoc(requestRef);
+
+      if (requestSnap.exists()) {
+        // Talebi iptal et
+        await deleteDoc(requestRef);
+        btn.classList.remove("requested");
+        btn.textContent = "Talep Et";
+        alert("Talebiniz iptal edildi.");
+
+        // Bildirim gönder (iptal)
+        await notifyAdmins(`${robotTitle} adlı robot ${userName} tarafından talep iptal edildi.`, null, "request_cancel");
+      } else {
+        // Talebi oluştur
+        await setDoc(requestRef, {
+          userId,
+          robotId,
+          requestedAt: Timestamp.now(),
+        });
+        btn.classList.add("requested");
+        btn.textContent = "Talep Edildi";
+        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir.");
+
+        // Bildirim gönder (talep)
+        await notifyAdmins(`${robotTitle} adlı robot ${userName} tarafından talep edildi.`, null, "request_create");
+      }
+    });
+  });
 }
 
 async function getUserSharedRobotMap(userId) {
