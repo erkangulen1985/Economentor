@@ -425,16 +425,20 @@ document.getElementById("uploadButton").addEventListener("click", async function
 async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
     const notificationMessage = `ECONOMENTOR sizinle "${robotTitle}" adlı robotu paylaştı.`;
+    const additionalNote = `📂 NOT: Eğer indirmiş olduğunuz robotun otomatik olarak başlattığı kurulum yolu siz çalıştırdığınızda hata verirse, lütfen iDeal programının kurulu olduğu doğru yolu bulup içindeki 'ChartSistem' klasörünü seçerek kurulumu manuel olarak tamamlayınız.`;
 
+    const fullMessage = `${notificationMessage}\n\n${additionalNote}`;
     const docId = `${uid}_${Date.now()}`;
+
+    // 🔹 Firestore'a kaydedilen bildirim içeriği (Firebase Bildirimleri)
     await setDoc(doc(db, "notifications", docId), {
       to: uid,
-      message: notificationMessage,
+      message: fullMessage,
       timestamp: Timestamp.now(),
       read: false
     });
 
-    // FCM bildirimi
+    // 🔸 FCM bildirimi (cihaza anlık bildirim)
     try {
       await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
         method: "POST",
@@ -442,12 +446,12 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
         body: JSON.stringify({
           uid: uid,
           title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
-          body: `${notificationMessage}\n\n📂 NOT: Eğer indirmiş olduğunuz robotun otomatik olarak başlattığı kurulum yolu siz çalıştırdığınızda hata verirse, lütfen iDeal programının kurulu olduğu doğru yolu bulup içindeki 'ChartSistem' klasörünü seçerek kurulumu manuel olarak tamamlayınız.`,
+          body: fullMessage,
           url: "https://economentor.netlify.app"
         })
       });
     } catch (err) {
-      console.error("FCM bildirimi başarısız:", err);
+      console.error("❌ FCM bildirimi başarısız:", err.message);
     }
   }
 }
