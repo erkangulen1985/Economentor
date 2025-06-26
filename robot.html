@@ -209,6 +209,8 @@ const supabase = createClient(
 
     let currentUserRole = "user"; // varsayılan
 
+let currentUserName = "";
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     document.getElementById("robotList").innerHTML = "<p>Lütfen giriş yapınız.</p>";
@@ -220,6 +222,7 @@ onAuthStateChanged(auth, async (user) => {
   const userDoc = await getDoc(doc(db, "users", user.uid));
   if (userDoc.exists()) {
     currentUserRole = userDoc.data().role || "user";
+    currentUserName = userDoc.data().name || userDoc.data().fullName || user.displayName || user.email || "Bir kullanıcı";
   }
 
   await loadRobots(user.uid, currentUserRole);
@@ -307,6 +310,7 @@ div.innerHTML = `
 async function notifyAdmins(message, trainingId, type) {
   const adminsQuery = query(collection(db, "users"), where("role", "==", "admin"));
   const adminsSnap = await getDocs(adminsQuery);
+  const userName = currentUserName;
 
   for (const adminDoc of adminsSnap.docs) {
     const adminId = adminDoc.id;
