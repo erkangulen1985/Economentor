@@ -768,10 +768,6 @@ async function loadRobotRequests() {
   listContainer.innerHTML = ""; // Temizle
 
   const robotsSnapshot = await getDocs(collection(db, "robots"));
-  if (robotsSnapshot.empty) {
-    listContainer.innerHTML = "<li>Henüz robot bulunmamaktadır.</li>";
-    return;
-  }
 
   const requestsSnapshot = await getDocs(collection(db, "requests"));
   
