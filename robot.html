@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Economentor | Robot</title>
+  <title>Economentor | Robotlarım</title>
   <link rel="icon" href="image1.png" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
       margin: 0;
@@ -25,6 +24,50 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
 
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .robot {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #4CAF50;
+      border-radius: 8px;
+    }
+
+    .robot h3 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #FFFFFF;
+    }
+
+    .robot p {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .download-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .download-btn:hover {
+      background-color: #2980b9;
+    }
+
     nav {
       display: flex;
       justify-content: center;
@@ -41,56 +84,82 @@
       padding: 10px 20px;
       border-radius: 5px;
       transition: background 0.3s ease;
+      margin: 0 5px;
     }
 
     nav a:hover {
       background-color: #4CAF50;
-      color: white;
     }
-
   </style>
 </head>
 <body>
-  <header>Economentor | Robot</header>
+  <header>Economentor | Robotlarım</header>
+  <nav>
+    <a href="anasayfa.html">Anasayfa</a>
+  </nav>
 
-  <a href="anasayfa.html">Anasayfa</a>
-  
-<nav>
-  <a href="anasayfa.html" id="homeBtn" style="display: none;">Anasayfa</a>
-</nav>
+  <div class="container" id="robotList">
+    <!-- Robotlar burada listelenecek -->
+  </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  doc,
-  setDoc,
-  deleteDoc,
-  getDoc,
-  addDoc,
-  Timestamp,
-  where
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs,
+    getDoc,
+    doc
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-  authDomain: "economentor-8ddc4.firebaseapp.com",
-  projectId: "economentor-8ddc4",
-  storageBucket: "economentor-8ddc4.appspot.com",
-  messagingSenderId: "835370350520",
-  appId: "1:835370350520:web:d9bb275eb4d"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+    authDomain: "economentor-8ddc4.firebaseapp.com",
+    projectId: "economentor-8ddc4",
+    storageBucket: "economentor-8ddc4.appspot.com",
+    messagingSenderId: "835370350520",
+    appId: "1:835370350520:web:d9bb275eb4d"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      loadSharedRobots(user.uid);
+    } else {
+      document.getElementById("robotList").innerHTML = "<p>Lütfen giriş yapınız.</p>";
+    }
+  });
+
+  async function loadSharedRobots(uid) {
+    const q = query(collection(db, "uploadedFiles"), where("sharedWith", "array-contains", uid));
+    const snapshot = await getDocs(q);
+
+    const list = document.getElementById("robotList");
+    list.innerHTML = "";
+
+    if (snapshot.empty) {
+      list.innerHTML = "<p>Paylaşılan robot bulunamadı.</p>";
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const el = document.createElement("div");
+      el.className = "robot";
+      el.innerHTML = `
+        <h3>${data.robotTitle || "Başlıksız Robot"}</h3>
+        <p><strong>Paylaşan:</strong> Sistem (henüz gösterilmiyor)</p>
+        <button class="download-btn" onclick="window.open('${data.fileUrl}', '_blank')">Dosyayı İndir</button>
+      `;
+      list.appendChild(el);
+    });
+  }
 </script>
-<script type="module" src="auth-guard.js"></script>
 </body>
 </html>
