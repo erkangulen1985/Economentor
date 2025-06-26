@@ -168,6 +168,45 @@
       background-color: #c0392b;
     }
 
+#publishedRobotsList li {
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  position: relative;
+}
+
+#publishedRobotsList li button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+#publishedRobotsList li button.delete {
+  background-color: #e74c3c;
+}
+
+#publishedRobotsList li button.delete:hover {
+  background-color: #c0392b;
+}
+
+#publishedRobotsList li button:hover {
+  opacity: 0.9;
+}
+
+/* Açıklama satır atlamalarını koru */
+#publishedRobotsList li .description {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  display: block;
+}
+
 #publishedRobotsDropdown {
   border: 1px solid #ccc;
   max-height: 150px;
