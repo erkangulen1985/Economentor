@@ -297,6 +297,15 @@ document.getElementById("uploadButton").addEventListener("click", async function
     console.error("Dosya yüklenirken hata:", err);
     alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
   }
+
+  function clearUploadForm() {
+    document.getElementById("fileUpload").value = "";
+    document.getElementById("fileNameInput").value = "";
+    document.getElementById("searchInput").value = "";
+    selectedUsers = [];
+    updateSelectedUserList();
+    searchUsers(); // Listeyi sıfırla ve tekrar yükle
+  }
 });
 
 async function searchUsers() {
