@@ -351,6 +351,15 @@
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+function clearUploadForm() {
+  document.getElementById("fileUpload").value = "";
+  document.getElementById("fileNameInput").value = "";
+  document.getElementById("searchInput").value = "";
+  selectedUsers = [];
+  updateSelectedUserList();
+  searchUsers();
+}
+
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
