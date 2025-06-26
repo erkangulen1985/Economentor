@@ -168,6 +168,45 @@
       background-color: #c0392b;
     }
 
+#publishedRobotsList li {
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  position: relative;
+}
+
+#publishedRobotsList li button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+#publishedRobotsList li button.delete {
+  background-color: #e74c3c;
+}
+
+#publishedRobotsList li button.delete:hover {
+  background-color: #c0392b;
+}
+
+#publishedRobotsList li button:hover {
+  opacity: 0.9;
+}
+
+/* Açıklama satır atlamalarını koru */
+#publishedRobotsList li .description {
+  white-space: pre-wrap;
+  margin-top: 5px;
+  display: block;
+}
+
   </style>
 </head>
 <body>
@@ -499,6 +538,8 @@ document.getElementById("publishRobotButton").addEventListener("click", async ()
   }
 });
 
+let editingId = null; // Düzenlenen robotun id'si
+
 async function loadPublishedRobots() {
   const list = document.getElementById("publishedRobotsList");
   list.innerHTML = "";
@@ -506,44 +547,64 @@ async function loadPublishedRobots() {
   const snap = await getDocs(collection(db, "publishedRobots"));
   const robots = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
 
-  // Yeniden eskiye sırala
   robots.sort((a, b) => b.timestamp?.toDate?.() - a.timestamp?.toDate?.());
 
   for (const robot of robots) {
     const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${robot.title}</strong><br>
-      <em>${robot.description}</em><br>
-      <button onclick="editRobot('${robot.id}', '${robot.title}', '${robot.description.replace(/'/g, "\\'")}')">Düzenle</button>
-      <button onclick="deleteRobot('${robot.id}')">Sil</button>
-    `;
+
+    if (editingId === robot.id) {
+      // Düzenleme modu: input ve textarea göster
+      li.innerHTML = `
+        <input id="editTitle" type="text" value="${robot.title}" style="width: 100%; padding: 5px; font-size: 16px;" />
+        <textarea id="editDescription" style="width: 100%; padding: 5px; font-size: 16px; margin-top: 5px;" rows="4">${robot.description}</textarea>
+        <button id="saveBtn">Kaydet</button>
+        <button id="cancelBtn">İptal</button>
+      `;
+
+      li.querySelector("#saveBtn").onclick = async () => {
+        const newTitle = li.querySelector("#editTitle").value.trim();
+        const newDesc = li.querySelector("#editDescription").value.trim();
+        if (!newTitle || !newDesc) {
+          alert("Lütfen başlık ve açıklama girin.");
+          return;
+        }
+        await updateDoc(doc(db, "publishedRobots", robot.id), {
+          title: newTitle,
+          description: newDesc,
+          timestamp: new Date()
+        });
+        editingId = null;
+        loadPublishedRobots();
+      };
+
+      li.querySelector("#cancelBtn").onclick = () => {
+        editingId = null;
+        loadPublishedRobots();
+      };
+
+    } else {
+      // Normal gösterim
+      li.innerHTML = `
+        <strong>${robot.title}</strong>
+        <span class="description">${robot.description.replace(/\n/g, "<br>")}</span>
+        <button class="editBtn">Düzenle</button>
+        <button class="delete deleteBtn">Sil</button>
+      `;
+      li.querySelector(".editBtn").onclick = () => {
+        editingId = robot.id;
+        loadPublishedRobots();
+      };
+      li.querySelector(".deleteBtn").onclick = async () => {
+        if (confirm("Bu robotu silmek istediğinizden emin misiniz?")) {
+          await deleteDoc(doc(db, "publishedRobots", robot.id));
+          loadPublishedRobots();
+        }
+      };
+    }
+
     list.appendChild(li);
   }
 }
-
-window.editRobot = async (id, oldTitle, oldDesc) => {
-  const newTitle = prompt("Yeni robot adı:", oldTitle);
-  const newDesc = prompt("Yeni açıklama:", oldDesc);
-  if (newTitle && newDesc) {
-    await updateDoc(doc(db, "publishedRobots", id), {
-      title: newTitle,
-      description: newDesc,
-      timestamp: new Date()
-    });
-    loadPublishedRobots();
-  }
-};
-
-window.deleteRobot = async (id) => {
-  const confirmDelete = confirm("Bu robotu silmek istediğinizden emin misiniz?");
-  if (confirmDelete) {
-    await deleteDoc(doc(db, "publishedRobots", id));
-    loadPublishedRobots();
-  }
-};
-
-// Sayfa yüklenince robotları da yükle
-loadPublishedRobots();
     
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadSharedFiles();
