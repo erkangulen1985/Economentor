@@ -135,12 +135,18 @@ nav a:hover {
       padding: 20px;
     }
 
-    .qr-buttons {
+.qr-buttons {
   display: flex;
   justify-content: center;
   gap: 20px;  /* Butonlar arasındaki mesafeyi ayarlayabilirsiniz */
-  align-items: center !important;  /* Yatayda ortalamak için */
+  align-items: center;
   margin-top: 20px;  /* Üst boşluk */
+  width: 100%;  /* Kapsayıcıyı %100 genişlikte yaparak yatayda ortalar */
+}
+
+.qr-buttons .blue-button {
+  width: 100%;  /* Butonların genişliğini %100 yaparak her birinin aynı boyda olmasını sağlar */
+  max-width: 200px;  /* Butonların genişliğini maksimum 200px olarak sınırlandırır */
 }
 
 @media (max-width: 600px) {
