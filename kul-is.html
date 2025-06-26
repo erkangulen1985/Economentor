@@ -420,10 +420,12 @@ async function loadTrainingRequests() {
     ul.style.listStyle = "none";
     ul.style.paddingLeft = "15px";
 
-    // Her talep eden için kullanıcı adını çek ve listeye ekle
     for (const requestDoc of requestsSnapshot.docs) {
       const requestData = requestDoc.data();
       const userId = requestData.userId;
+      const requestedAt = requestData.requestedAt;
+      const formattedTime = requestedAt ? requestedAt.toDate().toLocaleString() : "-";
+
       const userDoc = await getDoc(doc(db, "users", userId));
       const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
       const fullName = fullNameRaw.toUpperCase();
@@ -431,9 +433,8 @@ async function loadTrainingRequests() {
       const userLi = document.createElement("li");
       userLi.style.marginBottom = "6px";
 
-      // Kullanıcı ismi ve iptal butonu
       userLi.innerHTML = `
-        ${fullName} 
+        ${fullName} - Talep Zamanı: ${formattedTime}
         <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${requestDoc.id}" title="Talebi İptal Et">&#10006;</button>
       `;
 
