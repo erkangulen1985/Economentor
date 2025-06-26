@@ -233,6 +233,12 @@
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
   const file = document.getElementById("fileUpload").files[0];
+  const customName = document.getElementById("fileNameInput").value.trim();
+  
+  if (!customName) {
+    alert("Lütfen bir dosya adı girin.");
+    return;
+  }
 
   // Dosya seçilmemişse hata göster
   if (!file) {
@@ -371,23 +377,43 @@ function sanitizeFilename(filename) {
     .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
 }
 
-// Geçmişte paylaşılan dosyaları yükle
 async function loadSharedFiles() {
   const sharedFilesList = document.getElementById("sharedFilesList");
   sharedFilesList.innerHTML = ""; // Önceki listeleri temizle
 
   const sharedFilesSnap = await getDocs(collection(db, "uploadedFiles"));
-  sharedFilesSnap.forEach(docSnap => {
+  for (const docSnap of sharedFilesSnap.docs) {
     const sharedFile = docSnap.data();
 
     const listItem = document.createElement("li");
-    listItem.textContent = `Dosya: ${sharedFile.fileUrl}`;
+    const fileUrl = sharedFile.fileUrl;
+    const sharedWith = sharedFile.sharedWith || [];
+
+    // UID'leri isimlere dönüştür
+    const userNames = [];
+    for (const uid of sharedWith) {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        userNames.push(data.fullName || uid);
+      } else {
+        userNames.push(uid);
+      }
+    }
+
+    listItem.innerHTML = `
+      <strong>Dosya:</strong> <a href="${fileUrl}" target="_blank">${fileUrl.split("/").pop()}</a><br>
+      <strong>Paylaşılan Kullanıcılar:</strong> ${userNames.join(", ")}
+    `;
+
     const removeButton = document.createElement("button");
     removeButton.textContent = "Sil";
     removeButton.onclick = () => deleteSharedFile(docSnap.id);
     listItem.appendChild(removeButton);
+
     sharedFilesList.appendChild(listItem);
-  });
+  }
 }
 
 // Paylaşılan dosyayı sil
