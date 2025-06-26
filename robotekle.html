@@ -237,7 +237,8 @@
     <div class="upload-section">
       <h2>Yeni Robot Paylaş</h2>
       <input type="file" id="fileUpload" accept=".rar" />
-      <input type="text" id="fileNameInput" placeholder="Yayınlanmış Robot Seçiniz" />
+      <input type="text" id="fileNameInput" placeholder="Yayınlanmış Robot Seçiniz" autocomplete="off" />
+      <ul id="publishedRobotsDropdown" style="border:1px solid #ccc; max-height:150px; overflow-y:auto; position:absolute; background:#fff; width: calc(100% - 22px); margin-top:0; padding-left:0; list-style:none; display:none; z-index: 10;"></ul>
       <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
       <ul id="userList" class="user-list"></ul>
       <h3>Seçilen Kullanıcılar:</h3>
@@ -327,9 +328,11 @@ document.getElementById("uploadButton").addEventListener("click", async function
 
     // Paylaşılan dosya kaydını Firestore'a ekleyelim
     const fileData = {
-      fileUrl: fileUrl,                // Dosyanın URL'si
-      sharedWith: selectedUsers.map(user => user.uid),  // Paylaşılan kullanıcıların UID'leri
-      timestamp: new Date()            // Paylaşılma zamanı
+      fileUrl: fileUrl,
+      sharedWith: selectedUsers.map(user => user.uid),
+      timestamp: new Date(),
+      robotId: selectedRobot?.id || null,
+      robotTitle: selectedRobot?.title || null
     };
 
     function clearUploadForm() {
@@ -345,6 +348,11 @@ document.getElementById("uploadButton").addEventListener("click", async function
     // Eksik veri kontrolü
     if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
       throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
+    }
+
+    if (!selectedRobot) {
+      alert("Lütfen paylaşmak istediğiniz robotu seçin.");
+      return;
     }
 
     // Veriyi Firestore'a kaydedelim
@@ -625,9 +633,88 @@ async function loadPublishedRobots() {
     console.error("Yayınlanmış robotlar yüklenirken hata:", error);
   }
 }
+
+let publishedRobots = []; // Yayınlanmış robotları burada tutacağız
+let selectedRobot = null; // Seçilen robot objesi
+
+async function fetchPublishedRobotsForSelection() {
+  try {
+    const snap = await getDocs(collection(db, "publishedRobots"));
+    publishedRobots = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+
+    // Basitçe input altına listeyi gösterelim
+    showPublishedRobotOptions();
+  } catch (error) {
+    console.error("Yayınlanmış robotlar alınırken hata:", error);
+  }
+}
+
+const fileNameInput = document.getElementById("fileNameInput");
+const publishedRobotsDropdown = document.getElementById("publishedRobotsDropdown");
+
+function showPublishedRobotOptions() {
+  publishedRobotsDropdown.innerHTML = "";
+  if (publishedRobots.length === 0) {
+    publishedRobotsDropdown.style.display = "none";
+    return;
+  }
+
+  publishedRobots.forEach(robot => {
+    const li = document.createElement("li");
+    li.textContent = robot.title;
+    li.style.padding = "8px";
+    li.style.cursor = "pointer";
+
+    li.onclick = () => {
+      fileNameInput.value = robot.title;
+      selectedRobot = robot; // Seçilen robotu kaydet
+      publishedRobotsDropdown.style.display = "none";
+    };
+
+    publishedRobotsDropdown.appendChild(li);
+  });
+
+  publishedRobotsDropdown.style.display = "block";
+}
+
+// Input'a yazarken filtreleme için
+fileNameInput.addEventListener("input", () => {
+  const val = fileNameInput.value.toLowerCase();
+  publishedRobotsDropdown.innerHTML = "";
+  const filtered = publishedRobots.filter(r => r.title.toLowerCase().includes(val));
+
+  if (filtered.length === 0) {
+    publishedRobotsDropdown.style.display = "none";
+    selectedRobot = null;
+    return;
+  }
+
+  filtered.forEach(robot => {
+    const li = document.createElement("li");
+    li.textContent = robot.title;
+    li.style.padding = "8px";
+    li.style.cursor = "pointer";
+    li.onclick = () => {
+      fileNameInput.value = robot.title;
+      selectedRobot = robot;
+      publishedRobotsDropdown.style.display = "none";
+    };
+    publishedRobotsDropdown.appendChild(li);
+  });
+
+  publishedRobotsDropdown.style.display = "block";
+});
+
+// Sayfa dışına tıklayınca dropdown'u gizle
+document.addEventListener("click", (e) => {
+  if (!fileNameInput.contains(e.target) && !publishedRobotsDropdown.contains(e.target)) {
+    publishedRobotsDropdown.style.display = "none";
+  }
+});
     
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadPublishedRobots()
+fetchPublishedRobotsForSelection();
 loadSharedFiles();
 searchUsers();
     
