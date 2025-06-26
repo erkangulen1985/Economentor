@@ -280,6 +280,14 @@ document.getElementById("uploadButton").addEventListener("click", async function
       timestamp: new Date()            // Paylaşılma zamanı
     };
 
+    function clearUploadForm() {
+      document.getElementById("fileUpload").value = "";
+      document.getElementById("fileNameInput").value = "";
+      document.getElementById("searchInput").value = "";
+      selectedUsers = [];
+      updateSelectedUserList();
+      searchUsers(); // Listeyi sıfırla ve tekrar yükle
+    }
     console.log("File Data:", fileData);  // FileData'nın doğru olduğunu kontrol et
 
     // Eksik veri kontrolü
@@ -292,19 +300,11 @@ document.getElementById("uploadButton").addEventListener("click", async function
 
     alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
     loadSharedFiles(); // Yüklenen dosyaları tekrar yükle
+    clearUploadForm();
 
   } catch (err) {
     console.error("Dosya yüklenirken hata:", err);
     alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
-  }
-
-  function clearUploadForm() {
-    document.getElementById("fileUpload").value = "";
-    document.getElementById("fileNameInput").value = "";
-    document.getElementById("searchInput").value = "";
-    selectedUsers = [];
-    updateSelectedUserList();
-    searchUsers(); // Listeyi sıfırla ve tekrar yükle
   }
 });
 
