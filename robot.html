@@ -253,8 +253,8 @@ let requestButtonHTML = "";
 
 if (currentUserRole === "user") {
   requestButtonHTML = `
-    <button class="robot-btn request-btn not-allowed" disabled>Talep Edilemez</button>
     <p class="warning-text">Bu robotları talep edebilmek için öncelikle "Temel Düzey Finans Eğitimi" almanız gerekmektedir.</p>
+    <button class="robot-btn request-btn not-allowed" disabled>Talep Edilemez</button>
   `;
 } else {
   requestButtonHTML = `
