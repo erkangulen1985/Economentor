@@ -539,6 +539,7 @@ async function loadSharedFiles() {
 
     listItem.innerHTML = `
       <strong>Dosya:</strong> <a href="${fileUrl}" target="_blank">${fileUrl.split("/").pop()}</a><br>
+      <strong>Robot Adı:</strong> ${sharedFile.robotTitle || "Belirtilmedi"}<br>
       <strong>Paylaşılan Kullanıcılar:</strong> ${userNames.join(", ")}
     `;
 
