@@ -441,7 +441,7 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         uid: uid,
-        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı(Lütfen 'Robot' sayfasını ve 'Anasayfa' üzerindeki size düşen bildirimi kontrol edin!!!")",
+        title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı, lütfen 'Robot' sayfasını ve 'Anasayfa' üzerindeki size gelen bildirimi kontrol edin!!!",
         body: notificationMessage,
         url: "https://economentor.netlify.app"
       })
