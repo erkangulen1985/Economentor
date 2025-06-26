@@ -214,13 +214,17 @@
   position: absolute;
   background: #fff;
   width: 100%;
-  margin-top: 0;
+  left: 0;
+  top: 100%;
+  margin-top: 2px;
   padding-left: 0;
   list-style: none;
   display: none;
-  z-index: 10;
+  z-index: 1000;
   box-sizing: border-box;
   font-size: 14px;
+  white-space: nowrap;
+  overflow-x: hidden;  /* Bu satır taşmayı engeller */
 }
 
 #publishedRobotsDropdown li {
@@ -261,8 +265,10 @@
     <div class="upload-section">
       <h2>Yeni Robot Paylaş</h2>
       <input type="file" id="fileUpload" accept=".rar" />
+      <div style="position: relative; width: 100%;">
       <input type="text" id="fileNameInput" placeholder="Yayınlanmış Robot Seçiniz" autocomplete="off" />
-      <ul id="publishedRobotsDropdown" style="border:1px solid #ccc; max-height:150px; overflow-y:auto; position:absolute; background:#fff; width: calc(100% - 22px); margin-top:0; padding-left:0; list-style:none; display:none; z-index: 10;"></ul>
+      <ul id="publishedRobotsDropdown"></ul>
+      </div>
       <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
       <ul id="userList" class="user-list"></ul>
       <h3>Seçilen Kullanıcılar:</h3>
