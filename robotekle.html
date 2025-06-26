@@ -541,6 +541,7 @@ document.getElementById("publishRobotButton").addEventListener("click", async ()
     document.getElementById("robotTitle").value = "";
     document.getElementById("robotDescription").value = "";
     loadPublishedRobots();
+    fetchPublishedRobotsForSelection();
   } catch (error) {
     console.error("Robot yayınlama hatası:", error);
     alert("Yayınlanırken bir hata oluştu: " + error.message);
@@ -691,9 +692,11 @@ fileNameInput.addEventListener("input", () => {
 
   filtered.forEach(robot => {
     const li = document.createElement("li");
-    li.textContent = robot.title;
     li.style.padding = "8px";
     li.style.cursor = "pointer";
+    li.style.whiteSpace = "nowrap";
+    li.style.overflow = "hidden";
+    li.style.textOverflow = "ellipsis";
     li.onclick = () => {
       fileNameInput.value = robot.title;
       selectedRobot = robot;
