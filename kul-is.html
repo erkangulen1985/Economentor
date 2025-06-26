@@ -773,8 +773,8 @@ async function loadRobotRequests() {
     return;
   }
 
-  // Tüm robot taleplerini tek seferde çekelim (request koleksiyonundan)
-  const requestsSnapshot = await getDocs(collection(db, "request"));
+  // Tüm robot taleplerini tek seferde çekelim (requests koleksiyonundan)
+  const requestsSnapshot = await getDocs(collection(db, "requests"));
 
   // Talepleri robotId bazında grupla
   const requestsByRobotId = {};
