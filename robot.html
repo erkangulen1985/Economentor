@@ -7,160 +7,227 @@
   <link rel="icon" href="image1.png" />
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('image2.png') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
     }
-
-    header {
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px;
-      text-align: center;
-      font-size: 32px;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    }
-
     .container {
       max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
-      background: rgba(0,0,0,0.6);
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      margin: auto;
+      padding: 30px;
     }
-
-    .robot {
-      margin-bottom: 30px;
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.1);
+    .robot-card {
+      background: rgba(255, 255, 255, 0.1);
       border-left: 4px solid #4CAF50;
       border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
     }
-
-    .robot h3 {
-      margin-top: 0;
-      font-size: 24px;
-      color: #FFFFFF;
+    .robot-card h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
     }
-
-    .robot p {
-      font-size: 16px;
-      line-height: 1.6;
+    .robot-card p {
+      margin: 0 0 15px;
+      white-space: pre-line;
     }
-
-    .download-btn {
-      background-color: #3498db;
-      color: white;
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .robot-btn {
+      padding: 8px 16px;
       border: none;
       border-radius: 6px;
-      padding: 8px 16px;
-      font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-top: 10px;
-    }
-
-    .download-btn:hover {
-      background-color: #2980b9;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      background-color: transparent;
-      padding: 20px 0 10px;
-    }
-
-    nav a {
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      text-decoration: none;
       font-weight: bold;
-      font-size: 16px;
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: background 0.3s ease;
-      margin: 0 5px;
+      font-size: 14px;
     }
-
-    nav a:hover {
-      background-color: #4CAF50;
-    }
+    .request-btn { background: #3498db; color: white; }
+    .request-btn.requested { background: #27ae60; }
+    .download-btn { background: #f39c12; color: white; }
   </style>
 </head>
 <body>
-  <header>Economentor | Robotlarım</header>
-  <nav>
-    <a href="anasayfa.html">Anasayfa</a>
-  </nav>
+  <div class="container" id="robotList">Yükleniyor...</div>
 
-  <div class="container" id="robotList">
-    <!-- Robotlar burada listelenecek -->
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import {
-    getFirestore,
-    collection,
-    query,
-    where,
-    getDocs,
-    getDoc,
-    doc
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+      authDomain: "economentor-8ddc4.firebaseapp.com",
+      projectId: "economentor-8ddc4",
+      storageBucket: "economentor-8ddc4.appspot.com",
+      messagingSenderId: "835370350520",
+      appId: "1:835370350520:web:d9bb275eb4d"
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-    authDomain: "economentor-8ddc4.firebaseapp.com",
-    projectId: "economentor-8ddc4",
-    storageBucket: "economentor-8ddc4.appspot.com",
-    messagingSenderId: "835370350520",
-    appId: "1:835370350520:web:d9bb275eb4d"
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    let currentUser;
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      loadSharedRobots(user.uid);
-    } else {
-      document.getElementById("robotList").innerHTML = "<p>Lütfen giriş yapınız.</p>";
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        document.getElementById("robotList").innerHTML = "<p>Lütfen giriş yapınız.</p>";
+        return;
+      }
+      currentUser = user;
+      await loadRobots(user.uid);
+    });
+
+async function loadRobots(userId) {
+  const robotList = document.getElementById("robotList");
+  robotList.innerHTML = "";
+
+  const q = query(collection(db, "robots"), orderBy("timestamp", "desc"));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    robotList.innerHTML = "<p>Henüz yayınlanmış robot bulunmuyor.</p>";
+    return;
+  }
+
+  const sharedMap = await getUserSharedRobotMap(userId);
+
+  for (const docSnap of snapshot.docs) {
+    const r = docSnap.data();
+    const robotId = docSnap.id;
+
+    const requestRef = doc(db, "requests", `${userId}_${robotId}`);
+    const requestSnap = await getDoc(requestRef);
+    const alreadyRequested = requestSnap.exists();
+
+    const isShared = sharedMap[robotId] !== undefined;
+    const fileUrl = isShared ? sharedMap[robotId].fileUrl : null;
+    const fileDocId = isShared ? sharedMap[robotId].fileDocId : null;
+
+    const div = document.createElement("div");
+    div.className = "robot-card";
+
+    let downloadButton = "";
+    if (isShared) {
+      downloadButton = `<button class="robot-btn download-btn" data-url="${fileUrl}" data-docid="${fileDocId}" data-robot-id="${robotId}">İndir</button>`;
+    }
+
+    div.innerHTML = `
+      <h3>${r.title}</h3>
+      <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
+      <div class="buttons">
+        ${downloadButton}
+        <button class="robot-btn request-btn ${alreadyRequested ? "requested" : ""}"
+                data-robot-id="${robotId}">
+          ${alreadyRequested ? "Talep Edildi" : "Talep Et"}
+        </button>
+      </div>
+    `;
+
+    robotList.appendChild(div);
+  }
+
+  setupRequestListeners(userId);
+  setupDownloadListeners(userId);
+}
+
+
+function setupRequestListeners(userId) {
+  const buttons = document.querySelectorAll(".request-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const robotId = btn.dataset.robotId;
+      const requestRef = doc(db, "requests", `${userId}_${robotId}`);
+      const requestSnap = await getDoc(requestRef);
+
+      if (requestSnap.exists()) {
+        // Talebi iptal et
+        await deleteDoc(requestRef);
+        btn.classList.remove("requested");
+        btn.textContent = "Talep Et";
+        alert("Talebiniz iptal edildi.");
+      } else {
+        // Talebi oluştur
+        await setDoc(requestRef, {
+          userId,
+          robotId,
+          requestedAt: Timestamp.now(),
+        });
+        btn.classList.add("requested");
+        btn.textContent = "Talep Edildi";
+        alert("Talebiniz alındı. Sizinle en kısa zamanda iletişime geçilecektir.");
+      }
+    });
+  });
+}
+
+async function getUserSharedRobotMap(userId) {
+  const sharedMap = {};
+  const q = query(
+    collection(db, "uploadedFiles"),
+    where("sharedWith", "array-contains", userId)
+  );
+  const snap = await getDocs(q);
+
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    if (d.robotId && d.fileUrl) {
+      sharedMap[d.robotId] = {
+        fileUrl: d.fileUrl,
+        fileDocId: docSnap.id
+      };
     }
   });
 
-  async function loadSharedRobots(uid) {
-    const q = query(collection(db, "uploadedFiles"), where("sharedWith", "array-contains", uid));
-    const snapshot = await getDocs(q);
+  return sharedMap;
+}
 
-    const list = document.getElementById("robotList");
-    list.innerHTML = "";
+function setupDownloadListeners(userId) {
+  const downloadButtons = document.querySelectorAll(".download-btn");
 
-    if (snapshot.empty) {
-      list.innerHTML = "<p>Paylaşılan robot bulunamadı.</p>";
-      return;
-    }
+  downloadButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        alert("Lütfen bu dosyayı bilgisayar üzerinden indirin.");
+        return;
+      }
 
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const el = document.createElement("div");
-      el.className = "robot";
-      el.innerHTML = `
-        <h3>${data.robotTitle || "Başlıksız Robot"}</h3>
-        <p><strong>Paylaşan:</strong> Sistem (henüz gösterilmiyor)</p>
-        <button class="download-btn" onclick="window.open('${data.fileUrl}', '_blank')">Dosyayı İndir</button>
-      `;
-      list.appendChild(el);
+      const fileUrl = btn.dataset.url;
+      const fileDocId = btn.dataset.docid;
+      const robotId = btn.dataset.robotId;
+
+      try {
+        // Windows dizinine indirme denemesi
+        const anchor = document.createElement("a");
+        anchor.href = fileUrl;
+        anchor.download = "C:\\iDeal\\ChartSistem\\" + fileUrl.split("/").pop();
+        anchor.click();
+
+        // Supabase'den sil
+        const filePath = fileUrl.split("/").slice(-1)[0]; // dosya ismi
+        await supabase.storage.from("robotlar").remove([filePath]);
+
+        // Firestore'dan sil
+        await deleteDoc(doc(db, "uploadedFiles", fileDocId));
+
+        // UI'dan indir butonunu kaldır
+        btn.remove();
+
+        alert("Dosya başarıyla indirildi ve paylaşılan bilgiler kaldırıldı.");
+
+      } catch (err) {
+        console.error("İndirme sırasında hata:", err);
+        alert("Dosya indirilemedi veya silme işlemi başarısız oldu.");
+      }
     });
-  }
-</script>
-<script type="module" src="auth-guard.js"></script>
+  });
+}
+
+  </script>
 </body>
 </html>
