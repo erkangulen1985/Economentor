@@ -266,14 +266,6 @@ document.getElementById("uploadButton").addEventListener("click", async function
     // Seçilen kullanıcılar
     console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // Seçilen kullanıcıları kontrol et
 
-    // Kullanıcıya bildirim gönder
-    selectedUsers.forEach(async (user) => {
-      await setDoc(doc(db, "notifications", user.uid), {
-        message: `"${file.name}" dosyası sizlere paylaşıldı.`,
-        timestamp: new Date()
-      });
-    });
-
     // Paylaşılan dosya kaydını Firestore'a ekleyelim
     const fileData = {
       fileUrl: fileUrl,                // Dosyanın URL'si
