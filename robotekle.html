@@ -426,10 +426,37 @@ async function loadSharedFiles() {
   }
 }
 
-// Paylaşılan dosyayı sil
 async function deleteSharedFile(fileId) {
-  await deleteDoc(doc(db, "uploadedFiles", fileId));
-  loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
+  try {
+    // Firestore'dan dosya verisini al
+    const docRef = doc(db, "uploadedFiles", fileId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const fileData = docSnap.data();
+      const fileUrl = fileData.fileUrl;
+
+      // Supabase Storage için dosya adını çıkar (URL'deki son parça)
+      const fileName = fileUrl.split('/').pop();
+
+      // Supabase'den sil
+      const { error: supabaseError } = await supabase.storage.from('robotlar').remove([fileName]);
+      if (supabaseError) {
+        console.warn("Supabase dosya silme hatası:", supabaseError.message);
+      }
+
+      // Firestore'dan sil
+      await deleteDoc(docRef);
+
+      // Listeyi yenile
+      loadSharedFiles();
+
+    } else {
+      console.log("Silinecek dosya Firestore'da bulunamadı.");
+    }
+  } catch (error) {
+    console.error("Dosya silinirken hata oluştu:", error);
+  }
 }
 
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
