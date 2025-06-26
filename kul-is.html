@@ -767,50 +767,65 @@ async function loadRobotRequests() {
   const listContainer = document.getElementById("robotRequestList");
   listContainer.innerHTML = ""; // Temizle
 
-  const robotsSnapshot = await getDocs(collection(db, "robots"));
+  // 1) Tüm yayınlanmış robotları çek
+  const robotsSnapshot = await getDocs(collection(db, "publishedRobots"));
+  if (robotsSnapshot.empty) {
+    listContainer.innerHTML = "<li>Henüz yayınlanmış robot bulunmamaktadır.</li>";
+    return;
+  }
 
+  // 2) Tüm talepleri çek (tüm kullanıcıların)
   const requestsSnapshot = await getDocs(collection(db, "requests"));
-  
-  // Talepleri robot.robotId bazında grupla
+
+  // 3) Talepleri robotId bazında grupla
   const requestsByRobotId = {};
-  requestsSnapshot.docs.forEach(doc => {
-    const data = doc.data();
-    const robotIdInRequest = data.robot?.robotId;
-    if (!robotIdInRequest) return; // robot bilgisi yoksa atla
+  for (const reqDoc of requestsSnapshot.docs) {
+    const reqData = reqDoc.data();
+    const rId = reqData.robotId;
+    if (!rId) continue;
 
-    if (!requestsByRobotId[robotIdInRequest]) {
-      requestsByRobotId[robotIdInRequest] = [];
+    if (!requestsByRobotId[rId]) {
+      requestsByRobotId[rId] = [];
     }
-    requestsByRobotId[robotIdInRequest].push({ id: doc.id, data });
-  });
+    requestsByRobotId[rId].push({
+      id: reqDoc.id,
+      userId: reqData.userId,
+      requestedAt: reqData.requestedAt
+    });
+  }
 
+  // 4) Robot bazında liste oluştur
   for (const robotDoc of robotsSnapshot.docs) {
     const robotId = robotDoc.id;
     const robotData = robotDoc.data();
-    const title = robotData.name || "Bilinmeyen Robot";
+    const title = robotData.title || "Bilinmeyen Robot";
 
     const requestsForRobot = requestsByRobotId[robotId] || [];
     if (requestsForRobot.length === 0) continue; // Talep yoksa atla
 
     const li = document.createElement("li");
     li.style.marginBottom = "15px";
+
     li.innerHTML = `<strong>${title}</strong> - Talep Sayısı: ${requestsForRobot.length}`;
 
     const ul = document.createElement("ul");
     ul.style.listStyle = "none";
     ul.style.paddingLeft = "15px";
 
+    // Talepleri tek tek listele
     for (const req of requestsForRobot) {
-      const userId = req.data.uid; // burada kullanıcı uid'si var
+      const userId = req.userId;
+
+      // Kullanıcı bilgisini al
       const userDoc = await getDoc(doc(db, "users", userId));
       const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
       const fullName = fullNameRaw.toUpperCase();
 
+      // İptal butonu da eklendi
       const userLi = document.createElement("li");
       userLi.style.marginBottom = "6px";
-
       userLi.innerHTML = `
-        ${fullName} 
+        ${fullName} - Talep Zamanı: ${req.requestedAt ? req.requestedAt.toDate().toLocaleString() : "-"} 
         <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${req.id}" title="Talebi İptal Et">&#10006;</button>
       `;
 
@@ -822,14 +837,14 @@ async function loadRobotRequests() {
   }
 }
 
-// Talep iptal butonu tıklama işlemi
+// Talep iptal etme buton işlemi
 document.getElementById("robotRequestList").addEventListener("click", async (e) => {
   if (e.target.tagName === "BUTTON" && e.target.dataset.requestId) {
     const requestId = e.target.dataset.requestId;
     if (!confirm("Bu robot talebini iptal etmek istediğinize emin misiniz?")) return;
 
     try {
-      await deleteDoc(doc(db, "requests", requestId)); // Burada collection db, "requests" olmalı
+      await deleteDoc(doc(db, "requests", requestId));
       alert("Robot talebi başarıyla iptal edildi.");
       await loadRobotRequests(); // Listeyi yenile
     } catch (err) {
