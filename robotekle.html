@@ -450,10 +450,6 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
     console.error("FCM bildirimi başarısız:", err);
   }
 }
-} catch (error) {
-      console.error(`FCM bildirimi hatası (UID: ${uid}):`, error);
-    }
-  }
 }
 
 async function searchUsers() {
