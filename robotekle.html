@@ -181,11 +181,23 @@
     <a href="robotekle.html">Robot Ekle</a>
   </nav>
 
+<div class="upload-section">
+  <h2>Robot Yayınla</h2>
+  <input type="text" id="robotTitle" placeholder="Robot Adı" />
+  <textarea id="robotDescription" placeholder="Açıklama" rows="4" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+  <button id="publishRobotButton">Yayınla</button>
+</div>
+
+<div class="shared-files">
+  <h3>Yayınlanmış Robotlar</h3>
+  <ul id="publishedRobotsList"></ul>
+</div>
+
   <div class="content">
     <div class="upload-section">
       <h2>Yeni Robot Paylaş</h2>
       <input type="file" id="fileUpload" accept=".rar" />
-      <input type="text" id="fileNameInput" placeholder="Dosya adını giriniz (örn. strateji_v1)" />
+      <input type="text" id="fileNameInput" placeholder="Yayınlanmış robot seçiniz." />
       <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
       <ul id="userList" class="user-list"></ul>
       <h3>Seçilen Kullanıcılar:</h3>
@@ -459,6 +471,80 @@ async function deleteSharedFile(fileId) {
   }
 }
 
+document.getElementById("publishRobotButton").addEventListener("click", async () => {
+  const title = document.getElementById("robotTitle").value.trim();
+  const description = document.getElementById("robotDescription").value.trim();
+
+  if (!title || !description) {
+    alert("Lütfen robot adı ve açıklama girin.");
+    return;
+  }
+
+  const robotData = {
+    title,
+    description,
+    timestamp: new Date()
+  };
+
+  try {
+    const id = `robot-${Date.now()}`;
+    await setDoc(doc(db, "publishedRobots", id), robotData);
+    alert("Robot başarıyla yayınlandı!");
+    document.getElementById("robotTitle").value = "";
+    document.getElementById("robotDescription").value = "";
+    loadPublishedRobots();
+  } catch (error) {
+    console.error("Robot yayınlama hatası:", error);
+    alert("Yayınlanırken bir hata oluştu.");
+  }
+});
+
+async function loadPublishedRobots() {
+  const list = document.getElementById("publishedRobotsList");
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "publishedRobots"));
+  const robots = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+
+  // Yeniden eskiye sırala
+  robots.sort((a, b) => b.timestamp?.toDate?.() - a.timestamp?.toDate?.());
+
+  for (const robot of robots) {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${robot.title}</strong><br>
+      <em>${robot.description}</em><br>
+      <button onclick="editRobot('${robot.id}', '${robot.title}', '${robot.description.replace(/'/g, "\\'")}')">Düzenle</button>
+      <button onclick="deleteRobot('${robot.id}')">Sil</button>
+    `;
+    list.appendChild(li);
+  }
+}
+
+window.editRobot = async (id, oldTitle, oldDesc) => {
+  const newTitle = prompt("Yeni robot adı:", oldTitle);
+  const newDesc = prompt("Yeni açıklama:", oldDesc);
+  if (newTitle && newDesc) {
+    await updateDoc(doc(db, "publishedRobots", id), {
+      title: newTitle,
+      description: newDesc,
+      timestamp: new Date()
+    });
+    loadPublishedRobots();
+  }
+};
+
+window.deleteRobot = async (id) => {
+  const confirmDelete = confirm("Bu robotu silmek istediğinizden emin misiniz?");
+  if (confirmDelete) {
+    await deleteDoc(doc(db, "publishedRobots", id));
+    loadPublishedRobots();
+  }
+};
+
+// Sayfa yüklenince robotları da yükle
+loadPublishedRobots();
+    
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadSharedFiles();
 searchUsers();
