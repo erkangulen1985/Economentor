@@ -425,7 +425,6 @@ document.getElementById("uploadButton").addEventListener("click", async function
 async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
     const notificationMessage = `${sharerName} sizinle "${robotTitle}" adlı robotu paylaştı.`;
-    const token = tokenDoc.data().token;
 
     const docId = `${uid}_${Date.now()}`;
     await setDoc(doc(db, "notifications", docId), {
@@ -435,21 +434,26 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       read: false
     });
 
-    // FCM token kontrolü
     try {
-      const tokenDoc = await getDoc(doc(db, "fcmTokens", uid));
-      if (tokenDoc.exists()) {
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
+      const tokenSnap = await getDoc(doc(db, "fcmTokens", uid));  // ✅ tokenSnap olarak tanımla
+      if (tokenSnap.exists()) {
+        const token = tokenSnap.data().token;
+
+        const response = await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             uid: uid,
-            token: token,
+            token: token, // ✅ Eksik olan eklendi
             title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
             body: notificationMessage,
             url: "https://economentor.netlify.app"
           })
         });
+
+        const result = await response.json();
+        console.log("FCM yanıtı:", result);
+
       } else {
         console.log(`FCM token yok (UID: ${uid}) — sadece Firestore bildirimi gönderildi.`);
       }
