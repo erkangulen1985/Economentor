@@ -203,214 +203,114 @@
     <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
-    import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
+    authDomain: "economentor-8ddc4.firebaseapp.com",
+    projectId: "economentor-8ddc4",
+    storageBucket: "economentor-8ddc4.firebasestorage.app",
+    messagingSenderId: "835370350520",
+    appId: "1:835370350520:web:d9bb275eb4b7502997814d",
+    measurementId: "G-FS3FMPYVPD"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
-      authDomain: "economentor-8ddc4.firebaseapp.com",
-      projectId: "economentor-8ddc4",
-      storageBucket: "economentor-8ddc4.firebasestorage.app",
-      messagingSenderId: "835370350520",
-      appId: "1:835370350520:web:d9bb275eb4b7502997814d",
-      measurementId: "G-FS3FMPYVPD"
-    };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app); // Firebase Authentication'ı başlatıyoruz
 
-    const supabaseUrl = "https://rvwsvhgihatxxhnbmouw.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2d3N2aGdpaGF0eHhobmJtb3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MTYxNTAsImV4cCI6MjA1OTE5MjE1MH0.91XCg6CE4WfI6Rr4K5vIOJB5-fi5QW8SZ98LngMLJMI";
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Arama ve kullanıcı listeleme
-    document.getElementById("searchInput").addEventListener("input", searchUsers);
-
-// Dosya yükleme işlemi
-document.getElementById("uploadButton").addEventListener("click", async function() {
-  const file = document.getElementById("fileUpload").files[0];
-
-  // Dosya seçilmemişse hata göster
-  if (!file) {
-    alert("Lütfen bir dosya seçin.");
-    return;
-  }
-
-  // Seçilen kullanıcılar yoksa hata göster
-  if (selectedUsers.length === 0) {
-    alert("Lütfen en az bir kullanıcı seçin.");
-    return;
-  }
-
-  try {
-    // Dosya adı oluştur
-    const fileName = `${Date.now()}-${file.name}`;
-    const safeFileName = sanitizeFilename(fileName);  // Dosya adını temizle
-
-    // Supabase'e dosya yükle
-    const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
-
-    if (error) {
-      console.error("Supabase yükleme hatası:", error);
-      throw new Error(`Dosya yüklenemedi: ${error.message}`);
-    }
-
-    // Dosya URL'ini al
-    const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
-    console.log("Dosya URL'si: ", fileUrl);  // Dosya URL'sini kontrol et
-
-    // Seçilen kullanıcılar
-    console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // Seçilen kullanıcıları kontrol et
-
-    // Kullanıcıya bildirim gönder
-    selectedUsers.forEach(async (user) => {
-      await setDoc(doc(db, "notifications", user.uid), {
-        message: `"${file.name}" dosyası sizlere paylaşıldı.`,
-        timestamp: new Date()
-      });
+  // Kullanıcıları yükle
+  async function loadUsers() {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const users = querySnapshot.docs.map(doc => {
+      const user = doc.data();
+      user.id = doc.id; // Firestore ID'sini alıyoruz
+      return user;
     });
 
-    // Paylaşılan dosya kaydını Firestore'a ekleyelim
-    const fileData = {
-      fileUrl: fileUrl,                // Dosyanın URL'si
-      sharedWith: selectedUsers.map(user => user.uid),  // Paylaşılan kullanıcıların UID'leri
-      timestamp: new Date()            // Paylaşılma zamanı
-    };
-
-    console.log("File Data:", fileData);  // FileData'nın doğru olduğunu kontrol et
-
-    // Eksik veri kontrolü
-    if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
-      throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
-    }
-
-    // Veriyi Firestore'a kaydedelim
-    await setDoc(doc(db, "uploadedFiles", safeFileName), fileData);
-
-    alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
-    loadSharedFiles(); // Yüklenen dosyaları tekrar yükle
-
-  } catch (err) {
-    console.error("Dosya yüklenirken hata:", err);
-    alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
+    const userSelect = document.getElementById("userSelect");
+    users.forEach(user => {
+      const option = document.createElement("option");
+      option.value = user.id; // UID'yi burada 'user.id' ile alıyoruz
+      option.textContent = user.username;
+      userSelect.appendChild(option);
+    });
   }
-});
 
-async function searchUsers() {
-  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-  const usersSnap = await getDocs(collection(db, "users"));
-  const userList = document.getElementById("userList");
+  // Arama kutusunda kullanıcı arama
+  document.getElementById("searchInput").addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+    const filteredUsers = users.filter(user =>
+      user.username.toLowerCase().includes(searchTerm)
+    );
 
-  userList.innerHTML = ""; // Eski listeyi temizliyoruz
-
-  usersSnap.forEach((userDoc) => {
-    const userData = userDoc.data();  // Kullanıcı verisini alıyoruz
-    const fullName = userData.fullName || '';  // Kullanıcı ismini alıyoruz
-
-    console.log("userData:", userData);  // Burada userData'yı log'layarak kontrol ediyoruz
-    console.log("userData.uid:", userData.uid);  // Burada userData.uid'yi loglayarak kontrol ediyoruz
-
-    // Kullanıcı adı ile arama yapıyoruz
-    if (fullName.toLowerCase().includes(searchTerm)) {
-      const listItem = document.createElement("li");
-      listItem.textContent = fullName;  // Kullanıcı adını listeye ekliyoruz
-      listItem.onclick = () => selectUser(userDoc.id); // Kullanıcıyı uid'si ile seçiyoruz
-      userList.appendChild(listItem); // Listeye ekliyoruz
-    }
+    const userSelect = document.getElementById("userSelect");
+    userSelect.innerHTML = ''; // Eski listeyi temizle
+    filteredUsers.forEach(user => {
+      const option = document.createElement("option");
+      option.value = user.id;
+      option.textContent = user.username;
+      userSelect.appendChild(option);
+    });
   });
-}
 
-let selectedUsers = [];
+  // Seçilen kullanıcıları listele
+  let selectedUsers = [];
 
-async function selectUser(uid) {
-  console.log("Seçilen Kullanıcı ID:", uid);  // Kullanıcı ID'sini log'la
+  document.getElementById("userSelect").addEventListener("change", function () {
+    const selectedOptions = Array.from(this.selectedOptions);
+    selectedUsers = selectedOptions.map(option => option.value);
+    updateSelectedUsersList();
+  });
 
-  // Firestore'dan UID ile kullanıcıyı alalım
-  const userRef = doc(db, "users", uid);  // users/{uid} şeklinde kullanıcıyı çek
-  try {
-    const docSnap = await getDoc(userRef);  // getDoc ile kullanıcı bilgilerini alıyoruz
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      console.log("Seçilen Kullanıcı Bilgileri:", userData);  // Kullanıcı bilgilerini logla
+  // Seçilen kullanıcıları listele
+  function updateSelectedUsersList() {
+    const selectedUsersList = document.getElementById("selectedUsersList");
+    selectedUsersList.innerHTML = ''; // Eski listeyi temizle
+    selectedUsers.forEach((userId, index) => {
+      const li = document.createElement("li");
+      li.textContent = users.find(user => user.id === userId).username;
+      
+      const removeButton = document.createElement("button");
+      removeButton.textContent = "Sil";
+      removeButton.onclick = () => {
+        selectedUsers.splice(index, 1); // Seçilen kullanıcıyı listeden çıkar
+        updateSelectedUsersList();
+      };
 
-      // Kullanıcıyı dizideki mevcut verilerle karşılaştırıp ekleyelim
-      if (!selectedUsers.includes(userData)) {
-        selectedUsers.push(userData);  // Doğru kullanıcı bilgilerini ekle
-        console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // UID'leri kontrol et
-        updateSelectedUserList();  // Kullanıcı listesini güncelle
-      }
-    } else {
-      console.log("Kullanıcı bulunamadı!");
-    }
-  } catch (error) {
-    console.error("Kullanıcı bilgisi alınırken hata:", error);
+      li.appendChild(removeButton);
+      selectedUsersList.appendChild(li);
+    });
   }
-}
 
-// Function to update the list of selected users on the UI
-function updateSelectedUserList() {
-  const selectedUserList = document.getElementById("selectedUserList");
-  selectedUserList.innerHTML = "";  // Clear the current list
+  // Paylaşma işlemi
+  async function shareFile() {
+    const file = document.getElementById('fileInput').files[0];
+    const fileName = document.getElementById('fileName').value;
+    if (!file || !fileName || selectedUsers.length === 0) {
+      alert("Lütfen bir dosya seçin, dosya adı girin ve kullanıcı seçin.");
+      return;
+    }
 
-  selectedUsers.forEach((user, index) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = user.fullName;
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Sil";
-    removeButton.onclick = () => removeUser(index);  // Remove user from selected list
-    listItem.appendChild(removeButton);
-    selectedUserList.appendChild(listItem);
-  });
-}
+    // Dosya veritabanına ekleme
+    const fileRef = collection(db, 'file_shares');
+    await setDoc(doc(fileRef), {
+      file_name: fileName,
+      file_url: "dosya linki buraya eklenecek",
+      users: selectedUsers,
+      timestamp: new Date()
+    });
 
-// Function to remove a user from the selected list
-function removeUser(index) {
-  selectedUsers.splice(index, 1);  // Remove the user at the given index
-  updateSelectedUserList();  // Update the displayed list
-}
+    alert("Dosya başarıyla paylaşıldı.");
+  }
 
-// sanitizeFilename fonksiyonu
-function sanitizeFilename(filename) {
-  return filename
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // aksanlı harfleri kaldır
-    .replace(/[^a-zA-Z0-9_.-]/g, ""); // sadece geçerli karakterler
-}
-
-// Geçmişte paylaşılan dosyaları yükle
-async function loadSharedFiles() {
-  const sharedFilesList = document.getElementById("sharedFilesList");
-  sharedFilesList.innerHTML = ""; // Önceki listeleri temizle
-
-  const sharedFilesSnap = await getDocs(collection(db, "uploadedFiles"));
-  sharedFilesSnap.forEach(docSnap => {
-    const sharedFile = docSnap.data();
-
-    const listItem = document.createElement("li");
-    listItem.textContent = `Dosya: ${sharedFile.fileUrl}`;
-    const removeButton = document.createElement("button");
-    removeButton.textContent = "Sil";
-    removeButton.onclick = () => deleteSharedFile(docSnap.id);
-    listItem.appendChild(removeButton);
-    sharedFilesList.appendChild(listItem);
-  });
-}
-
-// Paylaşılan dosyayı sil
-async function deleteSharedFile(fileId) {
-  await deleteDoc(doc(db, "uploadedFiles", fileId));
-  loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
-}
-
-    // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
-    loadSharedFiles();
-
-    // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
-    loadSharedFiles();
+  // Sayfa yüklendiğinde kullanıcıları yükle
+  window.onload = () => {
+    loadUsers();
+  };
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
