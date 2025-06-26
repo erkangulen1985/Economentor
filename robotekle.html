@@ -704,13 +704,6 @@ fileNameInput.addEventListener("input", () => {
 
   publishedRobotsDropdown.style.display = "block";
 });
-
-// Sayfa dışına tıklayınca dropdown'u gizle
-document.addEventListener("click", (e) => {
-  if (!fileNameInput.contains(e.target) && !publishedRobotsDropdown.contains(e.target)) {
-    publishedRobotsDropdown.style.display = "none";
-  }
-});
     
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadPublishedRobots()
