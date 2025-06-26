@@ -328,6 +328,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.10.0/+esm';
     import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADPBpJhZ9UKR1NFC42bqEqgKHyLaWunIQ",
@@ -345,9 +346,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const auth = getAuth();
 
     // Arama ve kullanıcı listeleme
     document.getElementById("searchInput").addEventListener("input", searchUsers);
+
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Dosya yükleme işlemi
 document.getElementById("uploadButton").addEventListener("click", async function() {
@@ -359,78 +364,60 @@ document.getElementById("uploadButton").addEventListener("click", async function
     return;
   }
 
-  // Dosya seçilmemişse hata göster
   if (!file) {
     alert("Lütfen bir dosya seçin.");
     return;
   }
 
-  // Seçilen kullanıcılar yoksa hata göster
   if (selectedUsers.length === 0) {
     alert("Lütfen en az bir kullanıcı seçin.");
     return;
   }
 
   try {
-    // Dosya adı oluştur
     const fileName = `${Date.now()}-${file.name}`;
-    const safeFileName = sanitizeFilename(fileName);  // Dosya adını temizle
-
-    // Supabase'e dosya yükle
+    const safeFileName = sanitizeFilename(fileName);
     const { error } = await supabase.storage.from('robotlar').upload(safeFileName, file);
 
-    if (error) {
-      console.error("Supabase yükleme hatası:", error);
-      throw new Error(`Dosya yüklenemedi: ${error.message}`);
-    }
+    if (error) throw new Error(`Dosya yüklenemedi: ${error.message}`);
 
-    // Dosya URL'ini al
     const fileUrl = `${supabaseUrl}/storage/v1/object/public/robotlar/${safeFileName}`;
-    console.log("Dosya URL'si: ", fileUrl);  // Dosya URL'sini kontrol et
+    const sharedUserIds = selectedUsers.map(user => user.uid);
 
-    // Seçilen kullanıcılar
-    console.log("Seçilen Kullanıcılar (UID):", selectedUsers.map(user => user ? user.uid : 'undefined'));  // Seçilen kullanıcıları kontrol et
-
-    // Paylaşılan dosya kaydını Firestore'a ekleyelim
     const fileData = {
       fileUrl: fileUrl,
-      sharedWith: selectedUsers.map(user => user.uid),
+      sharedWith: sharedUserIds,
       timestamp: new Date(),
       robotId: selectedRobot?.id || null,
       robotTitle: selectedRobot?.title || null
     };
 
-    function clearUploadForm() {
-      document.getElementById("fileUpload").value = "";
-      document.getElementById("fileNameInput").value = "";
-      document.getElementById("searchInput").value = "";
-      selectedUsers = [];
-      updateSelectedUserList();
-      searchUsers(); // Listeyi sıfırla ve tekrar yükle
-    }
-    console.log("File Data:", fileData);  // FileData'nın doğru olduğunu kontrol et
-
-    // Eksik veri kontrolü
-    if (!fileData.fileUrl || !fileData.sharedWith || fileData.sharedWith.length === 0) {
-      throw new Error("Eksik veri: Dosya URL'si veya paylaşılacak kullanıcılar eksik.");
+    if (!fileData.fileUrl || sharedUserIds.length === 0 || !selectedRobot) {
+      throw new Error("Eksik veri: Dosya URL'si, kullanıcı veya robot bilgisi eksik.");
     }
 
-    if (!selectedRobot) {
-      alert("Lütfen paylaşmak istediğiniz robotu seçin.");
-      return;
-    }
-
-    // Veriyi Firestore'a kaydedelim
     await setDoc(doc(db, "uploadedFiles", safeFileName), fileData);
 
-    
-async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
-  // userIds: Paylaşım yapılan kullanıcıların UID listesi
-  // robotTitle: Paylaşılan robotun başlığı
-  // sharerName: Paylaşan kullanıcının adı (örn. "Erkan Gülen")
+    // 🔔 Bildirim gönder
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    const sharerName = currentUser?.displayName || "Bir kullanıcı";
 
+    await notifyUsersOfRobotShare(sharedUserIds, fileData.robotTitle, sharerName);
+
+    alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
+    loadSharedFiles();
+    clearUploadForm();
+
+  } catch (err) {
+    console.error("Dosya yüklenirken hata:", err);
+    alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
+  }
+});
+
+// 📢 Bildirim gönderme fonksiyonu
+async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
-    // Firestore bildirimi ekle
     const notificationMessage = `${sharerName} sizinle "${robotTitle}" adlı robotu paylaştı.`;
 
     const docId = `${uid}_${Date.now()}`;
@@ -441,13 +428,10 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
       read: false
     });
 
-    // FCM tokenını al ve varsa bildirim gönder
+    // FCM token kontrolü
     try {
       const tokenDoc = await getDoc(doc(db, "fcmTokens", uid));
       if (tokenDoc.exists()) {
-        // token varsa FCM sunucusuna POST at
-        const token = tokenDoc.data().token;
-
         await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -455,27 +439,17 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
             uid: uid,
             title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
             body: notificationMessage,
-            url: "https://economentor.netlify.app"  // İstersen robot detay sayfası URL'si ver
+            url: "https://economentor.netlify.app"
           })
         });
       } else {
-        console.log(`Kullanıcı ${uid} için FCM token bulunamadı, sadece Firestore bildirimi gönderildi.`);
+        console.log(`FCM token yok (UID: ${uid}) — sadece Firestore bildirimi gönderildi.`);
       }
     } catch (error) {
-      console.error(`Bildirim gönderilirken hata oluştu (UID: ${uid}):`, error);
+      console.error(`FCM bildirimi hatası (UID: ${uid}):`, error);
     }
   }
 }
-
-    alert("Dosya başarıyla yüklendi ve kullanıcılara bildirildi!");
-    loadSharedFiles(); // Yüklenen dosyaları tekrar yükle
-    clearUploadForm();
-
-  } catch (err) {
-    console.error("Dosya yüklenirken hata:", err);
-    alert(`Dosya yüklenirken bir hata oluştu: ${err.message}`);
-  }
-});
 
 async function searchUsers() {
   const searchTerm = document.getElementById("searchInput").value.toLowerCase();
