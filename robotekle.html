@@ -747,12 +747,13 @@ function showPublishedRobotOptions() {
   publishedRobotsDropdown.style.display = "block";
 }
 
-// Input'a yazarken filtreleme için
 fileNameInput.addEventListener("click", () => {
   if (publishedRobots.length > 0) {
     showPublishedRobotOptions();
   }
+});
 
+fileNameInput.addEventListener("input", () => {
   const val = fileNameInput.value.toLowerCase();
   publishedRobotsDropdown.innerHTML = "";
   const filtered = publishedRobots.filter(r => r.title.toLowerCase().includes(val));
