@@ -746,9 +746,7 @@ function showPublishedRobotOptions() {
 }
 
 // Input'a yazarken filtreleme için
-fileNameInput.addEventListener("focus", () => {
-  showPublishedRobotOptions(); // Tıklanınca direkt aç
-});
+fileNameInput.addEventListener("input", () => {
   const val = fileNameInput.value.toLowerCase();
   publishedRobotsDropdown.innerHTML = "";
   const filtered = publishedRobots.filter(r => r.title.toLowerCase().includes(val));
@@ -761,11 +759,9 @@ fileNameInput.addEventListener("focus", () => {
 
   filtered.forEach(robot => {
     const li = document.createElement("li");
+    li.textContent = robot.title;
     li.style.padding = "8px";
     li.style.cursor = "pointer";
-    li.style.whiteSpace = "nowrap";
-    li.style.overflow = "hidden";
-    li.style.textOverflow = "ellipsis";
     li.onclick = () => {
       fileNameInput.value = robot.title;
       selectedRobot = robot;
@@ -776,6 +772,7 @@ fileNameInput.addEventListener("focus", () => {
 
   publishedRobotsDropdown.style.display = "block";
 });
+;
     
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadPublishedRobots()
