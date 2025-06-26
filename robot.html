@@ -135,7 +135,7 @@ async function loadRobots(userId) {
   const robotList = document.getElementById("robotList");
   robotList.innerHTML = "";
 
-  const q = query(collection(db, "robots"), orderBy("timestamp", "desc"));
+  const q = query(collection(db, "publishedRobots"), orderBy("timestamp", "desc"));
   const snapshot = await getDocs(q);
 
   if (snapshot.empty) {
