@@ -1166,49 +1166,6 @@ document.addEventListener("input", function (e) {
   }
 });
 
-async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
-  // userIds: Paylaşım yapılan kullanıcıların UID listesi
-  // robotTitle: Paylaşılan robotun başlığı
-  // sharerName: Paylaşan kullanıcının adı (örn. "Erkan Gülen")
-
-  for (const uid of userIds) {
-    // Firestore bildirimi ekle
-    const notificationMessage = `${sharerName} sizinle "${robotTitle}" adlı robotu paylaştı.`;
-
-    const docId = `${uid}_${Date.now()}`;
-    await setDoc(doc(db, "notifications", docId), {
-      to: uid,
-      message: notificationMessage,
-      timestamp: Timestamp.now(),
-      read: false
-    });
-
-    // FCM tokenını al ve varsa bildirim gönder
-    try {
-      const tokenDoc = await getDoc(doc(db, "fcmTokens", uid));
-      if (tokenDoc.exists()) {
-        // token varsa FCM sunucusuna POST at
-        const token = tokenDoc.data().token;
-
-        await fetch("https://fcm-server-1-3uer.onrender.com/sendToUid", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            uid: uid,
-            title: "\"Economentor\" 🤖 Yeni Robot Paylaşımı",
-            body: notificationMessage,
-            url: "https://economentor.netlify.app"  // İstersen robot detay sayfası URL'si ver
-          })
-        });
-      } else {
-        console.log(`Kullanıcı ${uid} için FCM token bulunamadı, sadece Firestore bildirimi gönderildi.`);
-      }
-    } catch (error) {
-      console.error(`Bildirim gönderilirken hata oluştu (UID: ${uid}):`, error);
-    }
-  }
-}
-
 // Load user list once on load
 loadUsers();
 </script>
