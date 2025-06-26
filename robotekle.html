@@ -211,20 +211,20 @@
   border: 1px solid #ccc;
   max-height: 150px;
   overflow-y: auto;
+  overflow-x: hidden;
   position: absolute;
   background: #fff;
   width: 100%;
+  top: 100%; /* input’un altına yerleştir */
   left: 0;
-  top: 100%;
-  margin-top: 2px;
+  margin-top: 4px;
   padding-left: 0;
   list-style: none;
   display: none;
-  z-index: 1000;
+  z-index: 999;
   box-sizing: border-box;
   font-size: 14px;
   white-space: nowrap;
-  overflow-x: hidden;  /* Bu satır taşmayı engeller */
 }
 
 #publishedRobotsDropdown li {
@@ -249,43 +249,74 @@
   </nav>
 
 <div class="content">
+
+  <!-- Robot Yayınla Bölümü -->
   <div class="upload-section">
-  <h2>Robot Yayınla</h2>
-  <input type="text" id="robotTitle" placeholder="Robot Adı" />
-  <textarea id="robotDescription" placeholder="Açıklama" rows="4" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
-  <button id="publishRobotButton">Yayınla</button>
-</div>
-
-<div class="shared-files">
-  <h3>Yayınlanmış Robotlar</h3>
-  <ul id="publishedRobotsList"></ul>
-</div>
-
-  <div class="content">
-    <div class="upload-section">
-      <h2>Yeni Robot Paylaş</h2>
-      <input type="file" id="fileUpload" accept=".rar" />
-      <div style="position: relative; width: 100%;">
-      <input type="text" id="fileNameInput" placeholder="Yayınlanmış Robot Seçiniz" autocomplete="off" />
-      <ul id="publishedRobotsDropdown"></ul>
-      </div>
-      <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
-      <ul id="userList" class="user-list"></ul>
-      <h3>Seçilen Kullanıcılar:</h3>
-      <ul id="selectedUserList"></ul>
-      <button id="uploadButton">Paylaş</button>
-    </div>
-    
-    <!-- Geçmişte Paylaşılan Dosyaların Listeleneceği Alan -->
-    <div class="shared-files">
-      <h3>Geçmişte Paylaşılan Dosyalar</h3>
-      <ul id="sharedFilesList"></ul>
-    </div>
+    <h2>Robot Yayınla</h2>
+    <input type="text" id="robotTitle" placeholder="Robot Adı" />
+    <textarea id="robotDescription" placeholder="Açıklama" rows="4" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px; resize: vertical;"></textarea>
+    <button id="publishRobotButton">Yayınla</button>
   </div>
 
-  <div class="footer">
-    <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
+  <!-- Yayınlanmış Robotlar -->
+  <div class="shared-files">
+    <h3>Yayınlanmış Robotlar</h3>
+    <ul id="publishedRobotsList"></ul>
   </div>
+
+  <!-- Yeni Robot Paylaş -->
+  <div class="upload-section" style="max-width: 700px; width: 100%;">
+    <h2>Yeni Robot Paylaş</h2>
+    <input type="file" id="fileUpload" accept=".rar" />
+
+    <!-- Yayınlanmış Robot Seçiniz Dropdown -->
+    <div style="position: relative; width: 100%; margin-bottom: 15px;">
+      <input type="text" id="fileNameInput" placeholder="Yayınlanmış Robot Seçiniz" autocomplete="off" style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;" />
+      <ul id="publishedRobotsDropdown" style="
+          border: 1px solid #ccc;
+          max-height: 150px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          position: absolute;
+          background: #fff;
+          width: 100%;
+          top: 100%;
+          left: 0;
+          margin-top: 4px;
+          padding-left: 0;
+          list-style: none;
+          display: none;
+          z-index: 999;
+          box-sizing: border-box;
+          font-size: 14px;
+          white-space: nowrap;
+        ">
+      </ul>
+    </div>
+
+    <!-- Kullanıcı Arama -->
+    <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" style="margin-bottom: 10px;" />
+    <ul id="userList" class="user-list"></ul>
+
+    <!-- Seçilen Kullanıcılar -->
+    <h3>Seçilen Kullanıcılar:</h3>
+    <ul id="selectedUserList"></ul>
+
+    <button id="uploadButton">Paylaş</button>
+  </div>
+
+  <!-- Geçmişte Paylaşılan Dosyalar -->
+  <div class="shared-files">
+    <h3>Geçmişte Paylaşılan Dosyalar</h3>
+    <ul id="sharedFilesList"></ul>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>© 2025 Economentor. Tüm Hakları Saklıdır.</p>
+</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
