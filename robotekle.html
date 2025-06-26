@@ -424,7 +424,7 @@ document.getElementById("uploadButton").addEventListener("click", async function
 // 📢 Bildirim gönderme fonksiyonu
 async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   for (const uid of userIds) {
-    const notificationMessage = `${sharerName} sizinle "${robotTitle}" adlı robotu paylaştı.`;
+    const notificationMessage = `ECONOMENTOR sizinle "${robotTitle}" adlı robotu paylaştı.`;
 
     const docId = `${uid}_${Date.now()}`;
     await setDoc(doc(db, "notifications", docId), {
@@ -449,7 +449,7 @@ async function notifyUsersOfRobotShare(userIds, robotTitle, sharerName) {
   } catch (err) {
     console.error("FCM bildirimi başarısız:", err);
   }
-}
+ }
 }
 
 async function searchUsers() {
