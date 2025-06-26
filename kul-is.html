@@ -193,6 +193,11 @@
         <ul id="trainingRequestList" style="list-style: none; padding-left: 0;"></ul>
       </div>
 
+      <div id="robotRequests" class="card" style="margin-top: 20px;">
+        <h3>Robot Talep Sayıları</h3>
+        <ul id="robotRequestList" style="list-style: none; padding-left: 0;"></ul>
+      </div>
+
       <div id="notifiedUsersList" class="card" style="margin-top: 20px;">
         <h3>Bildirim Alan Kullanıcılar</h3>
         <ul id="notifiedUsersUl" style="list-style: disc; padding-left: 20px; margin-top: 10px;"></ul>
@@ -758,6 +763,81 @@ function renderUserList(userArray) {
   });
 }
 
+async function loadRobotRequests() {
+  const listContainer = document.getElementById("robotRequestList");
+  listContainer.innerHTML = ""; // Temizle
+
+  // Robotları çek
+  const robotsSnapshot = await getDocs(collection(db, "robots"));
+
+  if (robotsSnapshot.empty) {
+    listContainer.innerHTML = "<li>Henüz robot bulunmamaktadır.</li>";
+    return;
+  }
+
+  for (const robotDoc of robotsSnapshot.docs) {
+    const robotId = robotDoc.id;
+    const robotData = robotDoc.data();
+    const title = robotData.name || "Bilinmeyen Robot";
+
+    // Bu robota ait talepleri çek (örnek koleksiyon: "robotRequests", alan: "robotId")
+    const requestsQuery = query(
+      collection(db, "robotRequests"),
+      where("robotId", "==", robotId)
+    );
+    const requestsSnapshot = await getDocs(requestsQuery);
+
+    if (requestsSnapshot.empty) continue; // Talep yoksa gösterme
+
+    // Robot başlığı ve talep sayısı
+    const li = document.createElement("li");
+    li.style.marginBottom = "15px";
+    li.innerHTML = `<strong>${title}</strong> - Talep Sayısı: ${requestsSnapshot.size}`;
+
+    // Talep edenlerin listesi
+    const ul = document.createElement("ul");
+    ul.style.listStyle = "none";
+    ul.style.paddingLeft = "15px";
+
+    for (const requestDoc of requestsSnapshot.docs) {
+      const requestData = requestDoc.data();
+      const userId = requestData.userId;
+      const userDoc = await getDoc(doc(db, "users", userId));
+      const fullNameRaw = userDoc.exists() ? userDoc.data().fullName || "İsim Yok" : "Kullanıcı Bulunamadı";
+      const fullName = fullNameRaw.toUpperCase();
+
+      const userLi = document.createElement("li");
+      userLi.style.marginBottom = "6px";
+
+      userLi.innerHTML = `
+        ${fullName} 
+        <button style="color: red; border: none; background: none; cursor: pointer;" data-request-id="${requestDoc.id}" title="Talebi İptal Et">&#10006;</button>
+      `;
+
+      ul.appendChild(userLi);
+    }
+
+    li.appendChild(ul);
+    listContainer.appendChild(li);
+  }
+}
+
+// Robot talep iptal butonu tıklama işlemi
+document.getElementById("robotRequestList").addEventListener("click", async (e) => {
+  if (e.target.tagName === "BUTTON" && e.target.dataset.requestId) {
+    const requestId = e.target.dataset.requestId;
+    if (!confirm("Bu robot talebini iptal etmek istediğinize emin misiniz?")) return;
+
+    try {
+      await deleteDoc(doc(db, "robotRequests", requestId));
+      alert("Robot talebi başarıyla iptal edildi.");
+      await loadRobotRequests(); // Listeyi yenile
+    } catch (err) {
+      alert("Robot talebi iptal edilemedi: " + err.message);
+    }
+  }
+});
+
 const observer = new IntersectionObserver((entries, observer) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -768,7 +848,8 @@ const observer = new IntersectionObserver((entries, observer) => {
 }, { threshold: 0.3 });
 
 observer.observe(document.getElementById("statistics"));
-
+  
+  loadRobotRequests();
   loadUserList();
   loadNotificationUsers();
   loadCharts();
