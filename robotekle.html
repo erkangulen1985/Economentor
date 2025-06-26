@@ -748,7 +748,11 @@ function showPublishedRobotOptions() {
 }
 
 // Input'a yazarken filtreleme için
-fileNameInput.addEventListener("input", () => {
+fileNameInput.addEventListener("click", () => {
+  if (publishedRobots.length > 0) {
+    showPublishedRobotOptions();
+  }
+
   const val = fileNameInput.value.toLowerCase();
   publishedRobotsDropdown.innerHTML = "";
   const filtered = publishedRobots.filter(r => r.title.toLowerCase().includes(val));
@@ -775,6 +779,16 @@ fileNameInput.addEventListener("input", () => {
   publishedRobotsDropdown.style.display = "block";
 });
 ;
+
+document.addEventListener("click", (event) => {
+  // Eğer tıklama fileNameInput veya dropdown dışında ise dropdown kapansın
+  if (
+    event.target !== fileNameInput &&
+    !publishedRobotsDropdown.contains(event.target)
+  ) {
+    publishedRobotsDropdown.style.display = "none";
+  }
+});
     
 // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
 loadPublishedRobots()
