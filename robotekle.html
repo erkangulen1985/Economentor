@@ -185,6 +185,7 @@
     <div class="upload-section">
       <h2>Yeni Robot Paylaş</h2>
       <input type="file" id="fileUpload" accept=".rar" />
+      <input type="text" id="fileNameInput" placeholder="Dosya adını giriniz (örn. strateji_v1)" />
       <input type="text" id="searchInput" placeholder="Kullanıcı Adı Ara" />
       <ul id="userList" class="user-list"></ul>
       <h3>Seçilen Kullanıcılar:</h3>
@@ -422,11 +423,10 @@ async function deleteSharedFile(fileId) {
   loadSharedFiles(); // Dosya silindikten sonra listeyi yeniden yükle
 }
 
-    // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
-    loadSharedFiles();
-
-    // Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
-    loadSharedFiles();
+// Sayfa yüklendiğinde geçmişte paylaşılan dosyaları yükleyelim
+loadSharedFiles();
+searchUsers();
+    
 </script>
 <script type="module" src="auth-guard.js"></script>
 </body>
