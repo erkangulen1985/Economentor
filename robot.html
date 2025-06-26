@@ -257,11 +257,10 @@ if (currentUserRole === "user") {
 div.innerHTML = `
   <h3>${r.title}</h3>
   <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
-<div class="buttons">
-  ${downloadButton}
-  ${requestButtonHTML.button}
-</div>
-${requestButtonHTML.warningText}
+  <div class="buttons">
+    ${downloadButton}
+    ${requestButtonHTML}
+  </div>
   <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
 `;
     
