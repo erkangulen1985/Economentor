@@ -221,15 +221,6 @@ async function loadRobots(userId, currentUserRole) {
     const div = document.createElement("div");
     div.className = "robot-card";
 
-div.innerHTML = `
-  <h3>${r.title}</h3>
-  <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
-  <div class="buttons">
-    ${downloadButton}
-    ${requestButtonHTML}
-  </div>
-`;
-
     let downloadButton = "";
     if (isShared) {
       downloadButton = `<button class="robot-btn download-btn" data-url="${fileUrl}" data-docid="${fileDocId}" data-robot-id="${robotId}">İndir</button>`;
@@ -251,6 +242,15 @@ if (currentUserRole === "user") {
   `;
 }
 
+div.innerHTML = `
+  <h3>${r.title}</h3>
+  <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
+  <div class="buttons">
+    ${downloadButton}
+    ${requestButtonHTML}
+  </div>
+`;
+    
     robotList.appendChild(div);
   }
 
