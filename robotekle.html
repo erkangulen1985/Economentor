@@ -616,6 +616,7 @@ async function loadPublishedRobots() {
             });
             editingId = null;
             loadPublishedRobots();
+            fetchPublishedRobotsForSelection()
           } catch (error) {
             console.error("Robot güncellenirken hata:", error);
             alert("Güncellenirken hata oluştu.");
@@ -625,6 +626,7 @@ async function loadPublishedRobots() {
         li.querySelector("#cancelBtn").onclick = () => {
           editingId = null;
           loadPublishedRobots();
+          fetchPublishedRobotsForSelection()
         };
 
       } else {
@@ -638,12 +640,14 @@ async function loadPublishedRobots() {
         li.querySelector(".editBtn").onclick = () => {
           editingId = robot.id;
           loadPublishedRobots();
+          fetchPublishedRobotsForSelection()
         };
         li.querySelector(".deleteBtn").onclick = async () => {
           if (confirm("Bu robotu silmek istediğinizden emin misiniz?")) {
             try {
               await deleteDoc(doc(db, "publishedRobots", robot.id));
               loadPublishedRobots();
+              fetchPublishedRobotsForSelection()
             } catch (error) {
               console.error("Robot silinirken hata:", error);
               alert("Silme işlemi sırasında hata oluştu.");
