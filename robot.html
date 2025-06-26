@@ -254,14 +254,16 @@ if (currentUserRole === "user") {
   `;
 }
 
-div.innerHTML = `
-  <h3>${r.title}</h3>
-  <p>${(r.description || '').replace(/\n/g, "<br>")}</p>
-  <div class="buttons">
-    ${downloadButton}
-    ${requestButtonHTML}
-  </div>
+el.innerHTML = `
+  <h3>${t.title}</h3>
+  <p>${(t.description || '').replace(/\n/g, '<br>')}</p>
+  <ul>${(t.bullets || []).map(b => `<li>${b}</li>`).join('')}</ul>
+  ${buttonHTML}
+  <p class="contact-line">Ayrıntılar için lütfen economentor25@gmail.com adresi ile iletişime geçin.</p>
 `;
+    list.appendChild(el);
+  });
+}
     
     robotList.appendChild(div);
   }
