@@ -473,11 +473,11 @@ function setupDownloadListeners(userId) {
   // UI'dan indir butonunu kaldır
   btn.remove();
 
-  alert("Dosya başarıyla indirildi ve paylaşılan bilgiler kaldırıldı.");
+  alert("Dosya başarıyla indirildi");
 
 } catch (err) {
   console.error("İndirme sırasında hata:", err);
-  alert("Dosya indirilemedi veya silme işlemi başarısız oldu.");
+  alert("Dosya indirme işlemi başarısız oldu.");
 }
     });
   });
